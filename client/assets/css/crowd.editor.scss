@@ -1,0 +1,249 @@
+/* theme variables */
+$primary: #212121;
+$accent: #455a64;
+$warn: #f4511e;
+$alt-primary: #424242;
+$alt-accent: #263238;
+
+.crowd-container {
+  margin: 0 !important;
+  width: 100%;
+  height: 100%;
+}
+
+.crowd-palette {
+  display: flex;
+  background-color: $accent;
+  border-right: 0.1px solid black;
+  height: 100% !important;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  user-select: none;
+}
+
+.crowd-container-middle {
+  display: grid;
+  width: 1px;
+  flex: 1;
+  grid-template-rows: 50px;
+}
+
+.crowd-container-side {
+  display: grid;
+  width: 200px;
+  grid-template-rows: auto 200px;
+}
+
+.crowd-tools {
+  display: table-row;
+  background-color: $alt-accent;
+  border-top: 0.1px solid black;
+  border-bottom: 0.1px solid black;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+.crowd-tools .row {
+  margin: 5px 0px 0px 0px !important;
+  color: white;
+}
+
+.crowd-tools .row .form-group {
+  margin-left: 30px;
+}
+
+.crowd-tools .row .form-group label {
+  margin-bottom: 0px !important;
+}
+
+.crowd-tools .row .form-group .btn {
+  width: 30px !important;
+  height: 30px !important;
+  padding: 2px 2px !important;
+  margin-top: 3px !important;
+}
+
+.crowd-workspace {
+  display: table-row;
+  background-color: rgba(246, 246, 246, 1);
+  width: 100%;
+  cursor: grab;
+  user-select: none;
+}
+
+.crowd-workspace:active {
+  cursor: grabbing;
+}
+
+.crowd-workspace-tools-icon {
+  opacity: 0.7;
+}
+
+.crowd-workspace-tools-icon:hover {
+  opacity: 1;
+}
+
+.crowd-inspector {
+  display: table-row;
+  background-color: $accent;
+  border-top: 0.1px solid black;
+  border-left: 0.1px solid black;
+  color: white;
+  position: absolute;
+  top: 0px;
+  bottom: 200px;
+  width: 200px;
+  overflow-y: auto;
+  user-select: none;
+}
+
+.crowd-inspector .crowd-inspector-empty {
+  font-size: 20px;
+  text-align: center;
+  padding: 10px;
+}
+
+.crowd-inspector .crowd-inspector-title {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  margin: 0px !important;
+}
+
+.crowd-inspector .crowd-inspector-content {
+  padding: 10px;
+}
+
+.crowd-inspector .crowd-inspector-content .row {
+  margin: 5px 0px 0px 0px !important;
+}
+
+.crowd-map {
+  display: table-row;
+  background-color: white;
+  border-top: 0.1px solid #444444;
+  border-left: 0.1px solid black;
+  position: absolute;
+  width: 100%;
+  height: 200px;
+  bottom: 0px;
+  cursor: grab;
+  user-select: none;
+}
+
+.crowd-flypaper {
+  position: fixed;
+  z-index: 100;
+  opacity: 0.7;
+  pointer-events: none;
+  background-color: rgba(0, 0, 0, 0) !important;
+}
+
+.crowd-element-text {
+  font-family: sans-serif;
+  font-size: 12px;
+  text-shadow: 1px 0px 0px black, -1px 0px 0px black;
+  text-transform: uppercase;
+}
+
+.crowd-element-text.s {
+  font-size: 10px;
+}
+
+.crowd-element-text.xs {
+  font-size: 9px;
+}
+
+.crowd-element-text.key-attribute {
+  text-decoration: underline;
+}
+
+.crowd-element-text.weak-key-attribute {
+  text-decoration: underline dashed;
+}
+
+.crowd-element-text.inheritance {
+  text-transform: none;
+}
+
+.crowd-link-text.inherit {
+  font-size: 40px;
+}
+
+.crowd-entity-color,
+.crowd-weak-entity-color,
+.crowd-relationship-color,
+.crowd-weak-relationship-color,
+.crowd-attribute-color,
+.crowd-multivalued-attribute-color,
+.crowd-key-attribute-color,
+.crowd-weak-key-attribute-color,
+.crowd-inheritance-color,
+.crowd-derived-attribute-color {
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 0px 5px 2px 5px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.crowd-entity-color {
+  color: rgba(33, 33, 33, 1);
+}
+
+.crowd-weak-entity-color {
+  color: rgba(66, 66, 66, 1);
+}
+
+.crowd-relationship-color {
+  color: rgba(38, 50, 56, 1);
+}
+
+.crowd-weak-relationship-color {
+  color: rgba(55, 71, 79, 1);
+}
+
+.crowd-attribute-color {
+  color: rgba(97, 97, 97, 1);
+}
+
+.crowd-multivalued-attribute-color {
+  color: rgba(117, 117, 117, 1);
+}
+
+.crowd-key-attribute-color {
+  color: rgba(62, 39, 35, 1);
+}
+
+.crowd-weak-key-attribute-color {
+  color: rgba(78, 52, 46, 1);
+}
+
+.crowd-inheritance-color {
+  color: rgba(191, 54, 12, 1);
+}
+
+.crowd-derived-attribute-color {
+  color: rgba(158, 158, 158, 1);
+}
+
+.tooltip {
+  transition: opacity 0.5s !important;
+}
+
+.tooltip .tooltip-inner {
+  background-color: rgba(0, 0, 0, 0.9) !important;
+}
+
+.modal-header h1 {
+  margin-bottom: 0px !important;
+}
+.modal-body p {
+  margin-bottom: 0px !important;
+}
+
+.btn:focus {
+  outline: none;
+  box-shadow: none;
+}
