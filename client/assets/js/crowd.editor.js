@@ -276,6 +276,7 @@ CrowdEditor.prototype.initPalette = function () {
 
   //add joint eer inheritance to palette elements
   self.palette.elements.inheritance = new joint.shapes.erd.Attribute({
+    parentType: 'inheritance',
     type: 'inheritance',
     subtype: 'overlaped',
     uri: 'http://crowd.fi.uncoma.edu.ar#Inheritance',
@@ -509,7 +510,7 @@ CrowdEditor.prototype.initTools = function () {
       <div class="modal-dialog"> \
         <div class="modal-content"> \
           <div class="modal-header"> \
-            <h1 class="modal-title">Clear Diagram</h1> \
+            <h5 class="modal-title">Clear Diagram</h5> \
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
               <span aria-hidden="true">&times;</span> \
             </button> \
@@ -584,6 +585,33 @@ CrowdEditor.prototype.initTools = function () {
   $('#crowd-tools-grid-size-input-' + self.id).on('input', function () {
     $('#crowd-tools-grid-size-label-' + self.id).html(this.value);
     self.workspace.paper.setGridSize(this.value);
+  });
+
+  //append dom for export tool
+  $('#crowd-tools-row-' + self.id).append(
+    '<div class="form-group"> \
+      <div class="dropdown"> \
+        <button class="btn btn-primary dropdown-toggle" type="button" id="crowd-tools-export-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+          <i class="fa fa-cloud-download"></i> Export \
+        </button> \
+        <div class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"> \
+          <button class="dropdown-item" id="crowd-tools-export-eer-schema-' + self.id + '">EER Schema</button> \
+          <button class="dropdown-item" id="crowd-tools-export-uml-schema-' + self.id + '" disabled>UML Schema</button> \
+          <button class="dropdown-item" id="crowd-tools-export-orm-schema-' + self.id + '" disabled>ORM Schema</button> \
+        </div> \
+      </div> \
+    </div>'
+  );
+
+  //event handler when click export eer schema
+  $('#crowd-tools-export-eer-schema-' + self.id).on('click', function () {
+    $("<a />", {
+      "download": "eer-schema.json",
+      "href": "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(self.toJSONSchema())),
+    }).appendTo("body")
+      .click(function () {
+        $(this).remove()
+      })[0].click()
   });
 
   $('[data-toggle="tooltip"]').tooltip({ html: true });
@@ -1592,4 +1620,153 @@ CrowdEditor.prototype.initMap = function () {
         event.originalEvent.layerX - self.map.dragStartPosition.x,
         event.originalEvent.layerY - self.map.dragStartPosition.y);
   });
+}
+
+CrowdEditor.prototype.toJSONSchema = function () {
+  var self = this;
+
+  //define basic structure of eer json according to schema
+  var jsonSchema = {
+    entities: [],
+    attributes: [],
+    relationships: [],
+    links: []
+  };
+
+  //mapping of datatypes to the requested format of schema
+  var datatypeMap = {
+    'varchar': 'String',
+    'char': 'String',
+    'int': 'Integer',
+    'bit': 'Boolean'
+  }
+
+  //mapping of cardinalities to the requested format of schema
+  var cardinalityMap = {
+    '1': '1..1',
+    'N': '1..*'
+  }
+
+  var inheritanceSubtypeMap = {
+    'disjoint': 'disjoint',
+    'overlaped': 'overlapping',
+    'union': 'union'
+  }
+
+  //iterates each element and add it to the correspondent collection
+  self.workspace.graph.getElements().forEach(function (element) {
+    switch (element.attributes.parentType) {
+      case 'entity':
+        jsonSchema.entities.push({
+          id: element.cid,
+          uri: element.attributes.uri,
+          name: element.attributes.name,
+          isWeak: element.attributes.type == 'weakEntity',
+          position: element.attributes.position,
+          size: element.attributes.size,
+        });
+        break;
+      case 'attribute':
+        jsonSchema.attributes.push({
+          id: element.cid,
+          uri: element.attributes.uri,
+          name: element.attributes.name,
+          type: element.attributes.type,
+          datatype: datatypeMap[element.attributes.datatype],
+          position: element.attributes.position,
+          size: element.attributes.size,
+        });
+        //create the link for this attribute
+        var attributeLink = {
+          id: element.cid,
+          uri: element.attributes.uri,
+          name: element.attributes.name,
+          entity: null,
+          attribute: element.attributes.name,
+          type: 'attribute'
+        }
+        //search for links connected to the attribute for add entity to attribute link
+        self.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+          var connectedEntity = link.attributes.source.id != element.id
+            ? link.getSourceElement()
+            : (link.attributes.target.id != element.id
+              ? link.getTargetElement()
+              : null);
+          if (connectedEntity) {
+            attributeLink.entity = connectedEntity.attributes.name;
+          }
+        });
+        jsonSchema.links.push(attributeLink);
+        break;
+      case 'relationship':
+        jsonSchema.relationships.push({
+          id: element.cid,
+          uri: element.attributes.uri,
+          name: element.attributes.name,
+          isWeak: element.attributes.type == 'weakRelationship',
+          position: element.attributes.position,
+          size: element.attributes.size,
+        });
+        //create the link for this relationship
+        var relationshipLink = {
+          id: element.cid,
+          uri: element.attributes.uri,
+          name: element.attributes.name,
+          entities: [],
+          cardinality: [],
+          roles: [],
+          type: 'relationship'
+        }
+        //search for links connected to the relationship for add entities to relationship link
+        self.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+          var connectedEntity = link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'entity'
+            ? link.getSourceElement()
+            : (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'entity'
+              ? link.getTargetElement()
+              : null);
+          if (connectedEntity) {
+            relationshipLink.entities.push(connectedEntity.attributes.name);
+            relationshipLink.roles.push(connectedEntity.attributes.name);
+            relationshipLink.cardinality.push(cardinalityMap[link.attributes.cardinality]);
+          }
+        });
+        jsonSchema.links.push(relationshipLink);
+        break;
+      case 'inheritance':
+        //create the link for this inheritance
+        var inheritanceLink = {
+          id: element.cid,
+          uri: element.attributes.uri,
+          parent: null,
+          entities: [],
+          constraint: [
+            inheritanceSubtypeMap[element.attributes.subtype]
+          ],
+          type: 'isa'
+        }
+        //search for links connected to the relationship for add entities to relationship link
+        self.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+          var connectedEntity = link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'entity'
+            ? link.getSourceElement()
+            : (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'entity'
+              ? link.getTargetElement()
+              : null);
+          if (connectedEntity) {
+            if (!link.attributes.cardinality) {
+              inheritanceLink.parent = connectedEntity.attributes.name;
+              if (link.attributes.total) {
+                inheritanceLink.constraint.push('exclusive');
+              }
+            }
+            else {
+              inheritanceLink.entities.push(connectedEntity.attributes.name);
+            }
+          }
+        });
+        jsonSchema.links.push(inheritanceLink);
+        break;
+    }
+  });
+
+  return jsonSchema;
 }

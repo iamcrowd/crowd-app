@@ -59,9 +59,14 @@ $alt-accent: #263238;
 }
 
 .crowd-tools .row .form-group .btn {
-  width: 30px !important;
   height: 30px !important;
   padding: 2px 2px !important;
+  margin-top: 3px !important;
+}
+
+.crowd-tools .row .form-group .dropdown .btn {
+  height: 30px !important;
+  padding: 2px 8px !important;
   margin-top: 3px !important;
 }
 

@@ -1,0 +1,119 @@
+{
+  "entities": [
+    {
+      "name": "Person",
+      "id": "c51",
+      "timestamp": "",
+      "position": {
+        "x": 580,
+        "y": 260
+      }
+    },
+    {
+      "name": "Dog",
+      "id": "c63",
+      "timestamp": "",
+      "position": {
+        "x": 1020,
+        "y": 230
+      }
+    },
+    {
+      "name": "Golden",
+      "id": "c87",
+      "timestamp": "",
+      "position": {
+        "x": 976,
+        "y": 473
+      }
+    },
+    {
+      "name": "Pointer",
+      "id": "c99",
+      "timestamp": "",
+      "position": {
+        "x": 1140,
+        "y": 480
+      }
+    },
+    {
+      "name": "Toy",
+      "id": "c111",
+      "timestamp": "",
+      "position": {
+        "x": 980,
+        "y": 700
+      }
+    }
+  ],
+  "attributes": [],
+  "relationships": [
+    {
+      "name": "owns",
+      "id": "c75",
+      "timestamp": "",
+      "position": {
+        "x": 780,
+        "y": 230
+      }
+    },
+    {
+      "name": "has",
+      "id": "c228",
+      "timestamp": "",
+      "position": {
+        "x": 990,
+        "y": 580
+      }
+    }
+  ],
+  "links": [
+    {
+      "name": "c123",
+      "parent": "Dog",
+      "entities": [
+        "Pointer",
+        "Golden"
+      ],
+      "type": "isa",
+      "constraint": [
+        "union",
+        "exclusive"
+      ]
+    },
+    {
+      "name": "owns",
+      "id": "c75",
+      "entities": [
+        "Person",
+        "Dog"
+      ],
+      "cardinality": [
+        "0..1",
+        "1..1"
+      ],
+      "roles": [
+        "person",
+        "dog"
+      ],
+      "type": "relationship"
+    },
+    {
+      "name": "has",
+      "id": "c228",
+      "entities": [
+        "Golden",
+        "Toy"
+      ],
+      "cardinality": [
+        "1..*",
+        "1..1"
+      ],
+      "roles": [
+        "golden",
+        "toy"
+      ],
+      "type": "relationship"
+    }
+  ]
+}
