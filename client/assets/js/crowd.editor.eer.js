@@ -436,7 +436,10 @@ var CrowdEditorEer = {
           title: 'Click and drag to make an <b class="crowd-attribute-color">attribute</b> and connect with it',
           placement: "top"
         }
-      })
+      }),
+      link: {
+        type: 'connector'
+      }
     });
 
     //link tool for multivalued attributes
@@ -450,7 +453,10 @@ var CrowdEditorEer = {
           title: 'Click and drag to make a <b class="crowd-multivalued-attribute-color">multivalued attribute</b> and connect with it',
           placement: "bottom"
         }
-      })
+      }),
+      link: {
+        type: 'connector'
+      }
     });
 
     //link tool for key attributes
@@ -464,7 +470,10 @@ var CrowdEditorEer = {
           title: 'Click and drag to make a <b class="crowd-key-attribute-color">key attribute</b> and connect with it',
           placement: "top"
         }
-      })
+      }),
+      link: {
+        type: 'connector'
+      }
     });
 
     //link tool for weak key attributes
@@ -478,7 +487,10 @@ var CrowdEditorEer = {
           title: 'Click and drag to make a <b class="crowd-weak-key-attribute-color">weak key attribute</b> and connect with it',
           placement: "top"
         }
-      })
+      }),
+      link: {
+        type: 'connector'
+      }
     });
 
     //link tool for inheritance

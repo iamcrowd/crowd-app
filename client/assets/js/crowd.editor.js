@@ -300,8 +300,8 @@ CrowdEditor.prototype.initTools = function () {
           <div class="modal-body"><pre id="crowd-tools-export-check-schema-modal-pre-' + self.id + '" \
           style="overflow: hidden; overflow-wrap: break-word;"></pre></div> \
           <div class="modal-footer"> \
-            <button type="button" class="btn btn-light" data-dismiss="modal">Close</button> \
-            <button class="btn btn-primary" data-clipboard-target="#crowd-tools-export-check-schema-modal-pre-' + self.id + '"> \
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
+            <button class="btn btn-dark" data-clipboard-target="#crowd-tools-export-check-schema-modal-pre-' + self.id + '"> \
               Copy to Clipboard \
             </button> \
           </div> \
@@ -352,7 +352,7 @@ CrowdEditor.prototype.initTools = function () {
           <p><b>You lost not saved changes</b></p> \
         </div> \
         <div class="modal-footer"> \
-          <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button> \
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
           <button id="crowd-tools-model-advertisement-proceed-' + self.id + '" \
           type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
         </div> \
@@ -398,7 +398,7 @@ CrowdEditor.prototype.initTools = function () {
             <p>Are you sure you want to clear the diagram?</p> \
           </div> \
           <div class="modal-footer"> \
-            <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button> \
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
             <button id="crowd-tools-clear-workspace-advertisement-proceed-' + self.id + '" \
             type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
           </div> \
