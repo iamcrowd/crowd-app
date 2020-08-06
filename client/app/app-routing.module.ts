@@ -22,7 +22,7 @@ const routes: Routes = [
   { path: 'account', component: AccountComponent, canActivate: [AuthGuardLogin] },
   { path: 'admin', component: AdminComponent, canActivate: [AuthGuardAdmin] },
   { path: 'notfound', component: NotFoundComponent },
-  { path: 'editor', component: EditorComponent },
+  { path: 'editor/:conceptualModel', component: EditorComponent },
   { path: '**', redirectTo: '/notfound' },
 ];
 

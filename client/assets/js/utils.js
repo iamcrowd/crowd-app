@@ -26,6 +26,10 @@ var formatString = function (str) {
   return (str.charAt(0).toUpperCase() + str.slice(1)).split(/(?=[A-Z])/).join(" ");
 }
 
+var formatSelector = function (str) {
+  return str.replace('/', '-');
+}
+
 function toggleFullScreen(elem) {
   // ## The below if statement seems to work better ## if ((document.fullScreenElement && document.fullScreenElement !== null) || (document.msfullscreenElement && document.msfullscreenElement !== null) || (!document.mozFullScreen && !document.webkitIsFullScreen)) {
   if ((document.fullScreenElement !== undefined && document.fullScreenElement === null) || (document.msFullscreenElement !== undefined && document.msFullscreenElement === null) || (document.mozFullScreen !== undefined && !document.mozFullScreen) || (document.webkitIsFullScreen !== undefined && !document.webkitIsFullScreen)) {
@@ -49,4 +53,12 @@ function toggleFullScreen(elem) {
       document.msExitFullscreen();
     }
   }
+}
+
+function copyToClipboard(element) {
+  var $temp = $("<input>");
+  $("body").append($temp);
+  $temp.val($(element).text()).select();
+  document.execCommand("copy");
+  $temp.remove();
 }

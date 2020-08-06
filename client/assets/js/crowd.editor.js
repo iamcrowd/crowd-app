@@ -11,6 +11,27 @@ var CrowdEditor = function (config) {
 CrowdEditor.prototype.init = function () {
   var self = this;
 
+  if (!self.config.conceptualModel) {
+    self.config.conceptualModel = {}
+  }
+  if (!self.config.conceptualModel.initPalette) {
+    self.config.conceptualModel.initPalette = () => console.warn("CrowdEditor conceptual model palette is not defined.");
+  }
+  if (!self.config.conceptualModel.initElementsToolsViews) {
+    self.config.conceptualModel.initElementsToolsViews = () => console.warn("CrowdEditor conceptual model elements tools views are not defined.");
+  }
+  if (!self.config.conceptualModel.initLinksToolsViews) {
+    self.config.conceptualModel.initLinksToolsViews = () => console.warn("CrowdEditor conceptual model links tools views are not defined.");
+  }
+  if (!self.config.conceptualModel.initChangeAttributesEvents) {
+    self.config.conceptualModel.initChangeAttributesEvents = () => console.warn("CrowdEditor conceptual model change attributes events are not defined.");
+  }
+  if (!self.config.conceptualModel.initInspector) {
+    self.config.conceptualModel.initInspector = () => console.warn("CrowdEditor conceptual model inspector is not defined.");
+  }
+
+  $("#" + this.config.selector).html('');
+
   //append dom element that contains all the editor parts
   $('#' + self.config.selector).append('<div class="crowd-container row" id="crowd-container-' + self.id + '"></div>');
 
@@ -52,288 +73,10 @@ CrowdEditor.prototype.initPalette = function () {
   self.palette = new Object();
   self.palette.elements = new Object();
   self.palette.links = new Object();
-  self.palette.colors = {
-    entity: getCSS('color', 'crowd-entity-color'),
-    weakEntity: getCSS('color', 'crowd-weak-entity-color'),
-    relationship: getCSS('color', 'crowd-relationship-color'),
-    weakRelationship: getCSS('color', 'crowd-weak-relationship-color'),
-    attribute: getCSS('color', 'crowd-attribute-color'),
-    multivaluedAttribute: getCSS('color', 'crowd-multivalued-attribute-color'),
-    keyAttribute: getCSS('color', 'crowd-key-attribute-color'),
-    weakKeyAttribute: getCSS('color', 'crowd-weak-key-attribute-color'),
-    inheritance: getCSS('color', 'crowd-inheritance-color'),
-    derivedAttribute: getCSS('color', 'crowd-derived-attribute-color')
-  }
 
-  //add joint eer entity to palette elements
-  self.palette.elements.entity = new joint.shapes.erd.Entity({
-    parentType: 'entity',
-    type: 'entity',
-    name: 'Entity',
-    uri: 'http://crowd.fi.uncoma.edu.ar#Entity',
-    attrs: {
-      text: {
-        fill: 'white',
-        class: 'crowd-element-text'
-      },
-      '.outer': {
-        fill: self.palette.colors.entity,
-        stroke: self.palette.colors.entity
-      },
-      '.inner': {
-        fill: self.palette.colors.entity,
-        stroke: self.palette.colors.entity
-      }
-    },
-    size: {
-      width: 80,
-      height: 40
-    }
-  });
-
-  //add joint eer weak entity to palette elements
-  self.palette.elements.weakEntity = new joint.shapes.erd.Entity({
-    parentType: 'entity',
-    type: 'weakEntity',
-    name: 'Weak\nEntity',
-    uri: 'http://crowd.fi.uncoma.edu.ar#WeakEntity',
-    attrs: {
-      text: {
-        text: 'Weak\nEntity',
-        fill: 'white',
-        class: 'crowd-element-text'
-      },
-      '.outer': {
-        fill: 'none',
-        stroke: self.palette.colors.weakEntity,
-      },
-      '.inner': {
-        fill: self.palette.colors.weakEntity,
-        stroke: self.palette.colors.weakEntity,
-        display: 'auto'
-      }
-    },
-    size: {
-      width: 80,
-      height: 40
-    }
-  });
-
-  //add joint eer relationship to palette elements
-  self.palette.elements.relationship = new joint.shapes.erd.Relationship({
-    parentType: 'relationship',
-    type: 'relationship',
-    name: 'Relationship',
-    uri: 'http://crowd.fi.uncoma.edu.ar#Relationship',
-    attrs: {
-      text: {
-        fill: 'white',
-        class: 'crowd-element-text s'
-      },
-      '.outer': {
-        fill: self.palette.colors.relationship,
-        stroke: self.palette.colors.relationship
-      },
-      '.inner': {
-        fill: self.palette.colors.relationship,
-        stroke: self.palette.colors.relationship
-      }
-    },
-    size: {
-      width: 80,
-      height: 60
-    }
-  });
-
-  //add joint eer weak relationship to palette elements
-  self.palette.elements.weakRelationship = new joint.shapes.erd.Relationship({
-    parentType: 'relationship',
-    type: 'weakRelationship',
-    name: 'Weak\nRelationship',
-    uri: 'http://crowd.fi.uncoma.edu.ar#WeakRelationship',
-    attrs: {
-      text: {
-        text: 'Weak\nRelationship',
-        fill: 'white',
-        class: 'crowd-element-text s'
-      },
-      '.outer': {
-        fill: 'none',
-        stroke: self.palette.colors.weakRelationship
-      },
-      '.inner': {
-        fill: self.palette.colors.weakRelationship,
-        stroke: self.palette.colors.weakRelationship,
-        display: 'auto'
-      }
-    },
-    size: {
-      width: 80,
-      height: 60
-    }
-  });
-
-  //add joint eer key attribute to palette elements
-  self.palette.elements.keyAttribute = new joint.shapes.erd.Attribute({
-    parentType: 'attribute',
-    type: 'keyAttribute',
-    name: 'Key\nAttribute',
-    uri: 'http://crowd.fi.uncoma.edu.ar#KeyAttribute',
-    datatype: 'int',
-    attrs: {
-      text: {
-        fill: 'white',
-        text: 'Key\nAttribute',
-        class: 'crowd-element-text xs key-attribute'
-      },
-      '.outer': {
-        fill: self.palette.colors.keyAttribute,
-        stroke: self.palette.colors.keyAttribute
-      }
-    },
-    size: {
-      width: 60,
-      height: 40
-    }
-  });
-
-  //add joint eer weak key attribute to palette elements
-  self.palette.elements.weakKeyAttribute = new joint.shapes.erd.Attribute({
-    parentType: 'attribute',
-    type: 'weakKeyAttribute',
-    name: 'Weak Key\nAttribute',
-    uri: 'http://crowd.fi.uncoma.edu.ar#WeakKeyAttribute',
-    datatype: 'int',
-    attrs: {
-      text: {
-        fill: 'white',
-        text: 'Weak Key\nAttribute',
-        class: 'crowd-element-text xs weak-key-attribute'
-      },
-      '.outer': {
-        fill: self.palette.colors.weakKeyAttribute,
-        stroke: self.palette.colors.weakKeyAttribute,
-      }
-    },
-    size: {
-      width: 60,
-      height: 40
-    }
-  });
-
-  //add joint eer attribute to palette elements
-  self.palette.elements.attribute = new joint.shapes.erd.Attribute({
-    parentType: 'attribute',
-    type: 'attribute',
-    name: 'Attribute',
-    uri: 'http://crowd.fi.uncoma.edu.ar#Attribute',
-    datatype: 'int',
-    attrs: {
-      text: {
-        fill: 'white',
-        text: 'Attribute',
-        class: 'crowd-element-text xs'
-      },
-      '.outer': {
-        fill: self.palette.colors.attribute,
-        stroke: self.palette.colors.attribute
-      }
-    },
-    size: {
-      width: 60,
-      height: 40
-    }
-  });
-
-  //add joint eer multivalued attribute to palette elements
-  self.palette.elements.multivaluedAttribute = new joint.shapes.erd.Attribute({
-    parentType: 'attribute',
-    type: 'multivaluedAttribute',
-    name: 'Multivalued\nAttribute',
-    uri: 'http://crowd.fi.uncoma.edu.ar#MultivaluedAttribute',
-    datatype: 'int',
-    attrs: {
-      text: {
-        fill: 'white',
-        text: 'Multivalued\nAttribute',
-        class: 'crowd-element-text xs'
-      },
-      '.outer': {
-        fill: 'none',
-        stroke: self.palette.colors.multivaluedAttribute
-      },
-      '.inner': {
-        fill: self.palette.colors.multivaluedAttribute,
-        stroke: self.palette.colors.multivaluedAttribute,
-        display: 'auto'
-      }
-    },
-    size: {
-      width: 60,
-      height: 40
-    }
-  });
-
-  //add joint eer inheritance to palette elements
-  self.palette.elements.inheritance = new joint.shapes.erd.Attribute({
-    parentType: 'inheritance',
-    type: 'inheritance',
-    subtype: 'overlaped',
-    uri: 'http://crowd.fi.uncoma.edu.ar#Inheritance',
-    attrs: {
-      text: {
-        fill: 'white',
-        text: 'o',
-        class: 'crowd-element-text inheritance'
-      },
-      '.outer': {
-        fill: self.palette.colors.inheritance,
-        stroke: self.palette.colors.inheritance
-      }
-    },
-    size: {
-      width: 40,
-      height: 40
-    }
-  });
-
-  //add joint eer derived attribute to palette elements
-  self.palette.elements.derivedAttribute = new joint.shapes.erd.Attribute({
-    parentType: 'attribute',
-    type: 'derivedAttribute',
-    name: 'Derived\nAttribute',
-    uri: 'http://crowd.fi.uncoma.edu.ar#DerivedAttribute',
-    datatype: 'int',
-    attrs: {
-      text: {
-        fill: 'white',
-        text: 'Derived\nAttribute',
-        class: 'crowd-element-text xs'
-      },
-      '.outer': {
-        fill: 'none',
-        stroke: self.palette.colors.derivedAttribute,
-        'stroke-dasharray': '3'
-      },
-      '.inner': {
-        fill: self.palette.colors.derivedAttribute,
-        stroke: self.palette.colors.derivedAttribute,
-        display: 'auto'
-      }
-    },
-    size: {
-      width: 60,
-      height: 40
-    }
-  });
-
-  //add joint eer connector to palette links
-  self.palette.links.connector = new joint.shapes.standard.Link({
-    type: 'connector',
-    cardinality: null,
-    total: false,
-    inherit: false,
-    uri: 'http://crowd.fi.uncoma.edu.ar#Connector',
+  //add joint basic link to palette links
+  self.palette.links.basic = new joint.shapes.standard.Link({
+    type: 'Link',
     attrs: {
       line: {
         stroke: 'black',
@@ -353,44 +96,15 @@ CrowdEditor.prototype.initPalette = function () {
     }]
   });
 
-  //add joint eer total connector to palette links
-  self.palette.links.total = new joint.shapes.standard.DoubleLink({
-    type: 'connector',
-    cardinality: null,
-    total: true,
-    inherit: false,
-    uri: 'http://crowd.fi.uncoma.edu.ar#Connector',
-    attrs: {
-      line: {
-        stroke: getCSS('background-color', 'crowd-workspace'),
-        sourceMarker: {},
-        targetMarker: {
-          'd': ''
-        }
-      },
-      outline: {
-        stroke: 'black',
-        strokeWidth: 8,
-      }
-    },
-    labels: [{
-      attrs: {
-        text: {
-          text: null
-        }
-      }
-    }]
-  });
+  //call initialization of palette elements and links for the specific conceptual model
+  self.config.conceptualModel.initPalette(self);
 
   //add styled jump over the lines when they collides
-  self.palette.links.connector.connector('jumpover', {
-    size: 10
-  });
-
-  //add styled jump over the lines when they collides
-  self.palette.links.total.connector('jumpover', {
-    size: 10
-  });
+  for (var link in self.palette.links) {
+    self.palette.links[link].connector('jumpover', {
+      size: 10
+    });
+  }
 
   //add joint graph to palette
   self.palette.graph = new joint.dia.Graph();
@@ -419,8 +133,8 @@ CrowdEditor.prototype.initPalette = function () {
   });
 
   //adjust joint svg height to the space occupied by the added elements (able to scroll palette when screen is small)
-  $('#crowd-palette-' + self.id + " svg")[0]
-    .setAttribute('height', (Object.keys(self.palette.elements).length / self.config.palette.grid.columns + 1) * self.config.palette.grid.size);
+  if ($('#crowd-palette-' + self.id + " svg")[0])
+    $('#crowd-palette-' + self.id + " svg")[0].setAttribute('height', (Object.keys(self.palette.elements).length / self.config.palette.grid.columns + 1) * self.config.palette.grid.size);
 
   //add palette elements to palette graph and place (change position) them on the grid
   var position = 0;
@@ -495,6 +209,171 @@ CrowdEditor.prototype.initTools = function () {
   //append dom row for the tools elements
   $('#crowd-tools-' + self.id).append('<span class="row" id="crowd-tools-row-' + self.id + '"></span>');
 
+  //append dom for zoom tool
+  $('#crowd-tools-row-' + self.id).append(
+    '<div class="form-group"> \
+      <label>Zoom</label> \
+      <label id="crowd-tools-zoom-label-' + self.id + '" style="float: right">100%</label> \
+      <input class="form-control-range" id="crowd-tools-zoom-input-' + self.id + '" type="range" min="50" max="200" step="25" value="100" /> \
+    </div>'
+  );
+
+  //event handler when change zoom
+  //updates zoom label and change scale of the workspace paper
+  $('#crowd-tools-zoom-input-' + self.id).on('input', function () {
+    $('#crowd-tools-zoom-label-' + self.id).html(this.value + "%");
+    self.workspace.paper.scale(this.value / 100);
+  });
+
+  //append dom for grid size tool
+  $('#crowd-tools-row-' + self.id).append(
+    '<div class="form-group"> \
+      <label>Grid Size</label> \
+      <label id="crowd-tools-grid-size-label-' + self.id + '" style="float: right">10</label> \
+      <input class="form-control-range" id="crowd-tools-grid-size-input-' + self.id + '" type="range" min="1" max="50" step="1" value="10" /> \
+    </div>'
+  );
+
+  //event handler when change grid size
+  //updates grid size label and change grid size of the workspace paper
+  $('#crowd-tools-grid-size-input-' + self.id).on('input', function () {
+    $('#crowd-tools-grid-size-label-' + self.id).html(this.value);
+    self.workspace.paper.setGridSize(this.value);
+  });
+
+  //append dom for fullscreen tool
+  $('#crowd-tools-row-' + self.id).append(
+    '<div class="form-group"> \
+    <button class="btn btn-primary" id="crowd-tools-fullscreen-input-' + self.id + '" type="button" \
+    data-toggle="tooltip" data-original-title="Toggle Fullscreen Mode" data-placement="bottom" > \
+    <i class="material-icons">fullscreen</i></button> \
+  </div>'
+  );
+
+  //event handler when click fullscreen
+  $('#crowd-tools-fullscreen-input-' + self.id).on('click', function () {
+    toggleFullScreen(document.documentElement);
+    $(".tooltip").tooltip('hide');
+  });
+
+  //append dom for export tool
+  $('#crowd-tools-row-' + self.id).append(
+    '<div class="form-group"> \
+      <div class="dropdown"> \
+        <button class="btn btn-primary dropdown-toggle" type="button" id="crowd-tools-export-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+          <i class="fa fa-cloud-download"></i> Export \
+        </button> \
+        <div class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"> \
+          <div class="btn-group dropdown-item" role="group"> \
+            <button class="btn" id="crowd-tools-export-eer-schema-' + self.id + '">EER Schema</button> \
+            <button class="btn" id="crowd-tools-export-check-eer-schema-' + self.id + '"><i class="fa fa-eye"></i></button> \
+          </div> \
+          <button class="dropdown-item" id="crowd-tools-export-uml-schema-' + self.id + '" disabled>UML Schema</button> \
+          <button class="dropdown-item" id="crowd-tools-export-orm-schema-' + self.id + '" disabled>ORM Schema</button> \
+        </div> \
+      </div> \
+    </div>'
+  );
+
+  //event handler when click export eer schema
+  $('#crowd-tools-export-eer-schema-' + self.id).on('click', function () {
+    $("<a />", {
+      "download": "eer-schema.json",
+      "href": "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(self.toJSONSchema())),
+    }).appendTo("body")
+      .click(function () {
+        $(this).remove()
+      })[0].click()
+  });
+
+  //append dom for the schemas modal when check export schemas
+  $('body').append(
+    '<div id="crowd-tools-export-check-schema-modal-' + self.id + '" class="modal fade"> \
+      <div class="modal-dialog modal-dialog-scrollable modal-lg"> \
+        <div class="modal-content"> \
+          <div class="modal-header"> \
+            <h5 class="modal-title"></h5> \
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+              <span aria-hidden="true">&times;</span> \
+            </button> \
+          </div> \
+          <div class="modal-body"><pre id="crowd-tools-export-check-schema-modal-pre-' + self.id + '" \
+          style="overflow: hidden; overflow-wrap: break-word;"></pre></div> \
+          <div class="modal-footer"> \
+            <button type="button" class="btn btn-light" data-dismiss="modal">Close</button> \
+            <button class="btn btn-primary" data-clipboard-target="#crowd-tools-export-check-schema-modal-pre-' + self.id + '"> \
+              Copy to Clipboard \
+            </button> \
+          </div> \
+        </div> \
+      </div> \
+    </div>'
+  );
+
+  //init copy clipboard functionality
+  new ClipboardJS('.btn');
+
+  //event handler when click export check eer schema
+  $('#crowd-tools-export-check-eer-schema-' + self.id).on('click', function () {
+    $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html("EER Schema");
+    $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(self.toJSONSchema(), null, 4));
+    $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
+    // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
+  });
+
+  //append dom for change conceptual model tool
+  $('#crowd-tools-row-' + self.id).append(
+    '<div class="form-group"> \
+  <div class="dropdown"> \
+    <button class="btn btn-danger dropdown-toggle" type="button" id="crowd-tools-model-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+      <i class="fa fa-th"></i> Model \
+    </button> \
+    <div class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"> \
+      <button class="dropdown-item" name="crowd-tools-model-input-' + self.id + '" data-model="uml" ' + (self.config.conceptualModel.name == 'uml' ? 'disabled' : '') + '>UML</button> \
+      <button class="dropdown-item" name="crowd-tools-model-input-' + self.id + '" data-model="eer" ' + (self.config.conceptualModel.name == 'eer' ? 'disabled' : '') + '>EER</button> \
+    </div> \
+  </div> \
+</div>'
+  );
+
+  //append dom for the advertisement modal when try clear workspace
+  $('body').append(
+    '<div id="crowd-tools-model-advertisement-' + self.id + '" class="modal fade"> \
+    <div class="modal-dialog"> \
+      <div class="modal-content"> \
+        <div class="modal-header"> \
+          <h5 class="modal-title">Change Conceptual Model</h5> \
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+            <span aria-hidden="true">&times;</span> \
+          </button> \
+        </div> \
+        <div class="modal-body"> \
+          <p>Are you sure you want to change the conceptual model?</p> \
+          <p><b>You lost not saved changes</b></p> \
+        </div> \
+        <div class="modal-footer"> \
+          <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button> \
+          <button id="crowd-tools-model-advertisement-proceed-' + self.id + '" \
+          type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
+        </div> \
+      </div> \
+    </div> \
+  </div>'
+  );
+
+  //event handler when click model change that open advertisement modal
+  $('[name=crowd-tools-model-input-' + self.id + "]").on('click', function () {
+    $('#crowd-tools-model-advertisement-' + self.id).modal('show');
+    $('#crowd-tools-model-advertisement-proceed-' + self.id).attr('data-model', $(this).attr('data-model'));
+    $(".tooltip").tooltip('hide');
+  });
+
+  //event handler when click proceed button in advertisement for model change
+  $('#crowd-tools-model-advertisement-proceed-' + self.id).on('click', function () {
+    console.log("/editor/" + $(this).attr('data-model'));
+    window.location.href = "/editor/" + $(this).attr('data-model');
+  });
+
   //append dom for clear workspace tool
   $('#crowd-tools-row-' + self.id).append(
     '<div class="form-group"> \
@@ -540,80 +419,6 @@ CrowdEditor.prototype.initTools = function () {
     $(".tooltip").tooltip('hide');
   });
 
-  //append dom for fullscreen tool
-  $('#crowd-tools-row-' + self.id).append(
-    '<div class="form-group"> \
-      <button class="btn btn-primary" id="crowd-tools-fullscreen-input-' + self.id + '" type="button" \
-      data-toggle="tooltip" data-original-title="Toggle Fullscreen Mode" data-placement="bottom" > \
-      <i class="material-icons">fullscreen</i></button> \
-    </div>'
-  );
-
-  //event handler when click fullscreen
-  $('#crowd-tools-fullscreen-input-' + self.id).on('click', function () {
-    toggleFullScreen(document.documentElement);
-    $(".tooltip").tooltip('hide');
-  });
-
-  //append dom for zoom tool
-  $('#crowd-tools-row-' + self.id).append(
-    '<div class="form-group"> \
-      <label>Zoom</label> \
-      <label id="crowd-tools-zoom-label-' + self.id + '" style="float: right">100%</label> \
-      <input class="form-control-range" id="crowd-tools-zoom-input-' + self.id + '" type="range" min="50" max="200" step="25" value="100" /> \
-    </div>'
-  );
-
-  //event handler when change zoom
-  //updates zoom label and change scale of the workspace paper
-  $('#crowd-tools-zoom-input-' + self.id).on('input', function () {
-    $('#crowd-tools-zoom-label-' + self.id).html(this.value + "%");
-    self.workspace.paper.scale(this.value / 100);
-  });
-
-  //append dom for grid size tool
-  $('#crowd-tools-row-' + self.id).append(
-    '<div class="form-group"> \
-      <label>Grid Size</label> \
-      <label id="crowd-tools-grid-size-label-' + self.id + '" style="float: right">10</label> \
-      <input class="form-control-range" id="crowd-tools-grid-size-input-' + self.id + '" type="range" min="1" max="50" step="1" value="10" /> \
-    </div>'
-  );
-
-  //event handler when change grid size
-  //updates grid size label and change grid size of the workspace paper
-  $('#crowd-tools-grid-size-input-' + self.id).on('input', function () {
-    $('#crowd-tools-grid-size-label-' + self.id).html(this.value);
-    self.workspace.paper.setGridSize(this.value);
-  });
-
-  //append dom for export tool
-  $('#crowd-tools-row-' + self.id).append(
-    '<div class="form-group"> \
-      <div class="dropdown"> \
-        <button class="btn btn-primary dropdown-toggle" type="button" id="crowd-tools-export-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
-          <i class="fa fa-cloud-download"></i> Export \
-        </button> \
-        <div class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"> \
-          <button class="dropdown-item" id="crowd-tools-export-eer-schema-' + self.id + '">EER Schema</button> \
-          <button class="dropdown-item" id="crowd-tools-export-uml-schema-' + self.id + '" disabled>UML Schema</button> \
-          <button class="dropdown-item" id="crowd-tools-export-orm-schema-' + self.id + '" disabled>ORM Schema</button> \
-        </div> \
-      </div> \
-    </div>'
-  );
-
-  //event handler when click export eer schema
-  $('#crowd-tools-export-eer-schema-' + self.id).on('click', function () {
-    $("<a />", {
-      "download": "eer-schema.json",
-      "href": "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(self.toJSONSchema())),
-    }).appendTo("body")
-      .click(function () {
-        $(this).remove()
-      })[0].click()
-  });
-
   $('[data-toggle="tooltip"]').tooltip({ html: true });
 }
 
@@ -623,6 +428,9 @@ CrowdEditor.prototype.initWorkspace = function () {
   //initialize workspace objects
   self.workspace = new Object();
   self.workspace.tools = new Object();
+  self.workspace.tools.elements = new Object();
+  self.workspace.tools.links = new Object();
+
 
   //add joint graph to workspace
   self.workspace.graph = new joint.dia.Graph();
@@ -672,8 +480,8 @@ CrowdEditor.prototype.initWorkspace = function () {
   //function to render the tools of a element view (may be used for update in case of change element type)
   self.workspace.renderElementTools = function (elementView) {
     self.workspace.paper.hideTools();
-    var toolsView = self.workspace.tools.elementsToolsView[elementView.model.attributes.type];
-    elementView.addTools(toolsView != null ? toolsView : self.workspace.tools.elementsToolsView.basic);
+    var toolsView = self.workspace.tools.elements.elementsToolsView[elementView.model.attributes.type];
+    elementView.addTools(toolsView != null ? toolsView : self.workspace.tools.elements.elementsToolsView.basic);
     elementView.showTools();
     $('[data-toggle="tooltip"]').tooltip({ html: true });
   }
@@ -760,7 +568,7 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
   //design of tools icons with markup (svg in json notation)
   //https://www.w3schools.com/graphics/svg_intro.asp
   //https://resources.jointjs.com/docs/jointjs/v3.2/joint.html#dia.Cell.markup
-  self.workspace.tools.markup = function (config) {
+  self.workspace.tools.elements.markup = function (config) {
     return [
       //draw a circle for the icon background
       {
@@ -801,55 +609,65 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
   }
 
   //add remove tool to workspace tools
-  self.workspace.tools.removeTool = new joint.elementTools.Remove({
+  self.workspace.tools.elements.removeTool = new joint.elementTools.Remove({
     focusOpacity: 1,
     rotate: true,
     offset: { x: -20, y: -10 },
-    markup: self.workspace.tools.markup({ icon: 'clear', tooltip: { title: 'Click to remove the object', placement: "left" } })
+    markup: self.workspace.tools.elements.markup({ icon: 'clear', tooltip: { title: 'Click to remove the object', placement: "left" } })
   });
 
   //add link tool to workspace tools
-  self.workspace.tools.linkTool = new joint.elementTools.Button({
-    focusOpacity: 1,
-    rotate: true,
-    x: '100%',
-    offset: { x: 20, y: -10 },
-    action: function (evt, elementView, buttonView) {
-      console.log('linkTool', this, { evt, elementView, buttonView });
-      //create the link
-      var link = self.palette.links.connector.clone();
+  self.workspace.tools.elements.linkTool = function (config) {
+    return new joint.elementTools.Button({
+      focusOpacity: 1,
+      rotate: true,
+      x: config.x != null ? config.x : '100%',
+      y: config.y != null ? config.y : null,
+      offset: config.offset != null ? config.offset : { x: 20, y: -10 },
+      action: function (evt, elementView, buttonView) {
+        console.log('linkTool', this, { evt, elementView, buttonView });
+        //create the link
+        var link = config.link && config.link.type ? self.palette.links[config.link.type].clone() : self.palette.links.basic.clone();
 
-      //set the source to the selected element
-      link.source({ id: this.model.id });
+        //set the source to the selected element
+        link.source({ id: this.model.id });
 
-      //place it at mouse position
-      link.target({
-        x: (evt.originalEvent.layerX - self.workspace.paper.translate().tx) / self.workspace.paper.scale().sx,
-        y: (evt.originalEvent.layerY - self.workspace.paper.translate().ty) / self.workspace.paper.scale().sy
-      });
+        //place it at mouse position
+        link.target({
+          x: (evt.originalEvent.layerX - self.workspace.paper.translate().tx) / self.workspace.paper.scale().sx,
+          y: (evt.originalEvent.layerY - self.workspace.paper.translate().ty) / self.workspace.paper.scale().sy
+        });
 
-      //add it to the graph
-      self.workspace.graph.addCell(link);
+        //add it to the graph
+        self.workspace.graph.addCell(link);
 
-      //get link view of the new link in the workspace paper
-      var linkView = link.findView(self.workspace.paper);
+        //change specific props of the link if they are defined
+        if (config.link && config.link.props) {
+          for (prop in config.link.props) {
+            link.prop(prop, config.link.props[prop]);
+          }
+        }
 
-      //create tools view for the new link (is a bag of tools)
-      var linkToolsView = self.workspace.tools.linksToolsView();
+        //get link view of the new link in the workspace paper
+        var linkView = link.findView(self.workspace.paper);
 
-      //add tools to the link view
-      linkView.addTools(linkToolsView);
+        //create tools view for the new link (is a bag of tools)
+        var linkToolsView = self.workspace.tools.links.linksToolsView[linkView.model.attributes.type];
 
-      //simulate pointerdown event (mousedown) over the dom element of the link tool "TargetArrowhead"
-      var clickEvent = document.createEvent('MouseEvents');
-      clickEvent.initMouseEvent('mousedown', true, true, evt.view, evt.detail, evt.screenX, evt.screenY, evt.clientX, evt.clientY, null, null, null, null, null, new EventTarget('marker-arrowhead'));
-      linkView._toolsView.tools[3].el.dispatchEvent(clickEvent); //third position of the array correspond to "TargetArrowhead" tool
-    },
-    markup: self.workspace.tools.markup({ icon: 'trending_up', tooltip: { title: 'Click and drag to connect the object', placement: "right" } })
-  });
+        //add tools to the link view
+        linkView.addTools(linkToolsView != null ? linkToolsView() : self.workspace.tools.links.linksToolsView.basic());
+
+        //simulate pointerdown event (mousedown) over the dom element of the link tool "TargetArrowhead"
+        var clickEvent = document.createEvent('MouseEvents');
+        clickEvent.initMouseEvent('mousedown', true, true, evt.view, evt.detail, evt.screenX, evt.screenY, evt.clientX, evt.clientY, null, null, null, null, null, new EventTarget('marker-arrowhead'));
+        linkView._toolsView.tools[2].el.dispatchEvent(clickEvent); //second position of the array correspond to "TargetArrowhead" tool
+      },
+      markup: config.markup != null ? config.markup : self.workspace.tools.elements.markup({ icon: 'call_made', tooltip: { title: 'Click and drag to connect the object', placement: "right" } })
+    });
+  }
 
   //add clone tool to workspace tools
-  self.workspace.tools.cloneTool = new joint.elementTools.Button({
+  self.workspace.tools.elements.cloneTool = new joint.elementTools.Button({
     focusOpacity: 1,
     rotate: true,
     x: '100%',
@@ -877,11 +695,11 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
       clickEvent.initMouseEvent('mousedown', true, true, evt.view, evt.detail, evt.screenX, evt.screenY, evt.clientX, evt.clientY);
       clonedElementView.el.dispatchEvent(clickEvent);
     },
-    markup: self.workspace.tools.markup({ icon: 'content_copy', tooltip: { title: 'Click and drag to clone the object', placement: "right" } })
+    markup: self.workspace.tools.elements.markup({ icon: 'content_copy', tooltip: { title: 'Click and drag to clone the object', placement: "right" } })
   });
 
   //add remove links tool to workspace tools
-  self.workspace.tools.removeLinksTool = new joint.elementTools.Button({
+  self.workspace.tools.elements.removeLinksTool = new joint.elementTools.Button({
     focusOpacity: 1,
     rotate: true,
     y: '100%',
@@ -893,16 +711,16 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         connectedLink.remove();
       });
     },
-    markup: self.workspace.tools.markup({ icon: 'content_cut', tooltip: { title: 'Click to break all connections to other objects', placement: "left" } })
+    markup: self.workspace.tools.elements.markup({ icon: 'content_cut', tooltip: { title: 'Click to break all connections to other objects', placement: "left" } })
   });
 
   //add boundary tool to workspace tools
-  self.workspace.tools.boundaryTool = new joint.elementTools.Boundary({
+  self.workspace.tools.elements.boundaryTool = new joint.elementTools.Boundary({
     focusOpacity: 0.5
   });
 
   //function for generate link element tool with a specific element type
-  self.workspace.tools.linkElementTool = function (config) {
+  self.workspace.tools.elements.linkElementTool = function (config) {
     return new joint.elementTools.Button({
       focusOpacity: 1,
       rotate: true,
@@ -923,8 +741,8 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         //add new element to the graph
         self.workspace.graph.addCell(newElement);
 
-        //create the connector or total connector for connect the selected element with the new element
-        var link = config.connector && config.connector.total ? self.palette.links.total.clone() : self.palette.links.connector.clone();
+        //create the link of the indicated type or else basic type for connect the selected element with the new element
+        var link = config.link && config.link.type ? self.palette.links[config.link.type].clone() : self.palette.links.basic.clone();
 
         //set the source to the selected element
         link.source({ id: this.model.id });
@@ -935,19 +753,21 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         //add link to the graph
         self.workspace.graph.addCell(link);
 
-        //change cardinality of the connector if it is defined
-        if (config.connector && config.connector.cardinality) {
-          link.prop('cardinality', config.connector.cardinality);
+        //change specific props of the link if they are defined
+        if (config.link && config.link.props) {
+          for (prop in config.link.props) {
+            link.prop(prop, config.link.props[prop]);
+          }
         }
 
         //get link view of the new link in the workspace paper
         var linkView = link.findView(self.workspace.paper);
 
         //create tools view for the new link (is a bag of tools)
-        var linkToolsView = self.workspace.tools.linksToolsView();
+        var linkToolsView = self.workspace.tools.links.linksToolsView[linkView.model.attributes.type];
 
         //add tools to the link view
-        linkView.addTools(linkToolsView);
+        linkView.addTools(linkToolsView != null ? linkToolsView() : self.workspace.tools.links.linksToolsView.basic());
 
         //get element view of the new element in the workspace paper
         var newElementView = newElement.findView(self.workspace.paper);
@@ -957,367 +777,63 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         clickEvent.initMouseEvent('mousedown', true, true, evt.view, evt.detail, evt.screenX, evt.screenY, evt.clientX, evt.clientY);
         newElementView.el.dispatchEvent(clickEvent);
       },
-      markup: config.markup != null ? config.markup : self.workspace.tools.markup({ icon: 'share', tooltip: { title: 'Click and drag to make new object and connect with it', placement: "top" } })
+      markup: config.markup != null ? config.markup : self.workspace.tools.elements.markup({ icon: 'share', tooltip: { title: 'Click and drag to make new object and connect with it', placement: "top" } })
     });
   }
 
   //initialize elements tools view object
-  self.workspace.tools.elementsToolsView = new Object();
+  self.workspace.tools.elements.elementsToolsView = new Object();
 
   //array of basic tools for all elements
-  var basicTools = [
-    self.workspace.tools.removeTool,
-    self.workspace.tools.linkTool,
-    self.workspace.tools.cloneTool,
-    self.workspace.tools.removeLinksTool,
-    self.workspace.tools.boundaryTool
+  self.workspace.tools.elements.basicTools = [
+    self.workspace.tools.elements.removeTool,
+    self.workspace.tools.elements.cloneTool,
+    self.workspace.tools.elements.removeLinksTool,
+    self.workspace.tools.elements.boundaryTool
   ];
 
   //create tools view for basic elements
-  self.workspace.tools.elementsToolsView['basic'] = new joint.dia.ToolsView({
-    name: 'basic-tools',
-    tools: basicTools
+  self.workspace.tools.elements.elementsToolsView['basic'] = new joint.dia.ToolsView({
+    name: 'element-basic-tools',
+    tools: self.workspace.tools.elements.basicTools
   });
 
-  //link tool for entities
-  var linkEntityTool = function (config) {
-    config = config ? config : {};
-    return self.workspace.tools.linkElementTool({
-      elementType: self.palette.elements.entity,
-      x: '100%', y: '50%', offset: { x: 20, y: 10 },
-      markup: self.workspace.tools.markup({
-        icon: 'share',
-        background: self.palette.colors.entity,
-        tooltip: {
-          title: 'Click and drag to make a <b class="crowd-entity-color">entity</b> and connect with it',
-          placement: "right"
-        }
-      }),
-      connector: {
-        total: config.total,
-        cardinality: config.cardinality
-      }
-    });
-  };
-
-  //link tool for weak entities
-  var linkWeakEntityTool = function (config) {
-    config = config ? config : {};
-    return self.workspace.tools.linkElementTool({
-      elementType: self.palette.elements.weakEntity,
-      x: '0%', y: '50%', offset: { x: -20, y: 10 },
-      markup: self.workspace.tools.markup({
-        icon: 'share',
-        background: self.palette.colors.weakEntity,
-        tooltip: {
-          title: 'Click and drag to make a <b class="crowd-weak-entity-color">weak entity</b> and connect with it',
-          placement: "left"
-        }
-      }),
-      connector: {
-        total: config.total,
-        cardinality: config.cardinality
-      }
-    });
-  };
-
-  //link tool for relationships
-  var linkRelationshipTool = function (config) {
-    config = config ? config : {};
-    return self.workspace.tools.linkElementTool({
-      elementType: self.palette.elements.relationship,
-      x: '100%', y: '50%', offset: { x: 20, y: 10 },
-      markup: self.workspace.tools.markup({
-        icon: 'share',
-        background: self.palette.colors.relationship,
-        tooltip: {
-          title: 'Click and drag to make a <b class="crowd-relationship-color">relationship</b> and connect with it',
-          placement: "right"
-        }
-      }),
-      connector: {
-        total: config.total,
-        cardinality: config.cardinality
-      }
-    });
-  };
-
-  //link tool for weak relationships
-  var linkWeakRelationshipTool = function (config) {
-    config = config ? config : {};
-    return self.workspace.tools.linkElementTool({
-      elementType: self.palette.elements.weakRelationship,
-      x: '0%', y: '50%', offset: { x: -20, y: 10 },
-      markup: self.workspace.tools.markup({
-        icon: 'share',
-        background: self.palette.colors.weakRelationship,
-        tooltip: {
-          title: 'Click and drag to make a <b class="crowd-weak-relationship-color">weak relationship</b> and connect with it',
-          placement: "left"
-        }
-      }),
-      connector: {
-        total: config.total,
-        cardinality: config.cardinality
-      }
-    })
-  };
-
-  //link tool for attributes
-  var linkAttributeTool = self.workspace.tools.linkElementTool({
-    elementType: self.palette.elements.attribute,
-    x: '50%', offset: { x: -20, y: -10 },
-    markup: self.workspace.tools.markup({
-      icon: 'share',
-      background: self.palette.colors.attribute,
-      tooltip: {
-        title: 'Click and drag to make an <b class="crowd-attribute-color">attribute</b> and connect with it',
-        placement: "top"
-      }
-    })
-  });
-
-  //link tool for multivalued attributes
-  var linkMultivaluedAttributeTool = self.workspace.tools.linkElementTool({
-    elementType: self.palette.elements.multivaluedAttribute,
-    x: '50%', y: '100%', offset: { x: -20, y: 30 },
-    markup: self.workspace.tools.markup({
-      icon: 'share',
-      background: self.palette.colors.multivaluedAttribute,
-      tooltip: {
-        title: 'Click and drag to make a <b class="crowd-multivalued-attribute-color">multivalued attribute</b> and connect with it',
-        placement: "bottom"
-      }
-    })
-  });
-
-  //link tool for key attributes
-  var linkKeyAttributeTool = self.workspace.tools.linkElementTool({
-    elementType: self.palette.elements.keyAttribute,
-    x: '50%', offset: { x: 20, y: -10 },
-    markup: self.workspace.tools.markup({
-      icon: 'share',
-      background: self.palette.colors.keyAttribute,
-      tooltip: {
-        title: 'Click and drag to make a <b class="crowd-key-attribute-color">key attribute</b> and connect with it',
-        placement: "top"
-      }
-    })
-  });
-
-  //link tool for weak key attributes
-  var linkWeakKeyAttributeTool = self.workspace.tools.linkElementTool({
-    elementType: self.palette.elements.weakKeyAttribute,
-    x: '50%', offset: { x: 20, y: -10 },
-    markup: self.workspace.tools.markup({
-      icon: 'share',
-      background: self.palette.colors.weakKeyAttribute,
-      tooltip: {
-        title: 'Click and drag to make a <b class="crowd-weak-key-attribute-color">weak key attribute</b> and connect with it',
-        placement: "top"
-      }
-    })
-  });
-
-  //link tool for inheritance
-  var linkInheritanceTool = function (config) {
-    config = config ? config : {};
-    return self.workspace.tools.linkElementTool({
-      elementType: self.palette.elements.inheritance,
-      x: '50%', y: '100%', offset: { x: 20, y: 30 },
-      markup: self.workspace.tools.markup({
-        icon: 'share',
-        background: self.palette.colors.inheritance,
-        tooltip: {
-          title: 'Click and drag to make a <b class="crowd-inheritance-color">inheritance</b> and connect with it',
-          placement: "bottom"
-        }
-      }),
-      connector: {
-        total: config.total,
-      }
-    });
-  }
-
-  //create tools view for entities
-  self.workspace.tools.elementsToolsView['entity'] = new joint.dia.ToolsView({
-    name: 'entity-tools',
-    tools: basicTools.concat([
-      linkAttributeTool,
-      linkKeyAttributeTool,
-      linkRelationshipTool({ cardinality: '1' }),
-      linkWeakRelationshipTool({ total: false, cardinality: '1' }),
-      linkMultivaluedAttributeTool,
-      linkInheritanceTool()
-    ])
-  });
-
-  //create tools view for weak entities
-  self.workspace.tools.elementsToolsView['weakEntity'] = new joint.dia.ToolsView({
-    name: 'weak-entity-tools',
-    tools: basicTools.concat([
-      linkAttributeTool,
-      linkWeakKeyAttributeTool,
-      linkRelationshipTool({ cardinality: '1' }),
-      linkWeakRelationshipTool({ total: true, cardinality: 'N' }),
-      linkMultivaluedAttributeTool,
-      linkInheritanceTool()
-    ])
-  });
-
-  //create tools view for relationship
-  self.workspace.tools.elementsToolsView['relationship'] = new joint.dia.ToolsView({
-    name: 'relationship-tools',
-    tools: basicTools.concat([
-      linkAttributeTool,
-      linkKeyAttributeTool,
-      linkEntityTool({ cardinality: '1' }),
-      linkWeakEntityTool({ total: false, cardinality: '1' })
-    ])
-  });
-
-  //create tools view for weak relationship
-  self.workspace.tools.elementsToolsView['weakRelationship'] = new joint.dia.ToolsView({
-    name: 'weak-relationship-tools',
-    tools: basicTools.concat([
-      linkAttributeTool,
-      linkWeakKeyAttributeTool,
-      linkEntityTool({ cardinality: '1' }),
-      linkWeakEntityTool({ total: true, cardinality: 'N' })
-    ])
-  });
-
-  //create tools view for attribute
-  self.workspace.tools.elementsToolsView['attribute'] = new joint.dia.ToolsView({
-    name: 'attribute-tools',
-    tools: basicTools.concat([
-      linkAttributeTool
-    ])
-  });
-
-  //create tools view for inheritance
-  self.workspace.tools.elementsToolsView['inheritance'] = new joint.dia.ToolsView({
-    name: 'inheritance-tools',
-    tools: basicTools.concat([
-      linkEntityTool({ cardinality: 'U' }),
-      linkWeakEntityTool({ cardinality: 'U' })
-    ])
-  });
+  //call initialization of elements tools view for the specific conceptual model
+  self.config.conceptualModel.initElementsToolsViews(self);
 }
 
 CrowdEditor.prototype.initLinksToolsViews = function () {
   var self = this;
 
-  //initialize links tools view object
-  self.workspace.tools.linksToolsView = function () {
+  //initialize elements tools view object
+  self.workspace.tools.links.linksToolsView = new Object();
+
+  //create tools view for basic links
+  self.workspace.tools.links.linksToolsView['basic'] = function () {
     return new joint.dia.ToolsView({
-      name: 'links-tools',
+      name: 'link-basic-tools',
       tools: [
-        //new joint.linkTools.TotalButton(),
-        //new joint.linkTools.CardinalityButton(),
         new joint.linkTools.Vertices(),
         new joint.linkTools.Segments(),
+        new joint.linkTools.TargetArrowhead(), //second position of the _toolsView.tools array of the linkView
         new joint.linkTools.SourceArrowhead(),
-        new joint.linkTools.TargetArrowhead(), //third position of the _toolsView.tools array of the linkView
-        new joint.linkTools.SourceAnchor(),
         new joint.linkTools.TargetAnchor(),
+        new joint.linkTools.SourceAnchor(),
         new joint.linkTools.Boundary(),
         new joint.linkTools.Remove({ distance: 20 })
       ]
     });
   };
 
+  //call initialization of links tools view for the specific conceptual model
+  self.config.conceptualModel.initLinksToolsViews(self);
 }
 
 CrowdEditor.prototype.initChangeAttributesEvents = function () {
   var self = this;
 
-  //event when the elements type change (types are: entity, weakEntity, attribute, etc)
-  self.workspace.graph.on('change:type', function (element, newType) {
-    console.log('change:datatype', { element, newType });
-
-    if (element.isElement()) {
-      //replace element attributes and markup with the palette default component of the newtype
-      element.attributes.attrs = self.palette.elements[newType].attributes.attrs;
-      element.markup = self.palette.elements[newType].markup;
-
-      //get element view
-      var elementView = element.findView(self.workspace.paper);
-
-      //redraw the element and their tools with the new type style
-      elementView.render();
-      self.workspace.renderElementTools(elementView);
-
-      //trigger the change name event to update the text with the name of the element
-      //(because it is overwrited when replaced the attributes.attrs)
-      element.trigger('change:name', element, element.prop('name'));
-    }
-  });
-
-  //event when the elements name change
-  self.workspace.graph.on('change:name', function (element, newName) {
-    console.log('change:name', { element, newName });
-
-    if (element.isElement()) {
-      element.attr('text/text', newName);
-    }
-  });
-
-  //event when the elements (specificly inheritance) subtype change
-  self.workspace.graph.on('change:subtype', function (element, newSubtype) {
-    console.log('change:subtype', { element, newSubtype });
-
-    if (element.isElement() && element.prop('type') == 'inheritance') {
-      var subtypesText = { overlaped: 'o', disjoint: 'd', union: 'U' };
-      element.attr('text/text', subtypesText[newSubtype]);
-    }
-  });
-
-  //event when the links cardinality change
-  self.workspace.graph.on('change:cardinality', function (link, newCardinality) {
-    console.log('change:cardinality', { link, newCardinality });
-
-    if (link.isLink()) {
-      link.labels([{
-        attrs: {
-          text: {
-            text: (newCardinality != "null" ? newCardinality : null),
-            class: newCardinality == 'U' ? 'crowd-link-text inherit' : ''
-          },
-          rect: {
-            fill: newCardinality == 'U' ? "none" : getCSS('background-color', 'crowd-workspace')
-          }
-        },
-        position: {
-          angle: newCardinality == 'U' ? -90 : null,
-          args: {
-            keepGradient: newCardinality == 'U' ? true : false
-          }
-        }
-      }]);
-    }
-  });
-
-  //event when the elements type change (types are: entity, weakEntity, attribute, etc)
-  self.workspace.graph.on('change:total', function (link, newTotal) {
-    console.log('change:total', { link, newTotal });
-
-    if (link.isLink()) {
-      //replace link attributes and markup with the palette default component of the corresponding style
-      link.attributes.attrs = newTotal
-        ? self.palette.links.total.attributes.attrs
-        : self.palette.links.connector.attributes.attrs;
-      link.markup = newTotal
-        ? self.palette.links.total.markup
-        : self.palette.links.connector.markup;
-
-      //get link view
-      var linkView = link.findView(self.workspace.paper);
-
-      //redraw the link with the new style
-      linkView.render();
-    }
-  });
+  //call initialization of change attributes events for the specific conceptual model
+  self.config.conceptualModel.initChangeAttributesEvents(self);
 }
 
 CrowdEditor.prototype.initInspector = function () {
@@ -1350,8 +866,8 @@ CrowdEditor.prototype.initInspector = function () {
       case 'boolean':
         dom = $('<span class="row"> \
           <div class="form-check"> \
-            <input class="form-check-input" type="checkbox" value="" id="crowd-inspector-content-' + attribute.property + '-' + self.id + '"> \
-            <label class="form-check-label" for="crowd-inspector-content-' + attribute.property + '-' + self.id + '">' + attribute.label + '</label> \
+            <input class="form-check-input" type="checkbox" value="" id="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '"> \
+            <label class="form-check-label" for="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '">' + attribute.label + '</label> \
           </div> \
         </span>');
         break;
@@ -1364,9 +880,9 @@ CrowdEditor.prototype.initInspector = function () {
         attribute.values.forEach(function (value) {
           $(dom).find('.form-group').append(
             '<div class="form-check form-check-inline"> \
-              <input class="form-check-input" type="radio" name="crowd-inspector-content-' + attribute.property + '-' + self.id + '" \
-              id="crowd-inspector-content-' + attribute.property + '-' + value.value + '-' + self.id + '" value="' + value.value + '"> \
-              <label class="form-check-label" for="crowd-inspector-content-' + attribute.property + '-' + value.value + '-' + self.id + '">' + value.label + '</label> \
+              <input class="form-check-input" type="radio" name="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '" \
+              id="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + value.value + '-' + self.id + '" value="' + value.value + '"> \
+              <label class="form-check-label" for="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + value.value + '-' + self.id + '">' + value.label + '</label> \
             </div>'
           );
         });
@@ -1375,7 +891,7 @@ CrowdEditor.prototype.initInspector = function () {
         dom = $('<span class="row"> \
           <div class="form-group"> \
             <label>' + attribute.label + '</label> \
-            <' + (attribute.input == 'textarea' ? 'textarea' : 'input type="text"') + ' class="form-control" id="crowd-inspector-content-' + attribute.property + '-' + self.id + '" /> \
+            <' + (attribute.input == 'textarea' ? 'textarea' : 'input type="text"') + ' class="form-control" id="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '" /> \
           </div> \
         </span>');
         break;
@@ -1395,21 +911,20 @@ CrowdEditor.prototype.initInspector = function () {
 
     //set the dom input value with the property value according to the attribute type
     switch (attribute.type) {
-
       case 'boolean':
-        $('#crowd-inspector-content-' + attribute.property + '-' + self.id).prop("checked", propertyValue == 'true');
+        $('#crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id).prop("checked", propertyValue == 'true');
         break;
       case 'multiple':
-        $('#crowd-inspector-content-' + attribute.property + '-' + propertyValue + '-' + self.id).prop("checked", true);
+        $('#crowd-inspector-content-' + formatSelector(attribute.property) + '-' + propertyValue + '-' + self.id).prop("checked", true);
         break;
       case 'text': default:
-        $('#crowd-inspector-content-' + attribute.property + '-' + self.id).val(propertyValue);
+        $('#crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id).val(propertyValue);
         break;
     }
 
     //event when the input is modified that change the model property value by the user input
-    $('#crowd-inspector-content-' + attribute.property + '-' + self.id +
-      ',[name="crowd-inspector-content-' + attribute.property + '-' + self.id + '"]').on('keyup change', function () {
+    $('#crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id +
+      ',[name="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '"]').on('keyup change', function () {
         var newPropertyValue;
 
         //get the dom input value according to the attribute type
@@ -1419,7 +934,7 @@ CrowdEditor.prototype.initInspector = function () {
             newPropertyValue = $(this).prop('checked');
             break;
           case 'multiple':
-            newPropertyValue = $('[name="crowd-inspector-content-' + attribute.property + '-' + self.id + '"]:checked').val();
+            newPropertyValue = $('[name="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '"]:checked').val();
             break;
           case 'text': default:
             newPropertyValue = $(this).val();
@@ -1438,6 +953,20 @@ CrowdEditor.prototype.initInspector = function () {
       });
   }
 
+  self.inspector.loadContent = function () {
+    //toggle the content on
+    self.inspector.toggleContent(true);
+
+    //make the title with the name of the element or link
+    $('#crowd-inspector-' + self.id + ' .crowd-inspector-title').html(formatString(self.inspector.model.attributes.type));
+
+    //clear attributes of the lastest model
+    self.inspector.clearAttributes();
+
+    //call initialization of inspector for the specific conceptual model
+    self.config.conceptualModel.initInspector(self);
+  }
+
   //append dom element that shows an empty message on the inspector
   $('#crowd-inspector-' + self.id).append(
     '<div class="crowd-inspector-empty"> \
@@ -1446,7 +975,7 @@ CrowdEditor.prototype.initInspector = function () {
   );
 
   //append dom element that contains the title of the element or link inspected
-  $('#crowd-inspector-' + self.id).append('<h2 class="crowd-inspector-title"></h2>');
+  $('#crowd-inspector-' + self.id).append('<h4 class="crowd-inspector-title"></h4>');
 
   //append dom element that contains the content of the element or link inspected
   $('#crowd-inspector-' + self.id).append('<div class="crowd-inspector-content"></div>');
@@ -1458,110 +987,10 @@ CrowdEditor.prototype.initInspector = function () {
   self.workspace.paper.on('cell:pointerup', function (cellView) {
     console.log(cellView);
 
-    //toggle the content on
-    self.inspector.toggleContent(true);
-
     //get cell view (that can be element view or link view) model
     self.inspector.model = cellView.model;
 
-    //make the title with the name of the element or link
-    $('#crowd-inspector-' + self.id + ' .crowd-inspector-title').html(formatString(self.inspector.model.attributes.type));
-
-    //clear attributes of the lastest model
-    self.inspector.clearAttributes();
-
-    //add uri attribute to content for all types
-    self.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
-
-    //add name attribute to content if it is of the correct type
-    switch (self.inspector.model.attributes.type) {
-      case 'entity':
-      case 'weakEntity':
-      case 'relationship':
-      case 'weakRelationship':
-      case 'attribute':
-      case 'multivaluedAttribute':
-      case 'keyAttribute':
-      case 'weakKeyAttribute':
-      case 'derivedAttribute':
-        self.inspector.addAttribute({ label: 'Name', property: 'name', type: 'text', input: 'textarea' });
-        break;
-    }
-
-    //add is weak attribute for entity and weak entity
-    switch (self.inspector.model.attributes.type) {
-      case 'entity':
-      case 'weakEntity':
-        self.inspector.addAttribute({ label: 'Is Weak?', property: 'type', type: 'boolean', map: { true: 'weakEntity', false: 'entity' } });
-        break;
-    }
-
-    //add is weak attribute for relationship and weak relationship
-    switch (self.inspector.model.attributes.type) {
-      case 'relationship':
-      case 'weakRelationship':
-        self.inspector.addAttribute({ label: 'Is Weak?', property: 'type', type: 'boolean', map: { true: 'weakRelationship', false: 'relationship' } });
-        break;
-    }
-
-    //add the type and datatype attributes for all attributes types
-    switch (self.inspector.model.attributes.type) {
-      case 'attribute':
-      case 'multivaluedAttribute':
-      case 'keyAttribute':
-      case 'weakKeyAttribute':
-      case 'derivedAttribute':
-        self.inspector.addAttribute({
-          label: 'Type', property: 'type', type: 'multiple',
-          values: [
-            { label: 'Normal', value: 'attribute' },
-            { label: 'Key', value: 'keyAttribute' },
-            { label: 'Weak Key', value: 'weakKeyAttribute' },
-            { label: 'Multivalued', value: 'multivaluedAttribute' },
-            { label: 'Derived', value: 'derivedAttribute' }
-          ]
-        });
-        self.inspector.addAttribute({
-          label: 'Datatype', property: 'datatype', type: 'multiple',
-          values: [
-            { label: 'varchar', value: 'varchar' },
-            { label: 'char', value: 'char' },
-            { label: 'int', value: 'int' },
-            { label: 'bit', value: 'bit' }
-          ]
-        });
-        break;
-    }
-
-    //add the subtype attribute for inheritance
-    switch (self.inspector.model.attributes.type) {
-      case 'inheritance':
-        self.inspector.addAttribute({
-          label: 'Type', property: 'subtype', type: 'multiple',
-          values: [
-            { label: 'Overlaped', value: 'overlaped' },
-            { label: 'Disjoint', value: 'disjoint' },
-            { label: 'Union', value: 'union' },
-          ]
-        });
-        break;
-    }
-
-    //add the cardinality attribute for connector
-    switch (self.inspector.model.attributes.type) {
-      case 'connector':
-        self.inspector.addAttribute({
-          label: 'Cardinality', property: 'cardinality', type: 'multiple',
-          values: [
-            { label: 'None', value: null },
-            { label: '1', value: '1' },
-            { label: 'N', value: 'N' },
-            { label: 'U (inherit child)', value: 'U' },
-          ]
-        });
-        self.inspector.addAttribute({ label: 'Is Total?', property: 'total', type: 'boolean', map: { true: true, false: false } });
-        break;
-    }
+    self.inspector.loadContent();
   });
 
   //event for hide the present information and show the empty message again when the element or link is no more selected
@@ -1660,7 +1089,7 @@ CrowdEditor.prototype.toJSONSchema = function () {
         jsonSchema.entities.push({
           id: element.cid,
           uri: element.attributes.uri,
-          name: element.attributes.name,
+          name: element.attributes.uri,
           isWeak: element.attributes.type == 'weakEntity',
           position: element.attributes.position,
           size: element.attributes.size,
@@ -1670,7 +1099,7 @@ CrowdEditor.prototype.toJSONSchema = function () {
         jsonSchema.attributes.push({
           id: element.cid,
           uri: element.attributes.uri,
-          name: element.attributes.name,
+          name: element.attributes.uri,
           type: element.attributes.type,
           datatype: datatypeMap[element.attributes.datatype],
           position: element.attributes.position,
@@ -1680,9 +1109,9 @@ CrowdEditor.prototype.toJSONSchema = function () {
         var attributeLink = {
           id: element.cid,
           uri: element.attributes.uri,
-          name: element.attributes.name,
+          name: element.attributes.uri,
           entity: null,
-          attribute: element.attributes.name,
+          attribute: element.attributes.uri,
           type: 'attribute'
         }
         //search for links connected to the attribute for add entity to attribute link
@@ -1693,7 +1122,7 @@ CrowdEditor.prototype.toJSONSchema = function () {
               ? link.getTargetElement()
               : null);
           if (connectedEntity) {
-            attributeLink.entity = connectedEntity.attributes.name;
+            attributeLink.entity = connectedEntity.attributes.uri;
           }
         });
         jsonSchema.links.push(attributeLink);
@@ -1702,7 +1131,7 @@ CrowdEditor.prototype.toJSONSchema = function () {
         jsonSchema.relationships.push({
           id: element.cid,
           uri: element.attributes.uri,
-          name: element.attributes.name,
+          name: element.attributes.uri,
           isWeak: element.attributes.type == 'weakRelationship',
           position: element.attributes.position,
           size: element.attributes.size,
@@ -1711,7 +1140,7 @@ CrowdEditor.prototype.toJSONSchema = function () {
         var relationshipLink = {
           id: element.cid,
           uri: element.attributes.uri,
-          name: element.attributes.name,
+          name: element.attributes.uri,
           entities: [],
           cardinality: [],
           roles: [],
@@ -1725,8 +1154,8 @@ CrowdEditor.prototype.toJSONSchema = function () {
               ? link.getTargetElement()
               : null);
           if (connectedEntity) {
-            relationshipLink.entities.push(connectedEntity.attributes.name);
-            relationshipLink.roles.push(connectedEntity.attributes.name);
+            relationshipLink.entities.push(connectedEntity.attributes.uri);
+            relationshipLink.roles.push(connectedEntity.attributes.uri);
             relationshipLink.cardinality.push(cardinalityMap[link.attributes.cardinality]);
           }
         });
@@ -1737,6 +1166,7 @@ CrowdEditor.prototype.toJSONSchema = function () {
         var inheritanceLink = {
           id: element.cid,
           uri: element.attributes.uri,
+          name: element.attributes.uri,
           parent: null,
           entities: [],
           constraint: [
@@ -1753,13 +1183,13 @@ CrowdEditor.prototype.toJSONSchema = function () {
               : null);
           if (connectedEntity) {
             if (!link.attributes.cardinality) {
-              inheritanceLink.parent = connectedEntity.attributes.name;
+              inheritanceLink.parent = connectedEntity.attributes.uri;
               if (link.attributes.total) {
                 inheritanceLink.constraint.push('exclusive');
               }
             }
             else {
-              inheritanceLink.entities.push(connectedEntity.attributes.name);
+              inheritanceLink.entities.push(connectedEntity.attributes.uri);
             }
           }
         });

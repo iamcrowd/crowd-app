@@ -43,8 +43,11 @@
               "node_modules/lodash/lodash.min.js",
               "node_modules/backbone/backbone-min.js",
               "node_modules/jointjs/dist/joint.min.js",
+              "node_modules/clipboard/dist/clipboard.min.js",
               "client/assets/js/utils.js",
-              "client/assets/js/crowd.editor.js"
+              "client/assets/js/crowd.editor.js",
+              "client/assets/js/crowd.editor.eer.js",
+              "client/assets/js/crowd.editor.uml.js"
             ]
           },
           "configurations": {
@@ -118,8 +121,11 @@
               "node_modules/lodash/lodash.min.js",
               "node_modules/backbone/backbone-min.js",
               "node_modules/jointjs/dist/joint.min.js",
+              "node_modules/clipboard/dist/clipboard.min.js",
               "client/assets/js/utils.js",
-              "client/assets/js/crowd.editor.js"
+              "client/assets/js/crowd.editor.js",
+              "client/assets/js/crowd.editor.eer.js",
+              "client/assets/js/crowd.editor.uml.js"
             ],
             "assets": [
               "client/assets/favicon.ico",

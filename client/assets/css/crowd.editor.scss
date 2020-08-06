@@ -14,6 +14,7 @@ $alt-accent: #263238;
 .crowd-palette {
   display: flex;
   background-color: $accent;
+  border-top: 0.1px solid black;
   border-right: 0.1px solid black;
   height: 100% !important;
   padding: 0;
@@ -51,7 +52,7 @@ $alt-accent: #263238;
 }
 
 .crowd-tools .row .form-group {
-  margin-left: 30px;
+  margin-left: 20px;
 }
 
 .crowd-tools .row .form-group label {
@@ -177,6 +178,13 @@ $alt-accent: #263238;
   font-size: 40px;
 }
 
+.uml-class-name-text,
+.uml-class-attrs-text,
+.uml-class-methods-text {
+  font-family: sans-serif;
+  font-size: 12px;
+}
+
 .crowd-entity-color,
 .crowd-weak-entity-color,
 .crowd-relationship-color,
@@ -186,7 +194,11 @@ $alt-accent: #263238;
 .crowd-key-attribute-color,
 .crowd-weak-key-attribute-color,
 .crowd-inheritance-color,
-.crowd-derived-attribute-color {
+.crowd-derived-attribute-color,
+.crowd-bold-color,
+.crowd-class-color,
+.crowd-abstract-color,
+.crowd-interface-color {
   background-color: rgba(255, 255, 255, 0.85);
   padding: 0px 5px 2px 5px;
   border-radius: 10px;
@@ -231,6 +243,34 @@ $alt-accent: #263238;
 
 .crowd-derived-attribute-color {
   color: rgba(158, 158, 158, 1);
+}
+
+.crowd-bold-color {
+  color: black;
+}
+
+.crowd-class-color {
+  color: rgba(33, 33, 33, 1);
+}
+
+.crowd-class-alt-color {
+  color: rgba(66, 66, 66, 1);
+}
+
+.crowd-abstract-color {
+  color: rgba(38, 50, 56, 1);
+}
+
+.crowd-abstract-alt-color {
+  color: rgba(55, 71, 79, 1);
+}
+
+.crowd-interface-color {
+  color: rgba(62, 39, 35, 1);
+}
+
+.crowd-interface-alt-color {
+  color: rgba(78, 52, 46, 1);
 }
 
 .tooltip {

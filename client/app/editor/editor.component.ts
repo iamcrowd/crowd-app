@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 declare var CrowdEditor;
+declare var CrowdEditorEer;
+declare var CrowdEditorUml;
 
 @Component({
   selector: 'app-editor',
@@ -9,14 +12,32 @@ declare var CrowdEditor;
 })
 export class EditorComponent implements OnInit {
 
-  constructor() { }
+  conceptualModel: string;
+
+  constructor(private route: ActivatedRoute) {
+    this.route.params.subscribe(params => {
+      this.conceptualModel = params.conceptualModel;
+      this.ngOnInit();
+    });
+  }
+
+  // @HostListener('window:beforeunload', ['$event'])
+  // doSomething($event) {
+  //   $event.returnValue = 'Are you sure you want to change the conceptual model? You lost not saved changes';
+  // }
 
   ngOnInit(): void {
+    const conceptualModelMap = {
+      uml: CrowdEditorUml,
+      eer: CrowdEditorEer
+    }
+
     var editor = new CrowdEditor({
       selector: 'editor',
+      conceptualModel: conceptualModelMap[this.conceptualModel] ? conceptualModelMap[this.conceptualModel] : CrowdEditorUml,
       palette: {
         grid: {
-          size: 90,
+          size: this.conceptualModel == 'uml' ? 110 : 90,
           columns: 2
         }
       }
