@@ -338,7 +338,7 @@ var CrowdEditorEer = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.entity,
-        x: '100%', y: '50%', offset: { x: 20, y: 10 },
+        x: '100%', y: '50%', offset: { x: 25, y: 10 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.entity,
@@ -361,7 +361,7 @@ var CrowdEditorEer = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.weakEntity,
-        x: '0%', y: '50%', offset: { x: -20, y: 10 },
+        x: '0%', y: '50%', offset: { x: -25, y: 10 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.weakEntity,
@@ -384,7 +384,7 @@ var CrowdEditorEer = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.relationship,
-        x: '100%', y: '50%', offset: { x: 20, y: 10 },
+        x: '100%', y: '50%', offset: { x: 25, y: 10 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.relationship,
@@ -407,7 +407,7 @@ var CrowdEditorEer = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.weakRelationship,
-        x: '0%', y: '50%', offset: { x: -20, y: 10 },
+        x: '0%', y: '50%', offset: { x: -25, y: 10 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.weakRelationship,
@@ -428,7 +428,7 @@ var CrowdEditorEer = {
     //link tool for attributes
     var linkAttributeTool = crowd.workspace.tools.elements.linkElementTool({
       elementType: crowd.palette.elements.attribute,
-      x: '50%', offset: { x: -20, y: -10 },
+      x: '50%', offset: { x: -25, y: -15 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'share',
         background: crowd.palette.colors.attribute,
@@ -445,7 +445,7 @@ var CrowdEditorEer = {
     //link tool for multivalued attributes
     var linkMultivaluedAttributeTool = crowd.workspace.tools.elements.linkElementTool({
       elementType: crowd.palette.elements.multivaluedAttribute,
-      x: '50%', y: '100%', offset: { x: -20, y: 30 },
+      x: '50%', y: '100%', offset: { x: -25, y: 35 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'share',
         background: crowd.palette.colors.multivaluedAttribute,
@@ -462,7 +462,7 @@ var CrowdEditorEer = {
     //link tool for key attributes
     var linkKeyAttributeTool = crowd.workspace.tools.elements.linkElementTool({
       elementType: crowd.palette.elements.keyAttribute,
-      x: '50%', offset: { x: 20, y: -10 },
+      x: '50%', offset: { x: 25, y: -15 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'share',
         background: crowd.palette.colors.keyAttribute,
@@ -479,7 +479,7 @@ var CrowdEditorEer = {
     //link tool for weak key attributes
     var linkWeakKeyAttributeTool = crowd.workspace.tools.elements.linkElementTool({
       elementType: crowd.palette.elements.weakKeyAttribute,
-      x: '50%', offset: { x: 20, y: -10 },
+      x: '50%', offset: { x: 25, y: -15 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'share',
         background: crowd.palette.colors.weakKeyAttribute,
@@ -498,7 +498,7 @@ var CrowdEditorEer = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.inheritance,
-        x: '50%', y: '100%', offset: { x: 20, y: 30 },
+        x: '50%', y: '100%', offset: { x: 25, y: 35 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.inheritance,
@@ -618,7 +618,7 @@ var CrowdEditorEer = {
       if (element.isElement()) {
         element.attr('text/text', newName);
         element.attributes.uri = element.attributes.uri.split("#")[0] + "#" + newName;
-        $('#crowd-inspector-content-uri-' + crowd.id).val(element.attributes.uri);
+        $('#crowd-inspector-content--uri--' + crowd.id).val(element.attributes.uri);
       }
     });
 
@@ -632,7 +632,7 @@ var CrowdEditorEer = {
         newName = newName.join('#');
         element.attr('text/text', newName);
         element.attributes.name = newName;
-        $('#crowd-inspector-content-name-' + crowd.id).val(newName);
+        $('#crowd-inspector-content--name--' + crowd.id).val(newName);
       }
     });
 

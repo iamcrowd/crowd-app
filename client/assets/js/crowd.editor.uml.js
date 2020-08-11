@@ -38,8 +38,8 @@ var CrowdEditorUml = {
         '.uml-class-methods-text': { fill: 'white' }
       },
       size: {
-        width: 100,
-        height: 80
+        width: 90,
+        height: 90
       },
     });
 
@@ -70,8 +70,8 @@ var CrowdEditorUml = {
         '.uml-class-methods-text': { fill: 'white' }
       },
       size: {
-        width: 100,
-        height: 80
+        width: 90,
+        height: 90
       },
     });
 
@@ -102,8 +102,8 @@ var CrowdEditorUml = {
         '.uml-class-methods-text': { fill: 'white' }
       },
       size: {
-        width: 100,
-        height: 80
+        width: 90,
+        height: 90
       },
     });
 
@@ -244,7 +244,8 @@ var CrowdEditorUml = {
           cardinality: { source: '0..1', target: '0..1' }
         }
       },
-      offset: { x: -10, y: -10 },
+      x: '75%',
+      offset: { x: 12, y: -15 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'arrow_upward',
         tooltip: {
@@ -262,7 +263,8 @@ var CrowdEditorUml = {
           cardinality: { source: '0..1', target: '0..1' }
         }
       },
-      offset: { x: 20, y: 20 },
+      y: '25%',
+      offset: { x: 25, y: -2 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'arrow_forward',
         tooltip: {
@@ -278,7 +280,7 @@ var CrowdEditorUml = {
         type: 'generalization'
       },
       x: '50%',
-      offset: { x: 0, y: -10 },
+      offset: { x: 0, y: -15 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'call_merge',
         tooltip: {
@@ -293,8 +295,8 @@ var CrowdEditorUml = {
       link: {
         type: 'implementation'
       },
-      x: '0%',
-      offset: { x: 10, y: -10 },
+      x: '25%',
+      offset: { x: -12, y: -15 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'call_split',
         tooltip: {
@@ -309,7 +311,7 @@ var CrowdEditorUml = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.class,
-        x: '100%', y: '50%', offset: { x: 20, y: 10 },
+        x: '100%', y: '50%', offset: { x: 25, y: 10 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.class,
@@ -333,7 +335,7 @@ var CrowdEditorUml = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.abstract,
-        x: '50%', y: '100%', offset: { x: 0, y: 30 },
+        x: '50%', y: '100%', offset: { x: 0, y: 35 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.abstract,
@@ -357,7 +359,7 @@ var CrowdEditorUml = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.interface,
-        x: '0%', y: '50%', offset: { x: -20, y: 10 },
+        x: '0%', y: '50%', offset: { x: -25, y: 10 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.interface,
@@ -439,7 +441,7 @@ var CrowdEditorUml = {
 
       if (element.isElement()) {
         element.attributes.uri = element.attributes.uri.split("#")[0] + "#" + newName;
-        $('#crowd-inspector-content-uri-' + crowd.id).val(element.attributes.uri);
+        $('#crowd-inspector-content--uri--' + crowd.id).val(element.attributes.uri);
         element.findView(crowd.workspace.paper).render();
       }
     });
@@ -454,8 +456,48 @@ var CrowdEditorUml = {
         newName = newName.join('#');
 
         element.attributes.name = newName;
-        $('#crowd-inspector-content-name-' + crowd.id).val(newName);
+        $('#crowd-inspector-content--name--' + crowd.id).val(newName);
         element.trigger('change:name', element, element.prop('name'));
+      }
+    });
+
+    //event when the elements attributes change
+    crowd.workspace.graph.on('change:attributes', function (element, newAttributes, opt) {
+      console.log('change:attributes', { element, previosAttributes: element._previousAttributes.attributes, newAttributes, opt });
+
+      if (element.isElement()) {
+        //adjust element size if add or remove element
+        if (element._previousAttributes.attributes.length > newAttributes.length)
+          element.size(element.size().width, element.size().height - 10);
+        else if (element._previousAttributes.attributes.length < newAttributes.length)
+          element.size(element.size().width, element.size().height + 10);
+
+        //get element view
+        var elementView = element.findView(crowd.workspace.paper);
+
+        //redraw the element and their tools with the new type style
+        elementView.render();
+        crowd.workspace.renderElementTools(elementView);
+      }
+    });
+
+    //event when the elements methods change
+    crowd.workspace.graph.on('change:methods', function (element, newMethods, opt) {
+      console.log('change:methods', { element, previosMethods: element._previousAttributes.methods, newMethods, opt });
+
+      if (element.isElement()) {
+        //adjust element size if add or remove element
+        if (element._previousAttributes.methods.length > newMethods.length)
+          element.size(element.size().width, element.size().height - 10);
+        else if (element._previousAttributes.methods.length < newMethods.length)
+          element.size(element.size().width, element.size().height + 10);
+
+        //get element view
+        var elementView = element.findView(crowd.workspace.paper);
+
+        //redraw the element and their tools with the new type style
+        elementView.render();
+        crowd.workspace.renderElementTools(elementView);
       }
     });
 
@@ -563,6 +605,14 @@ var CrowdEditorUml = {
             { label: 'Abstract', value: 'abstract' },
             { label: 'Interface', value: 'interface' },
           ]
+        });
+        crowd.inspector.addAttribute({
+          label: 'Attributes', property: 'attributes', type: 'list',
+          template: { type: 'text', placeholder: 'Attribute' }
+        });
+        crowd.inspector.addAttribute({
+          label: 'Methods', property: 'methods', type: 'list',
+          template: { type: 'text', placeholder: 'Method' }
         });
         break;
     }

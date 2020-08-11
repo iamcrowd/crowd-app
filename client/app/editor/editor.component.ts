@@ -37,7 +37,7 @@ export class EditorComponent implements OnInit {
       conceptualModel: conceptualModelMap[this.conceptualModel] ? conceptualModelMap[this.conceptualModel] : CrowdEditorUml,
       palette: {
         grid: {
-          size: this.conceptualModel == 'uml' ? 110 : 90,
+          size: this.conceptualModel == 'uml' ? 100 : 90,
           columns: 2
         }
       }

@@ -266,7 +266,9 @@ CrowdEditor.prototype.initTools = function () {
         <div class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"> \
           <div class="btn-group dropdown-item" role="group"> \
             <button class="btn" id="crowd-tools-export-eer-schema-' + self.id + '">EER Schema</button> \
-            <button class="btn" id="crowd-tools-export-check-eer-schema-' + self.id + '"><i class="fa fa-eye"></i></button> \
+            <button class="btn" id="crowd-tools-export-check-eer-schema-' + self.id + '" \
+            data-toggle="tooltip" data-original-title="Show schema" data-placement="right"> \
+            <i class="fa fa-eye"></i></button> \
           </div> \
           <button class="dropdown-item" id="crowd-tools-export-uml-schema-' + self.id + '" disabled>UML Schema</button> \
           <button class="dropdown-item" id="crowd-tools-export-orm-schema-' + self.id + '" disabled>ORM Schema</button> \
@@ -608,11 +610,34 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
     ];
   }
 
+  //design of resize tools icons with markup (svg in json notation)
+  self.workspace.tools.elements.resizeMarkup = function (config) {
+    return [
+      //draw a little rectangle
+      {
+        tagName: 'rect',
+        selector: 'button',
+        className: '',
+        style: {
+          opacity: '0.7'
+        },
+        attributes: {
+          width: 8,
+          height: 8,
+          x: 0,
+          y: 0,
+          fill: config.background ? config.background : 'black',
+          cursor: config.cursor ? config.cursor : 'nw-resize'
+        }
+      },
+    ];
+  }
+
   //add remove tool to workspace tools
   self.workspace.tools.elements.removeTool = new joint.elementTools.Remove({
     focusOpacity: 1,
     rotate: true,
-    offset: { x: -20, y: -10 },
+    offset: { x: -25, y: -15 },
     markup: self.workspace.tools.elements.markup({ icon: 'clear', tooltip: { title: 'Click to remove the object', placement: "left" } })
   });
 
@@ -623,7 +648,7 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
       rotate: true,
       x: config.x != null ? config.x : '100%',
       y: config.y != null ? config.y : null,
-      offset: config.offset != null ? config.offset : { x: 20, y: -10 },
+      offset: config.offset != null ? config.offset : { x: 25, y: -15 },
       action: function (evt, elementView, buttonView) {
         console.log('linkTool', this, { evt, elementView, buttonView });
         //create the link
@@ -672,7 +697,7 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
     rotate: true,
     x: '100%',
     y: '100%',
-    offset: { x: 20, y: 30 },
+    offset: { x: 25, y: 35 },
     action: function (evt, elementView, buttonView) {
       console.log('cloneTool', this, { evt, elementView, buttonView });
       //clone the element
@@ -703,7 +728,7 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
     focusOpacity: 1,
     rotate: true,
     y: '100%',
-    offset: { x: -20, y: 30 },
+    offset: { x: -25, y: 35 },
     action: function (evt, elementView, buttonView) {
       console.log('removeLinksTool', this, { evt, elementView, buttonView });
 
@@ -726,9 +751,9 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
       rotate: true,
       x: config.x != null ? config.x : '50%',
       y: config.y != null ? config.y : null,
-      offset: config.offset != null ? config.offset : { x: -20, y: -10 },
+      offset: config.offset != null ? config.offset : { x: -25, y: -15 },
       action: function (evt, elementView, buttonView) {
-        console.log('linkAttributeTool', this, { evt, elementView, buttonView });
+        console.log('linkTool', this, { evt, elementView, buttonView });
         //create the new element
         var newElement = config.elementType.clone();
 
@@ -781,6 +806,76 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
     });
   }
 
+  //function for generate resize tools
+  self.workspace.tools.elements.resizeTool = function (config) {
+    return new joint.elementTools.Button({
+      focusOpacity: 1,
+      rotate: false,
+      x: config.x != null ? config.x : null,
+      y: config.y != null ? config.y : null,
+      offset: config.offset != null ? config.offset : { x: -14, y: -14 },
+      action: function (evt, elementView, buttonView) {
+        console.log('resizeTool', this, { evt, elementView, buttonView });
+
+        config.minSize = config.minSize ? config.minSize : { width: 20, height: 20 };
+        config.direction = config.direction ? config.direction : 'top-left';
+
+        $('#crowd-workspace-' + self.id).on('mousemove.resizing', function (evt) {
+          // console.log('resizing', evt);
+
+          //create object with the distances between buttonView and the cursor position
+          var addSize = { height: 0, width: 0 };
+          //calculates the added width and height depends on the resizing direction
+          switch (config.vdirection) {
+            case 'top':
+              addSize.height = buttonView.$el.position().top - evt.pageY;
+              break;
+            case 'bottom':
+              addSize.height = evt.pageY - buttonView.$el.position().top;
+              break;
+          }
+          switch (config.hdirection) {
+            case 'left':
+              addSize.width = buttonView.$el.position().left - evt.pageX;
+              break;
+            case 'right':
+              addSize.width = evt.pageX - buttonView.$el.position().left;
+              break;
+          }
+
+          // console.log({ pageY: evt.pageY, pageX: evt.pageX }, buttonView.$el.position(), { addSize });
+
+          //adjust the add size for the paper actual zoom (scale)
+          addSize.width = addSize.width / self.workspace.paper.scale().sx;
+          addSize.height = addSize.height / self.workspace.paper.scale().sy;
+
+          //create object for the newSize and check if new width and height are bigger than min sizes individually
+          var newSize = { width: elementView.model.size().width, height: elementView.model.size().height };
+          newSize.width = newSize.width + addSize.width > config.minSize.width ? newSize.width + addSize.width : newSize.width;
+          newSize.height = newSize.height + addSize.height > config.minSize.height ? newSize.height + addSize.height : newSize.height;
+
+          //restrict new size to a multiple of grid size to simulate snap to grid effect
+          if (config.snapGrid || config.snapGrid == null) {
+            var gridSize = self.workspace.paper._gridSettings[0].width / self.workspace.paper.scale().sx;
+            newSize.width = Math.round(newSize.width / gridSize) * gridSize;
+            newSize.height = Math.round(newSize.height / gridSize) * gridSize;
+          }
+
+          //resize the view to the new size calculated in the correpondiente direction of resizing
+          elementView.model.resize(newSize.width, newSize.height, { direction: config.direction });
+        });
+
+        $('#crowd-workspace-' + self.id).on('mouseup.finishResizing', function (evt) {
+          // console.log('finishResizing', evt);
+
+          $('#crowd-workspace-' + self.id).off('mousemove.resizing');
+          $('#crowd-workspace-' + self.id).off('mouseup.finishResizing');
+        });
+      },
+      markup: config.markup != null ? config.markup : self.workspace.tools.elements.resizeMarkup({})
+    });
+  }
+
   //initialize elements tools view object
   self.workspace.tools.elements.elementsToolsView = new Object();
 
@@ -789,7 +884,46 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
     self.workspace.tools.elements.removeTool,
     self.workspace.tools.elements.cloneTool,
     self.workspace.tools.elements.removeLinksTool,
-    self.workspace.tools.elements.boundaryTool
+    self.workspace.tools.elements.boundaryTool,
+    self.workspace.tools.elements.resizeTool({
+      direction: 'top-left', vdirection: 'top', hdirection: 'left',
+      markup: self.workspace.tools.elements.resizeMarkup({ cursor: 'nw-resize' })
+    }),
+    self.workspace.tools.elements.resizeTool({
+      x: '100%', offset: { x: 6, y: -14 },
+      direction: 'top-right', vdirection: 'top', hdirection: 'right',
+      markup: self.workspace.tools.elements.resizeMarkup({ cursor: 'ne-resize' })
+    }),
+    self.workspace.tools.elements.resizeTool({
+      y: '100%', offset: { x: -14, y: 6 },
+      direction: 'bottom-left', vdirection: 'bottom', hdirection: 'left',
+      markup: self.workspace.tools.elements.resizeMarkup({ cursor: 'sw-resize' })
+    }),
+    self.workspace.tools.elements.resizeTool({
+      x: '100%', y: '100%', offset: { x: 6, y: 6 },
+      direction: 'bottom-right', vdirection: 'bottom', hdirection: 'right',
+      markup: self.workspace.tools.elements.resizeMarkup({ cursor: 'se-resize' })
+    }),
+    self.workspace.tools.elements.resizeTool({
+      x: '50%', offset: { x: -4, y: -14 },
+      direction: 'top', vdirection: 'top', hdirection: null,
+      markup: self.workspace.tools.elements.resizeMarkup({ cursor: 'ns-resize' })
+    }),
+    self.workspace.tools.elements.resizeTool({
+      x: '50%', y: '100%', offset: { x: -4, y: 6 },
+      direction: 'bottom', vdirection: 'bottom', hdirection: null,
+      markup: self.workspace.tools.elements.resizeMarkup({ cursor: 'ns-resize' })
+    }),
+    self.workspace.tools.elements.resizeTool({
+      y: '50%', offset: { x: -14, y: -4 },
+      direction: 'left', vdirection: null, hdirection: 'left',
+      markup: self.workspace.tools.elements.resizeMarkup({ cursor: 'ew-resize' })
+    }),
+    self.workspace.tools.elements.resizeTool({
+      x: '100%', y: '50%', offset: { x: 6, y: -4 },
+      direction: 'right', vdirection: null, hdirection: 'right',
+      markup: self.workspace.tools.elements.resizeMarkup({ cursor: 'ew-resize' })
+    }),
   ];
 
   //create tools view for basic elements
@@ -865,66 +999,136 @@ CrowdEditor.prototype.initInspector = function () {
     switch (attribute.type) {
       case 'boolean':
         dom = $('<span class="row"> \
-          <div class="form-check"> \
-            <input class="form-check-input" type="checkbox" value="" id="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '"> \
-            <label class="form-check-label" for="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '">' + attribute.label + '</label> \
+          <div class="col"> \
+            <div class="form-check"> \
+              <input class="form-check-input" type="checkbox" value="" id="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '"> \
+              <label class="form-check-label" for="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '">' + attribute.label + '</label> \
+            </div> \
           </div> \
         </span>');
         break;
       case 'multiple':
         dom = $('<span class="row"> \
-          <div class="form-group"> \
-            <label>' + attribute.label + '</label><br> \
+          <div class="col"> \
+            <div class="form-group"> \
+              ' + (attribute.label ? '<label>' + attribute.label + '</label><br>' : '') + '\
+            </div> \
           </div> \
         </span>');
         attribute.values.forEach(function (value) {
           $(dom).find('.form-group').append(
             '<div class="form-check form-check-inline"> \
-              <input class="form-check-input" type="radio" name="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '" \
-              id="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + value.value + '-' + self.id + '" value="' + value.value + '"> \
-              <label class="form-check-label" for="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + value.value + '-' + self.id + '">' + value.label + '</label> \
+              <input class="form-check-input" type="radio" name="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '" \
+              id="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + value.value + '-' + self.id + '" value="' + value.value + '"> \
+              <label class="form-check-label" for="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + value.value + '-' + self.id + '">' + value.label + '</label> \
             </div>'
           );
         });
         break;
       case 'text': default:
         dom = $('<span class="row"> \
-          <div class="form-group"> \
-            <label>' + attribute.label + '</label> \
-            <' + (attribute.input == 'textarea' ? 'textarea' : 'input type="text"') + ' class="form-control" id="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '" /> \
+          <div class="col"> \
+            <div class="form-group"> \
+              ' + (attribute.label ? '<label>' + attribute.label + '</label>' : '') + '\
+              <' + (attribute.input == 'textarea' ? 'textarea' : 'input type="text"') + ' placeholder="' + (attribute.placeholder ? attribute.placeholder : attribute.label) + '" class="form-control" id="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '" /> \
+            </div> \
           </div> \
         </span>');
         break;
+      case 'list':
+        dom = $('<span class="row"> \
+          <div class="form-group"> \
+            ' + (attribute.label ? '<label>' + attribute.label + '</label>' : '') + '\
+            <div class="form-group" id="crowd-inspector-content-elements-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '"></div> \
+            <div class="text-center"> \
+              <button class="btn btn-primary" id="crowd-inspector-content-add-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '" \
+              data-toggle="tooltip" data-original-title="Add element" data-placement="top"><i class="fa fa-fw fa-plus"></i></button> \
+            </div> \
+          </div> \
+        </span>');
+        break;
+    }
+
+    if (attribute.canRemove) {
+      $(dom).append(
+        '<div class="col-3"> \
+          <button class="btn btn-danger"  id="crowd-inspector-content-remove-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '" \
+          data-toggle="tooltip" data-original-title="Remove element" data-placement="top"><i class="fa fa-fw fa-minus"></i></button> \
+        </div>'
+      );
     }
     return dom;
   }
 
   //append an specified attribute to the content dom element
   self.inspector.addAttribute = function (attribute) {
+    //check if attribute is inside a container else assign a empty string for selector usage
+    attribute.container = attribute.container != null ? attribute.container : '';
+    attribute.index = attribute.index != null ? attribute.index : '';
+
     //append dom element to the inspector content
-    $('#crowd-inspector-' + self.id + ' .crowd-inspector-content').append(self.inspector._makeAttributeDom(attribute));
+    if (attribute.container != '')
+      $('#crowd-inspector-content-elements-' + formatSelector(attribute.container) + '-' + self.id).append(self.inspector._makeAttributeDom(attribute));
+    else
+      $('#crowd-inspector-' + self.id + ' .crowd-inspector-content').append(self.inspector._makeAttributeDom(attribute));
 
     //get the property value and map it in case that a map is defined
-    var propertyValue = attribute.map != null
-      ? Object.keys(attribute.map).find(key => attribute.map[key] == self.inspector.model.prop(attribute.property))
-      : self.inspector.model.prop(attribute.property);
+    var propertyValue = attribute.map
+      ? Object.keys(attribute.map).find(key =>
+        attribute.map[key] == (attribute.index !== ''
+          ? self.inspector.model.prop(attribute.property)[attribute.index]
+          : self.inspector.model.prop(attribute.property)))
+      : (attribute.index !== ''
+        ? self.inspector.model.prop(attribute.property)[attribute.index]
+        : self.inspector.model.prop(attribute.property));
 
     //set the dom input value with the property value according to the attribute type
     switch (attribute.type) {
       case 'boolean':
-        $('#crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id).prop("checked", propertyValue == 'true');
+        $('#crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id).prop("checked", propertyValue == 'true');
         break;
       case 'multiple':
-        $('#crowd-inspector-content-' + formatSelector(attribute.property) + '-' + propertyValue + '-' + self.id).prop("checked", true);
+        $('#crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + propertyValue + '-' + self.id).prop("checked", true);
         break;
       case 'text': default:
-        $('#crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id).val(propertyValue);
+        $('#crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id).val(propertyValue);
+        break;
+      case 'list':
+        for (var i = 0; i < propertyValue.length; i++) {
+          self.inspector.addAttribute($.extend({}, attribute.template, {
+            container: (attribute.container + '-' + attribute.property + '-' + attribute.index),
+            property: attribute.property,
+            index: i,
+            canRemove: true
+          }));
+        }
+        $('#crowd-inspector-content-add-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id).on('click', function () {
+          self.inspector.addAttribute($.extend({}, attribute.template, {
+            container: (attribute.container + '-' + attribute.property + '-' + attribute.index),
+            property: attribute.property,
+            index: self.inspector.model.prop(attribute.property).length,
+            canRemove: true
+          }));
+          self.inspector.model.prop(attribute.property + '/' + self.inspector.model.prop(attribute.property).length, '');
+          $(".tooltip").tooltip('hide');
+        });
         break;
     }
 
+    if (attribute.canRemove) {
+      $('#crowd-inspector-content-remove-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id).on('click', function () {
+        var newValue = self.inspector.model.prop(attribute.property).slice();
+        newValue.splice(attribute.index, 1);
+        self.inspector.model.prop(attribute.property, newValue);
+        console.log('remove', attribute.property, newValue);
+        self.inspector.loadContent();
+        $(".tooltip").tooltip('hide');
+      });
+    }
+
     //event when the input is modified that change the model property value by the user input
-    $('#crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id +
-      ',[name="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '"]').on('keyup change', function () {
+    $('#crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id +
+      ',[name="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '"]').on('keyup change', function () {
         var newPropertyValue;
 
         //get the dom input value according to the attribute type
@@ -934,14 +1138,12 @@ CrowdEditor.prototype.initInspector = function () {
             newPropertyValue = $(this).prop('checked');
             break;
           case 'multiple':
-            newPropertyValue = $('[name="crowd-inspector-content-' + formatSelector(attribute.property) + '-' + self.id + '"]:checked').val();
+            newPropertyValue = $('[name="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '"]:checked').val();
             break;
           case 'text': default:
             newPropertyValue = $(this).val();
             break;
         }
-
-        console.log(newPropertyValue);
 
         //remap the property value in case that a map is defined
         newPropertyValue = attribute.map != null
@@ -949,8 +1151,10 @@ CrowdEditor.prototype.initInspector = function () {
           : newPropertyValue;
 
         //set the model property value to the new value
-        self.inspector.model.prop(attribute.property, newPropertyValue);
+        self.inspector.model.prop(attribute.property + (attribute.index !== '' ? '/' + attribute.index : ''), newPropertyValue);
       });
+
+    $('[data-toggle="tooltip"]').tooltip({ html: true });
   }
 
   self.inspector.loadContent = function () {
@@ -993,14 +1197,23 @@ CrowdEditor.prototype.initInspector = function () {
     self.inspector.loadContent();
   });
 
-  //event for hide the present information and show the empty message again when the element or link is no more selected
-  self.workspace.paper.on('blank:pointerdown', function () {
+  //function for hide information presented
+  self.inspector.hideInformation = function () {
     //toggle the content off
     self.inspector.toggleContent(false);
     //clear attributes of the actual model
     self.inspector.clearAttributes();
     //clear the model var
     self.inspector.model = null;
+  }
+
+  //events for hide the present information and show the empty message again when the element or link is no more selected
+  self.workspace.paper.on('blank:pointerup blank:pointerdown', function () {
+    self.inspector.hideInformation();
+  });
+
+  self.workspace.graph.on('remove', function () {
+    self.inspector.hideInformation();
   });
 }
 
