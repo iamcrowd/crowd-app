@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ToastComponent } from '../shared/toast/toast.component';
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
 import { User } from '../shared/models/user.model';
 
+declare var iziToast;
 @Component({
   selector: 'app-account',
   templateUrl: './account.component.html',
@@ -15,9 +15,10 @@ export class AccountComponent implements OnInit {
   user: User;
   isLoading = true;
 
-  constructor(public auth: AuthService,
-              public toast: ToastComponent,
-              private userService: UserService) { }
+  constructor(
+    public auth: AuthService,
+    private userService: UserService
+  ) { }
 
   ngOnInit(): void {
     this.getUser();
@@ -34,7 +35,7 @@ export class AccountComponent implements OnInit {
   save(user: User): void {
     this.userService.editUser(user).subscribe(
       res => {
-        this.toast.setMessage('account settings saved!', 'success');
+        iziToast.success({ message: 'Account settings saved.' });
         this.auth.currentUser = user;
         this.auth.isAdmin = user.role === 'admin';
       },

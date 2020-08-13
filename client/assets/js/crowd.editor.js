@@ -279,12 +279,7 @@ CrowdEditor.prototype.initTools = function () {
   //draw a button for each conceptual model and put the name on data attribute
   $.each(self.config.availableConceptualModels, function (conceptualModelName) {
     $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').append(
-      '<div class="btn-group dropdown-item" role="group"> \
-        <button class="btn" data-model="' + conceptualModelName + '" name="crowd-tools-export-schema-' + self.id + '">' + conceptualModelName.toUpperCase() + ' Schema</button> \
-        <button class="btn" data-model="' + conceptualModelName + '" name="crowd-tools-export-check-schema-' + self.id + '" \
-        data-toggle="tooltip" data-original-title="Show schema" data-placement="right"> \
-        <i class="fa fa-eye"></i></button> \
-      </div>'
+      '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-export-check-schema-' + self.id + '">' + conceptualModelName.toUpperCase() + ' Schema</button>'
     );
   })
 
@@ -306,6 +301,7 @@ CrowdEditor.prototype.initTools = function () {
             <button class="btn btn-dark" data-clipboard-target="#crowd-tools-export-check-schema-modal-pre-' + self.id + '"> \
               Copy to Clipboard \
             </button> \
+            <button class="btn btn-dark" data-model="" id="crowd-tools-export-schema-' + self.id + '">Download</button> \
           </div> \
         </div> \
       </div> \
@@ -340,24 +336,11 @@ CrowdEditor.prototype.initTools = function () {
     }
   }
 
-  //event handler when click export schema
-  $('[name="crowd-tools-export-schema-' + self.id + '"]').on('click', function () {
-    var model = $(this).attr('data-model');
-
-    self.tools.exportTo(model, function (schema) {
-      $("<a />", {
-        "download": model + "-schema.json",
-        "href": "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(schema)),
-      }).appendTo("body")
-        .click(function () {
-          $(this).remove()
-        })[0].click();
-    });
-  });
-
   //event handler when click export check schema
   $('[name="crowd-tools-export-check-schema-' + self.id + '"]').on('click', function () {
     var model = $(this).attr('data-model');
+
+    $('#crowd-tools-export-schema-' + self.id).attr('data-model', model);
 
     self.tools.exportTo(model, function (schema) {
       $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html(model.toUpperCase() + ' Schema');
@@ -367,6 +350,21 @@ CrowdEditor.prototype.initTools = function () {
     });
 
     $(".tooltip").tooltip('hide');
+  });
+
+  //event handler when click download exported schema
+  $('#crowd-tools-export-schema-' + self.id).on('click', function () {
+    var model = $(this).attr('data-model');
+
+    self.tools.exportTo(model, function (schema) {
+      $("<a />", {
+        "download": model + "-schema.json",
+        "href": "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(schema, null, 4)),
+      }).appendTo("body")
+        .click(function () {
+          $(this).remove()
+        })[0].click();
+    });
   });
 
   //append dom for change conceptual model tool
@@ -384,10 +382,13 @@ CrowdEditor.prototype.initTools = function () {
   //draw a button for each conceptual model and put the name on data attribute
   $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
     $('[aria-labelledby="crowd-tools-model-dropdown-' + self.id + '"]').append(
-      '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-input-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
+      // '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-input-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
+      '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-advertisement-proceed-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
+      //'<a href="/editor/' + conceptualModelName + '" class="dropdown-item ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '">' + conceptualModelName.toUpperCase() + '</a>'
     );
   })
 
+  // (not in use)
   //append dom for the advertisement modal when try to change conceptual model
   $('body').append(
     '<div id="crowd-tools-model-advertisement-' + self.id + '" class="modal fade"> \
@@ -405,7 +406,7 @@ CrowdEditor.prototype.initTools = function () {
           </div> \
           <div class="modal-footer"> \
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
-            <button id="crowd-tools-model-advertisement-proceed-' + self.id + '" \
+            <button name="crowd-tools-model-advertisement-proceed-' + self.id + '" \
             type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
           </div> \
         </div> \
@@ -413,6 +414,7 @@ CrowdEditor.prototype.initTools = function () {
     </div>'
   );
 
+  // (not in use)
   //event handler when click model change that open advertisement modal
   $('[name=crowd-tools-model-input-' + self.id + "]").on('click', function () {
     $('#crowd-tools-model-advertisement-' + self.id).modal('show');
@@ -421,9 +423,12 @@ CrowdEditor.prototype.initTools = function () {
   });
 
   //event handler when click proceed button in advertisement for model change
-  $('#crowd-tools-model-advertisement-proceed-' + self.id).on('click', function () {
-    console.log("/editor/" + $(this).attr('data-model'));
-    window.location.href = "/editor/" + $(this).attr('data-model');
+  $('[name=crowd-tools-model-advertisement-proceed-' + self.id + "]").on('click', function () {
+    console.log('/editor/' + $(this).attr('data-model'));
+    if (self.config.ngRouter)
+      self.config.ngRouter.navigateByUrl('/editor/' + $(this).attr('data-model'));
+    else
+      window.location.href = '/editor/' + $(this).attr('data-model');
   });
 
   //append dom for clear workspace tool
@@ -1201,7 +1206,7 @@ CrowdEditor.prototype.initInspector = function () {
           : newPropertyValue;
 
         //set the model property value to the new value
-        self.inspector.model.prop(attribute.property + (attribute.index !== '' ? '/' + attribute.index : ''), newPropertyValue);
+        self.inspector.model.prop(attribute.property + (attribute.index !== '' ? '/' + attribute.index : ''), newPropertyValue == "null" ? null : newPropertyValue);
       });
 
     $('[data-toggle="tooltip"]').tooltip({ html: true });
@@ -1326,4 +1331,9 @@ CrowdEditor.prototype.fromJSONSchema = function (schema) {
 
   //call the function to load a json schema for the specific conceptual model
   self.config.conceptualModel.fromJSONSchema(self, schema);
+}
+
+CrowdEditor.prototype.hasChanges = function () {
+  var self = this;
+  return self.workspace.graph.getElements().length > 0;
 }

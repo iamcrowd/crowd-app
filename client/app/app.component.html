@@ -8,41 +8,41 @@
     <div class="collapse navbar-collapse" id="navbar-supported-content">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <a routerLink="/" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
             <i class="fa fa-fw fa-home"></i> Home
           </a>
         </li>
         <li class="nav-item">
-          <a routerLink="/editor/uml" class="nav-link" routerLinkActive="active">
+          <a class="nav-link" routerLink="/editor/uml" [class.active]="isActive('editor')">
             <i class="fa fa-fw fa-th"></i> Editor
           </a>
         </li>
         <li class="nav-item">
-          <a routerLink="/admin" class="nav-link" routerLinkActive="active" *ngIf="auth.loggedIn && auth.isAdmin">
+          <a class="nav-link" routerLink="/admin" routerLinkActive="active" *ngIf="auth.loggedIn && auth.isAdmin">
             <i class="fa fa-fw fa-users"></i> Users
           </a>
         </li>
       </ul>
       <ul class="navbar-nav navbar-right">
         <li class="nav-item">
-          <a [routerLink]="" class="nav-link" *ngIf="!auth.loggedIn" (click)="openRegister()">
+          <a class="nav-link" [routerLink]="" *ngIf="!auth.loggedIn" (click)="openRegister()">
             <i class="fa fa-fw fa-user-plus"></i> Sign Up
           </a>
         </li>
         <li class="nav-item">
-          <a [routerLink]="" class="nav-link" *ngIf="!auth.loggedIn" (click)="openLogin()">
+          <a class="nav-link" [routerLink]="" *ngIf="!auth.loggedIn" (click)="openLogin()">
             <i class="fa fa-fw fa-sign-in"></i> Log In
           </a>
         </li>
         <li class="nav-item">
-          <a routerLink="/account" class="nav-link" routerLinkActive="active" *ngIf="auth.loggedIn">
+          <a class="nav-link" routerLink="/account" routerLinkActive="active" *ngIf="auth.loggedIn">
             <i class="fa fa-fw fa-user"></i> {{auth.currentUser.username}}
           </a>
         </li>
       </ul>
       <ul class="navbar-nav flex-row">
         <li class="nav-item">
-          <a routerLink="/logout" class="nav-link" routerLinkActive="active" *ngIf="auth.loggedIn">
+          <a class="nav-link" routerLink="/logout" routerLinkActive="active" *ngIf="auth.loggedIn">
             <i class="fa fa-fw fa-sign-out"></i> Log Out
           </a>
         </li>

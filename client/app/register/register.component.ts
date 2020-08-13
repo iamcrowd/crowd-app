@@ -3,12 +3,12 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { UserService } from '../services/user.service';
-import { ToastComponent } from '../shared/toast/toast.component';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LoginComponent } from '../login/login.component';
 
+declare var iziToast;
 
 @Component({
   selector: 'app-register',
@@ -39,7 +39,6 @@ export class RegisterComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
-    public toast: ToastComponent,
     private userService: UserService,
     public activeModal: NgbActiveModal,
     private modalService: NgbModal
@@ -69,12 +68,12 @@ export class RegisterComponent implements OnInit {
   register(): void {
     this.userService.register(this.registerForm.value).subscribe(
       res => {
-        this.toast.setMessage('you successfully registered!', 'success');
+        iziToast.success({ message: 'You successfully registered.' });
         // this.router.navigate(['/login']);
         this.modalService.dismissAll();
         this.modalService.open(LoginComponent);
       },
-      error => this.toast.setMessage('email already exists', 'danger')
+      error => iziToast.error({ message: 'Email already exists.' })
     );
   }
 }

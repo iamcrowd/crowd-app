@@ -9,6 +9,7 @@ import { UserService } from './services/user.service';
 import { AuthService } from './services/auth.service';
 import { AuthGuardLogin } from './services/auth-guard-login.service';
 import { AuthGuardAdmin } from './services/auth-guard-admin.service';
+import { LeaveGuardEditor } from './services/leave-guard-editor.service';
 // Components
 import { AppComponent } from './app.component';
 import { AboutComponent } from './about/about.component';
@@ -48,6 +49,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     AuthService,
     AuthGuardLogin,
     AuthGuardAdmin,
+    LeaveGuardEditor,
     UserService
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

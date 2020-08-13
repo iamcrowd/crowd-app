@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { AuthService } from '../services/auth.service';
-import { ToastComponent } from '../shared/toast/toast.component';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -28,7 +27,6 @@ export class LoginComponent implements OnInit {
     private auth: AuthService,
     private formBuilder: FormBuilder,
     private router: Router,
-    public toast: ToastComponent,
     public activeModal: NgbActiveModal
   ) { }
 

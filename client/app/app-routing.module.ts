@@ -13,6 +13,7 @@ import { AccountComponent } from './account/account.component';
 import { AdminComponent } from './admin/admin.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { EditorComponent } from './editor/editor.component';
+import { LeaveGuardEditor } from './services/leave-guard-editor.service';
 
 const routes: Routes = [
   { path: '', component: AboutComponent },
@@ -22,7 +23,7 @@ const routes: Routes = [
   { path: 'account', component: AccountComponent, canActivate: [AuthGuardLogin] },
   { path: 'admin', component: AdminComponent, canActivate: [AuthGuardAdmin] },
   { path: 'notfound', component: NotFoundComponent },
-  { path: 'editor/:conceptualModel', component: EditorComponent },
+  { path: 'editor/:conceptualModel', component: EditorComponent, canDeactivate: [LeaveGuardEditor] },
   { path: '**', redirectTo: '/notfound' },
 ];
 

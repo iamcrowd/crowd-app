@@ -809,6 +809,7 @@ var CrowdEditorEer = {
       'N': '1..*'
     }
 
+    //mapping of inheritances to the requested format of schema
     var inheritanceSubtypeMap = {
       'disjoint': 'disjoint',
       'overlaped': 'overlapping',
@@ -907,7 +908,7 @@ var CrowdEditorEer = {
             ],
             type: 'isa'
           }
-          //search for links connected to the relationship for add entities to relationship link
+          //search for links connected to the inheritance for add entities to inheritance link
           crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
             var connectedEntity = link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'entity'
               ? link.getSourceElement()

@@ -1,3 +1,3 @@
-<div *ngIf="message.body" class="alert" [ngClass]="'alert-' + message.type" role="alert">
+<div (mouseover)="stayShowing()" (mouseout)="stopShowing()" *ngIf="message.body" class="alert" [ngClass]="'alert-' + message.type" role="alert">
   <b>Message:</b>&nbsp;<span [innerHTML]="message.body"></span>
 </div>

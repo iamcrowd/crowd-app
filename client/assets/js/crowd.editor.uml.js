@@ -114,6 +114,10 @@ var CrowdEditorUml = {
         source: null,
         target: null
       },
+      roles: {
+        source: null,
+        target: null
+      },
       direction: 'target',
       uri: 'http://crowd.fi.uncoma.edu.ar#Association',
       attrs: {
@@ -132,6 +136,10 @@ var CrowdEditorUml = {
     crowd.palette.links.aggregation = new joint.shapes.standard.Link({
       type: 'aggregation',
       cardinality: {
+        source: null,
+        target: null
+      },
+      roles: {
         source: null,
         target: null
       },
@@ -157,6 +165,10 @@ var CrowdEditorUml = {
         source: null,
         target: null
       },
+      roles: {
+        source: null,
+        target: null
+      },
       direction: 'target',
       uri: 'http://crowd.fi.uncoma.edu.ar#Composition',
       attrs: {
@@ -179,6 +191,10 @@ var CrowdEditorUml = {
         source: null,
         target: null
       },
+      roles: {
+        source: null,
+        target: null
+      },
       direction: 'target',
       uri: 'http://crowd.fi.uncoma.edu.ar#Generalization',
       attrs: {
@@ -198,6 +214,10 @@ var CrowdEditorUml = {
     crowd.palette.links.implementation = new joint.shapes.standard.Link({
       type: 'implementation',
       cardinality: {
+        source: null,
+        target: null
+      },
+      roles: {
         source: null,
         target: null
       },
@@ -683,6 +703,73 @@ var CrowdEditorUml = {
       classes: [],
       links: []
     };
+
+    //mapping of inheritances to the requested format of schema
+    var linkTypeMap = {
+      'association': 'association',
+      'aggregation': 'association',
+      'composition': 'association',
+      'generalization': 'generalization',
+      'implementation': 'generalization'
+    }
+
+    //iterates each element and add it to the correspondent collection
+    crowd.workspace.graph.getElements().forEach(function (element) {
+      switch (element.attributes.parentType) {
+        case 'class':
+          jsonSchema.classes.push({
+            uri: element.attributes.uri,
+            name: element.attributes.uri,
+            attrs: element.attributes.attributes,
+            methods: element.attributes.methods,
+            position: element.attributes.position,
+            size: element.attributes.size
+          });
+
+          //search for links connected to the class for add them to the links collection
+          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+            var connectedClass;
+            if (link.attributes.direction && link.attributes[link.attributes.direction].id != element.id) {
+              connectedClass = link.attributes.direction == 'source' ? link.getSourceElement() : link.getTargetElement();
+            } else if (!link.attributes.direction && link.attributes.target.id != element.id) {
+              connectedClass = link.getTargetElement();
+            }
+
+            if (connectedClass) {
+              jsonSchema.links.push({
+                uri: link.attributes.uri,
+                name: link.attributes.uri,
+                ...linkTypeMap[link.attributes.type] == 'generalization' ? { parent: connectedClass.attributes.uri } : {},
+                classes: [
+                  element.attributes.uri,
+                  ...linkTypeMap[link.attributes.type] != 'generalization' ? [connectedClass.attributes.uri] : []
+                ],
+                type: linkTypeMap[link.attributes.type],
+                ...linkTypeMap[link.attributes.type] != 'generalization' ? {
+                  multiplicity: [
+                    link.attributes.direction && link.attributes.direction == 'source' ? link.attributes.cardinality.target : link.attributes.cardinality.source,
+                    link.attributes.direction && link.attributes.direction == 'source' ? link.attributes.cardinality.source : link.attributes.cardinality.target
+                  ]
+                } : {},
+                ...linkTypeMap[link.attributes.type] != 'generalization' ? {
+                  roles: [
+                    link.attributes.direction && link.attributes.direction == 'source'
+                      ? (link.attributes.roles.target ? link.attributes.roles.target : element.attributes.uri)
+                      : (link.attributes.roles.source ? link.attributes.roles.source : element.attributes.uri),
+                    link.attributes.direction && link.attributes.direction == 'source'
+                      ? (link.attributes.roles.source ? link.attributes.roles.source : connectedClass.attributes.uri)
+                      : (link.attributes.roles.target ? link.attributes.roles.target : connectedClass.attributes.uri)
+                  ]
+                } : {},
+                ...linkTypeMap[link.attributes.type] != 'association' ? {
+                  constraint: []
+                } : {}
+              });
+            }
+          });
+          break;
+      }
+    });
 
     return jsonSchema;
   },

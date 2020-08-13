@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
-import { ToastComponent } from '../shared/toast/toast.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+
+declare var iziToast;
 
 declare var CrowdEditor;
 declare var CrowdEditorEer;
@@ -14,11 +15,12 @@ declare var CrowdMetamodel;
 })
 export class EditorComponent implements OnInit {
 
+  editor: any;
   conceptualModel: string;
 
   constructor(
     private route: ActivatedRoute,
-    public toast: ToastComponent
+    private router: Router
   ) {
     this.route.params.subscribe(params => {
       this.conceptualModel = params.conceptualModel;
@@ -26,10 +28,12 @@ export class EditorComponent implements OnInit {
     });
   }
 
-  // @HostListener('window:beforeunload', ['$event'])
-  // doSomething($event) {
-  //   $event.returnValue = 'Are you sure you want to change the conceptual model? You lost not saved changes';
-  // }
+  @HostListener('window:beforeunload', ['$event'])
+  doSomething($event) {
+    if (this.hasChanges()) {
+      $event.returnValue = 'Are you sure you want to leave page? You lost not saved changes';
+    }
+  }
 
   ngOnInit(): void {
     const availableConceptualModels = {
@@ -37,17 +41,20 @@ export class EditorComponent implements OnInit {
       eer: CrowdEditorEer
     }
 
-    var editor = new CrowdEditor({
+    this.editor = new CrowdEditor({
       selector: 'editor',
       availableConceptualModels: availableConceptualModels,
       conceptualModel: availableConceptualModels[this.conceptualModel] ? availableConceptualModels[this.conceptualModel] : CrowdEditorUml,
       metamodelApi: new CrowdMetamodel({
         url: 'http://crowd.fi.uncoma.edu.ar:3334/',
         error: (error) => {
-          this.toast.setMessage(
-            'There was an error when trying to call Metamodel API<hr>' + error.responseJSON.error + "<br>" + error.responseJSON.message,
-            'danger'
-          );
+          iziToast.error({
+            title: 'Error',
+            message: 'There was an error when trying to call Metamodel API<br>' +
+              (error.responseJSON != null
+                ? error.responseJSON.error + "<br>" + error.responseJSON.message
+                : error.responseText),
+          });
         }
       }),
       palette: {
@@ -55,8 +62,13 @@ export class EditorComponent implements OnInit {
           size: this.conceptualModel == 'eer' ? 90 : 100,
           columns: 2
         }
-      }
+      },
+      ngRouter: this.router
     });
+  }
+
+  hasChanges() {
+    return this.editor.hasChanges();
   }
 
 }

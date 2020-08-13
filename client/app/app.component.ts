@@ -5,6 +5,7 @@ import { LoginComponent } from './login/login.component';
 import { Router, NavigationEnd } from '@angular/router';
 import { RegisterComponent } from './register/register.component';
 
+declare var iziToast;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -20,6 +21,10 @@ export class AppComponent implements AfterViewChecked {
   ) { }
 
   ngOnInit() {
+    iziToast.settings({
+      position: 'topCenter',
+      maxWidth: '30%'
+    });
   }
 
   ngAfterViewChecked(): void {
@@ -34,4 +39,7 @@ export class AppComponent implements AfterViewChecked {
     this.modalService.open(RegisterComponent);
   }
 
+  isActive(url: string): boolean {
+    return this.router.isActive(url, false);
+  }
 }
