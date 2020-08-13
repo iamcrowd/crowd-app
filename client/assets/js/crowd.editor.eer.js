@@ -785,5 +785,155 @@ var CrowdEditorEer = {
         crowd.inspector.addAttribute({ label: 'Is Total?', property: 'total', type: 'boolean', map: { true: true, false: false } });
         break;
     }
-  }
+  },
+  toJSONSchema: function (crowd) {
+    //define basic structure of eer json according to schema
+    var jsonSchema = {
+      entities: [],
+      attributes: [],
+      relationships: [],
+      links: []
+    };
+
+    //mapping of datatypes to the requested format of schema
+    var datatypeMap = {
+      'varchar': 'String',
+      'char': 'String',
+      'int': 'Integer',
+      'bit': 'Boolean'
+    }
+
+    //mapping of cardinalities to the requested format of schema
+    var cardinalityMap = {
+      '1': '1..1',
+      'N': '1..*'
+    }
+
+    var inheritanceSubtypeMap = {
+      'disjoint': 'disjoint',
+      'overlaped': 'overlapping',
+      'union': 'union'
+    }
+
+    //iterates each element and add it to the correspondent collection
+    crowd.workspace.graph.getElements().forEach(function (element) {
+      switch (element.attributes.parentType) {
+        case 'entity':
+          jsonSchema.entities.push({
+            id: element.cid,
+            uri: element.attributes.uri,
+            name: element.attributes.uri,
+            isWeak: element.attributes.type == 'weakEntity',
+            position: element.attributes.position,
+            size: element.attributes.size,
+          });
+          break;
+        case 'attribute':
+          jsonSchema.attributes.push({
+            id: element.cid,
+            uri: element.attributes.uri,
+            name: element.attributes.uri,
+            type: element.attributes.type,
+            datatype: datatypeMap[element.attributes.datatype],
+            position: element.attributes.position,
+            size: element.attributes.size,
+          });
+          //create the link for this attribute
+          var attributeLink = {
+            id: element.cid,
+            uri: element.attributes.uri,
+            name: element.attributes.uri,
+            entity: null,
+            attribute: element.attributes.uri,
+            type: 'attribute'
+          }
+          //search for links connected to the attribute for add entity to attribute link
+          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+            var connectedEntity = link.attributes.source.id != element.id
+              ? link.getSourceElement()
+              : (link.attributes.target.id != element.id
+                ? link.getTargetElement()
+                : null);
+            if (connectedEntity) {
+              attributeLink.entity = connectedEntity.attributes.uri;
+            }
+          });
+          jsonSchema.links.push(attributeLink);
+          break;
+        case 'relationship':
+          jsonSchema.relationships.push({
+            id: element.cid,
+            uri: element.attributes.uri,
+            name: element.attributes.uri,
+            isWeak: element.attributes.type == 'weakRelationship',
+            position: element.attributes.position,
+            size: element.attributes.size,
+          });
+          //create the link for this relationship
+          var relationshipLink = {
+            id: element.cid,
+            uri: element.attributes.uri,
+            name: element.attributes.uri,
+            entities: [],
+            cardinality: [],
+            roles: [],
+            type: 'relationship'
+          }
+          //search for links connected to the relationship for add entities to relationship link
+          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+            var connectedEntity = link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'entity'
+              ? link.getSourceElement()
+              : (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'entity'
+                ? link.getTargetElement()
+                : null);
+            if (connectedEntity) {
+              relationshipLink.entities.push(connectedEntity.attributes.uri);
+              relationshipLink.roles.push(connectedEntity.attributes.uri);
+              relationshipLink.cardinality.push(cardinalityMap[link.attributes.cardinality]);
+            }
+          });
+          jsonSchema.links.push(relationshipLink);
+          break;
+        case 'inheritance':
+          //create the link for this inheritance
+          var inheritanceLink = {
+            id: element.cid,
+            uri: element.attributes.uri,
+            name: element.attributes.uri,
+            parent: null,
+            entities: [],
+            constraint: [
+              inheritanceSubtypeMap[element.attributes.subtype]
+            ],
+            type: 'isa'
+          }
+          //search for links connected to the relationship for add entities to relationship link
+          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+            var connectedEntity = link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'entity'
+              ? link.getSourceElement()
+              : (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'entity'
+                ? link.getTargetElement()
+                : null);
+            if (connectedEntity) {
+              if (!link.attributes.cardinality) {
+                inheritanceLink.parent = connectedEntity.attributes.uri;
+                if (link.attributes.total) {
+                  inheritanceLink.constraint.push('exclusive');
+                }
+              }
+              else {
+                inheritanceLink.entities.push(connectedEntity.attributes.uri);
+              }
+            }
+          });
+          jsonSchema.links.push(inheritanceLink);
+          break;
+      }
+    });
+
+    return jsonSchema;
+  },
+  fromJSONSchema: function (crowd, schema) {
+    //to do
+  },
 }

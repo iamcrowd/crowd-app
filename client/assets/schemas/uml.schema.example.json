@@ -1,0 +1,102 @@
+{
+  "classes": [
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#Person",
+      "attrs": [],
+      "methods": [],
+      "position": {
+        "x": 422,
+        "y": 275
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#Dog",
+      "attrs": [],
+      "methods": [],
+      "position": {
+        "x": 863,
+        "y": 274
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#Golden",
+      "attrs": [],
+      "methods": [],
+      "position": {
+        "x": 706,
+        "y": 542
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#Pointer",
+      "attrs": [],
+      "methods": [],
+      "position": {
+        "x": 1029,
+        "y": 534
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#Toy",
+      "attrs": [],
+      "methods": [],
+      "position": {
+        "x": 705,
+        "y": 759
+      }
+    }
+  ],
+  "links": [
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#owns",
+      "classes": [
+        "http://crowd.fi.uncoma.edu.ar#Person",
+        "http://crowd.fi.uncoma.edu.ar#Dog"
+      ],
+      "multiplicity": [
+        "1..1",
+        "0..1"
+      ],
+      "roles": [
+        "http://crowd.fi.uncoma.edu.ar#person",
+        "http://crowd.fi.uncoma.edu.ar#dog"
+      ],
+      "type": "association"
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#has",
+      "classes": [
+        "http://crowd.fi.uncoma.edu.ar#Golden",
+        "http://crowd.fi.uncoma.edu.ar#Toy"
+      ],
+      "multiplicity": [
+        "1..1",
+        "1..*"
+      ],
+      "roles": [
+        "http://crowd.fi.uncoma.edu.ar#golden",
+        "http://crowd.fi.uncoma.edu.ar#toy"
+      ],
+      "type": "association"
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#s1",
+      "parent": "http://crowd.fi.uncoma.edu.ar#Dog",
+      "classes": [
+        "http://crowd.fi.uncoma.edu.ar#Golden",
+        "http://crowd.fi.uncoma.edu.ar#Pointer"
+      ],
+      "multiplicity": null,
+      "roles": null,
+      "type": "generalization",
+      "constraint": [
+        "disjoint",
+        "covering"
+      ],
+      "position": {
+        "x": 936,
+        "y": 425
+      }
+    }
+  ]
+}

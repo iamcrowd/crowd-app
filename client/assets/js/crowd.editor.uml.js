@@ -409,7 +409,7 @@ var CrowdEditorUml = {
     });
   },
   initLinksToolsViews: function (crowd) {
-
+    //no extra links tools
   },
   initChangeAttributesEvents: function (crowd) {
     //event when the elements type change (types are: entity, weakEntity, attribute, etc)
@@ -676,5 +676,17 @@ var CrowdEditorUml = {
         crowd.inspector.addAttribute({ label: 'Cardinality Target', property: 'cardinality/target', type: 'text' });
         break;
     }
-  }
+  },
+  toJSONSchema: function (crowd) {
+    //define basic structure of uml json according to schema
+    var jsonSchema = {
+      classes: [],
+      links: []
+    };
+
+    return jsonSchema;
+  },
+  fromJSONSchema: function (crowd, schema) {
+    //to do
+  },
 }

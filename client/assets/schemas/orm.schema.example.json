@@ -1,0 +1,115 @@
+{
+  "entities": [
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#Person",
+      "ref": "",
+      "id": 60,
+      "type": "entity",
+      "position": {
+        "x": 190,
+        "y": 190
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#Dog",
+      "ref": "",
+      "id": 74,
+      "type": "entity",
+      "position": {
+        "x": 565,
+        "y": 175
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#Golden",
+      "ref": "",
+      "id": 188,
+      "type": "entity",
+      "position": {
+        "x": 430,
+        "y": 399.5
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#Pointer",
+      "ref": "",
+      "id": 202,
+      "type": "entity",
+      "position": {
+        "x": 654,
+        "y": 399.5
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#Toy",
+      "ref": "",
+      "id": 220,
+      "type": "entity",
+      "position": {
+        "x": 434,
+        "y": 642.5
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#owns",
+      "inverseReading": false,
+      "entities": [
+        "http://crowd.fi.uncoma.edu.ar#Person",
+        "http://crowd.fi.uncoma.edu.ar#Dog"
+      ],
+      "uniquenessConstraints": [
+        "0..1",
+        "1..1"
+      ],
+      "mandatory": [
+        "http://crowd.fi.uncoma.edu.ar#Dog"
+      ],
+      "type": "binaryFactType",
+      "position": {
+        "x": 380,
+        "y": 195
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#has",
+      "inverseReading": false,
+      "entities": [
+        "http://crowd.fi.uncoma.edu.ar#Golden",
+        "http://crowd.fi.uncoma.edu.ar#Toy"
+      ],
+      "uniquenessConstraints": [
+        "1..*",
+        "1..1"
+      ],
+      "mandatory": [
+        "http://crowd.fi.uncoma.edu.ar#Golden",
+        "http://crowd.fi.uncoma.edu.ar#Toy"
+      ],
+      "type": "binaryFactType",
+      "position": {
+        "x": 460,
+        "y": 515
+      }
+    }
+  ],
+  "attributes": [],
+  "inheritances": [],
+  "connectors": [
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#S1",
+      "parent": "http://crowd.fi.uncoma.edu.ar#Dog",
+      "entities": [
+        "http://crowd.fi.uncoma.edu.ar#Golden",
+        "http://crowd.fi.uncoma.edu.ar#Pointer"
+      ],
+      "type": "subtyping",
+      "subtypingContraint": ["exclusive","union"],
+      "position": {
+        "x": 587.5,
+        "y": 320.5
+      }
+    }
+  ]
+}

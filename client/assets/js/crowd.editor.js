@@ -29,6 +29,9 @@ CrowdEditor.prototype.init = function () {
   if (!self.config.conceptualModel.initInspector) {
     self.config.conceptualModel.initInspector = () => console.warn("CrowdEditor conceptual model inspector is not defined.");
   }
+  if (!self.config.conceptualModel.fromJSONSchema) {
+    self.config.conceptualModel.fromJSONSchema = () => console.warn("CrowdEditor conceptual model fromJSONSchema is not defined.");
+  }
 
   $("#" + this.config.selector).html('');
 
@@ -206,6 +209,9 @@ CrowdEditor.prototype.initPalette = function () {
 CrowdEditor.prototype.initTools = function () {
   var self = this;
 
+  //initialize tools objects
+  self.tools = {};
+
   //append dom row for the tools elements
   $('#crowd-tools-' + self.id).append('<span class="row" id="crowd-tools-row-' + self.id + '"></span>');
 
@@ -223,6 +229,8 @@ CrowdEditor.prototype.initTools = function () {
   $('#crowd-tools-zoom-input-' + self.id).on('input', function () {
     $('#crowd-tools-zoom-label-' + self.id).html(this.value + "%");
     self.workspace.paper.scale(this.value / 100);
+    //fix for Firefox bug
+    setTimeout(() => self.workspace.paper.translate(self.workspace.paper.translate().tx + 1, self.workspace.paper.translate().ty + 1), 1);
   });
 
   //append dom for grid size tool
@@ -263,30 +271,22 @@ CrowdEditor.prototype.initTools = function () {
         <button class="btn btn-primary dropdown-toggle" type="button" id="crowd-tools-export-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
           <i class="fa fa-cloud-download"></i> Export \
         </button> \
-        <div class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"> \
-          <div class="btn-group dropdown-item" role="group"> \
-            <button class="btn" id="crowd-tools-export-eer-schema-' + self.id + '">EER Schema</button> \
-            <button class="btn" id="crowd-tools-export-check-eer-schema-' + self.id + '" \
-            data-toggle="tooltip" data-original-title="Show schema" data-placement="right"> \
-            <i class="fa fa-eye"></i></button> \
-          </div> \
-          <button class="dropdown-item" id="crowd-tools-export-uml-schema-' + self.id + '" disabled>UML Schema</button> \
-          <button class="dropdown-item" id="crowd-tools-export-orm-schema-' + self.id + '" disabled>ORM Schema</button> \
-        </div> \
+        <div class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"></div> \
       </div> \
     </div>'
   );
 
-  //event handler when click export eer schema
-  $('#crowd-tools-export-eer-schema-' + self.id).on('click', function () {
-    $("<a />", {
-      "download": "eer-schema.json",
-      "href": "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(self.toJSONSchema())),
-    }).appendTo("body")
-      .click(function () {
-        $(this).remove()
-      })[0].click()
-  });
+  //draw a button for each conceptual model and put the name on data attribute
+  $.each(self.config.availableConceptualModels, function (conceptualModelName) {
+    $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').append(
+      '<div class="btn-group dropdown-item" role="group"> \
+        <button class="btn" data-model="' + conceptualModelName + '" name="crowd-tools-export-schema-' + self.id + '">' + conceptualModelName.toUpperCase() + ' Schema</button> \
+        <button class="btn" data-model="' + conceptualModelName + '" name="crowd-tools-export-check-schema-' + self.id + '" \
+        data-toggle="tooltip" data-original-title="Show schema" data-placement="right"> \
+        <i class="fa fa-eye"></i></button> \
+      </div>'
+    );
+  })
 
   //append dom for the schemas modal when check export schemas
   $('body').append(
@@ -315,52 +315,102 @@ CrowdEditor.prototype.initTools = function () {
   //init copy clipboard functionality
   new ClipboardJS('.btn');
 
-  //event handler when click export check eer schema
-  $('#crowd-tools-export-check-eer-schema-' + self.id).on('click', function () {
-    $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html("EER Schema");
-    $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(self.toJSONSchema(), null, 4));
-    $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
-    // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
+  //define function to convert the actual model json schema to another model using the metamodelApi
+  //in case the parameter model was equal to the actual model it exports json without using metamodelApi
+  self.tools.exportTo = function (model, callback) {
+    if (self.config.conceptualModel.name == self.config.availableConceptualModels[model].name) {
+      callback(self.config.conceptualModel.toJSONSchema(self));
+    }
+    else {
+      self.config.metamodelApi.request({
+        from: self.config.conceptualModel.name,
+        to: 'meta',
+        data: self.config.conceptualModel.toJSONSchema(self),
+        success: function (response) {
+          self.config.metamodelApi.request({
+            from: 'meta',
+            to: self.config.availableConceptualModels[model].name,
+            data: response,
+            success: function (response) {
+              callback(response);
+            }
+          });
+        }
+      });
+    }
+  }
+
+  //event handler when click export schema
+  $('[name="crowd-tools-export-schema-' + self.id + '"]').on('click', function () {
+    var model = $(this).attr('data-model');
+
+    self.tools.exportTo(model, function (schema) {
+      $("<a />", {
+        "download": model + "-schema.json",
+        "href": "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(schema)),
+      }).appendTo("body")
+        .click(function () {
+          $(this).remove()
+        })[0].click();
+    });
+  });
+
+  //event handler when click export check schema
+  $('[name="crowd-tools-export-check-schema-' + self.id + '"]').on('click', function () {
+    var model = $(this).attr('data-model');
+
+    self.tools.exportTo(model, function (schema) {
+      $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html(model.toUpperCase() + ' Schema');
+      $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(schema, null, 4));
+      $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
+      // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
+    });
+
+    $(".tooltip").tooltip('hide');
   });
 
   //append dom for change conceptual model tool
   $('#crowd-tools-row-' + self.id).append(
     '<div class="form-group"> \
-  <div class="dropdown"> \
-    <button class="btn btn-danger dropdown-toggle" type="button" id="crowd-tools-model-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
-      <i class="fa fa-th"></i> Model \
-    </button> \
-    <div class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"> \
-      <button class="dropdown-item" name="crowd-tools-model-input-' + self.id + '" data-model="uml" ' + (self.config.conceptualModel.name == 'uml' ? 'disabled' : '') + '>UML</button> \
-      <button class="dropdown-item" name="crowd-tools-model-input-' + self.id + '" data-model="eer" ' + (self.config.conceptualModel.name == 'eer' ? 'disabled' : '') + '>EER</button> \
-    </div> \
-  </div> \
-</div>'
+      <div class="dropdown"> \
+        <button class="btn btn-danger dropdown-toggle" type="button" id="crowd-tools-model-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+          <i class="fa fa-th"></i> Model \
+        </button> \
+        <div class="dropdown-menu" aria-labelledby="crowd-tools-model-dropdown-' + self.id + '"></div> \
+      </div> \
+    </div>'
   );
 
-  //append dom for the advertisement modal when try clear workspace
+  //draw a button for each conceptual model and put the name on data attribute
+  $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
+    $('[aria-labelledby="crowd-tools-model-dropdown-' + self.id + '"]').append(
+      '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-input-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
+    );
+  })
+
+  //append dom for the advertisement modal when try to change conceptual model
   $('body').append(
     '<div id="crowd-tools-model-advertisement-' + self.id + '" class="modal fade"> \
-    <div class="modal-dialog"> \
-      <div class="modal-content"> \
-        <div class="modal-header"> \
-          <h5 class="modal-title">Change Conceptual Model</h5> \
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
-            <span aria-hidden="true">&times;</span> \
-          </button> \
-        </div> \
-        <div class="modal-body"> \
-          <p>Are you sure you want to change the conceptual model?</p> \
-          <p><b>You lost not saved changes</b></p> \
-        </div> \
-        <div class="modal-footer"> \
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
-          <button id="crowd-tools-model-advertisement-proceed-' + self.id + '" \
-          type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
+      <div class="modal-dialog"> \
+        <div class="modal-content"> \
+          <div class="modal-header"> \
+            <h5 class="modal-title">Change Conceptual Model</h5> \
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+              <span aria-hidden="true">&times;</span> \
+            </button> \
+          </div> \
+          <div class="modal-body"> \
+            <p>Are you sure you want to change the conceptual model?</p> \
+            <p><b>You lost not saved changes</b></p> \
+          </div> \
+          <div class="modal-footer"> \
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
+            <button id="crowd-tools-model-advertisement-proceed-' + self.id + '" \
+            type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
+          </div> \
         </div> \
       </div> \
-    </div> \
-  </div>'
+    </div>'
   );
 
   //event handler when click model change that open advertisement modal
@@ -379,10 +429,10 @@ CrowdEditor.prototype.initTools = function () {
   //append dom for clear workspace tool
   $('#crowd-tools-row-' + self.id).append(
     '<div class="form-group"> \
-    <button class="btn btn-danger" id="crowd-tools-clear-workspace-input-' + self.id + '" type="button" \
-    data-toggle="tooltip" data-original-title="Clear Diagram" data-placement="bottom" > \
-    <i class="material-icons">delete_forever</i></button> \
-  </div>'
+      <button class="btn btn-danger" id="crowd-tools-clear-workspace-input-' + self.id + '" type="button" \
+      data-toggle="tooltip" data-original-title="Clear Diagram" data-placement="bottom" > \
+      <i class="material-icons">delete_forever</i></button> \
+    </div>'
   );
 
   //append dom for the advertisement modal when try clear workspace
@@ -856,7 +906,7 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
 
           //restrict new size to a multiple of grid size to simulate snap to grid effect
           if (config.snapGrid || config.snapGrid == null) {
-            var gridSize = self.workspace.paper._gridSettings[0].width / self.workspace.paper.scale().sx;
+            var gridSize = self.workspace.paper.options.gridSize / self.workspace.paper.scale().sx;
             newSize.width = Math.round(newSize.width / gridSize) * gridSize;
             newSize.height = Math.round(newSize.height / gridSize) * gridSize;
           }
@@ -1267,149 +1317,13 @@ CrowdEditor.prototype.initMap = function () {
 CrowdEditor.prototype.toJSONSchema = function () {
   var self = this;
 
-  //define basic structure of eer json according to schema
-  var jsonSchema = {
-    entities: [],
-    attributes: [],
-    relationships: [],
-    links: []
-  };
+  //return the json schema generation for the specific conceptual model
+  return self.config.conceptualModel.toJSONSchema ? self.config.conceptualModel.toJSONSchema(self) : {};
+}
 
-  //mapping of datatypes to the requested format of schema
-  var datatypeMap = {
-    'varchar': 'String',
-    'char': 'String',
-    'int': 'Integer',
-    'bit': 'Boolean'
-  }
+CrowdEditor.prototype.fromJSONSchema = function (schema) {
+  var self = this;
 
-  //mapping of cardinalities to the requested format of schema
-  var cardinalityMap = {
-    '1': '1..1',
-    'N': '1..*'
-  }
-
-  var inheritanceSubtypeMap = {
-    'disjoint': 'disjoint',
-    'overlaped': 'overlapping',
-    'union': 'union'
-  }
-
-  //iterates each element and add it to the correspondent collection
-  self.workspace.graph.getElements().forEach(function (element) {
-    switch (element.attributes.parentType) {
-      case 'entity':
-        jsonSchema.entities.push({
-          id: element.cid,
-          uri: element.attributes.uri,
-          name: element.attributes.uri,
-          isWeak: element.attributes.type == 'weakEntity',
-          position: element.attributes.position,
-          size: element.attributes.size,
-        });
-        break;
-      case 'attribute':
-        jsonSchema.attributes.push({
-          id: element.cid,
-          uri: element.attributes.uri,
-          name: element.attributes.uri,
-          type: element.attributes.type,
-          datatype: datatypeMap[element.attributes.datatype],
-          position: element.attributes.position,
-          size: element.attributes.size,
-        });
-        //create the link for this attribute
-        var attributeLink = {
-          id: element.cid,
-          uri: element.attributes.uri,
-          name: element.attributes.uri,
-          entity: null,
-          attribute: element.attributes.uri,
-          type: 'attribute'
-        }
-        //search for links connected to the attribute for add entity to attribute link
-        self.workspace.graph.getConnectedLinks(element).forEach(function (link) {
-          var connectedEntity = link.attributes.source.id != element.id
-            ? link.getSourceElement()
-            : (link.attributes.target.id != element.id
-              ? link.getTargetElement()
-              : null);
-          if (connectedEntity) {
-            attributeLink.entity = connectedEntity.attributes.uri;
-          }
-        });
-        jsonSchema.links.push(attributeLink);
-        break;
-      case 'relationship':
-        jsonSchema.relationships.push({
-          id: element.cid,
-          uri: element.attributes.uri,
-          name: element.attributes.uri,
-          isWeak: element.attributes.type == 'weakRelationship',
-          position: element.attributes.position,
-          size: element.attributes.size,
-        });
-        //create the link for this relationship
-        var relationshipLink = {
-          id: element.cid,
-          uri: element.attributes.uri,
-          name: element.attributes.uri,
-          entities: [],
-          cardinality: [],
-          roles: [],
-          type: 'relationship'
-        }
-        //search for links connected to the relationship for add entities to relationship link
-        self.workspace.graph.getConnectedLinks(element).forEach(function (link) {
-          var connectedEntity = link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'entity'
-            ? link.getSourceElement()
-            : (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'entity'
-              ? link.getTargetElement()
-              : null);
-          if (connectedEntity) {
-            relationshipLink.entities.push(connectedEntity.attributes.uri);
-            relationshipLink.roles.push(connectedEntity.attributes.uri);
-            relationshipLink.cardinality.push(cardinalityMap[link.attributes.cardinality]);
-          }
-        });
-        jsonSchema.links.push(relationshipLink);
-        break;
-      case 'inheritance':
-        //create the link for this inheritance
-        var inheritanceLink = {
-          id: element.cid,
-          uri: element.attributes.uri,
-          name: element.attributes.uri,
-          parent: null,
-          entities: [],
-          constraint: [
-            inheritanceSubtypeMap[element.attributes.subtype]
-          ],
-          type: 'isa'
-        }
-        //search for links connected to the relationship for add entities to relationship link
-        self.workspace.graph.getConnectedLinks(element).forEach(function (link) {
-          var connectedEntity = link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'entity'
-            ? link.getSourceElement()
-            : (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'entity'
-              ? link.getTargetElement()
-              : null);
-          if (connectedEntity) {
-            if (!link.attributes.cardinality) {
-              inheritanceLink.parent = connectedEntity.attributes.uri;
-              if (link.attributes.total) {
-                inheritanceLink.constraint.push('exclusive');
-              }
-            }
-            else {
-              inheritanceLink.entities.push(connectedEntity.attributes.uri);
-            }
-          }
-        });
-        jsonSchema.links.push(inheritanceLink);
-        break;
-    }
-  });
-
-  return jsonSchema;
+  //call the function to load a json schema for the specific conceptual model
+  self.config.conceptualModel.fromJSONSchema(self, schema);
 }

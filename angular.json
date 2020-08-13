@@ -49,7 +49,8 @@
               "client/assets/js/utils.js",
               "client/assets/js/crowd.editor.js",
               "client/assets/js/crowd.editor.eer.js",
-              "client/assets/js/crowd.editor.uml.js"
+              "client/assets/js/crowd.editor.uml.js",
+              "client/assets/js/crowd.metamodel.js"
             ]
           },
           "configurations": {
@@ -129,7 +130,8 @@
               "client/assets/js/utils.js",
               "client/assets/js/crowd.editor.js",
               "client/assets/js/crowd.editor.eer.js",
-              "client/assets/js/crowd.editor.uml.js"
+              "client/assets/js/crowd.editor.uml.js",
+              "client/assets/js/crowd.metamodel.js"
             ],
             "assets": [
               "client/assets/favicon.ico",
