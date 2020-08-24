@@ -1,5 +1,6 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 declare var iziToast;
 
@@ -38,7 +39,9 @@ export class EditorComponent implements OnInit {
   ngOnInit(): void {
     const availableConceptualModels = {
       uml: CrowdEditorUml,
-      eer: CrowdEditorEer
+      eer: CrowdEditorEer,
+      orm: {name: 'orm'},
+      meta: {name: 'meta'}
     }
 
     this.editor = new CrowdEditor({
@@ -46,7 +49,7 @@ export class EditorComponent implements OnInit {
       availableConceptualModels: availableConceptualModels,
       conceptualModel: availableConceptualModels[this.conceptualModel] ? availableConceptualModels[this.conceptualModel] : CrowdEditorUml,
       metamodelApi: new CrowdMetamodel({
-        url: 'http://crowd.fi.uncoma.edu.ar:3334/',
+        url: environment.metamodelUrl,
         error: (error) => {
           iziToast.error({
             title: 'Error',

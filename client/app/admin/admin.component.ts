@@ -32,13 +32,31 @@ export class AdminComponent implements OnInit {
   }
 
   deleteUser(user: User): void {
-    if (window.confirm('Are you sure you want to delete ' + user.username + '?')) {
-      this.userService.deleteUser(user).subscribe(
-        data => iziToast.success({ message: 'User deleted successfully.' }),
-        error => console.log(error),
-        () => this.getUsers()
-      );
-    }
+    var self = this;
+    iziToast.question({
+      timeout: false,
+      close: false,
+      overlay: true,
+      displayMode: 'replace',
+      zindex: 999,
+      color: 'red',
+      icon: 'fa fa-trash',
+      message: 'Are you sure you want to delete <b>' + user.username + '</b>?',
+      position: 'topCenter',
+      buttons: [
+        ['<button>Cancel</button>', function (instance, toast) {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+        }, true],
+        ['<button><b>Proceed</b></button>', function (instance, toast) {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          self.userService.deleteUser(user).subscribe(
+            data => iziToast.success({ message: 'User deleted successfully.' }),
+            error => console.log(error),
+            () => self.getUsers()
+          );
+        }]
+      ]
+    });
   }
 
 }

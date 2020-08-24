@@ -39,6 +39,31 @@ export class AppComponent implements AfterViewChecked {
     this.modalService.open(RegisterComponent);
   }
 
+  logout() {
+    var self = this;
+    iziToast.question({
+      timeout: false,
+      close: false,
+      overlay: true,
+      displayMode: 'replace',
+      zindex: 999,
+      theme: 'dark',
+      icon: 'fa fa-user',
+      color: 'grey',
+      message: 'Are you sure you want to logout?',
+      position: 'topCenter',
+      buttons: [
+        ['<button>Cancel</button>', function (instance, toast) {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+        }, true],
+        ['<button><b>Proceed</b></button>', function (instance, toast) {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          self.auth.logout();
+        }]
+      ]
+    });
+  }
+
   isActive(url: string): boolean {
     return this.router.isActive(url, false);
   }

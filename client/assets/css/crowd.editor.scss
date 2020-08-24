@@ -12,11 +12,14 @@ $alt-accent: #262a2e;
 }
 
 .crowd-palette {
-  display: flex;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 200px;
+  height: inherit !important;
   background-color: $accent;
   border-top: 0.1px solid black;
   border-right: 0.1px solid black;
-  height: 100% !important;
   padding: 0;
   margin: 0;
   overflow-y: auto;
@@ -24,29 +27,33 @@ $alt-accent: #262a2e;
 }
 
 .crowd-container-middle {
-  display: grid;
-  width: 1px;
-  flex: 1;
-  grid-template-rows: 50px;
-
+  position: absolute;
+  top: 0px;
+  left: 200px;
+  right: 200px;
+  height: inherit !important;
   display: flex;
-  flex-flow: column;
+  flex-direction: column;
 }
 
 .crowd-container-side {
-  display: grid;
+  position: absolute;
+  top: 0px;
+  right: 0px;
   width: 200px;
+  height: inherit !important;
+  // display: flex;
   grid-template-rows: auto 200px;
 }
 
 .crowd-tools {
-  display: table-row;
+  // display: table-row;
+  // flex: 0 0 auto;
   background-color: $alt-accent;
   border-top: 0.1px solid black;
   border-bottom: 0.1px solid black;
   width: 100%;
   user-select: none;
-  flex: 1 1 auto;
 }
 
 .crowd-tools .row {
@@ -81,16 +88,37 @@ $alt-accent: #262a2e;
 }
 
 .crowd-workspace {
-  display: table-row;
+  // display: table-row;
+  // flex: 1 1 auto;
   background-color: rgba(246, 246, 246, 1);
   width: 100%;
-  cursor: grab;
+  height: 100%;
   user-select: none;
-  flex: 1 1 auto;
+  overflow: scroll;
+  // z-index: 1; //fix tools dropdown menu bug
 }
 
 .crowd-workspace:active {
   cursor: grabbing;
+}
+
+.crowd-workspace-scrollable {
+  position: relative;
+  width: 4000px;
+  height: 4000px;
+  background-color: rgba(197,197,197,1.0);
+  cursor: grab;
+}
+
+.crowd-workspace-paper {
+  position: absolute;
+  top: 1500px;
+  left: 1500px;
+  width: 1000px;
+  height: 1000px;
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+  // transform: translate(-50%, -50%); //this bug dropdown menu and jointjs vectorizer in firefox
+  // z-index: 1; //fix tools dropdown menu bug
 }
 
 .crowd-workspace-tools-icon {
@@ -171,6 +199,36 @@ $alt-accent: #262a2e;
   bottom: 0px;
   cursor: grab;
   user-select: none;
+}
+
+.crowd-map-scrollable {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  background-color: rgba(197,197,197,1.0);
+  // cursor: grab;
+  overflow: hidden;
+}
+
+.crowd-map-paper {
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  width: 100px;
+  height: 100px;
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.75);
+  // transform: translate(-50%, -50%); //this bug dropdown menu and jointjs vectorizer in firefox
+  // z-index: 1; //fix tools dropdown menu bug
+}
+
+.crowd-map-camera {
+  position: absolute;
+  border: 1px black solid;
+  background: rgba(0, 0, 0, 0);
+  top: 75px;
+  left: 75px;
+  width: 50px;
+  height: 50px;
 }
 
 .crowd-flypaper {

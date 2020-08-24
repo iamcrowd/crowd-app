@@ -564,7 +564,7 @@ var CrowdEditorUml = {
               }
             },
             position: {
-              distance: 25,
+              distance: 15,
               offset: 20
             }
           },
@@ -575,7 +575,7 @@ var CrowdEditorUml = {
               }
             },
             position: {
-              distance: -25,
+              distance: -15,
               offset: 20
             }
           }

@@ -21,6 +21,20 @@ pre {
   color: wheat !important;
 }
 
+//break text on iziToasts
+.iziToast > .iziToast-body .iziToast-texts {
+  word-break: break-word;
+}
+
+//adjust buttons to right on iziToasts
+.iziToast-buttons {
+  float: right !important;
+}
+
+// .navbar {
+//   z-index: 2;  //fix crowd tools dropdown menu bug
+// }
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -45,7 +59,7 @@ input:-webkit-autofill {
 /* custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
-  height: 1px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {

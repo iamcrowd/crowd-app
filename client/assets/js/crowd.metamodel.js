@@ -21,6 +21,7 @@ CrowdMetamodel.prototype.request = function (req) {
     error: function (error) {
       console.log('MetamodelAPI: error', error);
       self.config.error(error);
+      req.error(error);
     }
   });
 }

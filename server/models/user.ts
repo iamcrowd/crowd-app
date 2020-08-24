@@ -29,10 +29,11 @@ userSchema.methods.comparePassword = function(candidatePassword, callback): void
   });
 };
 
-// Omit the password when returning a user
+// Omit the password and __v when returning a user
 userSchema.set('toJSON', {
   transform: (doc, ret, options) => {
     delete ret.password;
+    delete ret.__v;
     return ret;
   }
 });

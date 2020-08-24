@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  production: true,
+  metamodelUrl: 'http://crowd.fi.uncoma.edu.ar:3334/'
 };

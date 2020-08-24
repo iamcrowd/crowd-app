@@ -15,28 +15,28 @@ CrowdEditor.prototype.init = function () {
     self.config.conceptualModel = {}
   }
   if (!self.config.conceptualModel.initPalette) {
-    self.config.conceptualModel.initPalette = () => console.warn("CrowdEditor conceptual model palette is not defined.");
+    self.config.conceptualModel.initPalette = function () { console.warn("CrowdEditor conceptual model palette is not defined."); }
   }
   if (!self.config.conceptualModel.initElementsToolsViews) {
-    self.config.conceptualModel.initElementsToolsViews = () => console.warn("CrowdEditor conceptual model elements tools views are not defined.");
+    self.config.conceptualModel.initElementsToolsViews = function () { console.warn("CrowdEditor conceptual model elements tools views are not defined."); }
   }
   if (!self.config.conceptualModel.initLinksToolsViews) {
-    self.config.conceptualModel.initLinksToolsViews = () => console.warn("CrowdEditor conceptual model links tools views are not defined.");
+    self.config.conceptualModel.initLinksToolsViews = function () { console.warn("CrowdEditor conceptual model links tools views are not defined."); }
   }
   if (!self.config.conceptualModel.initChangeAttributesEvents) {
-    self.config.conceptualModel.initChangeAttributesEvents = () => console.warn("CrowdEditor conceptual model change attributes events are not defined.");
+    self.config.conceptualModel.initChangeAttributesEvents = function () { console.warn("CrowdEditor conceptual model change attributes events are not defined."); }
   }
   if (!self.config.conceptualModel.initInspector) {
-    self.config.conceptualModel.initInspector = () => console.warn("CrowdEditor conceptual model inspector is not defined.");
+    self.config.conceptualModel.initInspector = function () { console.warn("CrowdEditor conceptual model inspector is not defined."); }
   }
   if (!self.config.conceptualModel.fromJSONSchema) {
-    self.config.conceptualModel.fromJSONSchema = () => console.warn("CrowdEditor conceptual model fromJSONSchema is not defined.");
+    self.config.conceptualModel.fromJSONSchema = function () { console.warn("CrowdEditor conceptual model fromJSONSchema is not defined."); }
   }
 
   $("#" + this.config.selector).html('');
 
   //append dom element that contains all the editor parts
-  $('#' + self.config.selector).append('<div class="crowd-container row" id="crowd-container-' + self.id + '"></div>');
+  $('#' + self.config.selector).append('<div class="crowd-container" id="crowd-container-' + self.id + '"></div>');
 
   //append dom element for palette
   $('#crowd-container-' + self.id).append('<div class="crowd-palette" id="crowd-palette-' + self.id + '"></div>');
@@ -64,6 +64,10 @@ CrowdEditor.prototype.init = function () {
   self.initWorkspace();
   self.initInspector();
   self.initMap();
+
+  //fit and center the paper for first time
+  self.workspace.fitPaper();
+  self.workspace.centerScroll();
 }
 
 CrowdEditor.prototype.initPalette = function () {
@@ -71,6 +75,7 @@ CrowdEditor.prototype.initPalette = function () {
 
   //set palette width with config values
   $('#crowd-palette-' + self.id).css('width', self.config.palette.grid.size * self.config.palette.grid.columns + 1);
+  $('#crowd-container-middle-' + self.id).css('left', self.config.palette.grid.size * self.config.palette.grid.columns);
 
   //initialize palette objects
   self.palette = new Object();
@@ -157,6 +162,7 @@ CrowdEditor.prototype.initPalette = function () {
     var flyid = uuidv4();
 
     $('body').append('<div class="crowd-flypaper" id="crowd-flypaper-' + flyid + '"></div>');
+
     var flyGraph = new joint.dia.Graph;
     var flyPaper = new joint.dia.Paper({
       el: $('#crowd-flypaper-' + flyid),
@@ -167,9 +173,11 @@ CrowdEditor.prototype.initPalette = function () {
     var offset = {
       x: flyShape.attributes.size.width / 2 * self.workspace.paper.scale().sx,
       y: flyShape.attributes.size.height / 2 * self.workspace.paper.scale().sy
+      // x: flyShape.attributes.size.width / 2 * self.workspace.zoom,
+      // y: flyShape.attributes.size.height / 2 * self.workspace.zoom
     };
 
-    flyPaper.scale(self.workspace.paper.scale().sx);
+    flyPaper.scale(self.workspace.zoom);
     flyShape.position(0, 0);
     flyGraph.addCell(flyShape);
 
@@ -192,12 +200,50 @@ CrowdEditor.prototype.initPalette = function () {
       var origin = self.palette.paper.$el.offset();
 
       //dropped over workspaces and not over palette
-      if ((x > target.left && x < target.left + self.workspace.paper.$el.width() && y > target.top && y < target.top + self.workspace.paper.$el.height()) &&
-        !(x > origin.left && x < origin.left + self.palette.paper.$el.width() && y > origin.top && y < origin.top + self.palette.paper.$el.height())) {
+      // if ((x > target.left && x < target.left + self.workspace.paper.$el.width() && y > target.top && y < target.top + self.workspace.paper.$el.height()) &&
+      //   !(x > origin.left && x < origin.left + self.palette.paper.$el.width() && y > origin.top && y < origin.top + self.palette.paper.$el.height())) {
+      // if ($('#crowd-workspace-paper-' + self.id + ':hover').length) {
+      if ($('#crowd-workspace-scrollable-' + self.id + ':hover').length) {
         var s = flyShape.clone();
-        var p = self.workspace.paper.clientToLocalPoint(e.clientX, e.clientY);
-        s.position(p.x - (s.attributes.size.width / 2), p.y - (s.attributes.size.height / 2));
+
+        //get event mouse point depending on browser
+        var eventPoint = getEventClientPoint(e);
+
+        //variable to manage the relative position of the mouse in respect to paper div
+        var relativePos = eventPoint;
+
+        //in case of beign dropped on scrollable div and not on paper div
+        if (!$('#crowd-workspace-paper-' + self.id + ':hover').length) {
+          //get the paper div position relative to scrollable div
+          var paperPos = {
+            x: $('#crowd-workspace-paper-' + self.id).offset().left - $('#crowd-workspace-scrollable-' + self.id).offset().left,
+            y: $('#crowd-workspace-paper-' + self.id).offset().top - $('#crowd-workspace-scrollable-' + self.id).offset().top
+          }
+          //calculate the relative position of the mouse in respect to paper div
+          relativePos = {
+            x: eventPoint.x - paperPos.x,
+            y: eventPoint.y - paperPos.y,
+          }
+        }
+
+        //final position wich is scalated and translated in respect to paper
+        var p = {
+          x: (relativePos.x - self.workspace.paper.translate().tx) / self.workspace.paper.scale().sx,
+          y: (relativePos.y - self.workspace.paper.translate().ty) / self.workspace.paper.scale().sy
+        }
+
+        //repostion the final position to adjust to grid
+        var gridSize = self.workspace.paper.options.gridSize;
+        s.position(
+          Math.round((p.x - (s.attributes.size.width / 2)) / gridSize) * gridSize,
+          Math.round((p.y - (s.attributes.size.height / 2)) / gridSize) * gridSize
+        );
+
+        //add the cell to workspace graph
         self.workspace.graph.addCell(s);
+
+        //fit paper to the new content
+        self.workspace.fitPaper();
       }
       $('body').off('mousemove.fly').off('mouseup.fly');
       flyShape.remove();
@@ -218,25 +264,33 @@ CrowdEditor.prototype.initTools = function () {
   //append dom for zoom tool
   $('#crowd-tools-row-' + self.id).append(
     '<div class="form-group"> \
-      <label>Zoom</label> \
+      <i class="material-icons" style="font-size: 14px">zoom_in</i> <label>Zoom</label> \
       <label id="crowd-tools-zoom-label-' + self.id + '" style="float: right">100%</label> \
-      <input class="form-control-range" id="crowd-tools-zoom-input-' + self.id + '" type="range" min="50" max="200" step="25" value="100" /> \
+      <input class="form-control-range" id="crowd-tools-zoom-input-' + self.id + '" type="range" min="25" max="250" step="25" value="100" /> \
     </div>'
   );
+
+  self.tools.zoom = {
+    previousZoom: 1
+  };
 
   //event handler when change zoom
   //updates zoom label and change scale of the workspace paper
   $('#crowd-tools-zoom-input-' + self.id).on('input', function () {
+    //set new zoom value
+    self.workspace.zoom = this.value / 100;
+
+    //fit paper with the new zoom setted
+    self.workspace.fitPaper();
+
+    //change zoom label percentage
     $('#crowd-tools-zoom-label-' + self.id).html(this.value + "%");
-    self.workspace.paper.scale(this.value / 100);
-    //fix for Firefox bug
-    setTimeout(() => self.workspace.paper.translate(self.workspace.paper.translate().tx + 1, self.workspace.paper.translate().ty + 1), 1);
   });
 
   //append dom for grid size tool
   $('#crowd-tools-row-' + self.id).append(
     '<div class="form-group"> \
-      <label>Grid Size</label> \
+      <i class="material-icons" style="font-size: 12px">grid_on</i> <label>Grid Size</label> \
       <label id="crowd-tools-grid-size-label-' + self.id + '" style="float: right">10</label> \
       <input class="form-control-range" id="crowd-tools-grid-size-input-' + self.id + '" type="range" min="1" max="50" step="1" value="10" /> \
     </div>'
@@ -261,6 +315,29 @@ CrowdEditor.prototype.initTools = function () {
   //event handler when click fullscreen
   $('#crowd-tools-fullscreen-input-' + self.id).on('click', function () {
     toggleFullScreen(document.documentElement);
+    $(".tooltip").tooltip('hide');
+  });
+
+  //append dom for layout tool
+  $('#crowd-tools-row-' + self.id).append(
+    '<div class="form-group"> \
+    <button class="btn btn-primary" id="crowd-tools-layout-input-' + self.id + '" type="button" \
+    data-toggle="tooltip" data-original-title="Automatic Layout" data-placement="bottom" > \
+    <i class="material-icons">timeline</i></button> \
+  </div>'
+  );
+
+  //event handler when click layout
+  $('#crowd-tools-layout-input-' + self.id).on('click', function () {
+    joint.layout.DirectedGraph.layout(self.workspace.graph,
+      {
+        marginX: 100,
+        marginY: 100
+      }
+    );
+
+    setTimeout(() => self.workspace.fitPaper());
+
     $(".tooltip").tooltip('hide');
   });
 
@@ -313,9 +390,10 @@ CrowdEditor.prototype.initTools = function () {
 
   //define function to convert the actual model json schema to another model using the metamodelApi
   //in case the parameter model was equal to the actual model it exports json without using metamodelApi
-  self.tools.exportTo = function (model, callback) {
+  self.tools.exportTo = function (model, callback, callbackFinally) {
     if (self.config.conceptualModel.name == self.config.availableConceptualModels[model].name) {
-      callback(self.config.conceptualModel.toJSONSchema(self));
+      if (callback) callback(self.config.conceptualModel.toJSONSchema(self));
+      if (callbackFinally) callbackFinally(self.config.conceptualModel.toJSONSchema(self));
     }
     else {
       self.config.metamodelApi.request({
@@ -323,31 +401,54 @@ CrowdEditor.prototype.initTools = function () {
         to: 'meta',
         data: self.config.conceptualModel.toJSONSchema(self),
         success: function (response) {
-          self.config.metamodelApi.request({
-            from: 'meta',
-            to: self.config.availableConceptualModels[model].name,
-            data: response,
-            success: function (response) {
-              callback(response);
-            }
-          });
+          if (self.config.availableConceptualModels[model].name != 'meta') {
+            self.config.metamodelApi.request({
+              from: 'meta',
+              to: self.config.availableConceptualModels[model].name,
+              data: response,
+              success: function (response) {
+                if (callback) callback(response);
+                if (callbackFinally) callbackFinally(response);
+              },
+              error: function (error) {
+                if (callbackFinally) callbackFinally(error);
+              }
+            });
+          } else {
+            if (callback) callback(response);
+            if (callbackFinally) callbackFinally(response);
+          }
+        },
+        error: function (error) {
+          if (callbackFinally) callbackFinally(error);
         }
       });
     }
   }
 
   //event handler when click export check schema
-  $('[name="crowd-tools-export-check-schema-' + self.id + '"]').on('click', function () {
-    var model = $(this).attr('data-model');
+  $('[name="crowd-tools-export-check-schema-' + self.id + '"]').on('click', function (event) {
+    var btn = this;
+    event.stopPropagation();
 
+    var model = $(this).attr('data-model');
     $('#crowd-tools-export-schema-' + self.id).attr('data-model', model);
 
-    self.tools.exportTo(model, function (schema) {
-      $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html(model.toUpperCase() + ' Schema');
-      $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(schema, null, 4));
-      $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
-      // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
-    });
+    var originalBtn = $(btn).html();
+    $(btn).html(originalBtn + ' <i class="loading fa fa-circle-o-notch fa-spin"></i>');
+
+    self.tools.exportTo(model,
+      function (schema) {
+        $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html(model.toUpperCase() + ' Schema');
+        $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(schema, null, 4));
+        $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
+        // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
+      },
+      function () {
+        $(btn).html(originalBtn);
+        $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
+      }
+    );
 
     $(".tooltip").tooltip('hide');
   });
@@ -381,11 +482,13 @@ CrowdEditor.prototype.initTools = function () {
 
   //draw a button for each conceptual model and put the name on data attribute
   $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
-    $('[aria-labelledby="crowd-tools-model-dropdown-' + self.id + '"]').append(
-      // '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-input-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
-      '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-advertisement-proceed-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
-      //'<a href="/editor/' + conceptualModelName + '" class="dropdown-item ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '">' + conceptualModelName.toUpperCase() + '</a>'
-    );
+    if (conceptualModel.initPalette != null) {
+      $('[aria-labelledby="crowd-tools-model-dropdown-' + self.id + '"]').append(
+        // '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-input-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
+        '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-advertisement-proceed-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
+        //'<a href="/editor/' + conceptualModelName + '" class="dropdown-item ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '">' + conceptualModelName.toUpperCase() + '</a>'
+      );
+    }
   })
 
   // (not in use)
@@ -426,7 +529,7 @@ CrowdEditor.prototype.initTools = function () {
   $('[name=crowd-tools-model-advertisement-proceed-' + self.id + "]").on('click', function () {
     console.log('/editor/' + $(this).attr('data-model'));
     if (self.config.ngRouter)
-      self.config.ngRouter.navigateByUrl('/editor/' + $(this).attr('data-model'));
+      self.config.ngRouter.navigate(['/editor/' + $(this).attr('data-model')]);
     else
       window.location.href = '/editor/' + $(this).attr('data-model');
   });
@@ -466,13 +569,19 @@ CrowdEditor.prototype.initTools = function () {
 
   //event handler when click clear workspace that open advertisement modal
   $('#crowd-tools-clear-workspace-input-' + self.id).on('click', function () {
-    $('#crowd-tools-clear-workspace-advertisement-' + self.id).modal('show');
+    if (self.hasChanges()) {
+      $('#crowd-tools-clear-workspace-advertisement-' + self.id).modal('show');
+    }
     $(".tooltip").tooltip('hide');
   });
 
   //event handler when click proceed button in advertisement for clear workspace
   $('#crowd-tools-clear-workspace-advertisement-proceed-' + self.id).on('click', function () {
+    //clear the workspace elements
     self.workspace.graph.clear();
+    //center workspace scroll
+    setTimeout(() => self.workspace.centerScroll());
+
     $(".tooltip").tooltip('hide');
   });
 
@@ -487,16 +596,31 @@ CrowdEditor.prototype.initWorkspace = function () {
   self.workspace.tools = new Object();
   self.workspace.tools.elements = new Object();
   self.workspace.tools.links = new Object();
-
+  //the size of map paper is obtained from css
+  self.workspace.paperSize = {
+    width: parseFloat(getCSS('width', 'crowd-workspace-paper')),
+    height: parseFloat(getCSS('height', 'crowd-workspace-paper')),
+  };
+  //the zoom of paper is initialy 100%
+  self.workspace.zoom = 1;
+  //the paper padding is setted to avoid element tools to be outside paper when they are close to edge
+  self.workspace.paperPadding = 40;
 
   //add joint graph to workspace
   self.workspace.graph = new joint.dia.Graph();
 
+  //append dom element for workspace scrollable
+  $('#crowd-workspace-' + self.id).append('<div class="crowd-workspace-scrollable" id="crowd-workspace-scrollable-' + self.id + '"></div>');
+
+  //append dom element for workspace paper
+  $('#crowd-workspace-scrollable-' + self.id).append('<div class="crowd-workspace-paper" id="crowd-workspace-paper-' + self.id + '"></div>');
+
   //add joint paper to workspace
   self.workspace.paper = new joint.dia.Paper({
-    el: $('#crowd-workspace-' + self.id)[0],
-    width: '100%',//$('#crowd-workspace-' + self.id).width(),
-    height: '100%',//$('#crowd-workspace-' + self.id).height(),
+    el: $('#crowd-workspace-paper-' + self.id)[0],
+    width: self.workspace.paperSize.width,//$('#crowd-workspace-' + self.id).width(),
+    height: self.workspace.paperSize.height,//$('#crowd-workspace-' + self.id).height(),
+    // origin: { x: self.workspace.paperPadding, y: self.workspace.paperPadding },
     model: self.workspace.graph,
     gridSize: 10,
     background: {
@@ -594,28 +718,149 @@ CrowdEditor.prototype.initWorkspace = function () {
     $('[data-toggle="tooltip"]').tooltip({ html: true });
   });
 
+  //function that set workspace scroll to the center
+  self.workspace.centerScroll = function () {
+    $('#crowd-workspace-' + self.id).scrollLeft(($('#crowd-workspace-scrollable-' + self.id).width() - $('#crowd-workspace-' + self.id).width()) / 2);
+    $('#crowd-workspace-' + self.id).scrollTop(($('#crowd-workspace-scrollable-' + self.id).height() - $('#crowd-workspace-' + self.id).height()) / 2);
+  };
+
+  //function that fits the paper size and scroll to the elements position
+  self.workspace.fitPaper = function () {
+    //preserve previous zoom for later calculus
+    var zoomPrev = self.workspace.paper.scale().sx;
+    //flag to determine that the zoom has changed
+    var zoomChange = self.workspace.paper.scale().sx != self.workspace.zoom;
+
+    //save the proportion of workspace view relative to paper for adjust scroll when zooming
+    if ($('#crowd-workspace-paper-' + self.id).position()) {
+      var prop = {
+        left: ($('#crowd-workspace-' + self.id).scrollLeft() - $('#crowd-workspace-paper-' + self.id).position().left) / $('#crowd-workspace-paper-' + self.id).width(),
+        top: ($('#crowd-workspace-' + self.id).scrollTop() - $('#crowd-workspace-paper-' + self.id).position().top) / $('#crowd-workspace-paper-' + self.id).height(),
+        width: $('#crowd-workspace-' + self.id).width() - $('#crowd-workspace-paper-' + self.id).width(),
+        height: $('#crowd-workspace-' + self.id).height() - $('#crowd-workspace-paper-' + self.id).height()
+      }
+    }
+
+    //scale the workspace paper elements to the zoom value
+    //it needs to be proportional to the paper size of workspace
+    self.workspace.paper.scale(self.workspace.zoom);
+
+    //get the size of the paper before fitting it
+    var oldPaperArea = self.workspace.paper.getArea();
+
+    self.workspace.paper.fitToContent({
+      allowNewOrigin: 'any',
+      gridWidth: self.workspace.paperSize.width * self.workspace.zoom,
+      gridHeight: self.workspace.paperSize.height * self.workspace.zoom,
+      // useModelGeometry: true,
+      contentArea: {
+        x: self.workspace.paper.getContentArea().x > 0 ? 0 : self.workspace.paper.getContentArea().x,
+        y: self.workspace.paper.getContentArea().y > 0 ? 0 : self.workspace.paper.getContentArea().y,
+        width: self.workspace.paper.getContentArea().x > 0
+          ? Math.abs(self.workspace.paper.getContentArea().x) + self.workspace.paper.getContentArea().width
+          : self.workspace.paper.getContentArea().width,
+        height: self.workspace.paper.getContentArea().y > 0
+          ? Math.abs(self.workspace.paper.getContentArea().y) + self.workspace.paper.getContentArea().height
+          : self.workspace.paper.getContentArea().height
+      },
+      padding: self.workspace.paperPadding * self.workspace.zoom
+    });
+
+    //get the size of the paper after fitting it
+    var newPaperArea = self.workspace.paper.getArea();
+
+    //calculate the growth or shrink size and origin move of the paper area with the old and new area
+    var paperAreaDiff = {
+      x: newPaperArea.x - oldPaperArea.x,
+      y: newPaperArea.y - oldPaperArea.y,
+      width: newPaperArea.width - oldPaperArea.width,
+      height: newPaperArea.height - oldPaperArea.height
+    }
+
+    //growth or shrink the scrollable div with the area difference value to preserve the distance of the paper to the edge of container
+    $('#crowd-workspace-scrollable-' + self.id).width($('#crowd-workspace-scrollable-' + self.id).width() + paperAreaDiff.width * self.workspace.zoom);
+    $('#crowd-workspace-scrollable-' + self.id).height($('#crowd-workspace-scrollable-' + self.id).height() + paperAreaDiff.height * self.workspace.zoom);
+
+    //moves the workspace scroll to preserve the camera on the center of view when zooming in or out
+    if (zoomChange) {
+      var newProp = {
+        width: $('#crowd-workspace-' + self.id).width() - $('#crowd-workspace-paper-' + self.id).width(),
+        height: $('#crowd-workspace-' + self.id).height() - $('#crowd-workspace-paper-' + self.id).height()
+      }
+
+      // console.log('prop', prop);
+      // console.log('newProp', newProp);
+      // console.log(paperAreaDiff);
+      // console.log($('#crowd-workspace-' + self.id).scrollLeft(), $('#crowd-workspace-' + self.id).scrollTop());
+      // console.log('wsL', $('#crowd-workspace-' + self.id).scrollLeft());
+      // console.log('wsW', $('#crowd-workspace-' + self.id).width());
+      // console.log('wsCenter', ($('#crowd-workspace-' + self.id).scrollLeft() + $('#crowd-workspace-' + self.id).width() / 2));
+      // console.log('ppL', $('#crowd-workspace-paper-' + self.id).position().left);
+      // console.log('distWSPP', (($('#crowd-workspace-' + self.id).scrollLeft() + $('#crowd-workspace-' + self.id).width() / 2) - $('#crowd-workspace-paper-' + self.id).position().left));
+      $('#crowd-workspace-' + self.id).scrollLeft(($('#crowd-workspace-paper-' + self.id).width() * prop.left) + $('#crowd-workspace-paper-' + self.id).position().left +
+        Math.abs(newProp.width - prop.width) * (self.workspace.zoom - zoomPrev));
+      $('#crowd-workspace-' + self.id).scrollTop(($('#crowd-workspace-paper-' + self.id).height() * prop.top) + $('#crowd-workspace-paper-' + self.id).position().top +
+        Math.abs(newProp.height - prop.height) * (self.workspace.zoom - zoomPrev));
+    }
+
+    //scroll the workspace container when the origin of paper change to preserve the view in the same relative position when resize the paper div
+    if (Math.abs(paperAreaDiff.x) > 0 && !zoomChange) {
+      $('#crowd-workspace-' + self.id).scrollLeft($('#crowd-workspace-' + self.id).scrollLeft() + paperAreaDiff.width * self.workspace.zoom);
+    }
+    if (Math.abs(paperAreaDiff.y) > 0 && !zoomChange) {
+      $('#crowd-workspace-' + self.id).scrollTop($('#crowd-workspace-' + self.id).scrollTop() + paperAreaDiff.height * self.workspace.zoom);
+    }
+
+    //call the fit paper function of the mini map
+    self.map.fitPaper();
+  };
+
+  //event that fit the workspace paper when elements or links are moved
+  self.workspace.graph.on('change:position change:target change:source remove add', function () {
+    setTimeout(() => self.workspace.fitPaper());
+  });
+
   //this will contain the start position in the workspace paper when user drag it
   self.workspace.dragStartPosition = null;
 
-  //event for save start position of dragging of the workspace paper
-  self.workspace.paper.on('blank:pointerdown', function (event, x, y) {
+  //function that save start position of dragging of the workspace
+  self.workspace.dragStart = function (evt) {
     self.workspace.dragStartPosition = {
-      x: x * self.workspace.paper.scale().sx,
-      y: y * self.workspace.paper.scale().sy
+      //the current scroll
+      left: $('#crowd-workspace-' + self.id)[0].scrollLeft,
+      top: $('#crowd-workspace-' + self.id)[0].scrollTop,
+      //get the current mouse position
+      x: evt.clientX,
+      y: evt.clientY
     };
+  }
+
+  //event for save start position of dragging of the workspace paper when click over scrollable div and not over paper
+  $('#crowd-workspace-scrollable-' + self.id).on('mousedown', function (evt) {
+    if (!$('#crowd-workspace-paper-' + self.id + ':hover').length)
+      self.workspace.dragStart(evt);
+  });
+
+  //event for save start position of dragging of the workspace paper when click over blank position of the paper
+  self.workspace.paper.on('blank:pointerdown', function (evt, x, y) {
+    self.workspace.dragStart(evt);
   });
 
   //event for clear the drag start position for drag workspace paper
-  self.workspace.paper.on('cell:pointerup blank:pointerup', function () {
+  $('#crowd-workspace-scrollable-' + self.id).on('mouseup mouseleave', function (evt) {
     self.workspace.dragStartPosition = null;
   });
 
   //event for drag workspace paper with the drag start position saved previously
-  $('#crowd-workspace-' + self.id).mousemove(function (event) {
-    if (self.workspace.dragStartPosition)
-      self.workspace.paper.translate(
-        event.originalEvent.layerX - self.workspace.dragStartPosition.x,
-        event.originalEvent.layerY - self.workspace.dragStartPosition.y);
+  $('#crowd-workspace-scrollable-' + self.id).on('mousemove', function (evt) {
+    if (self.workspace.dragStartPosition) {
+      //how far the mouse has been moved
+      const dx = evt.clientX - self.workspace.dragStartPosition.x;
+      const dy = evt.clientY - self.workspace.dragStartPosition.y;
+      //scroll the element
+      $('#crowd-workspace-' + self.id)[0].scrollTop = self.workspace.dragStartPosition.top - dy;
+      $('#crowd-workspace-' + self.id)[0].scrollLeft = self.workspace.dragStartPosition.left - dx;
+    }
   });
 }
 
@@ -712,10 +957,15 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         //set the source to the selected element
         link.source({ id: this.model.id });
 
+        //get event mouse point depending on browser
+        var eventPoint = getEventClientPoint(evt);
+
         //place it at mouse position
         link.target({
-          x: (evt.originalEvent.layerX - self.workspace.paper.translate().tx) / self.workspace.paper.scale().sx,
-          y: (evt.originalEvent.layerY - self.workspace.paper.translate().ty) / self.workspace.paper.scale().sy
+          x: (eventPoint.x - self.workspace.paper.translate().tx) / self.workspace.paper.scale().sx,
+          y: (eventPoint.y - self.workspace.paper.translate().ty) / self.workspace.paper.scale().sy
+          // x: (evt.originalEvent.offsetX - self.workspace.paper.translate().tx),
+          // y: (evt.originalEvent.offsetY - self.workspace.paper.translate().ty)
         });
 
         //add it to the graph
@@ -739,7 +989,7 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
 
         //simulate pointerdown event (mousedown) over the dom element of the link tool "TargetArrowhead"
         var clickEvent = document.createEvent('MouseEvents');
-        clickEvent.initMouseEvent('mousedown', true, true, evt.view, evt.detail, evt.screenX, evt.screenY, evt.clientX, evt.clientY, null, null, null, null, null, new EventTarget('marker-arrowhead'));
+        clickEvent.initMouseEvent('mousedown', true, true, evt.view, evt.detail, evt.screenX, evt.screenY, eventPoint.x, eventPoint.y, null, null, null, null, null, new EventTarget('marker-arrowhead'));
         linkView._toolsView.tools[2].el.dispatchEvent(clickEvent); //second position of the array correspond to "TargetArrowhead" tool
       },
       markup: config.markup != null ? config.markup : self.workspace.tools.elements.markup({ icon: 'call_made', tooltip: { title: 'Click and drag to connect the object', placement: "right" } })
@@ -758,10 +1008,15 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
       //clone the element
       var clonedElement = this.model.clone();
 
+      //get event mouse point depending on browser
+      var eventPoint = getEventClientPoint(evt);
+
       //place it at mouse position
       clonedElement.attributes.position = {
-        x: (evt.originalEvent.layerX - self.workspace.paper.translate().tx) / self.workspace.paper.scale().sx - (clonedElement.attributes.size.width / 2),
-        y: (evt.originalEvent.layerY - self.workspace.paper.translate().ty) / self.workspace.paper.scale().sy - (clonedElement.attributes.size.height / 2)
+        x: (eventPoint.x - self.workspace.paper.translate().tx) / self.workspace.paper.scale().sx - (clonedElement.attributes.size.width / 2),
+        y: (eventPoint.y - self.workspace.paper.translate().ty) / self.workspace.paper.scale().sy - (clonedElement.attributes.size.height / 2)
+        // x: (evt.originalEvent.layerX - self.workspace.paper.translate().tx) - (clonedElement.attributes.size.width / 2),
+        // y: (evt.originalEvent.layerY - self.workspace.paper.translate().ty) - (clonedElement.attributes.size.height / 2)
       };
 
       //add it to the graph
@@ -812,10 +1067,15 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         //create the new element
         var newElement = config.elementType.clone();
 
+        //get event mouse point depending on browser
+        var eventPoint = getEventClientPoint(evt);
+
         //place it at mouse position
         newElement.attributes.position = {
-          x: (evt.originalEvent.layerX - self.workspace.paper.translate().tx) / self.workspace.paper.scale().sx - (newElement.attributes.size.width / 2),
-          y: (evt.originalEvent.layerY - self.workspace.paper.translate().ty) / self.workspace.paper.scale().sy - (newElement.attributes.size.height / 2)
+          x: (eventPoint.x - self.workspace.paper.translate().tx) / self.workspace.paper.scale().sx - (newElement.attributes.size.width / 2),
+          y: (eventPoint.y - self.workspace.paper.translate().ty) / self.workspace.paper.scale().sy - (newElement.attributes.size.height / 2)
+          // x: (evt.originalEvent.offsetX - self.workspace.paper.translate().tx) - (newElement.attributes.size.width / 2),
+          // y: (evt.originalEvent.offsetY - self.workspace.paper.translate().ty) - (newElement.attributes.size.height / 2)
         };
 
         //add new element to the graph
@@ -901,8 +1161,10 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
           // console.log({ pageY: evt.pageY, pageX: evt.pageX }, buttonView.$el.position(), { addSize });
 
           //adjust the add size for the paper actual zoom (scale)
-          addSize.width = addSize.width / self.workspace.paper.scale().sx;
-          addSize.height = addSize.height / self.workspace.paper.scale().sy;
+          // addSize.width = addSize.width / self.workspace.paper.scale().sx;
+          // addSize.height = addSize.height / self.workspace.paper.scale().sy;
+          addSize.width = addSize.width / self.workspace.zoom;
+          addSize.height = addSize.height / self.workspace.zoom;
 
           //create object for the newSize and check if new width and height are bigger than min sizes individually
           var newSize = { width: elementView.model.size().width, height: elementView.model.size().height };
@@ -911,9 +1173,12 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
 
           //restrict new size to a multiple of grid size to simulate snap to grid effect
           if (config.snapGrid || config.snapGrid == null) {
-            var gridSize = self.workspace.paper.options.gridSize / self.workspace.paper.scale().sx;
-            newSize.width = Math.round(newSize.width / gridSize) * gridSize;
-            newSize.height = Math.round(newSize.height / gridSize) * gridSize;
+            // var gridSize = self.workspace.paper.options.gridSize / self.workspace.paper.scale().sx;
+            var gridSize = self.workspace.paper.options.gridSize;
+            newSize.width = Math.round(newSize.width / gridSize) * gridSize > config.minSize.width
+              ? Math.round(newSize.width / gridSize) * gridSize : newSize.width;
+            newSize.height = Math.round(newSize.height / gridSize) * gridSize > config.minSize.height
+              ? Math.round(newSize.height / gridSize) * gridSize : newSize.height;
           }
 
           //resize the view to the new size calculated in the correpondiente direction of resizing
@@ -1277,12 +1542,33 @@ CrowdEditor.prototype.initMap = function () {
 
   //initialize workspace objects
   self.map = new Object();
+  //the size of map paper is obtained from css
+  self.map.paperSize = {
+    width: parseFloat(getCSS('width', 'crowd-map-paper')),
+    height: parseFloat(getCSS('height', 'crowd-map-paper')),
+  };
+  //the zoom is the proportion of map paper size with respect to workspace paper size
+  self.map.zoom = self.map.paperSize.width / self.workspace.paperSize.width;
+  //the initial grid size is equivalent to the map paper size
+  self.map.gridSize = {
+    width: self.map.paperSize.width,
+    height: self.map.paperSize.height
+  };
+
+  //append dom element for map scrollable
+  $('#crowd-map-' + self.id).append('<div class="crowd-map-scrollable" id="crowd-map-scrollable-' + self.id + '"></div>');
+
+  //append dom element for map paper
+  $('#crowd-map-scrollable-' + self.id).append('<div class="crowd-map-paper" id="crowd-map-paper-' + self.id + '"></div>');
+
+  //append dom element for camera view over workspace paper
+  $('#crowd-map-scrollable-' + self.id).append('<div class="crowd-map-camera" id="crowd-map-camera-' + self.id + '"></div>');
 
   //add joint paper to map
   self.map.paper = new joint.dia.Paper({
-    el: $('#crowd-map-' + self.id)[0],
-    width: '100%',
-    height: '200px',
+    el: $('#crowd-map-paper-' + self.id)[0],
+    width: self.map.paperSize.width,
+    height: self.map.paperSize.height,
     model: self.workspace.graph,
     gridSize: 1,
     background: {
@@ -1291,31 +1577,79 @@ CrowdEditor.prototype.initMap = function () {
     interactive: false
   });
 
-  //scale the map paper to see a mini map of the workspace
-  self.map.paper.scale(0.1);
+  //scale the map paper elements to the zoom value
+  //it needs to be proportional to the paper size of workspace scalated to map paper
+  self.map.paper.scale(self.map.zoom);
 
-  //this will contain the start position in the map paper when user drag it
-  self.map.dragStartPosition = null;
-
-  //event for save start position of dragging of the map paper
-  self.map.paper.on('blank:pointerdown', function (event, x, y) {
-    self.map.dragStartPosition = {
-      x: x * self.map.paper.scale().sx,
-      y: y * self.map.paper.scale().sy
+  //function that fits the map paper size to the elements position and proportion of space container
+  self.map.fitPaper = function () {
+    //calculate the size of the map paper with the actual workspace paper size and the zoom in the map
+    var scaledPaperSize = {
+      width: self.workspace.paper.getArea().width * self.map.zoom,
+      height: self.workspace.paper.getArea().height * self.map.zoom
     };
-  });
 
-  //event for clear the drag start position for drag map paper
-  self.map.paper.on('cell:pointerup blank:pointerup', function () {
-    self.map.dragStartPosition = null;
-  });
+    //calculate the resize ratio with the actual and new paper size
+    //(resize ratio is a percentage of the amount of growth or shrink of the paper)
+    var resizeRatio = scaledPaperSize.width >= scaledPaperSize.height
+      ? (self.map.paperSize.width * 100 / scaledPaperSize.width) / 100
+      : (self.map.paperSize.height * 100 / scaledPaperSize.height) / 100;
 
-  //event for drag map paper with the drag start position saved previously
-  $('#crowd-map-' + self.id).mousemove(function (event) {
-    if (self.map.dragStartPosition)
-      self.map.paper.translate(
-        event.originalEvent.layerX - self.map.dragStartPosition.x,
-        event.originalEvent.layerY - self.map.dragStartPosition.y);
+    //adjust the zoom (scale) of the elements on map paper with the resize ratio
+    self.map.zoom = self.map.zoom * resizeRatio;
+    self.map.paper.scale(self.map.zoom);
+
+    //calculate the new grid size with the resize ratio
+    self.map.gridSize = {
+      width: self.map.gridSize.width * resizeRatio,
+      height: self.map.gridSize.height * resizeRatio
+    };
+
+    //fit paper to the elements on map paper using grid size
+    //and adjusting the content area to preserve the (0,0) origin when it's on positive quadrant
+    self.map.paper.fitToContent({
+      allowNewOrigin: 'any',
+      gridWidth: self.map.gridSize.width,
+      gridHeight: self.map.gridSize.height,
+      // useModelGeometry: true,
+      contentArea: {
+        x: self.map.paper.getContentArea().x > 0 ? 0 : self.map.paper.getContentArea().x,
+        y: self.map.paper.getContentArea().y > 0 ? 0 : self.map.paper.getContentArea().y,
+        width: self.map.paper.getContentArea().x > 0
+          ? self.map.paper.getContentArea().x + self.map.paper.getContentArea().width - 10
+          : self.map.paper.getContentArea().width,
+        height: self.map.paper.getContentArea().y > 0
+          ? self.map.paper.getContentArea().y + self.map.paper.getContentArea().height - 10
+          : self.map.paper.getContentArea().height
+      },
+      padding: (self.workspace.paperPadding - 10) * self.map.zoom
+    });
+
+    $('#crowd-map-paper-' + self.id).css({
+      left: ($('#crowd-map-scrollable-' + self.id).width() - $('#crowd-map-paper-' + self.id).width()) / 2,
+      top: ($('#crowd-map-scrollable-' + self.id).height() - $('#crowd-map-paper-' + self.id).height()) / 2
+    });
+
+    self.map.fitCamera();
+  }
+
+  //fit the camera of the map relatively to the workspace view of the paper
+  self.map.fitCamera = function () {
+    if ($('#crowd-workspace-paper-' + self.id).position()) {
+      $('#crowd-map-camera-' + self.id).css({
+        left: (($('#crowd-workspace-' + self.id).scrollLeft() - $('#crowd-workspace-paper-' + self.id).position().left) * self.map.zoom * (1 / self.workspace.zoom))
+          + $('#crowd-map-paper-' + self.id).position().left,
+        top: (($('#crowd-workspace-' + self.id).scrollTop() - $('#crowd-workspace-paper-' + self.id).position().top) * self.map.zoom * (1 / self.workspace.zoom))
+          + $('#crowd-map-paper-' + self.id).position().top,
+        width: $('#crowd-map-paper-' + self.id).width() * $('#crowd-workspace-' + self.id).width() / $('#crowd-workspace-paper-' + self.id).width(),
+        height: $('#crowd-map-paper-' + self.id).height() * $('#crowd-workspace-' + self.id).height() / $('#crowd-workspace-paper-' + self.id).height(),
+      });
+    }
+  }
+
+  //event when scroll over workspace
+  $('#crowd-workspace-' + self.id).scroll(function () {
+    self.map.fitCamera();
   });
 }
 
