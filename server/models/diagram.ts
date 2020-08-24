@@ -3,7 +3,10 @@ import * as mongoose from 'mongoose';
 const diagramSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   name: String,
-  content: Object
+  model: String,
+  content: Object,
+  meta: Object,
+  preview: String
 });
 
 // Omit the __v when returning a diagram

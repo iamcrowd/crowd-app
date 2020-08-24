@@ -5,6 +5,8 @@ import { DiagramService } from '../services/diagram.service';
 import { Diagram } from '../shared/models/diagram.model';
 
 declare var iziToast;
+declare var joint;
+declare var $;
 
 declare var CrowdEditor;
 declare var CrowdEditorEer;
@@ -21,6 +23,8 @@ export class EditorComponent implements OnInit {
   editor: any;
   conceptualModel: string;
   diagrams: Diagram[] = [];
+  //for preloaded diagram
+  diagram: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -41,6 +45,10 @@ export class EditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(this.router.getCurrentNavigation());
+
+    this.diagram = this.router.getCurrentNavigation()?.extras?.state?.diagram;
+
     const availableConceptualModels = {
       uml: CrowdEditorUml,
       eer: CrowdEditorEer,
@@ -76,7 +84,20 @@ export class EditorComponent implements OnInit {
           modal: 'crowd-tools-load-modal',
           get: this.getDiagrams()
         }
-      }
+      },
+      tools: {
+        import: {
+          errors: {
+            missingModelPalette: (model) => {
+              iziToast.error({
+                title: 'Error',
+                message: 'There is no palette for the conceptual model <b>' + model.toUpperCase() + '</b>.'
+              });
+            }
+          }
+        }
+      },
+      preloadDiagram: this.diagram
     });
   }
 
@@ -92,7 +113,6 @@ export class EditorComponent implements OnInit {
   }
 
   loadDiagram(diagram: Diagram): void {
-    this.editor.tools.load.loadFile(diagram.content);
+    this.editor.tools.import.importFrom({ model: diagram.model, schema: diagram.content });
   }
-
 }

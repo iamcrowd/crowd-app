@@ -3,3 +3,43 @@
   width: 100%;
   height: calc(100% - 57px);
 }
+
+#crowd-tools-load-modal .card:hover {
+  box-shadow: 0px 0px 2px 0px white;
+  cursor: pointer;
+}
+
+.crowd-model-label {
+  text-transform: uppercase;
+  float: right;
+  font-size: 10px;
+  padding: 0px 5px;
+  border-radius: 4px;
+}
+
+.crowd-model-label.uml {
+  background: cadetblue;
+}
+
+.crowd-model-label.eer {
+  background: crimson;
+}
+
+.crowd-model-label.orm {
+  background: darkmagenta;
+}
+
+.crowd-model-label.meta {
+  background: white;
+  color: black;
+}
+
+.crowd-diagram-preview {
+  background: white;
+  width: 100%;
+  border-radius: 0px 0px 4px 4px;
+}
+
+.crowd-diagram-preview-container {
+  padding: 0;
+}
