@@ -270,10 +270,6 @@ CrowdEditor.prototype.initTools = function () {
     </div>'
   );
 
-  self.tools.zoom = {
-    previousZoom: 1
-  };
-
   //event handler when change zoom
   //updates zoom label and change scale of the workspace paper
   $('#crowd-tools-zoom-input-' + self.id).on('input', function () {
@@ -346,7 +342,7 @@ CrowdEditor.prototype.initTools = function () {
     '<div class="form-group"> \
       <div class="dropdown"> \
         <button class="btn btn-primary dropdown-toggle" type="button" id="crowd-tools-export-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
-          <i class="fa fa-cloud-download"></i> Export \
+          <i class="fa fa-download"></i> Export \
         </button> \
         <div class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"></div> \
       </div> \
@@ -466,6 +462,65 @@ CrowdEditor.prototype.initTools = function () {
           $(this).remove()
         })[0].click();
     });
+  });
+
+  //initialize load tool object
+  self.tools.load = {};
+  //this function is called from outside editor for load a file through load modal
+  self.tools.load.loadFile = function (schema) {
+    if (self.config.ngFiles) {
+      if (self.config.ngFiles.load) {
+        if (self.config.ngFiles.load.modal) {
+          $('#' + self.config.ngFiles.load.modal).modal('hide');
+        }
+        self.fromJSONSchema(JSON.parse(schema));
+      }
+    }
+  }
+
+  //append dom for load tool
+  $('#crowd-tools-row-' + self.id).append(
+    '<div class="form-group"> \
+      <button class="btn btn-primary" id="crowd-tools-load-input-' + self.id + '" type="button" \
+      data-toggle="tooltip" data-original-title="Load Diagram from Cloud" data-placement="bottom" > \
+      <i class="material-icons">cloud_download</i></button> \
+    </div>'
+  );
+
+  //event handler when click load
+  $('#crowd-tools-load-input-' + self.id).on('click', function () {
+    if (self.config.ngFiles) {
+      if (self.config.ngFiles.load) {
+        if (self.config.ngFiles.load.modal) {
+          $('#' + self.config.ngFiles.load.modal).modal('show');
+        }
+        if (self.config.ngFiles.load.get) {
+          self.config.ngFiles.load.get();
+        }
+      }
+    }
+    $(".tooltip").tooltip('hide');
+  });
+
+  //append dom for save tool
+  $('#crowd-tools-row-' + self.id).append(
+    '<div class="form-group"> \
+      <button class="btn btn-primary" id="crowd-tools-save-input-' + self.id + '" type="button" \
+      data-toggle="tooltip" data-original-title="Save Diagram on Cloud" data-placement="bottom" > \
+      <i class="material-icons">cloud_upload</i></button> \
+    </div>'
+  );
+
+  //event handler when click save
+  $('#crowd-tools-save-input-' + self.id).on('click', function () {
+    if (self.config.ngFiles) {
+      if (self.config.ngFiles.save) {
+        if (self.config.ngFiles.save.modal) {
+          $('#' + self.config.ngFiles.save.modal).modal('show');
+        }
+      }
+    }
+    $(".tooltip").tooltip('hide');
   });
 
   //append dom for change conceptual model tool
@@ -981,12 +1036,6 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         //get link view of the new link in the workspace paper
         var linkView = link.findView(self.workspace.paper);
 
-        //create tools view for the new link (is a bag of tools)
-        var linkToolsView = self.workspace.tools.links.linksToolsView[linkView.model.attributes.type];
-
-        //add tools to the link view
-        linkView.addTools(linkToolsView != null ? linkToolsView() : self.workspace.tools.links.linksToolsView.basic());
-
         //simulate pointerdown event (mousedown) over the dom element of the link tool "TargetArrowhead"
         var clickEvent = document.createEvent('MouseEvents');
         clickEvent.initMouseEvent('mousedown', true, true, evt.view, evt.detail, evt.screenX, evt.screenY, eventPoint.x, eventPoint.y, null, null, null, null, null, new EventTarget('marker-arrowhead'));
@@ -1099,15 +1148,6 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
             link.prop(prop, config.link.props[prop]);
           }
         }
-
-        //get link view of the new link in the workspace paper
-        var linkView = link.findView(self.workspace.paper);
-
-        //create tools view for the new link (is a bag of tools)
-        var linkToolsView = self.workspace.tools.links.linksToolsView[linkView.model.attributes.type];
-
-        //add tools to the link view
-        linkView.addTools(linkToolsView != null ? linkToolsView() : self.workspace.tools.links.linksToolsView.basic());
 
         //get element view of the new element in the workspace paper
         var newElementView = newElement.findView(self.workspace.paper);
@@ -1281,6 +1321,23 @@ CrowdEditor.prototype.initLinksToolsViews = function () {
 
   //call initialization of links tools view for the specific conceptual model
   self.config.conceptualModel.initLinksToolsViews(self);
+
+  //capture event when add a link and add to their view the correpondent link tools
+  self.workspace.graph.on('add', function (link) {
+    if (link.isLink()) {
+      //get link view of the new link in the workspace paper
+      var linkView = link.findView(self.workspace.paper);
+
+      //create tools view for the new link (is a bag of tools)
+      var linkToolsView = self.workspace.tools.links.linksToolsView[linkView.model.attributes.type];
+
+      //add tools to the link view
+      linkView.addTools(linkToolsView != null ? linkToolsView() : self.workspace.tools.links.linksToolsView.basic());
+
+      //hide the tools to not appear at first time after add the link
+      linkView.hideTools();
+    }
+  });
 }
 
 CrowdEditor.prototype.initChangeAttributesEvents = function () {
@@ -1662,6 +1719,9 @@ CrowdEditor.prototype.toJSONSchema = function () {
 
 CrowdEditor.prototype.fromJSONSchema = function (schema) {
   var self = this;
+
+  //clear the workspace elements
+  self.workspace.graph.clear();
 
   //call the function to load a json schema for the specific conceptual model
   self.config.conceptualModel.fromJSONSchema(self, schema);

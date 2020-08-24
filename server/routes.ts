@@ -1,10 +1,12 @@
 import * as express from 'express';
 
 import UserCtrl from './controllers/user';
+import DiagramCtrl from './controllers/diagram';
 
 function setRoutes(app): void {
   const router = express.Router();
   const userCtrl = new UserCtrl();
+  const diagramCtrl = new DiagramCtrl();
 
   // Users
   router.route('/login').post(userCtrl.login);
@@ -14,6 +16,14 @@ function setRoutes(app): void {
   router.route('/user/:id').get(userCtrl.get);
   router.route('/user/:id').put(userCtrl.update);
   router.route('/user/:id').delete(userCtrl.delete);
+
+  //Diagrams
+  router.route('/diagrams').get(diagramCtrl.getAll);
+  router.route('/diagrams/count').get(diagramCtrl.count);
+  router.route('/diagram').post(diagramCtrl.insert);
+  router.route('/diagram/:id').get(diagramCtrl.get);
+  router.route('/diagram/:id').put(diagramCtrl.update);
+  router.route('/diagram/:id').delete(diagramCtrl.delete);
 
   // Apply the routes to our application with the prefix /api
   app.use('/api', router);

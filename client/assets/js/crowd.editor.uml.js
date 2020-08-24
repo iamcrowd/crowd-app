@@ -774,6 +774,64 @@ var CrowdEditorUml = {
     return jsonSchema;
   },
   fromJSONSchema: function (crowd, schema) {
-    //to do
+    console.log('loadUML', schema);
+
+    var classesObj = {};
+    var linksObj = {};
+
+    //add each class and their properties
+    schema.classes.forEach(function (classe) {
+      classesObj[classe.name] = crowd.palette.elements.class.clone();
+      crowd.workspace.graph.addCell(classesObj[classe.name]);
+      $.each(classe, function (attribute, value) {
+        switch (attribute) {
+          case 'name':
+            var newName = value.split('#');
+            newName.shift();
+            newName = newName.join('#');
+            classesObj[classe.name].prop(attribute, newName);
+            break;
+          case 'attrs':
+            classesObj[classe.name].prop('attributes', value)
+            break;
+          default:
+            classesObj[classe.name].prop(attribute, value)
+            break;
+        }
+      });
+    });
+
+    //add each link and their properties
+    schema.links.forEach(function (link) {
+      linksObj[link.name] = crowd.palette.links[link.type].clone();
+      crowd.workspace.graph.addCell(linksObj[link.name]);
+      $.each(link, function (attribute, value) {
+        switch (attribute) {
+          case 'classes':
+            if (link.type == "generalization") {
+              linksObj[link.name].source(classesObj[value[0]]);
+            } else {
+              linksObj[link.name].source(classesObj[value[0]]);
+              linksObj[link.name].target(classesObj[value[1]]);
+              linksObj[link.name].prop('direction', null);
+            }
+            break;
+          case 'parent':
+            linksObj[link.name].target(classesObj[value]);
+            break;
+          case 'multiplicity':
+            linksObj[link.name].prop('cardinality/source', value[0]);
+            linksObj[link.name].prop('cardinality/target', value[1]);
+            break;
+          case 'roles':
+            linksObj[link.name].prop('roles/source', value[0]);
+            linksObj[link.name].prop('roles/target', value[1]);
+            break;
+          default:
+            linksObj[link.name].prop(attribute, value)
+            break;
+        }
+      });
+    });
   },
 }

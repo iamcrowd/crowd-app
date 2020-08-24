@@ -1,6 +1,8 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../environments/environment';
+import { DiagramService } from '../services/diagram.service';
+import { Diagram } from '../shared/models/diagram.model';
 
 declare var iziToast;
 
@@ -18,10 +20,12 @@ export class EditorComponent implements OnInit {
 
   editor: any;
   conceptualModel: string;
+  diagrams: Diagram[] = [];
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private diagramService: DiagramService
   ) {
     this.route.params.subscribe(params => {
       this.conceptualModel = params.conceptualModel;
@@ -40,8 +44,8 @@ export class EditorComponent implements OnInit {
     const availableConceptualModels = {
       uml: CrowdEditorUml,
       eer: CrowdEditorEer,
-      orm: {name: 'orm'},
-      meta: {name: 'meta'}
+      orm: { name: 'orm' },
+      meta: { name: 'meta' }
     }
 
     this.editor = new CrowdEditor({
@@ -66,12 +70,29 @@ export class EditorComponent implements OnInit {
           columns: 2
         }
       },
-      ngRouter: this.router
+      ngRouter: this.router,
+      ngFiles: {
+        load: {
+          modal: 'crowd-tools-load-modal',
+          get: this.getDiagrams()
+        }
+      }
     });
   }
 
-  hasChanges() {
+  hasChanges(): boolean {
     return this.editor.hasChanges();
+  }
+
+  getDiagrams(): void {
+    this.diagramService.getDiagrams().subscribe(
+      data => this.diagrams = data,
+      error => console.log(error)
+    );
+  }
+
+  loadDiagram(diagram: Diagram): void {
+    this.editor.tools.load.loadFile(diagram.content);
   }
 
 }

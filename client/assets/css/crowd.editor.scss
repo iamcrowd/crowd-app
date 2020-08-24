@@ -212,10 +212,10 @@ $alt-accent: #262a2e;
 
 .crowd-map-paper {
   position: absolute;
-  top: 50px;
-  left: 50px;
-  width: 100px;
-  height: 100px;
+  top: 35px;
+  left: 35px;
+  width: 130px;
+  height: 130px;
   box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.75);
   // transform: translate(-50%, -50%); //this bug dropdown menu and jointjs vectorizer in firefox
   // z-index: 1; //fix tools dropdown menu bug
