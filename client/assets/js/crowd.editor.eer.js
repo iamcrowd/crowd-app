@@ -20,7 +20,7 @@ var CrowdEditorEer = {
       parentType: 'entity',
       type: 'entity',
       name: 'Entity',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Entity',
+      uri: 'http://crowd.fi.uncoma.edu.ar#entity',
       attrs: {
         text: {
           fill: 'white',
@@ -46,7 +46,7 @@ var CrowdEditorEer = {
       parentType: 'entity',
       type: 'weakEntity',
       name: 'Weak\nEntity',
-      uri: 'http://crowd.fi.uncoma.edu.ar#WeakEntity',
+      uri: 'http://crowd.fi.uncoma.edu.ar#weak-entity',
       attrs: {
         text: {
           text: 'Weak\nEntity',
@@ -74,7 +74,7 @@ var CrowdEditorEer = {
       parentType: 'relationship',
       type: 'relationship',
       name: 'Relationship',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Relationship',
+      uri: 'http://crowd.fi.uncoma.edu.ar#relationship',
       attrs: {
         text: {
           fill: 'white',
@@ -100,7 +100,7 @@ var CrowdEditorEer = {
       parentType: 'relationship',
       type: 'weakRelationship',
       name: 'Weak\nRelationship',
-      uri: 'http://crowd.fi.uncoma.edu.ar#WeakRelationship',
+      uri: 'http://crowd.fi.uncoma.edu.ar#weak-relationship',
       attrs: {
         text: {
           text: 'Weak\nRelationship',
@@ -128,7 +128,7 @@ var CrowdEditorEer = {
       parentType: 'attribute',
       type: 'keyAttribute',
       name: 'Key\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#KeyAttribute',
+      uri: 'http://crowd.fi.uncoma.edu.ar#key-attribute',
       datatype: 'int',
       attrs: {
         text: {
@@ -152,7 +152,7 @@ var CrowdEditorEer = {
       parentType: 'attribute',
       type: 'weakKeyAttribute',
       name: 'Weak Key\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#WeakKeyAttribute',
+      uri: 'http://crowd.fi.uncoma.edu.ar#weak-key-attribute',
       datatype: 'int',
       attrs: {
         text: {
@@ -176,7 +176,7 @@ var CrowdEditorEer = {
       parentType: 'attribute',
       type: 'attribute',
       name: 'Attribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Attribute',
+      uri: 'http://crowd.fi.uncoma.edu.ar#attribute',
       datatype: 'int',
       attrs: {
         text: {
@@ -200,7 +200,7 @@ var CrowdEditorEer = {
       parentType: 'attribute',
       type: 'multivaluedAttribute',
       name: 'Multivalued\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#MultivaluedAttribute',
+      uri: 'http://crowd.fi.uncoma.edu.ar#multivalued-attribute',
       datatype: 'int',
       attrs: {
         text: {
@@ -229,7 +229,7 @@ var CrowdEditorEer = {
       parentType: 'inheritance',
       type: 'inheritance',
       subtype: 'overlaped',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Inheritance',
+      uri: 'http://crowd.fi.uncoma.edu.ar#inheritance',
       attrs: {
         text: {
           fill: 'white',
@@ -252,7 +252,7 @@ var CrowdEditorEer = {
       parentType: 'attribute',
       type: 'derivedAttribute',
       name: 'Derived\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#DerivedAttribute',
+      uri: 'http://crowd.fi.uncoma.edu.ar#derived-attribute',
       datatype: 'int',
       attrs: {
         text: {
@@ -283,7 +283,7 @@ var CrowdEditorEer = {
       cardinality: null,
       total: false,
       inherit: false,
-      uri: 'http://crowd.fi.uncoma.edu.ar#Connector',
+      uri: 'http://crowd.fi.uncoma.edu.ar#connector',
       attrs: {
         line: {
           stroke: 'black',
@@ -309,7 +309,7 @@ var CrowdEditorEer = {
       cardinality: null,
       total: true,
       inherit: false,
-      uri: 'http://crowd.fi.uncoma.edu.ar#Connector',
+      uri: 'http://crowd.fi.uncoma.edu.ar#connector',
       attrs: {
         line: {
           stroke: getCSS('background-color', 'crowd-workspace'),
@@ -591,7 +591,7 @@ var CrowdEditorEer = {
   initChangeAttributesEvents: function (crowd) {
     //event when the elements type change (types are: entity, weakEntity, attribute, etc)
     crowd.workspace.graph.on('change:type', function (element, newType) {
-      console.log('change:type', { element, newType });
+      // console.log('change:type', { element, newType });
 
       if (element.isElement()) {
         //replace element attributes and markup with the palette default component of the newtype
@@ -613,32 +613,34 @@ var CrowdEditorEer = {
 
     //event when the elements name change
     crowd.workspace.graph.on('change:name', function (element, newName) {
-      console.log('change:name', { element, newName });
+      // console.log('change:name', { element, newName });
 
       if (element.isElement()) {
-        element.attr('text/text', newName);
-        element.attributes.uri = element.attributes.uri.split("#")[0] + "#" + newName;
+        element.attr('text/text', joint.util.breakText(newName, { width: element.attributes.size.width }));
+        // element.attr('text/text', newName);
+        element.attributes.uri = element.attributes.uri.split("#")[0] + "#" + toURI(newName);
         $('#crowd-inspector-content--uri--' + crowd.id).val(element.attributes.uri);
       }
     });
 
     //event when the elements uri change
     crowd.workspace.graph.on('change:uri', function (element, newUri) {
-      console.log('change:uri', { element, newUri });
+      // console.log('change:uri', { element, newUri });
 
       if (element.isElement() && element.attributes.parentType != "inheritance") {
         var newName = newUri.split('#');
         newName.shift();
         newName = newName.join('#');
-        element.attr('text/text', newName);
-        element.attributes.name = newName;
-        $('#crowd-inspector-content--name--' + crowd.id).val(newName);
+        element.attr('text/text', joint.util.breakText(fromURI(newName), { width: element.attributes.size.width }));
+        // element.attr('text/text', fromURI(newName));
+        element.attributes.name = fromURI(newName);
+        $('#crowd-inspector-content--name--' + crowd.id).val(element.attributes.name);
       }
     });
 
     //event when the elements (specificly inheritance) subtype change
     crowd.workspace.graph.on('change:subtype', function (element, newSubtype) {
-      console.log('change:subtype', { element, newSubtype });
+      // console.log('change:subtype', { element, newSubtype });
 
       if (element.isElement() && element.prop('type') == 'inheritance') {
         var subtypesText = { overlaped: 'o', disjoint: 'd', union: 'U' };
@@ -648,7 +650,7 @@ var CrowdEditorEer = {
 
     //event when the links cardinality change
     crowd.workspace.graph.on('change:cardinality', function (link, newCardinality) {
-      console.log('change:cardinality', { link, newCardinality });
+      // console.log('change:cardinality', { link, newCardinality });
 
       if (link.isLink()) {
         link.labels([{
@@ -673,7 +675,7 @@ var CrowdEditorEer = {
 
     //event when the link total change
     crowd.workspace.graph.on('change:total', function (link, newTotal) {
-      console.log('change:total', { link, newTotal });
+      // console.log('change:total', { link, newTotal });
 
       if (link.isLink()) {
         //replace link attributes and markup with the palette default component of the corresponding style

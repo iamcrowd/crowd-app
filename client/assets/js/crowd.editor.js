@@ -69,8 +69,30 @@ CrowdEditor.prototype.init = function () {
   self.workspace.fitPaper();
   self.workspace.centerScroll();
 
+  //preload a diagram if it's sended as parameter
   if (self.config.preloadDiagram) {
-    self.fromJSONSchema(JSON.parse(self.config.preloadDiagram));
+    var schema = JSON.parse(self.config.preloadDiagram);
+    self.fromJSONSchema(schema);
+    if (schema.hasPositions != null && !schema.hasPositions) {
+      self.tools.layout.doLayout();
+    }
+  }
+
+  //initialize enumerate for elements and links in case it's setted in config
+  if (self.config.enumerate) {
+    self.enumerate = { elements: {}, links: {} };
+    self.enumerate.getNumber = function (cell) {
+      var maxNumber = 0;
+      self.workspace.graph.getCells().forEach(function (existentCell) {
+        if (existentCell.attributes.uri.indexOf(cell.attributes.uri + '-') != -1) {
+          var number = parseInt(existentCell.attributes.uri.split(cell.attributes.uri + '-')[1]);
+          if (!isNaN(number)) {
+            maxNumber = number > maxNumber ? number : maxNumber;
+          }
+        }
+      });
+      return maxNumber + 1;
+    }
   }
 }
 
@@ -246,6 +268,11 @@ CrowdEditor.prototype.initPalette = function () {
         //add the cell to workspace graph
         self.workspace.graph.addCell(s);
 
+        //enumerate the uri of the new element to differentiate it from others
+        if (self.config.enumerate) {
+          s.prop('uri', s.prop('uri') + '-' + self.enumerate.getNumber(s));
+        }
+
         //fit paper to the new content
         self.workspace.fitPaper();
       }
@@ -270,6 +297,7 @@ CrowdEditor.prototype.initTools = function () {
   self.tools.load = {};
   self.tools.save = {};
   self.tools.model = {};
+  self.tools.translate = {};
   self.tools.clearWorkspace = {};
 
   //append dom row for the tools elements
@@ -343,6 +371,18 @@ CrowdEditor.prototype.initTools = function () {
 
   //layout tool
   self.tools.layout.init = function () {
+    //this function do the automatic layout (it's used in external functionalities)
+    self.tools.layout.doLayout = function () {
+      joint.layout.DirectedGraph.layout(self.workspace.graph,
+        {
+          marginX: 100,
+          marginY: 100
+        }
+      );
+
+      setTimeout(() => self.workspace.fitPaper());
+    }
+
     //append dom for layout tool
     $('#crowd-tools-row-' + self.id).append(
       '<div class="form-group"> \
@@ -354,14 +394,7 @@ CrowdEditor.prototype.initTools = function () {
 
     //event handler when click layout
     $('#crowd-tools-layout-input-' + self.id).on('click', function () {
-      joint.layout.DirectedGraph.layout(self.workspace.graph,
-        {
-          marginX: 100,
-          marginY: 100
-        }
-      );
-
-      setTimeout(() => self.workspace.fitPaper());
+      self.tools.layout.doLayout();
 
       $(".tooltip").tooltip('hide');
       $(this).blur();
@@ -660,9 +693,9 @@ CrowdEditor.prototype.initTools = function () {
     //append dom for save tool
     $('#crowd-tools-row-' + self.id).append(
       '<div class="form-group"> \
-        <button class="btn btn-primary" id="crowd-tools-save-input-' + self.id + '" type="button" \
+        <button class="btn btn-primary iconify" id="crowd-tools-save-input-' + self.id + '" type="button" \
         data-toggle="tooltip" data-original-title="Save Diagram on Cloud" data-placement="bottom" > \
-        <i class="material-icons">cloud_upload</i></button> \
+        <i class="fa fa-cloud-upload"></i> Save</button> \
       </div>'
     );
 
@@ -686,9 +719,9 @@ CrowdEditor.prototype.initTools = function () {
     //append dom for load tool
     $('#crowd-tools-row-' + self.id).append(
       '<div class="form-group"> \
-        <button class="btn btn-primary" id="crowd-tools-load-input-' + self.id + '" type="button" \
+        <button class="btn btn-primary iconify" id="crowd-tools-load-input-' + self.id + '" type="button" \
         data-toggle="tooltip" data-original-title="Load Diagram from Cloud" data-placement="bottom" > \
-        <i class="material-icons">cloud_download</i></button> \
+        <i class="fa fa-cloud-download"></i> Load</button> \
       </div>'
     );
 
@@ -779,6 +812,54 @@ CrowdEditor.prototype.initTools = function () {
     });
   }
   self.tools.model.init();
+
+  //translate conceptual model tool
+  self.tools.translate.init = function () {
+    //append dom for change translate tool
+    $('#crowd-tools-row-' + self.id).append(
+      '<div class="form-group"> \
+      <div class="dropdown"> \
+        <button class="btn btn-danger dropdown-toggle" type="button" id="crowd-tools-translate-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+          <i class="fa fa-random"></i> Translate \
+        </button> \
+        <div class="dropdown-menu" aria-labelledby="crowd-tools-translate-dropdown-' + self.id + '"></div> \
+      </div> \
+    </div>'
+    );
+
+    //draw a button for each conceptual model and put the name on data attribute
+    $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
+      if (conceptualModel.initPalette != null) {
+        $('[aria-labelledby="crowd-tools-translate-dropdown-' + self.id + '"]').append(
+          '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-translate-schema-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
+        );
+      }
+    })
+
+    //event handler when click a translate button
+    $('[name=crowd-tools-translate-schema-' + self.id + "]").on('click', function () {
+      var btn = this;
+      event.stopPropagation();
+
+      var model = $(this).attr('data-model');
+      $('#crowd-tools-translate-schema-' + self.id).attr('data-model', model);
+
+      var originalBtn = $(btn).html();
+      $(btn).html(originalBtn + ' <i class="loading fa fa-circle-o-notch fa-spin"></i>');
+
+      self.tools.export.exportTo(model,
+        function (schema) {
+          schema.hasPositions = false;
+          self.tools.import.importFrom({ model: model, schema: JSON.stringify(schema, null, 4) });
+        },
+        function () {
+          $(btn).html(originalBtn);
+          $('[aria-labelledby="crowd-tools-translate-dropdown-' + self.id + '"]').dropdown('hide');
+        }
+      );
+    });
+  }
+  self.tools.translate.init();
 
   //clear workspace tool
   self.tools.clearWorkspace.init = function () {
@@ -971,8 +1052,16 @@ CrowdEditor.prototype.initWorkspace = function () {
 
   //function that set workspace scroll to the center
   self.workspace.centerScroll = function () {
-    $('#crowd-workspace-' + self.id).scrollLeft(($('#crowd-workspace-scrollable-' + self.id).width() - $('#crowd-workspace-' + self.id).width()) / 2);
-    $('#crowd-workspace-' + self.id).scrollTop(($('#crowd-workspace-scrollable-' + self.id).height() - $('#crowd-workspace-' + self.id).height()) / 2);
+    var offsetWidth = $('#crowd-workspace-' + self.id).width() > $('#crowd-workspace-paper-' + self.id).width() ? 0 : 50;
+    var widthToFit = $('#crowd-workspace-' + self.id).width() > $('#crowd-workspace-paper-' + self.id).width()
+      ? $('#crowd-workspace-' + self.id).width()
+      : $('#crowd-workspace-paper-' + self.id).width();
+    var offsetHeight = $('#crowd-workspace-' + self.id).height() > $('#crowd-workspace-paper-' + self.id).height() ? 0 : 50;
+    var heightToFit = $('#crowd-workspace-' + self.id).height() > $('#crowd-workspace-paper-' + self.id).height()
+      ? $('#crowd-workspace-' + self.id).height()
+      : $('#crowd-workspace-paper-' + self.id).height();
+    $('#crowd-workspace-' + self.id).scrollLeft(($('#crowd-workspace-scrollable-' + self.id).width() - widthToFit) / 2 - offsetWidth);
+    $('#crowd-workspace-' + self.id).scrollTop(($('#crowd-workspace-scrollable-' + self.id).height() - heightToFit) / 2 - offsetHeight);
   };
 
   //function that fits the paper size and scroll to the elements position
@@ -1222,6 +1311,11 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         //add it to the graph
         self.workspace.graph.addCell(link);
 
+        //enumerate the uri of the new link to differentiate it from others
+        if (self.config.enumerate) {
+          link.prop('uri', link.prop('uri') + '-' + self.enumerate.getNumber(link));
+        }
+
         //change specific props of the link if they are defined
         if (config.link && config.link.props) {
           for (prop in config.link.props) {
@@ -1326,6 +1420,11 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         //add new element to the graph
         self.workspace.graph.addCell(newElement);
 
+        //enumerate the uri of the new element to differentiate it from others
+        if (self.config.enumerate) {
+          newElement.prop('uri', newElement.prop('uri') + '-' + self.enumerate.getNumber(newElement));
+        }
+
         //create the link of the indicated type or else basic type for connect the selected element with the new element
         var link = config.link && config.link.type ? self.palette.links[config.link.type].clone() : self.palette.links.basic.clone();
 
@@ -1337,6 +1436,11 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
 
         //add link to the graph
         self.workspace.graph.addCell(link);
+
+        //enumerate the uri of the new link to differentiate it from others
+        if (self.config.enumerate) {
+          link.prop('uri', link.prop('uri') + '-' + self.enumerate.getNumber(link));
+        }
 
         //change specific props of the link if they are defined
         if (config.link && config.link.props) {
@@ -1419,6 +1523,9 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
 
           //resize the view to the new size calculated in the correpondiente direction of resizing
           elementView.model.resize(newSize.width, newSize.height, { direction: config.direction });
+
+          //re-set name for wrap it to the new size
+          elementView.model.trigger('change:name', elementView.model, elementView.model.prop('name'));
         });
 
         $('#crowd-workspace-' + self.id).on('mouseup.finishResizing', function (evt) {
@@ -1603,7 +1710,7 @@ CrowdEditor.prototype.initInspector = function () {
           <div class="col"> \
             <div class="form-group"> \
               ' + (attribute.label ? '<label>' + attribute.label + '</label>' : '') + '\
-              <' + (attribute.input == 'textarea' ? 'textarea' : 'input type="text"') + ' placeholder="' + (attribute.placeholder ? attribute.placeholder : attribute.label) + '" class="form-control" id="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '" /> \
+              <' + (attribute.input == 'textarea' ? 'textarea rows="3"' : 'input type="text"') + ' placeholder="' + (attribute.placeholder ? attribute.placeholder : attribute.label) + '" class="form-control" id="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '" /> \
             </div> \
           </div> \
         </span>');
@@ -1785,8 +1892,10 @@ CrowdEditor.prototype.initInspector = function () {
     self.inspector.hideInformation();
   });
 
-  self.workspace.graph.on('remove', function () {
+  self.workspace.graph.on('add remove', function () {
     self.inspector.hideInformation();
+    self.workspace.linkClickedFlag = false;
+    self.workspace.paper.hideTools();
   });
 }
 

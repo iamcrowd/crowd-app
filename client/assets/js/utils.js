@@ -110,3 +110,16 @@ function SVG2PNG(svg, callback) {
   canvg(canvas, data); // Render SVG on Canvas.
   callback(canvas); // Execute callback function.
 }
+
+function toURI(str) {
+  // return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); }).replace(' ', '');
+  return str.split(' ').join('-').split('\n').join('-').toLowerCase();
+}
+
+function fromURI(str) {
+  return capitalize(str.split('-').join(' '));
+}
+
+function capitalize(str) {
+  return str.toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+}

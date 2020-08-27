@@ -45,8 +45,6 @@ export class EditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(this.router.getCurrentNavigation());
-
     this.diagram = this.router.getCurrentNavigation()?.extras?.state?.diagram;
 
     const availableConceptualModels = {
@@ -78,13 +76,7 @@ export class EditorComponent implements OnInit {
           columns: 2
         }
       },
-      ngRouter: this.router,
-      ngFiles: {
-        load: {
-          modal: 'crowd-tools-load-modal',
-          get: this.getDiagrams()
-        }
-      },
+      enumerate: true,
       tools: {
         import: {
           errors: {
@@ -95,6 +87,13 @@ export class EditorComponent implements OnInit {
               });
             }
           }
+        }
+      },
+      ngRouter: this.router,
+      ngFiles: {
+        load: {
+          modal: 'crowd-tools-load-modal',
+          get: this.getDiagrams()
         }
       },
       preloadDiagram: this.diagram

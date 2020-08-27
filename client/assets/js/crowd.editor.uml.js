@@ -16,7 +16,7 @@ var CrowdEditorUml = {
       parentType: 'class',
       type: 'class',
       name: 'Class',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Class',
+      uri: 'http://crowd.fi.uncoma.edu.ar#class',
       attrs: {
         '.uml-class-name-rect': {
           fill: crowd.palette.colors.class,
@@ -48,7 +48,7 @@ var CrowdEditorUml = {
       parentType: 'class',
       type: 'abstract',
       name: 'Abstract',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Abstract',
+      uri: 'http://crowd.fi.uncoma.edu.ar#abstract',
       attrs: {
         '.uml-class-name-rect': {
           fill: crowd.palette.colors.abstract,
@@ -80,7 +80,7 @@ var CrowdEditorUml = {
       parentType: 'class',
       type: 'interface',
       name: 'Interface',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Interface',
+      uri: 'http://crowd.fi.uncoma.edu.ar#interface',
       attrs: {
         '.uml-class-name-rect': {
           fill: crowd.palette.colors.interface,
@@ -119,7 +119,7 @@ var CrowdEditorUml = {
         target: null
       },
       direction: 'target',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Association',
+      uri: 'http://crowd.fi.uncoma.edu.ar#association',
       attrs: {
         line: {
           stroke: 'black',
@@ -144,7 +144,7 @@ var CrowdEditorUml = {
         target: null
       },
       direction: 'target',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Aggregation',
+      uri: 'http://crowd.fi.uncoma.edu.ar#aggregation',
       attrs: {
         line: {
           stroke: 'black',
@@ -170,7 +170,7 @@ var CrowdEditorUml = {
         target: null
       },
       direction: 'target',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Composition',
+      uri: 'http://crowd.fi.uncoma.edu.ar#composition',
       attrs: {
         line: {
           stroke: 'black',
@@ -196,7 +196,7 @@ var CrowdEditorUml = {
         target: null
       },
       direction: 'target',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Generalization',
+      uri: 'http://crowd.fi.uncoma.edu.ar#generalization',
       attrs: {
         line: {
           stroke: 'black',
@@ -222,7 +222,7 @@ var CrowdEditorUml = {
         target: null
       },
       direction: 'target',
-      uri: 'http://crowd.fi.uncoma.edu.ar#Implementation',
+      uri: 'http://crowd.fi.uncoma.edu.ar#implementation',
       attrs: {
         line: {
           stroke: 'black',
@@ -457,10 +457,10 @@ var CrowdEditorUml = {
 
     //event when the elements name change
     crowd.workspace.graph.on('change:name', function (element, newName) {
-      console.log('change:name', { element, newName });
+      // console.log('change:name', { element, newName });
 
       if (element.isElement()) {
-        element.attributes.uri = element.attributes.uri.split("#")[0] + "#" + newName;
+        element.attributes.uri = element.attributes.uri.split("#")[0] + "#" + toURI(newName);
         $('#crowd-inspector-content--uri--' + crowd.id).val(element.attributes.uri);
         element.findView(crowd.workspace.paper).render();
       }
@@ -468,22 +468,22 @@ var CrowdEditorUml = {
 
     //event when the elements uri change
     crowd.workspace.graph.on('change:uri', function (element, newUri) {
-      console.log('change:uri', { element, newUri });
+      // console.log('change:uri', { element, newUri });
 
       if (element.isElement()) {
         var newName = newUri.split('#');
         newName.shift();
         newName = newName.join('#');
 
-        element.attributes.name = newName;
-        $('#crowd-inspector-content--name--' + crowd.id).val(newName);
+        element.attributes.name = fromURI(newName);
+        $('#crowd-inspector-content--name--' + crowd.id).val(fromURI(newName));
         element.trigger('change:name', element, element.prop('name'));
       }
     });
 
     //event when the elements attributes change
     crowd.workspace.graph.on('change:attributes', function (element, newAttributes, opt) {
-      console.log('change:attributes', { element, previosAttributes: element._previousAttributes.attributes, newAttributes, opt });
+      // console.log('change:attributes', { element, previosAttributes: element._previousAttributes.attributes, newAttributes, opt });
 
       if (element.isElement()) {
         //adjust element size if add or remove element
@@ -503,7 +503,7 @@ var CrowdEditorUml = {
 
     //event when the elements methods change
     crowd.workspace.graph.on('change:methods', function (element, newMethods, opt) {
-      console.log('change:methods', { element, previosMethods: element._previousAttributes.methods, newMethods, opt });
+      // console.log('change:methods', { element, previosMethods: element._previousAttributes.methods, newMethods, opt });
 
       if (element.isElement()) {
         //adjust element size if add or remove element
@@ -523,7 +523,7 @@ var CrowdEditorUml = {
 
     //event when the links type change (types are: association, aggregation, composition, etc)
     crowd.workspace.graph.on('change:type', function (link, newType) {
-      console.log('change:type', { link, newType });
+      // console.log('change:type', { link, newType });
 
       if (link.isLink()) {
         //replace link attributes and markup with the palette default component of the newtype
@@ -553,7 +553,7 @@ var CrowdEditorUml = {
 
     //event when the links cardinality change
     crowd.workspace.graph.on('change:cardinality', function (link, newCardinality) {
-      console.log('change:cardinality', { link, newCardinality });
+      // console.log('change:cardinality', { link, newCardinality });
 
       if (link.isLink() && newCardinality != null) {
         link.labels([
@@ -585,7 +585,7 @@ var CrowdEditorUml = {
 
     //event when the links direction change
     crowd.workspace.graph.on('change:direction', function (link, newDirection) {
-      console.log('change:direction', { link, newDirection });
+      // console.log('change:direction', { link, newDirection });
 
       if (link.isLink()) {
         if (newDirection == 'source') {
@@ -791,7 +791,7 @@ var CrowdEditorUml = {
                 var newName = value.split('#');
                 newName.shift();
                 newName = newName.join('#');
-                classesObj[classe.name].prop(attribute, newName);
+                classesObj[classe.name].prop(attribute, fromURI(newName));
                 break;
               case 'attrs':
                 classesObj[classe.name].prop('attributes', value)
@@ -811,6 +811,9 @@ var CrowdEditorUml = {
           crowd.workspace.graph.addCell(linksObj[link.name]);
           $.each(link, function (attribute, value) {
             switch (attribute) {
+              case 'name':
+                linksObj[link.name].prop('uri', value);
+                break;
               case 'classes':
                 if (link.type == "generalization") {
                   linksObj[link.name].source(classesObj[value[0]]);
