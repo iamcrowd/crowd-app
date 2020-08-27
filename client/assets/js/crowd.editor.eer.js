@@ -36,7 +36,7 @@ var CrowdEditorEer = {
         }
       },
       size: {
-        width: 80,
+        width: 90,
         height: 40
       }
     });
@@ -64,7 +64,7 @@ var CrowdEditorEer = {
         }
       },
       size: {
-        width: 80,
+        width: 90,
         height: 40
       }
     });
@@ -90,7 +90,7 @@ var CrowdEditorEer = {
         }
       },
       size: {
-        width: 80,
+        width: 90,
         height: 60
       }
     });
@@ -118,7 +118,7 @@ var CrowdEditorEer = {
         }
       },
       size: {
-        width: 80,
+        width: 90,
         height: 60
       }
     });
@@ -142,7 +142,7 @@ var CrowdEditorEer = {
         }
       },
       size: {
-        width: 60,
+        width: 70,
         height: 40
       }
     });
@@ -166,7 +166,7 @@ var CrowdEditorEer = {
         }
       },
       size: {
-        width: 60,
+        width: 70,
         height: 40
       }
     });
@@ -190,7 +190,7 @@ var CrowdEditorEer = {
         }
       },
       size: {
-        width: 60,
+        width: 70,
         height: 40
       }
     });
@@ -219,7 +219,7 @@ var CrowdEditorEer = {
         }
       },
       size: {
-        width: 60,
+        width: 70,
         height: 40
       }
     });
@@ -272,7 +272,7 @@ var CrowdEditorEer = {
         }
       },
       size: {
-        width: 60,
+        width: 70,
         height: 40
       }
     });

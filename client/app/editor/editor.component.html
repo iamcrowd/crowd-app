@@ -11,7 +11,7 @@
       </div>
       <div class="modal-body">
         <div class="row">
-          <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3" *ngFor="let diagram of diagrams">
+          <div class="col-md-6 col-lg-3 col-xl-3" *ngFor="let diagram of diagrams">
             <div class="card text-white bg-dark mb-3" (click)="loadDiagram(diagram)">
               <div class="card-header">
                 <span class="crowd-model-label {{diagram.model}}">{{diagram.model}}</span>{{diagram.name}}
@@ -25,6 +25,54 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="crowd-tools-save-modal" class="modal fade">
+  <div class="modal-dialog modal-dialog-scrollable modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Save Diagram on Cloud</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="card text-white bg-dark mb-3">
+          <div class="card-body">
+            <img class="crowd-diagram-preview-save" src="{{preview}}" />
+          </div>
+        </div>
+        <form [formGroup]="diagramForm"  autocomplete="off">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">
+                <i class="fa fa-fw fa-file"></i>
+              </span>
+            </div>
+            <input class="form-control" type="text" name="diagramName" formControlName="diagramName" placeholder="Name"
+              [ngClass]="setValid('diagramName')" autocomplete="off">
+            <div class="invalid-feedback">
+              <div *ngIf="diagramName.errors && diagramName.errors.required">
+                Name is required
+              </div>
+              <div *ngIf="diagramName.errors && (diagramName.errors.minlength || diagramName.errors.maxlength)">
+                Name must be at 4-30 characters long
+              </div>
+              <div *ngIf="diagramName.errors && diagramName.errors.pattern">
+                Name can only have characters, numbers and _ or - symbols
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="resetDiagramForm()">Close</button>
+        <button class="btn btn-dark pull-right" type="submit" (click)="addDiagram()">
+          <i class="fa fa-save"></i> Save
+        </button>
       </div>
     </div>
   </div>

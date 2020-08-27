@@ -3,10 +3,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { DiagramService } from '../services/diagram.service';
 import { Diagram } from '../shared/models/diagram.model';
+import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms';
 
 declare var iziToast;
-declare var joint;
-declare var $;
 
 declare var CrowdEditor;
 declare var CrowdEditorEer;
@@ -20,16 +19,33 @@ declare var CrowdMetamodel;
 })
 export class EditorComponent implements OnInit {
 
+  //reference to editor object
   editor: any;
+  //actual conceptual model for the editor palette
   conceptualModel: string;
+  //diagrams loaded from db
   diagrams: Diagram[] = [];
-  //for preloaded diagram
-  diagram: string;
+  //for actual editing file (that is saved on cloud)
+  file: object;
+  //for preloaded schema
+  schema: object;
+  //reference to actual preview of diagram
+  preview: string;
+
+  //diagram save form
+  diagramForm: FormGroup;
+  diagramName = new FormControl('', [
+    Validators.required,
+    Validators.minLength(4),
+    Validators.maxLength(30),
+    Validators.pattern('[a-zA-Z0-9_-\\s]*')
+  ]);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private diagramService: DiagramService
+    private diagramService: DiagramService,
+    private formBuilder: FormBuilder
   ) {
     this.route.params.subscribe(params => {
       this.conceptualModel = params.conceptualModel;
@@ -45,7 +61,8 @@ export class EditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.diagram = this.router.getCurrentNavigation()?.extras?.state?.diagram;
+    this.file = this.router.getCurrentNavigation()?.extras?.state?.file;
+    this.schema = this.router.getCurrentNavigation()?.extras?.state?.schema;
 
     const availableConceptualModels = {
       uml: CrowdEditorUml,
@@ -72,7 +89,7 @@ export class EditorComponent implements OnInit {
       }),
       palette: {
         grid: {
-          size: this.conceptualModel == 'eer' ? 90 : 100,
+          size: 100,
           columns: 2
         }
       },
@@ -89,14 +106,24 @@ export class EditorComponent implements OnInit {
           }
         }
       },
+      ngComponent: this,
       ngRouter: this.router,
       ngFiles: {
         load: {
           modal: 'crowd-tools-load-modal',
-          get: this.getDiagrams()
+          get: 'getDiagrams'
+        },
+        save: {
+          modal: 'crowd-tools-save-modal',
+          put: 'editDiagram'
         }
       },
-      preloadDiagram: this.diagram
+      preloadedSchema: this.schema,
+      actualFile: this.file
+    });
+
+    this.diagramForm = this.formBuilder.group({
+      diagramName: this.diagramName
     });
   }
 
@@ -112,6 +139,47 @@ export class EditorComponent implements OnInit {
   }
 
   loadDiagram(diagram: Diagram): void {
-    this.editor.tools.import.importFrom({ model: diagram.model, schema: diagram.content });
+    this.editor.tools.import.importFrom({ model: diagram.model, schema: diagram.content, file: diagram });
+  }
+
+  editDiagram(): void {
+    this.editor.tools.file.getFile((diagram) => {
+      this.diagramService.editDiagram(diagram).subscribe(
+        res => iziToast.success({ message: 'Diagram saved successfully.' }),
+        error => iziToast.error({ message: 'There was an error when try to save the Diagram.' })
+      );
+    });
+  }
+
+  addDiagram(): void {
+    console.log('addDiagram');
+    this.diagramForm.markAllAsTouched();
+    if (this.diagramForm.valid) {
+      this.editor.tools.file.getFile((diagram) => {
+        diagram._id = null;
+        diagram.name = this.diagramName.value;
+        this.diagramService.addDiagram(diagram).subscribe(
+          res => {
+            console.log(res);
+            iziToast.success({ message: 'Diagram saved successfully.' });
+            this.editor.config.actualFile = res;
+            this.editor.tools.file.updateActualFile();
+            this.resetDiagramForm();
+          },
+          error => iziToast.error({ message: 'There was an error when try to save the Diagram.' })
+        );
+      });
+    }
+  }
+
+  resetDiagramForm(): void {
+    this.diagramForm.reset();
+  }
+
+  setValid(control): object {
+    return {
+      'is-invalid': this[control].touched && !this[control].valid,
+      'is-valid': this[control].touched && this[control].valid
+    };
   }
 }

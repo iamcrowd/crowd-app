@@ -69,14 +69,17 @@ CrowdEditor.prototype.init = function () {
   self.workspace.fitPaper();
   self.workspace.centerScroll();
 
-  //preload a diagram if it's sended as parameter
-  if (self.config.preloadDiagram) {
-    var schema = JSON.parse(self.config.preloadDiagram);
+  //preload a schema if it's sended as parameter
+  if (self.config.preloadedSchema) {
+    var schema = self.config.preloadedSchema;
     self.fromJSONSchema(schema);
     if (schema.hasPositions != null && !schema.hasPositions) {
       self.tools.layout.doLayout();
     }
   }
+
+  //update the actual file label if a file is loaded
+  self.tools.file.updateActualFile();
 
   //initialize enumerate for elements and links in case it's setted in config
   if (self.config.enumerate) {
@@ -294,8 +297,9 @@ CrowdEditor.prototype.initTools = function () {
   self.tools.layout = {};
   self.tools.export = {};
   self.tools.import = {};
-  self.tools.load = {};
   self.tools.save = {};
+  self.tools.load = {};
+  self.tools.file = {};
   self.tools.model = {};
   self.tools.translate = {};
   self.tools.clearWorkspace = {};
@@ -535,6 +539,13 @@ CrowdEditor.prototype.initTools = function () {
 
   //import tool
   self.tools.import.init = function () {
+    //this function do the import actions when the model is not changed using self.tools.import.diagramToImport object
+    self.tools.import.importFromLocal = function () {
+      self.fromJSONSchema(self.tools.import.diagramToImport.schema);
+      self.config.actualFile = self.tools.import.diagramToImport.file;
+      self.tools.file.updateActualFile();
+    };
+
     //this function is called from outside editor for load a file through load modal or internally for import tool
     self.tools.import.importFrom = function (diagram) {
       //preserve the actual diagram to be imported
@@ -546,7 +557,7 @@ CrowdEditor.prototype.initTools = function () {
           $('#crowd-tools-import-advertisement-' + self.id).modal('show');
           $('.modal').modal('hide');
         } else {
-          self.fromJSONSchema(JSON.parse(diagram.schema));
+          self.tools.import.importFromLocal();
           $('.modal').modal('hide');
         }
       }
@@ -554,7 +565,7 @@ CrowdEditor.prototype.initTools = function () {
       else {
         if (self.config.availableConceptualModels[diagram.model].initPalette != null) {
           if (self.config.ngRouter) {
-            self.config.ngRouter.navigate(['/editor/' + diagram.model], { state: { diagram: diagram.schema } });
+            self.config.ngRouter.navigate(['/editor/' + diagram.model], { state: { schema: diagram.schema, file: diagram.file } });
             $('.modal').modal('hide');
           } else
             window.location.href = '/editor/' + diagram.model;
@@ -594,7 +605,7 @@ CrowdEditor.prototype.initTools = function () {
 
     //event handler when click proceed button in advertisement for import diagram
     $('#crowd-tools-import-advertisement-proceed-' + self.id).on('click', function () {
-      self.fromJSONSchema(JSON.parse(self.tools.import.diagramToImport.schema));
+      self.tools.import.importFromLocal();
       $(".tooltip").tooltip('hide');
     });
 
@@ -683,31 +694,68 @@ CrowdEditor.prototype.initTools = function () {
 
     //event handler when click upload imported schema
     $('#crowd-tools-import-schema-' + self.id).on('click', function () {
-      self.tools.import.importFrom({ model: $(this).attr('data-model'), schema: $('#crowd-tools-import-raw-' + self.id).val() });
+      self.tools.import.importFrom({ model: $(this).attr('data-model'), schema: JSON.parse($('#crowd-tools-import-raw-' + self.id).val()), file: self.config.actualFile });
+
+    });
+
+    //event on close import modal
+    $('#crowd-tools-import-check-schema-modal-' + self.id).on("hidden.bs.modal", function () {
+      $('#crowd-tools-import-file-' + self.id).val('');
+      $('#crowd-tools-import-file-' + self.id).next('.custom-file-label').html('Choose file');
+      $('#crowd-tools-import-raw-' + self.id).val('');
     });
   }
   self.tools.import.init();
 
   //save to cloud tool
   self.tools.save.init = function () {
-    //append dom for save tool
-    $('#crowd-tools-row-' + self.id).append(
-      '<div class="form-group"> \
-        <button class="btn btn-primary iconify" id="crowd-tools-save-input-' + self.id + '" type="button" \
-        data-toggle="tooltip" data-original-title="Save Diagram on Cloud" data-placement="bottom" > \
-        <i class="fa fa-cloud-upload"></i> Save</button> \
-      </div>'
-    );
-
-    //event handler when click save
-    $('#crowd-tools-save-input-' + self.id).on('click', function () {
+    //function to open save as modal
+    self.tools.save.saveAs = function () {
       if (self.config.ngFiles) {
         if (self.config.ngFiles.save) {
           if (self.config.ngFiles.save.modal) {
+            self.toBase64(function (preview) {
+              self.config.ngComponent.preview = preview;
+            });
             $('#' + self.config.ngFiles.save.modal).modal('show');
           }
         }
       }
+    };
+
+    //append dom for save tool
+    $('#crowd-tools-row-' + self.id).append(
+      '<div class="form-group"> \
+        <div class="btn-group"> \
+          <button type="button" class="btn btn-primary" id="crowd-tools-save-input-save-' + self.id + '" \
+          data-toggle="tooltip" data-original-title="Save Diagram on Cloud" data-placement="bottom"> \
+            <i class="fa fa-cloud-upload"></i> Save \
+          </button> \
+          <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-reference="parent"> \
+            <span class="sr-only">Toggle Dropdown</span> \
+          </button> \
+          <div class="dropdown-menu"> \
+            <button class="dropdown-item" id="crowd-tools-save-input-saveas-' + self.id + '">Save as</button> \
+          </div> \
+        </div> \
+      </div>'
+    );
+
+    //event handler when click save
+    $('#crowd-tools-save-input-save-' + self.id).on('click', function () {
+      if (self.config.actualFile)
+        self.config.ngComponent[self.config.ngFiles.save.put]();
+      else
+        self.tools.save.saveAs();
+
+      $(".tooltip").tooltip('hide');
+      $(this).blur();
+    });
+
+    //event handler when click save as
+    $('#crowd-tools-save-input-saveas-' + self.id).on('click', function () {
+      self.tools.save.saveAs();
+
       $(".tooltip").tooltip('hide');
       $(this).blur();
     });
@@ -733,7 +781,7 @@ CrowdEditor.prototype.initTools = function () {
             $('#' + self.config.ngFiles.load.modal).modal('show');
           }
           if (self.config.ngFiles.load.get) {
-            self.config.ngFiles.load.get();
+            self.config.ngComponent[self.config.ngFiles.load.get]();
           }
         }
       }
@@ -742,6 +790,46 @@ CrowdEditor.prototype.initTools = function () {
     });
   }
   self.tools.load.init();
+
+  //actual file label tool
+  self.tools.file.init = function () {
+    //update the actual file label if a file is loaded
+    self.tools.file.updateActualFile = function () {
+      if (self.config.actualFile && self.config.actualFile.name)
+        $('#crowd-tools-actual-file-' + self.id).html(self.config.actualFile.name);
+      else
+        $('#crowd-tools-actual-file-' + self.id).html('-');
+
+      $('.modal').modal('hide');
+    }
+
+    self.tools.file.getFile = function (callback) {
+      if (self.config.actualFile) {
+        self.config.actualFile.content = self.toJSONSchema();
+        self.config.actualFile.model = self.config.conceptualModel.name;
+        self.toBase64(function (preview) {
+          self.config.actualFile.preview = preview;
+          callback(self.config.actualFile);
+        });
+      } else {
+        var newFile = {};
+        newFile.content = self.toJSONSchema();
+        newFile.model = self.config.conceptualModel.name;
+        self.toBase64(function (preview) {
+          newFile.preview = preview;
+          callback(newFile);
+        });
+      }
+    }
+
+    //append dom for save tool
+    $('#crowd-tools-row-' + self.id).append(
+      '<label data-toggle="tooltip" data-original-title="Diagram loaded from Cloud" data-placement="bottom"><i class="fa fa-file-code-o"></i>: \
+        <span id="crowd-tools-actual-file-' + self.id + '"></span> \
+      </label>'
+    );
+  }
+  self.tools.file.init();
 
   //change conceptual model tool
   self.tools.model.init = function () {
@@ -806,7 +894,7 @@ CrowdEditor.prototype.initTools = function () {
     $('[name=crowd-tools-model-advertisement-proceed-' + self.id + "]").on('click', function () {
       console.log('/editor/' + $(this).attr('data-model'));
       if (self.config.ngRouter)
-        self.config.ngRouter.navigate(['/editor/' + $(this).attr('data-model')]);
+        self.config.ngRouter.navigate(['/editor/' + $(this).attr('data-model')], { state: { file: self.config.actualFile } });
       else
         window.location.href = '/editor/' + $(this).attr('data-model');
     });
@@ -850,7 +938,7 @@ CrowdEditor.prototype.initTools = function () {
       self.tools.export.exportTo(model,
         function (schema) {
           schema.hasPositions = false;
-          self.tools.import.importFrom({ model: model, schema: JSON.stringify(schema, null, 4) });
+          self.tools.import.importFrom({ model: model, schema: schema, file: self.config.actualFile });
         },
         function () {
           $(btn).html(originalBtn);
@@ -1934,7 +2022,7 @@ CrowdEditor.prototype.initMap = function () {
     model: self.workspace.graph,
     gridSize: 1,
     background: {
-      color: $('#crowd-map-' + self.id).css("background-color")
+      color: $('#crowd-map-' + self.id).css("background-color"),
     },
     interactive: false
   });
@@ -2035,9 +2123,8 @@ CrowdEditor.prototype.fromJSONSchema = function (schema) {
 CrowdEditor.prototype.toBase64 = function (callback) {
   var self = this;
 
-  SVG2PNG($('#crowd-workspace-paper-' + self.id + ' svg')[0], function (canvas) {
-    var base64 = canvas.toDataURL("image/png");
-    callback(base64);
+  html2canvas($('#crowd-map-paper-' + self.id)[0]).then(function (canvas) {
+    callback(canvas.toDataURL("image/png"));
   });
 }
 

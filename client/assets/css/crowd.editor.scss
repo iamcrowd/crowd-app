@@ -91,6 +91,18 @@ $alt-accent: #262a2e;
   padding-right: 5px;
 }
 
+.crowd-tools > .row > .form-group > .btn-group .btn {
+  height: 30px !important;
+  padding: 2px 8px !important;
+  margin-top: 5px !important;
+}
+
+.crowd-tools > .row > label {
+  margin-top: 5px;
+  padding: 2px 0px 0px 15px;
+  height: 30px;
+}
+
 .crowd-workspace {
   // display: table-row;
   // flex: 1 1 auto;
@@ -110,7 +122,7 @@ $alt-accent: #262a2e;
   position: relative;
   width: 4000px;
   height: 4000px;
-  background-color: rgba(197,197,197,1.0);
+  background-color: rgba(197, 197, 197, 1);
   cursor: grab;
 }
 
@@ -121,6 +133,7 @@ $alt-accent: #262a2e;
   width: 1000px;
   height: 1000px;
   box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+  background: white;
   // transform: translate(-50%, -50%); //this bug dropdown menu and jointjs vectorizer in firefox
   // z-index: 1; //fix tools dropdown menu bug
 }
@@ -209,7 +222,7 @@ $alt-accent: #262a2e;
   position: relative;
   width: 200px;
   height: 200px;
-  background-color: rgba(197,197,197,1.0);
+  background-color: rgba(197, 197, 197, 1);
   // cursor: grab;
   overflow: hidden;
 }
@@ -221,8 +234,13 @@ $alt-accent: #262a2e;
   width: 130px;
   height: 130px;
   box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.75);
+  background: white;
   // transform: translate(-50%, -50%); //this bug dropdown menu and jointjs vectorizer in firefox
   // z-index: 1; //fix tools dropdown menu bug
+}
+
+.crowd-map-paper svg {
+  background: white;
 }
 
 .crowd-map-camera {
