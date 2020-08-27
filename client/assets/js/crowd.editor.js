@@ -822,12 +822,64 @@ CrowdEditor.prototype.initTools = function () {
       }
     }
 
-    //append dom for save tool
+    //append dom for file tool
     $('#crowd-tools-row-' + self.id).append(
       '<label data-toggle="tooltip" data-original-title="Diagram loaded from Cloud" data-placement="bottom"><i class="fa fa-file-code-o"></i>: \
         <span id="crowd-tools-actual-file-' + self.id + '"></span> \
-      </label>'
+      </label> \
+      <div class="form-group"> \
+        <button class="btn btn-danger iconify" id="crowd-tools-file-new-input-' + self.id + '" type="button" \
+        data-toggle="tooltip" data-original-title="Create New Diagram" data-placement="bottom" > \
+        <i class="fa fa-file"></i> New</button> \
+      </div>'
     );
+
+    //append dom for the advertisement modal when try to make new file
+    $('body').append(
+      '<div id="crowd-tools-file-new-advertisement-' + self.id + '" class="modal fade"> \
+        <div class="modal-dialog"> \
+          <div class="modal-content"> \
+            <div class="modal-header"> \
+              <h5 class="modal-title">Create new Diagram</h5> \
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+                <span aria-hidden="true">&times;</span> \
+              </button> \
+            </div> \
+            <div class="modal-body"> \
+              <p>Are you sure you want to create a new diagram?</p> \
+              <p><b>Changes may not be saved</b></p> \
+            </div> \
+            <div class="modal-footer"> \
+              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
+              <button id="crowd-tools-file-new-advertisement-proceed-' + self.id + '" \
+              type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
+            </div> \
+          </div> \
+        </div> \
+      </div>'
+    );
+
+    //event handler when click clear workspace that open advertisement modal
+    $('#crowd-tools-file-new-input-' + self.id).on('click', function () {
+      if (self.hasChanges()) {
+        $('#crowd-tools-file-new-advertisement-' + self.id).modal('show');
+      }
+      $(".tooltip").tooltip('hide');
+      $(this).blur();
+    });
+
+    //event handler when click proceed button in advertisement for clear workspace
+    $('#crowd-tools-file-new-advertisement-proceed-' + self.id).on('click', function () {
+      //clear the workspace elements
+      self.workspace.graph.clear();
+      //center workspace scroll
+      setTimeout(() => self.workspace.centerScroll());
+      //clear the actual file
+      self.config.actualFile = null;
+      self.tools.file.updateActualFile();
+
+      $(".tooltip").tooltip('hide');
+    });
   }
   self.tools.file.init();
 

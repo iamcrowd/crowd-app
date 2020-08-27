@@ -870,17 +870,20 @@ var CrowdEditorEer = {
             name: element.attributes.uri,
             isWeak: element.attributes.type == 'weakRelationship',
             position: element.attributes.position,
-            size: element.attributes.size,
+            size: element.attributes.size
           });
           //create the link for this relationship
           var relationshipLink = {
             id: element.cid,
             uri: element.attributes.uri,
             name: element.attributes.uri,
+            isWeak: element.attributes.type == 'weakRelationship',
             entities: [],
             cardinality: [],
             roles: [],
-            type: 'relationship'
+            type: 'relationship',
+            position: element.attributes.position,
+            size: element.attributes.size
           }
           //search for links connected to the relationship for add entities to relationship link
           crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
@@ -891,7 +894,7 @@ var CrowdEditorEer = {
                 : null);
             if (connectedEntity) {
               relationshipLink.entities.push(connectedEntity.attributes.uri);
-              relationshipLink.roles.push(connectedEntity.attributes.uri);
+              relationshipLink.roles.push(link.attributes.uri);
               relationshipLink.cardinality.push(cardinalityMap[link.attributes.cardinality]);
             }
           });
@@ -908,7 +911,9 @@ var CrowdEditorEer = {
             constraint: [
               inheritanceSubtypeMap[element.attributes.subtype]
             ],
-            type: 'isa'
+            type: 'isa',
+            position: element.attributes.position,
+            size: element.attributes.size
           }
           //search for links connected to the inheritance for add entities to inheritance link
           crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
@@ -937,6 +942,140 @@ var CrowdEditorEer = {
     return jsonSchema;
   },
   fromJSONSchema: function (crowd, schema) {
-    //to do
+    console.log('loadEER', schema);
+
+    var entitiesObj = {};
+    var relationshipsObj = {};
+    var attributesObj = {};
+    var inheritancesObj = {};
+    var linksObj = {};
+
+    //mapping of datatypes to the editor format
+    var datatypeMap = {
+      'String': 'varchar',
+      'String': 'char',
+      'Integer': 'int',
+      'Boolean': 'bit'
+    }
+
+    //mapping of cardinalities to the editor format
+    var cardinalityMap = function (cardinality) {
+      return cardinality.indexOf('*') != -1 ? 'N' : '1';
+    }
+
+    //mapping of inheritances to the editor format
+    var inheritanceSubtypeMap = {
+      'disjoint': 'disjoint',
+      'overlapping': 'overlaped',
+      'union': 'union'
+    }
+
+    if (schema) {
+      //add each entity and their properties
+      if (schema.entities) {
+        schema.entities.forEach(function (entity) {
+          entitiesObj[entity.name] = crowd.palette.elements[entity.isWeak ? 'weakEntity' : 'entity'].clone();
+          crowd.workspace.graph.addCell(entitiesObj[entity.name]);
+          $.each(entity, function (attribute, value) {
+            switch (attribute) {
+              case 'name':
+                var newName = value.split('#');
+                newName.shift();
+                newName = newName.join('#');
+                entitiesObj[entity.name].prop(attribute, fromURI(newName));
+                break;
+              case 'position': case 'size':
+                entitiesObj[entity.name].prop(attribute, value)
+                break;
+            }
+          });
+        });
+      }
+
+      //add each relationship and their properties
+      // if (schema.relationships) {
+      //   schema.relationships.forEach(function (relationship) {
+      //     relationshipsObj[relationship.name] = crowd.palette.elements[relationship.isWeak ? 'weakRelationship' : 'relationship'].clone();
+      //     crowd.workspace.graph.addCell(relationshipsObj[relationship.name]);
+      //     $.each(relationship, function (attribute, value) {
+      //       switch (attribute) {
+      //         case 'name':
+      //           var newName = value.split('#');
+      //           newName.shift();
+      //           newName = newName.join('#');
+      //           relationshipsObj[relationship.name].prop(attribute, fromURI(newName));
+      //           break;
+      //         case 'position': case 'size':
+      //           relationshipsObj[relationship.name].prop(attribute, value)
+      //           break;
+      //       }
+      //     });
+      //   });
+      // }
+
+      //add each link and their properties
+      if (schema.links) {
+        schema.links.forEach(function (link) {
+          switch (link.type) {
+            case 'relationship':
+              relationshipsObj[link.name] = crowd.palette.elements[link.isWeak ? 'weakRelationship' : 'relationship'].clone();
+              crowd.workspace.graph.addCell(relationshipsObj[link.name]);
+              $.each(link, function (attribute, value) {
+                switch (attribute) {
+                  case 'name':
+                    var newName = value.split('#');
+                    newName.shift();
+                    newName = newName.join('#');
+                    relationshipsObj[link.name].prop(attribute, fromURI(newName));
+                    break;
+                  case 'position': case 'size':
+                    relationshipsObj[link.name].prop(attribute, value)
+                    break;
+                }
+              });
+              link.entities.forEach(function (connectedEntity, index) {
+                linksObj[link.roles[index]] = crowd.palette.links.connector.clone();
+                linksObj[link.roles[index]].source(relationshipsObj[link.name]);
+                linksObj[link.roles[index]].target(entitiesObj[link.entities[index]]);
+                crowd.workspace.graph.addCell(linksObj[link.roles[index]]);
+                linksObj[link.roles[index]].prop('cardinality', cardinalityMap(link.cardinality[index]));
+              });
+              break;
+            case 'isa':
+              inheritancesObj[link.name] = crowd.palette.elements.inheritance.clone();
+              crowd.workspace.graph.addCell(inheritancesObj[link.name]);
+              $.each(link, function (attribute, value) {
+                switch (attribute) {
+                  case 'constraint':
+                    inheritancesObj[link.name].prop('subtype', inheritanceSubtypeMap[value[0]]);
+                    break;
+                  case 'position': case 'size': case 'uri':
+                    inheritancesObj[link.name].prop(attribute, value)
+                    break;
+                }
+              });
+              var inheritanceName = link.name.split('#');
+              inheritanceName.shift();
+              inheritanceName = inheritanceName.join('#');
+
+              var parentLinkName = link.parent + '-' + inheritanceName;
+              linksObj[parentLinkName] = crowd.palette.links.connector.clone();
+              linksObj[parentLinkName].source(inheritancesObj[link.name]);
+              linksObj[parentLinkName].target(entitiesObj[link.parent]);
+              crowd.workspace.graph.addCell(linksObj[parentLinkName]);
+
+              link.entities.forEach(function (connectedEntity, index) {
+                var linkName = link.entities[index] + '-' + inheritanceName;
+                linksObj[linkName] = crowd.palette.links.connector.clone();
+                linksObj[linkName].source(inheritancesObj[link.name]);
+                linksObj[linkName].target(entitiesObj[link.entities[index]]);
+                crowd.workspace.graph.addCell(linksObj[linkName]);
+                linksObj[linkName].prop('cardinality', 'U');
+              });
+              break;
+          }
+        });
+      }
+    }
   },
 }
