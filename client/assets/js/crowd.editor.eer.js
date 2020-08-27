@@ -844,8 +844,8 @@ var CrowdEditorEer = {
           //create the link for this attribute
           var attributeLink = {
             id: element.cid,
-            uri: element.attributes.uri,
-            name: element.attributes.uri,
+            // uri: element.attributes.uri,
+            // name: element.attributes.uri,
             entity: null,
             attribute: element.attributes.uri,
             type: 'attribute'
@@ -858,7 +858,12 @@ var CrowdEditorEer = {
                 ? link.getTargetElement()
                 : null);
             if (connectedEntity) {
-              attributeLink.entity = connectedEntity.attributes.uri;
+              if (connectedEntity.attributes.parentType == 'entity')
+                attributeLink.entity = connectedEntity.attributes.uri;
+              else if (connectedEntity.attributes.parentType == 'relationship')
+                attributeLink.relationship = connectedEntity.attributes.uri;
+              attributeLink.uri = link.attributes.uri;
+              attributeLink.name = link.attributes.uri;
             }
           });
           jsonSchema.links.push(attributeLink);
@@ -953,7 +958,6 @@ var CrowdEditorEer = {
     //mapping of datatypes to the editor format
     var datatypeMap = {
       'String': 'varchar',
-      'String': 'char',
       'Integer': 'int',
       'Boolean': 'bit'
     }
@@ -992,26 +996,29 @@ var CrowdEditorEer = {
         });
       }
 
-      //add each relationship and their properties
-      // if (schema.relationships) {
-      //   schema.relationships.forEach(function (relationship) {
-      //     relationshipsObj[relationship.name] = crowd.palette.elements[relationship.isWeak ? 'weakRelationship' : 'relationship'].clone();
-      //     crowd.workspace.graph.addCell(relationshipsObj[relationship.name]);
-      //     $.each(relationship, function (attribute, value) {
-      //       switch (attribute) {
-      //         case 'name':
-      //           var newName = value.split('#');
-      //           newName.shift();
-      //           newName = newName.join('#');
-      //           relationshipsObj[relationship.name].prop(attribute, fromURI(newName));
-      //           break;
-      //         case 'position': case 'size':
-      //           relationshipsObj[relationship.name].prop(attribute, value)
-      //           break;
-      //       }
-      //     });
-      //   });
-      // }
+      //add each attribute and their properties
+      if (schema.attributes) {
+        schema.attributes.forEach(function (attribute) {
+          attributesObj[attribute.name] = crowd.palette.elements[attribute.type].clone();
+          crowd.workspace.graph.addCell(attributesObj[attribute.name]);
+          $.each(attribute, function (attr, value) {
+            switch (attr) {
+              case 'name':
+                var newName = value.split('#');
+                newName.shift();
+                newName = newName.join('#');
+                attributesObj[attribute.name].prop(attr, fromURI(newName));
+                break;
+              case 'datatype':
+                attributesObj[attribute.name].prop(attr, datatypeMap[value]);
+                break;
+              case 'position': case 'size':
+                attributesObj[attribute.name].prop(attr, value)
+                break;
+            }
+          });
+        });
+      }
 
       //add each link and their properties
       if (schema.links) {
@@ -1072,6 +1079,17 @@ var CrowdEditorEer = {
                 crowd.workspace.graph.addCell(linksObj[linkName]);
                 linksObj[linkName].prop('cardinality', 'U');
               });
+              break;
+          }
+        });
+
+        schema.links.forEach(function (link) {
+          switch (link.type) {
+            case 'attribute':
+              linksObj[link.uri] = crowd.palette.links.connector.clone();
+              linksObj[link.uri].source(attributesObj[link.attribute]);
+              linksObj[link.uri].target(link.entity ? entitiesObj[link.entity] : relationshipsObj[link.relationship]);
+              crowd.workspace.graph.addCell(linksObj[link.uri]);
               break;
           }
         });
