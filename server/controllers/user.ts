@@ -6,6 +6,19 @@ import BaseCtrl from './base';
 class UserCtrl extends BaseCtrl {
   model = User;
 
+  //get all (if logged user is admin)
+  getAll = async (req, res) => {
+    try {
+      const resu = await User.findByAuthorization(req);
+      if (resu.status != 200 || resu?.user?.role != 'admin') throw new Error('unauthorized');
+
+      const docs = await this.model.find({});
+      res.status(200).json(docs);
+    } catch (err) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
+
   login = (req, res) => {
     this.model.findOne({ email: req.body.email }, (err, user) => {
       if (!user) { return res.sendStatus(403); }

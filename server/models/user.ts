@@ -1,3 +1,4 @@
+import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
 import * as mongoose from 'mongoose';
 
@@ -8,8 +9,8 @@ const userSchema = new mongoose.Schema({
   role: String
 });
 
-// Before saving the user, hash the password
-userSchema.pre('save', function(next): void {
+//before saving the user, hash the password
+userSchema.pre('save', function (next): void {
   const user = this;
   if (!user.isModified('password')) { return next(); }
   bcrypt.genSalt(10, (err, salt) => {
@@ -22,14 +23,15 @@ userSchema.pre('save', function(next): void {
   });
 });
 
-userSchema.methods.comparePassword = function(candidatePassword, callback): void {
+//compare provided password with db encrypted one
+userSchema.methods.comparePassword = function (candidatePassword, callback): void {
   bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
     if (err) { return callback(err); }
     callback(null, isMatch);
   });
 };
 
-// Omit the password and __v when returning a user
+//omit the password and __v when returning a user
 userSchema.set('toJSON', {
   transform: (doc, ret, options) => {
     delete ret.password;
@@ -37,6 +39,18 @@ userSchema.set('toJSON', {
     return ret;
   }
 });
+
+//decode the header authorization of a request in a User object (it's the actual logged user)
+userSchema.statics.findByAuthorization = async function (req) {
+  var authorization = req?.headers?.authorization?.split(' ')[1];
+  try {
+    var decoded = jwt.verify(authorization, process.env.SECRET_TOKEN);
+    const user = await User.findOne({ _id: decoded.user._id });
+    return { user: user, status: 200 };
+  } catch (e) {
+    return { status: 401 };
+  }
+}
 
 const User = mongoose.model('User', userSchema);
 

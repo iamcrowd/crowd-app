@@ -12,10 +12,15 @@
             <i class="fa fa-fw fa-home"></i> Home
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/editor/uml" [class.active]="isActive('editor')">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" id="navbar-editor-dropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false" [class.active]="isActive('editor')">
             <i class="fa fa-fw fa-th"></i> Editor
           </a>
+          <div class="dropdown-menu" aria-labelledby="navbar-editor-dropdown">
+            <a class="dropdown-item" routerLink="/editor/uml">UML</a>
+            <a class="dropdown-item" routerLink="/editor/eer">EER</a>
+          </div>
         </li>
         <li class="nav-item">
           <a class="nav-link" routerLink="/admin" routerLinkActive="active" *ngIf="auth.loggedIn && auth.isAdmin">

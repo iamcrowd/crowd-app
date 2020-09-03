@@ -32,14 +32,36 @@
 }
 
 .crowd-model-label.meta {
-  background: white;
-  color: black;
+  background: #191d21;
+  color: white;
+}
+
+.crowd-diagram-load-button {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 0px;
+  background: rgba(0, 0, 0, 0.7);
+  text-align: center;
+  transition: height 0.3s;
+}
+
+.card:hover > .crowd-diagram-load-button {
+  display: unset;
+  height: 100%;
+}
+
+.crowd-diagram-load-button > p {
+  // display: none;
+  margin-top: calc(50% - 10px);
+  font-size: 20px;
+  font-weight: 500;
 }
 
 .crowd-diagram-preview {
   background: white;
-  width: 100%;
-  border-radius: 0px 0px 4px 4px;
+  // border-radius: 0px 0px 4px 4px;
 }
 
 .crowd-diagram-preview-save {
@@ -50,4 +72,20 @@
 
 .crowd-diagram-preview-container {
   padding: 0;
+  text-align: center;
+  min-height: 50px;
+}
+
+.crowd-diagram-preview-container .crowd-diagram-btn {
+  width: 30px;
+  height: 25px;
+  padding: 0px;
+  margin-right: 5px;
+  // margin: -15px -16px 10px 0px;
+}
+
+.crowd-diagram-buttons {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
 }

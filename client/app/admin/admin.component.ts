@@ -38,10 +38,10 @@ export class AdminComponent implements OnInit {
       close: false,
       overlay: true,
       displayMode: 'replace',
-      zindex: 999,
+      zindex: 1051,
       color: 'red',
       icon: 'fa fa-trash',
-      message: 'Are you sure you want to delete <b>' + user.username + '</b>?',
+      message: 'Are you sure to delete <b>' + user.username + '</b>?',
       position: 'topCenter',
       buttons: [
         ['<button>Cancel</button>', function (instance, toast) {

@@ -2,7 +2,7 @@ abstract class BaseCtrl {
 
   abstract model: any;
 
-  // Get all
+  //get all
   getAll = async (req, res) => {
     try {
       const docs = await this.model.find({});
@@ -12,7 +12,7 @@ abstract class BaseCtrl {
     }
   }
 
-  // Count all
+  //count all
   count = async (req, res) => {
     try {
       const count = await this.model.count();
@@ -22,7 +22,7 @@ abstract class BaseCtrl {
     }
   }
 
-  // Insert
+  //insert
   insert = async (req, res) => {
     try {
       const obj = await new this.model(req.body).save();
@@ -32,7 +32,7 @@ abstract class BaseCtrl {
     }
   }
 
-  // Get by id
+  //get by id
   get = async (req, res) => {
     try {
       const obj = await this.model.findOne({ _id: req.params.id });
@@ -42,7 +42,7 @@ abstract class BaseCtrl {
     }
   }
 
-  // Update by id
+  //update by id
   update = async (req, res) => {
     try {
       await this.model.findOneAndUpdate({ _id: req.params.id }, req.body);
@@ -52,7 +52,7 @@ abstract class BaseCtrl {
     }
   }
 
-  // Delete by id
+  //delete by id
   delete = async (req, res) => {
     try {
       await this.model.findOneAndRemove({ _id: req.params.id });

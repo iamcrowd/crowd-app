@@ -51,11 +51,13 @@
               "node_modules/dagre/dist/dagre.min.js",
               "node_modules/jointjs/dist/joint.min.js",
               "node_modules/clipboard/dist/clipboard.min.js",
+              "client/assets/js/bootstrap.addons.js",
               "client/assets/js/utils.js",
               "client/assets/js/crowd.editor.js",
               "client/assets/js/crowd.editor.eer.js",
               "client/assets/js/crowd.editor.uml.js",
-              "client/assets/js/crowd.metamodel.js"
+              "client/assets/js/crowd.metamodel.js",
+              "client/assets/js/crowd.reasoning.js"
             ]
           },
           "configurations": {
@@ -137,11 +139,13 @@
               "node_modules/dagre/dist/dagre.min.js",
               "node_modules/jointjs/dist/joint.min.js",
               "node_modules/clipboard/dist/clipboard.min.js",
+              "client/assets/js/bootstrap.addons.js",
               "client/assets/js/utils.js",
               "client/assets/js/crowd.editor.js",
               "client/assets/js/crowd.editor.eer.js",
               "client/assets/js/crowd.editor.uml.js",
-              "client/assets/js/crowd.metamodel.js"
+              "client/assets/js/crowd.metamodel.js",
+              "client/assets/js/crowd.reasoning.js"
             ],
             "assets": [
               "client/assets/favicon.ico",

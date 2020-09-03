@@ -291,21 +291,1020 @@ CrowdEditor.prototype.initTools = function () {
 
   //initialize tools objects
   self.tools = {};
-  self.tools.zoom = {};
-  self.tools.gridSize = {};
-  self.tools.fullscreen = {};
-  self.tools.layout = {};
-  self.tools.export = {};
-  self.tools.import = {};
+
+  self.tools.file = {};
+  self.tools.new = {};
   self.tools.save = {};
   self.tools.load = {};
-  self.tools.file = {};
+  self.tools.rename = {};
+  self.tools.delete = {};
+  self.tools.export = {};
+  self.tools.import = {};
+
+  self.tools.edit = {};
+  self.tools.layout = {};
   self.tools.model = {};
   self.tools.translate = {};
   self.tools.clearWorkspace = {};
 
+  self.tools.reasoning = {};
+
+  self.tools.zoom = {};
+  self.tools.gridSize = {};
+  self.tools.fullscreen = {};
+
   //append dom row for the tools elements
   $('#crowd-tools-' + self.id).append('<span class="row" id="crowd-tools-row-' + self.id + '"></span>');
+
+  //append dom for menu options
+  $('#crowd-tools-row-' + self.id).append(
+    '<div class="form-group"><div class="btn-group" id="crowd-tools-menu-' + self.id + '" role="group"></div></div>'
+  );
+
+  //file tool
+  self.tools.file.init = function () {
+    //update the actual file label if a file is loaded
+    self.tools.file.updateActualFile = function (config) {
+      if (self.config.actualFile && self.config.actualFile.name) {
+        $('#crowd-tools-actual-file-' + self.id).html(self.config.actualFile.name);
+        $('#crowd-tools-rename-input-' + self.id).prop("disabled", false);
+        $('#crowd-tools-delete-input-' + self.id).prop("disabled", false);
+      } else {
+        $('#crowd-tools-actual-file-' + self.id).html('-');
+        $('#crowd-tools-rename-input-' + self.id).prop("disabled", true);
+        $('#crowd-tools-delete-input-' + self.id).prop("disabled", true);
+      }
+
+      if (config?.parent || config?.parent == null) $(config?.parent ? '#' + config?.parent : '.modal').modal('hide');
+    }
+
+    self.tools.file.getFile = function (callback) {
+      if (self.config.actualFile) {
+        self.config.actualFile.content = self.toJSONSchema();
+        self.config.actualFile.model = self.config.conceptualModel.name;
+        self.toBase64(function (preview) {
+          self.config.actualFile.preview = preview;
+          self.tools.export.exportTo({
+            model: 'kf',
+            //try to export to meta
+            callback: function (metaSchema) {
+              self.config.actualFile.meta = metaSchema;
+            },
+            //finally do the callback with or without the meta
+            callbackFinally: function (data) {
+              //   alert('Metamodel cannot be generated due an translate error, this means that your diagram can\'t be translated to another conceptual model.');
+              callback(self.config.actualFile, data.statusText == 'error' ? data : null);
+            },
+            hideError: true
+          });
+        });
+      } else {
+        var newFile = {};
+        newFile.content = self.toJSONSchema();
+        newFile.model = self.config.conceptualModel.name;
+        self.toBase64(function (preview) {
+          newFile.preview = preview;
+          self.tools.export.exportTo({
+            model: 'kf',
+            //try to export to meta
+            callback: function (metaSchema) {
+              newFile.meta = metaSchema;
+            },
+            //finally do the callback with or without the meta
+            callbackFinally: function (data) {
+              //   alert('Metamodel cannot be generated due an translate error, this means that your diagram can\'t be translated to another conceptual model.');
+              callback(newFile, data.statusText == 'error' ? data : null);
+            },
+            hideError: true
+          });
+        });
+      }
+    }
+
+    var loggedInMessage = 'You must be logged in to use this functionality';
+
+    //append files dropdown for all files related tools
+    $('#crowd-tools-menu-' + self.id).append(
+      '<div class="btn-group dropdown" id="crowd-tools-file-btn-' + self.id + '"> \
+        <button class="btn btn-light dropdown-toggle" type="button" id="crowd-tools-file-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+          <i class="fa fa-fw fa-file"></i> File \
+        </button> \
+        <ul class="dropdown-menu" aria-labelledby="crowd-tools-file-dropdown-' + self.id + '"></ul> \
+      </div>'
+    );
+
+    $('#crowd-workspace-' + self.id).append(
+      '<div class="crowd-tools-actual-file-container"> \
+        <label class="crowd-tools-actual-file-label" \
+        data-toggle="tooltip" data-original-title="Diagram loaded from Cloud" data-placement="right"> \
+          <i class="fa fa-file-code-o"></i>: \
+          <span id="crowd-tools-actual-file-' + self.id + '"></span> \
+        </label> \
+      </div>'
+    );
+
+    //new file tool
+    self.tools.new.init = function () {
+      //append dom for new file tool
+      // $('#crowd-tools-row-' + self.id).append(
+      //   '<label data-toggle="tooltip" data-original-title="Diagram loaded from Cloud" data-placement="bottom"><i class="fa fa-file-code-o"></i>: \
+      //     <span id="crowd-tools-actual-file-' + self.id + '"></span> \
+      //   </label> \
+      //   <div class="form-group"> \
+      //     <button class="btn btn-danger iconify" id="crowd-tools-file-new-input-' + self.id + '" type="button" \
+      //     data-toggle="tooltip" data-original-title="Create New Diagram" data-placement="bottom" \
+      //     ' + (!self.config?.ngFiles?.user ? 'disabled' : '') + '> \
+      //     <i class="fa fa-file"></i> New</button> \
+      //   </div>'
+      // );
+      $('[aria-labelledby="crowd-tools-file-dropdown-' + self.id + '"]').append(
+        '<li> \
+        <span class="d-block" data-toggle="tooltip" data-placement="right" \
+        title="' + (!self.config?.ngFiles?.user ? loggedInMessage : 'Create New Diagram') + '" > \
+          <button class="dropdown-item" id="crowd-tools-file-new-input-' + self.id + '" \
+          ' + (!self.config?.ngFiles?.user ? 'style="pointer-events: none;" disabled' : '') + '> \
+          <i class="fa fa-fw fa-file"></i> New...</button> \
+        </span> \
+        </li>'
+      );
+
+      //append dom for the advertisement modal when try to make new file
+      $('body').append(
+        '<div id="crowd-tools-file-new-advertisement-' + self.id + '" class="modal fade"> \
+          <div class="modal-dialog"> \
+            <div class="modal-content"> \
+              <div class="modal-header"> \
+                <h5 class="modal-title"><i class="fa fa-fw fa-file"></i> Create New Diagram</h5> \
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+                  <span aria-hidden="true">&times;</span> \
+                </button> \
+              </div> \
+              <div class="modal-body"> \
+                <p>Are you sure want to create a new diagram?</p> \
+                <p><b>Changes may not be saved</b></p> \
+              </div> \
+              <div class="modal-footer"> \
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
+                <button id="crowd-tools-file-new-advertisement-proceed-' + self.id + '" \
+                type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
+              </div> \
+            </div> \
+          </div> \
+        </div>'
+      );
+
+      //event handler when click new file that open advertisement modal
+      $('#crowd-tools-file-new-input-' + self.id).on('click', function () {
+        if (self.config.actualFile || self.hasChanges()) {
+          $('#crowd-tools-file-new-advertisement-' + self.id).modal('show');
+        }
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+
+      //event handler when click proceed button in advertisement for new file
+      $('#crowd-tools-file-new-advertisement-proceed-' + self.id).on('click', function () {
+        //clear the workspace elements
+        self.workspace.graph.clear();
+        //center workspace scroll
+        setTimeout(() => self.workspace.centerScroll());
+        //clear the actual file
+        self.config.actualFile = null;
+        self.tools.file.updateActualFile();
+
+        $(".tooltip").tooltip('hide');
+      });
+    }
+    self.tools.new.init();
+
+    //load from cloud tool
+    self.tools.load.init = function () {
+      //append dom for load tool
+      // $('#crowd-tools-row-' + self.id).append(
+      //   '<div class="form-group"> \
+      //     <button class="btn btn-primary iconify" id="crowd-tools-load-input-' + self.id + '" type="button" \
+      //     data-toggle="tooltip" data-original-title="Load Diagram from Cloud" data-placement="bottom" \
+      //     ' + (!self.config?.ngFiles?.user ? 'disabled' : '') + '> \
+      //     <i class="fa fa-cloud-download"></i> Load</button> \
+      //   </div>'
+      // );
+      $('[aria-labelledby="crowd-tools-file-dropdown-' + self.id + '"]').append(
+        '<li class="dropdown-divider"></li> \
+        <li> \
+        <span class="d-block" data-toggle="tooltip" data-placement="right" \
+        title="' + (!self.config?.ngFiles?.user ? loggedInMessage : 'Load Diagram from Cloud') + '" > \
+          <button class="dropdown-item" id="crowd-tools-load-input-' + self.id + '" \
+          ' + (!self.config?.ngFiles?.user ? 'style="pointer-events: none;" disabled' : '') + '> \
+          <i class="fa fa-fw fa-cloud-download"></i> Load</button> \
+        </span> \
+        </li>'
+      );
+
+      //event handler when click load
+      $('#crowd-tools-load-input-' + self.id).on('click', function () {
+        if (self.config?.ngFiles?.load?.modal) {
+          $('#' + self.config.ngFiles.load.modal).modal('show'); //not used
+        }
+        if (self.config?.ngFiles?.load?.get) {
+          self.config.ngComponent[self.config.ngFiles.load.get]();
+        }
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.load.init();
+
+    //save to cloud tool
+    self.tools.save.init = function () {
+      //function to open save as modal
+      self.tools.save.saveAs = function () {
+        if (self.config.ngFiles) {
+          if (self.config.ngFiles.save) {
+            if (self.config.ngFiles.save.modal) {
+              self.toBase64(function (preview) {
+                self.config.ngComponent.preview = preview;
+              });
+              $('#' + self.config.ngFiles.save.modal).modal('show');
+            }
+          }
+        }
+      };
+
+      //append dom for save tool
+      // $('#crowd-tools-row-' + self.id).append(
+      //   '<div class="form-group"> \
+      //     <div class="btn-group"> \
+      //       <button type="button" class="btn btn-primary" id="crowd-tools-save-input-save-' + self.id + '" \
+      //       data-toggle="tooltip" data-original-title="Save Diagram on Cloud" data-placement="bottom" \
+      //       ' + (!self.config?.ngFiles?.user ? 'disabled' : '') + '> \
+      //         <i class="fa fa-cloud-upload"></i> Save \
+      //       </button> \
+      //       <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-reference="parent" \
+      //       ' + (!self.config?.ngFiles?.user ? 'disabled' : '') + '> \
+      //         <span class="sr-only">Toggle Dropdown</span> \
+      //       </button> \
+      //       <div class="dropdown-menu"> \
+      //         <button class="dropdown-item" id="crowd-tools-save-input-saveas-' + self.id + '">Save as</button> \
+      //       </div> \
+      //     </div> \
+      //   </div>'
+      // );
+      $('[aria-labelledby="crowd-tools-file-dropdown-' + self.id + '"]').append(
+        '<li> \
+        <span class="d-block" data-toggle="tooltip" data-placement="right" \
+        title="' + (!self.config?.ngFiles?.user ? loggedInMessage : 'Save Diagram on Cloud') + '" > \
+          <button class="dropdown-item" id="crowd-tools-save-input-save-' + self.id + '" \
+          ' + (!self.config?.ngFiles?.user ? 'style="pointer-events: none;" disabled' : '') + '> \
+          <i class="fa fa-fw fa-cloud-upload"></i> Save</button></li> \
+        </span> \
+        </li> \
+        <li> \
+        <span class="d-block" data-toggle="tooltip" data-placement="right" \
+        title="' + (!self.config?.ngFiles?.user ? loggedInMessage : 'Save Diagram on Cloud as ...') + '" > \
+          <button class="dropdown-item" id="crowd-tools-save-input-saveas-' + self.id + '" \
+          ' + (!self.config?.ngFiles?.user ? 'style="pointer-events: none;" disabled' : '') + '> \
+          <i class="fa fa-fw"></i> Save as...</button></li> \
+        </span> \
+        </li>'
+      );
+
+      //event handler when click save
+      $('#crowd-tools-save-input-save-' + self.id).on('click', function () {
+        if (self.config.actualFile)
+          self.config.ngComponent[self.config.ngFiles.save.put]();
+        else
+          self.tools.save.saveAs();
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+
+      //event handler when click save as
+      $('#crowd-tools-save-input-saveas-' + self.id).on('click', function () {
+        self.tools.save.saveAs();
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.save.init();
+
+    //rename file tool
+    self.tools.rename.init = function () {
+      //append dom for rename tool
+      $('[aria-labelledby="crowd-tools-file-dropdown-' + self.id + '"]').append(
+        '<li class="dropdown-divider"></li> \
+        <li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" \
+          title="' + (!self.config?.ngFiles?.user ? loggedInMessage : 'Rename Diagram') + '" > \
+            <button class="dropdown-item" id="crowd-tools-rename-input-' + self.id + '" \
+            ' + (!self.config?.ngFiles?.user ? 'style="pointer-events: none;" disabled' : '') + '> \
+            <i class="fa fa-fw fa-pencil-square-o"></i> Rename</button> \
+          </span> \
+        </li>'
+      );
+
+      //event handler when click rename
+      $('#crowd-tools-rename-input-' + self.id).on('click', function () {
+        if (self.config?.ngFiles?.rename?.modal) {
+          $('#' + self.config.ngFiles.rename.modal).modal('show'); //not used
+        }
+        if (self.config?.ngFiles?.rename?.set) {
+          self.config.ngComponent[self.config.ngFiles.rename.set]('rename');
+        }
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.rename.init();
+
+    //delete file tool
+    self.tools.delete.init = function () {
+      //append dom for delete tool
+      $('[aria-labelledby="crowd-tools-file-dropdown-' + self.id + '"]').append(
+        '<li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" \
+          title="' + (!self.config?.ngFiles?.user ? loggedInMessage : 'Delete Diagram') + '" > \
+            <button class="dropdown-item" style="color: #dc3545;" id="crowd-tools-delete-input-' + self.id + '" \
+            ' + (!self.config?.ngFiles?.user ? 'style="pointer-events: none;" disabled' : '') + '> \
+            <i class="fa fa-fw fa-trash"></i> Delete</button> \
+          </span> \
+        </li>'
+      );
+
+      //event handler when click delete
+      $('#crowd-tools-delete-input-' + self.id).on('click', function () {
+        if (self.config?.ngFiles?.delete?.modal) {
+          $('#' + self.config.ngFiles.delete.modal).modal('show'); //not used
+        }
+        if (self.config?.ngFiles?.delete?.set) {
+          self.config.ngComponent[self.config.ngFiles.delete.set]('delete');
+        }
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.delete.init();
+
+    //export tool
+    self.tools.export.init = function () {
+      //define function to convert the actual model json schema to another model using the metamodelApi
+      //in case the parameter model was equal to the actual model it exports json without using metamodelApi
+      self.tools.export.exportTo = function (config) {
+        if (self.config.conceptualModel.name == self.config.availableConceptualModels[config.model].name) {
+          if (config.callback) config.callback(self.config.conceptualModel.toJSONSchema(self));
+          if (config.callbackFinally) config.callbackFinally(self.config.conceptualModel.toJSONSchema(self));
+        }
+        else {
+          self.config.metamodelApi.request({
+            from: self.config.conceptualModel.name,
+            to: 'kf',
+            data: self.config.conceptualModel.toJSONSchema(self),
+            success: function (response) {
+              if (self.config.availableConceptualModels[config.model].name != 'kf') {
+                self.config.metamodelApi.request({
+                  from: 'kf',
+                  to: self.config.availableConceptualModels[config.model].name,
+                  data: response,
+                  success: function (response) {
+                    if (config.callback) config.callback(response);
+                    if (config.callbackFinally) config.callbackFinally(response);
+                  },
+                  error: function (error) {
+                    if (config.callbackFinally) config.callbackFinally(error);
+                  },
+                  hideError: config.hideError
+                });
+              } else {
+                if (config.callback) config.callback(response);
+                if (config.callbackFinally) config.callbackFinally(response);
+              }
+            },
+            error: function (error) {
+              if (config.callbackFinally) config.callbackFinally(error);
+            },
+            hideError: config.hideError
+          });
+        }
+      }
+
+      //append dom for export tool
+      // $('#crowd-tools-row-' + self.id).append(
+      //   '<div class="form-group"> \
+      //     <div class="dropdown"> \
+      //       <button class="btn btn-primary dropdown-toggle" type="button" id="crowd-tools-export-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+      //         <i class="fa fa-download"></i> Export \
+      //       </button> \
+      //       <div class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"></div> \
+      //     </div> \
+      //   </div>'
+      // );
+      $('[aria-labelledby="crowd-tools-file-dropdown-' + self.id + '"]').append(
+        '<li class="dropdown-divider"></li> \
+        <li class="dropdown"> \
+          <button class="dropdown-item dropdown-toggle" type="button" id="crowd-tools-export-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+            <i class="fa fa-fw fa-download"></i> Export \
+          </button> \
+          <ul class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"></ul> \
+        </li>'
+      );
+
+      //draw a button for each conceptual model and put the name on data attribute
+      $.each(self.config.availableConceptualModels, function (conceptualModelName) {
+        $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').append(
+          '<li><button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-export-check-schema-' + self.id + '">' +
+          '<i class="fa fa-fw fa-long-arrow-right"></i> ' + conceptualModelName.toUpperCase() + ' Schema</button></li>'
+        );
+      });
+
+      //append dom for the schemas modal when check export schemas
+      $('body').append(
+        '<div id="crowd-tools-export-check-schema-modal-' + self.id + '" class="modal fade"> \
+          <div class="modal-dialog modal-dialog-scrollable modal-lg"> \
+            <div class="modal-content"> \
+              <div class="modal-header"> \
+                <h5 class="modal-title"></h5> \
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+                  <span aria-hidden="true">&times;</span> \
+                </button> \
+              </div> \
+              <div class="modal-body"><pre id="crowd-tools-export-check-schema-modal-pre-' + self.id + '" \
+              style="overflow: hidden; overflow-wrap: break-word;"></pre></div> \
+              <div class="modal-footer"> \
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
+                <button class="btn btn-dark" data-clipboard-target="#crowd-tools-export-check-schema-modal-pre-' + self.id + '"> \
+                  Copy to Clipboard \
+                </button> \
+                <button class="btn btn-dark" data-model="" id="crowd-tools-export-schema-' + self.id + '">Download</button> \
+              </div> \
+            </div> \
+          </div> \
+        </div>'
+      );
+
+      //init copy clipboard functionality
+      new ClipboardJS('.btn');
+
+      //event handler when click export check schema
+      $('[name="crowd-tools-export-check-schema-' + self.id + '"]').on('click', function (event) {
+        var btn = this;
+        event.stopPropagation();
+
+        var model = $(this).attr('data-model');
+        $('#crowd-tools-export-schema-' + self.id).attr('data-model', model);
+
+        var originalBtn = $(btn).html();
+        $(btn).html(originalBtn + ' <i class="loading fa fa-circle-o-notch fa-spin"></i>');
+
+        self.tools.export.exportTo({
+          model: model,
+          callback: function (schema) {
+            $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export ' + model.toUpperCase() + ' Schema');
+            $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(schema, null, 4));
+            $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
+            // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
+          },
+          callbackFinally: function () {
+            $(btn).html(originalBtn);
+            $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
+          }
+        });
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+        $('.dropdown-toggle').dropdown('hide');
+      });
+
+      //event handler when click download exported schema
+      $('#crowd-tools-export-schema-' + self.id).on('click', function () {
+        var model = $(this).attr('data-model');
+
+        self.tools.export.exportTo({
+          model: model,
+          callback: function (schema) {
+            $("<a />", {
+              "download": model + "-schema.json",
+              "href": "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(schema, null, 4)),
+            }).appendTo("body")
+              .click(function () {
+                $(this).remove()
+              })[0].click();
+          }
+        });
+      });
+    }
+    self.tools.export.init();
+
+    //import tool
+    self.tools.import.init = function () {
+      //this function do the import actions when the model is not changed using self.tools.import.diagramToImport object
+      self.tools.import.importFromLocal = function () {
+        //load the schema on workspace
+        self.fromJSONSchema(self.tools.import.diagramToImport.schema);
+        //do a layout if hasPositions is false
+        if (self.tools.import.diagramToImport.schema.hasPositions != null && !self.tools.import.diagramToImport.schema.hasPositions) {
+          self.tools.layout.doLayout();
+        }
+        //update actual file with the imported
+        self.config.actualFile = self.tools.import.diagramToImport.file;
+        self.tools.file.updateActualFile();
+      };
+
+      //this function is called from outside editor for load a file through load modal or internally for import tool
+      self.tools.import.importFrom = function (diagram) {
+        //preserve the actual diagram to be imported
+        self.tools.import.diagramToImport = diagram;
+
+        //in case that the model to import was in kf metamodel, translate it to the actual visualized conceptual model and import it
+        if (diagram.model == 'kf') {
+          self.config.metamodelApi.request({
+            from: 'kf',
+            to: self.config.conceptualModel.name,
+            data: self.tools.import.diagramToImport.schema,
+            success: (response) => {
+              response.hasPositions = false;
+              self.tools.import.importFrom({ model: self.config.conceptualModel.name, schema: response, file: self.config.conceptualModel.file });
+            }
+          });
+          return;
+        }
+
+        //in case that actual conceptual model was the same of the file, just load it from schema
+        if (diagram.model == self.config.conceptualModel.name) {
+          if (self.hasChanges()) {
+            $('#crowd-tools-import-advertisement-' + self.id).modal('show');
+            // $('.modal').modal('hide');
+          } else {
+            self.tools.import.importFromLocal();
+            // $('.modal').modal('hide');
+          }
+        }
+        //in case that actual conceptual model was different, redirect to url of the correct model sending the diagram schema as parameter
+        else {
+          if (self.config.availableConceptualModels[diagram.model].initPalette != null) {
+            if (self.config.ngRouter) {
+              self.config.ngRouter.navigate(['/editor/' + diagram.model], { state: { schema: diagram.schema, file: diagram.file } });
+              // $('.modal').modal('hide');
+            } else
+              window.location.href = '/editor/' + diagram.model;
+          } else {
+            if (self.config.tools && self.config.tools.import && self.config.tools.import.errors && self.config.tools.import.errors.missingModelPalette)
+              self.config.tools.import.errors.missingModelPalette(diagram.model);
+            else
+              alert('There is no palette for the conceptual model ' + model.toUpperCase() + '.');
+          }
+        }
+      };
+
+      //append dom for the advertisement modal when try to import a diagram
+      $('body').append(
+        '<div id="crowd-tools-import-advertisement-' + self.id + '" class="modal fade"> \
+          <div class="modal-dialog"> \
+            <div class="modal-content"> \
+              <div class="modal-header"> \
+                <h5 class="modal-title"><i class="fa fa-fw fa-upload"></i> Import Diagram</h5> \
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+                  <span aria-hidden="true">&times;</span> \
+                </button> \
+              </div> \
+              <div class="modal-body"> \
+                <p>Are you sure want to import the diagram?</p> \
+                <p><b>Changes may not be saved</b></p> \
+              </div> \
+              <div class="modal-footer"> \
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
+                <button id="crowd-tools-import-advertisement-proceed-' + self.id + '" \
+                type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
+              </div> \
+            </div> \
+          </div> \
+        </div>'
+      );
+
+      //event handler when click proceed button in advertisement for import diagram
+      $('#crowd-tools-import-advertisement-proceed-' + self.id).on('click', function () {
+        self.tools.import.importFromLocal();
+        $(".tooltip").tooltip('hide');
+      });
+
+      //append dom for import tool
+      // $('#crowd-tools-row-' + self.id).append(
+      //   '<div class="form-group"> \
+      //     <div class="dropdown"> \
+      //       <button class="btn btn-primary dropdown-toggle" type="button" id="crowd-tools-import-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+      //         <i class="fa fa-upload"></i> Import \
+      //       </button> \
+      //       <div class="dropdown-menu" aria-labelledby="crowd-tools-import-dropdown-' + self.id + '"></div> \
+      //     </div> \
+      //   </div>'
+      // );
+      $('[aria-labelledby="crowd-tools-file-dropdown-' + self.id + '"]').append(
+        '<li class="dropdown"> \
+          <button class="dropdown-item dropdown-toggle" type="button" id="crowd-tools-import-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+            <i class="fa fa-fw fa-upload"></i> Import \
+          </button> \
+          <ul class="dropdown-menu" aria-labelledby="crowd-tools-import-dropdown-' + self.id + '"></ul> \
+        </li>'
+      );
+
+      //draw a button for each conceptual model and put the name on data attribute
+      $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
+        if (conceptualModel.initPalette != null || conceptualModel.name == 'kf') {
+          $('[aria-labelledby="crowd-tools-import-dropdown-' + self.id + '"]').append(
+            '<li><button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-import-check-schema-' + self.id + '">' +
+            '<i class="fa fa-fw fa-long-arrow-left"></i> ' + conceptualModelName.toUpperCase() + ' Schema</button></li>'
+          );
+        }
+      });
+
+      //append dom for the schemas modal when check import schemas
+      $('body').append(
+        '<div id="crowd-tools-import-check-schema-modal-' + self.id + '" class="modal fade"> \
+          <div class="modal-dialog modal-dialog-scrollable modal-lg"> \
+            <div class="modal-content"> \
+              <div class="modal-header"> \
+                <h5 class="modal-title"></h5> \
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+                  <span aria-hidden="true">&times;</span> \
+                </button> \
+              </div> \
+              <div class="modal-body"> \
+                <div class="form-group"> \
+                  <label for="crowd-tools-import-file-' + self.id + '">Select a schema file</label> \
+                  <div class="custom-file"> \
+                    <input type="file" class="custom-file-input" id="crowd-tools-import-file-' + self.id + '"> \
+                    <label class="custom-file-label" for="crowd-tools-import-file-' + self.id + '">Choose file</label> \
+                  </div> \
+                </div> \
+                <div class="form-group"> \
+                  <label for="crowd-tools-import-raw-' + self.id + '">Or paste the JSON directly</label> \
+                  <textarea class="form-control" id="crowd-tools-import-raw-' + self.id + '" rows="10"></textarea> \
+                </div> \
+              </div> \
+              <div class="modal-footer"> \
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
+                <button class="btn btn-dark" data-model="" id="crowd-tools-import-schema-' + self.id + '">Upload</button> \
+              </div> \
+            </div> \
+          </div> \
+        </div>'
+      );
+
+      //event when select a file to import
+      $('#crowd-tools-import-file-' + self.id).on('change', function () {
+        var fileName = 'Choose file';
+        if (this.files[0])
+          fileName = document.getElementById('crowd-tools-import-file-' + self.id).files[0].name;
+        $(this).next('.custom-file-label').html(fileName);
+
+        var fr = new FileReader();
+        fr.onload = function () {
+          $('#crowd-tools-import-raw-' + self.id).val(fr.result);
+        }
+        fr.readAsText(this.files[0]);
+      });
+
+      //event handler when click import check schema
+      $('[name="crowd-tools-import-check-schema-' + self.id + '"]').on('click', function (event) {
+        var btn = this;
+        event.stopPropagation();
+
+        var model = $(this).attr('data-model');
+        $('#crowd-tools-import-schema-' + self.id).attr('data-model', model);
+
+        $('#crowd-tools-import-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-upload"></i> Import ' + model.toUpperCase() + ' Schema');
+        $('#crowd-tools-import-check-schema-modal-' + self.id).modal('show');
+
+        $('[aria-labelledby="crowd-tools-import-dropdown-' + self.id + '"]').dropdown('hide');
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+        $('.dropdown-toggle').dropdown('hide');
+      });
+
+      //event handler when click upload imported schema
+      $('#crowd-tools-import-schema-' + self.id).on('click', function () {
+        self.tools.import.importFrom({ model: $(this).attr('data-model'), schema: JSON.parse($('#crowd-tools-import-raw-' + self.id).val()), file: self.config.actualFile });
+      });
+
+      //event on close import modal
+      $('#crowd-tools-import-check-schema-modal-' + self.id).on("hidden.bs.modal", function () {
+        $('#crowd-tools-import-file-' + self.id).val('');
+        $('#crowd-tools-import-file-' + self.id).next('.custom-file-label').html('Choose file');
+        $('#crowd-tools-import-raw-' + self.id).val('');
+      });
+    }
+    self.tools.import.init();
+
+    //activate bootstrap nested dropdowns for files tools
+    $('#crowd-tools-file-btn-' + self.id).bootnavbar({});
+
+    //blur on hide
+    $('#crowd-tools-file-btn-' + self.id).on('hide.bs.dropdown', function () {
+      $('#crowd-tools-file-dropdown-' + self.id).blur();
+    });
+  }
+  self.tools.file.init();
+
+  //edit tool
+  self.tools.edit.init = function () {
+    //append edit dropdown for all edit related tools
+    $('#crowd-tools-menu-' + self.id).append(
+      '<div class="btn-group dropdown" id="crowd-tools-edit-btn-' + self.id + '"> \
+        <button class="btn btn-light dropdown-toggle" type="button" id="crowd-tools-edit-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+          <i class="fa fa-fw fa-pencil"></i> Edit \
+        </button> \
+        <ul class="dropdown-menu" aria-labelledby="crowd-tools-edit-dropdown-' + self.id + '"></ul> \
+      </div>'
+    );
+
+    //layout tool
+    self.tools.layout.init = function () {
+      //this function do the automatic layout (it's used in external functionalities)
+      self.tools.layout.doLayout = function () {
+        joint.layout.DirectedGraph.layout(self.workspace.graph,
+          {
+            marginX: 100,
+            marginY: 100
+          }
+        );
+
+        setTimeout(() => self.workspace.fitPaper());
+      }
+
+      //append dom for layout tool
+      // $('#crowd-tools-row-' + self.id).append(
+      //   '<div class="form-group"> \
+      //     <button class="btn btn-primary" id="crowd-tools-layout-input-' + self.id + '" type="button" \
+      //     data-toggle="tooltip" data-original-title="Automatic Layout" data-placement="bottom" > \
+      //     <i class="material-icons">timeline</i></button> \
+      //   </div>'
+      // );
+      $('[aria-labelledby="crowd-tools-edit-dropdown-' + self.id + '"]').append(
+        '<li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" title="Automatic Layout"> \
+            <button class="dropdown-item" id="crowd-tools-layout-input-' + self.id + '"> \
+            <i class="fa fa-fw fa-sitemap"></i> Layout</button> \
+          </span> \
+        </li>'
+      );
+
+      //event handler when click layout
+      $('#crowd-tools-layout-input-' + self.id).on('click', function () {
+        self.tools.layout.doLayout();
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.layout.init();
+
+    //change conceptual model tool
+    self.tools.model.init = function () {
+      //append dom for change conceptual model tool
+      // $('#crowd-tools-row-' + self.id).append(
+      //   '<div class="form-group"> \
+      //   <div class="dropdown"> \
+      //     <button class="btn btn-danger dropdown-toggle" type="button" id="crowd-tools-model-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+      //       <i class="fa fa-th"></i> Model \
+      //     </button> \
+      //     <div class="dropdown-menu" aria-labelledby="crowd-tools-model-dropdown-' + self.id + '"></div> \
+      //   </div> \
+      // </div>'
+      // );
+      $('[aria-labelledby="crowd-tools-edit-dropdown-' + self.id + '"]').append(
+        '<li class="dropdown-divider"></li> \
+        <li class="dropdown"> \
+          <button class="dropdown-item dropdown-toggle" type="button" id="crowd-tools-model-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+            <i class="fa fa-fw fa-th"></i> Model \
+          </button> \
+          <ul class="dropdown-menu" aria-labelledby="crowd-tools-model-dropdown-' + self.id + '"></ul> \
+        </li>'
+      );
+
+      //draw a button for each conceptual model and put the name on data attribute
+      $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
+        if (conceptualModel.initPalette != null) {
+          $('[aria-labelledby="crowd-tools-model-dropdown-' + self.id + '"]').append(
+            // '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-input-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
+            '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-advertisement-proceed-' + self.id + '" ' +
+            (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' +
+            (self.config.conceptualModel.name == conceptualModel.name ? '<i class="fa fa-fw fa-check"></i> ' : '<i class="fa fa-fw fa-long-arrow-right"></i> ') + conceptualModelName.toUpperCase() + '</button>'
+            //'<a href="/editor/' + conceptualModelName + '" class="dropdown-item ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '">' + conceptualModelName.toUpperCase() + '</a>'
+          );
+        }
+      })
+
+      // (not in use)
+      //append dom for the advertisement modal when try to change conceptual model
+      $('body').append(
+        '<div id="crowd-tools-model-advertisement-' + self.id + '" class="modal fade"> \
+          <div class="modal-dialog"> \
+            <div class="modal-content"> \
+              <div class="modal-header"> \
+                <h5 class="modal-title">Change Conceptual Model</h5> \
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+                  <span aria-hidden="true">&times;</span> \
+                </button> \
+              </div> \
+              <div class="modal-body"> \
+                <p>Are you sure want to change the conceptual model?</p> \
+                <p><b>You lost not saved changes</b></p> \
+              </div> \
+              <div class="modal-footer"> \
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
+                <button name="crowd-tools-model-advertisement-proceed-' + self.id + '" \
+                type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
+              </div> \
+            </div> \
+          </div> \
+        </div>'
+      );
+
+      // (not in use)
+      //event handler when click model change that open advertisement modal
+      $('[name=crowd-tools-model-input-' + self.id + "]").on('click', function () {
+        $('#crowd-tools-model-advertisement-' + self.id).modal('show');
+        $('#crowd-tools-model-advertisement-proceed-' + self.id).attr('data-model', $(this).attr('data-model'));
+        $(".tooltip").tooltip('hide');
+      });
+
+      //event handler when click proceed button in advertisement for model change
+      $('[name=crowd-tools-model-advertisement-proceed-' + self.id + "]").on('click', function () {
+        console.log('/editor/' + $(this).attr('data-model'));
+        if (self.config.ngRouter)
+          self.config.ngRouter.navigate(['/editor/' + $(this).attr('data-model')], { state: { file: self.config.actualFile } });
+        else
+          window.location.href = '/editor/' + $(this).attr('data-model');
+      });
+    }
+    self.tools.model.init();
+
+    //translate conceptual model tool
+    self.tools.translate.init = function () {
+      //append dom for change translate tool
+      // $('#crowd-tools-row-' + self.id).append(
+      //   '<div class="form-group"> \
+      //     <div class="dropdown"> \
+      //       <button class="btn btn-danger dropdown-toggle" type="button" id="crowd-tools-translate-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+      //         <i class="fa fa-random"></i> Translate \
+      //       </button> \
+      //       <div class="dropdown-menu" aria-labelledby="crowd-tools-translate-dropdown-' + self.id + '"></div> \
+      //     </div> \
+      //   </div>'
+      // );
+      $('[aria-labelledby="crowd-tools-edit-dropdown-' + self.id + '"]').append(
+        '<li class="dropdown"> \
+          <button class="dropdown-item dropdown-toggle" type="button" id="crowd-tools-translate-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+            <i class="fa fa-fw fa-random"></i> Translate \
+          </button> \
+          <ul class="dropdown-menu" aria-labelledby="crowd-tools-translate-dropdown-' + self.id + '"></ul> \
+        </li>'
+      );
+
+      //draw a button for each conceptual model and put the name on data attribute
+      $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
+        if (conceptualModel.initPalette != null) {
+          $('[aria-labelledby="crowd-tools-translate-dropdown-' + self.id + '"]').append(
+            '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-translate-schema-' + self.id + '" ' +
+            (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' +
+            (self.config.conceptualModel.name == conceptualModel.name ? '<i class="fa fa-fw fa-check"></i> ' : '<i class="fa fa-fw fa-long-arrow-right"></i> ') + conceptualModelName.toUpperCase() + '</button>'
+          );
+        }
+      })
+
+      //event handler when click a translate button
+      $('[name=crowd-tools-translate-schema-' + self.id + "]").on('click', function () {
+        var btn = this;
+        event.stopPropagation();
+
+        var model = $(this).attr('data-model');
+        $('#crowd-tools-translate-schema-' + self.id).attr('data-model', model);
+
+        var originalBtn = $(btn).html();
+        $(btn).html(originalBtn + ' <i class="loading fa fa-circle-o-notch fa-spin"></i>');
+
+        self.tools.export.exportTo({
+          model: model,
+          callback: function (schema) {
+            schema.hasPositions = false;
+            self.tools.import.importFrom({ model: model, schema: schema, file: self.config.actualFile });
+          },
+          callbackFinally: function () {
+            $(btn).html(originalBtn);
+            $('[aria-labelledby="crowd-tools-translate-dropdown-' + self.id + '"]').dropdown('hide');
+          }
+        });
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+        $('.dropdown-toggle').dropdown('hide');
+      });
+    }
+    self.tools.translate.init();
+
+    //clear workspace tool
+    self.tools.clearWorkspace.init = function () {
+      //clear the workspace and center the scroll
+      self.tools.clearWorkspace.clear = function () {
+        //clear the workspace elements
+        self.workspace.graph.clear();
+        //center workspace scroll
+        setTimeout(() => self.workspace.centerScroll());
+      }
+
+      //append dom for clear workspace tool
+      // $('#crowd-tools-row-' + self.id).append(
+      //   '<div class="form-group"> \
+      //     <button class="btn btn-danger" id="crowd-tools-clear-workspace-input-' + self.id + '" type="button" \
+      //     data-toggle="tooltip" data-original-title="Clear Diagram" data-placement="bottom" > \
+      //     <i class="material-icons">delete_forever</i></button> \
+      //   </div>'
+      // );
+      $('[aria-labelledby="crowd-tools-edit-dropdown-' + self.id + '"]').append(
+        '<li class="dropdown-divider"></li> \
+        <li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" title="Clear Paper"> \
+            <button class="dropdown-item" style="color: #dc3545;" id="crowd-tools-clear-workspace-input-' + self.id + '"> \
+            <i class="fa fa-fw fa-eraser"></i> Clear</button> \
+          </span> \
+        </li>'
+      );
+
+      //append dom for the advertisement modal when try clear workspace
+      $('body').append(
+        '<div id="crowd-tools-clear-workspace-advertisement-' + self.id + '" class="modal fade"> \
+          <div class="modal-dialog"> \
+            <div class="modal-content"> \
+              <div class="modal-header"> \
+                <h5 class="modal-title"><i class="fa fa-fw fa-eraser"></i> Clear Paper</h5> \
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+                  <span aria-hidden="true">&times;</span> \
+                </button> \
+              </div> \
+              <div class="modal-body"> \
+                <p>Are you sure want to clear the paper?</p> \
+                <p><b>Changes may not be saved</b></p> \
+              </div> \
+              <div class="modal-footer"> \
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
+                <button id="crowd-tools-clear-workspace-advertisement-proceed-' + self.id + '" \
+                type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
+              </div> \
+            </div> \
+          </div> \
+        </div>'
+      );
+
+      //event handler when click clear workspace that open advertisement modal
+      $('#crowd-tools-clear-workspace-input-' + self.id).on('click', function () {
+        if (self.hasChanges()) {
+          $('#crowd-tools-clear-workspace-advertisement-' + self.id).modal('show');
+        }
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+
+      //event handler when click proceed button in advertisement for clear workspace
+      $('#crowd-tools-clear-workspace-advertisement-proceed-' + self.id).on('click', function () {
+        self.tools.clearWorkspace.clear();
+
+        $(".tooltip").tooltip('hide');
+      });
+    }
+    self.tools.clearWorkspace.init();
+
+    //activate bootstrap nested dropdowns for edit tools
+    $('#crowd-tools-edit-btn-' + self.id).bootnavbar({});
+
+    //blur on hide
+    $('#crowd-tools-edit-btn-' + self.id).on('hide.bs.dropdown', function () {
+      $('#crowd-tools-edit-dropdown-' + self.id).blur();
+    });
+  }
+  self.tools.edit.init();
+
+  //reasoning tool
+  self.tools.reasoning.init = function () {
+    //append dom for reasoning tool
+    $('#crowd-tools-row-' + self.id).append(
+      '<div class="form-group"> \
+      <button class="btn btn-warning iconify" id="crowd-tools-reasoning-input-' + self.id + '" type="button" \
+      data-toggle="tooltip" data-original-title="Call Reasoner" data-placement="bottom"> \
+      <i class="fa fa-flask"></i> Reasoning</button> \
+    </div>'
+    );
+
+    //event handler when click reasoning
+    $('#crowd-tools-reasoning-input-' + self.id).on('click', function () {
+      //to do
+      $(".tooltip").tooltip('hide');
+      $(this).blur();
+    });
+  }
+  self.tools.reasoning.init();
 
   //zoom tool
   self.tools.zoom.init = function () {
@@ -372,690 +1371,6 @@ CrowdEditor.prototype.initTools = function () {
     });
   }
   self.tools.fullscreen.init();
-
-  //layout tool
-  self.tools.layout.init = function () {
-    //this function do the automatic layout (it's used in external functionalities)
-    self.tools.layout.doLayout = function () {
-      joint.layout.DirectedGraph.layout(self.workspace.graph,
-        {
-          marginX: 100,
-          marginY: 100
-        }
-      );
-
-      setTimeout(() => self.workspace.fitPaper());
-    }
-
-    //append dom for layout tool
-    $('#crowd-tools-row-' + self.id).append(
-      '<div class="form-group"> \
-        <button class="btn btn-primary" id="crowd-tools-layout-input-' + self.id + '" type="button" \
-        data-toggle="tooltip" data-original-title="Automatic Layout" data-placement="bottom" > \
-        <i class="material-icons">timeline</i></button> \
-      </div>'
-    );
-
-    //event handler when click layout
-    $('#crowd-tools-layout-input-' + self.id).on('click', function () {
-      self.tools.layout.doLayout();
-
-      $(".tooltip").tooltip('hide');
-      $(this).blur();
-    });
-  }
-  self.tools.layout.init();
-
-  //export tool
-  self.tools.export.init = function () {
-    //define function to convert the actual model json schema to another model using the metamodelApi
-    //in case the parameter model was equal to the actual model it exports json without using metamodelApi
-    self.tools.export.exportTo = function (model, callback, callbackFinally) {
-      if (self.config.conceptualModel.name == self.config.availableConceptualModels[model].name) {
-        if (callback) callback(self.config.conceptualModel.toJSONSchema(self));
-        if (callbackFinally) callbackFinally(self.config.conceptualModel.toJSONSchema(self));
-      }
-      else {
-        self.config.metamodelApi.request({
-          from: self.config.conceptualModel.name,
-          to: 'meta',
-          data: self.config.conceptualModel.toJSONSchema(self),
-          success: function (response) {
-            if (self.config.availableConceptualModels[model].name != 'meta') {
-              self.config.metamodelApi.request({
-                from: 'meta',
-                to: self.config.availableConceptualModels[model].name,
-                data: response,
-                success: function (response) {
-                  if (callback) callback(response);
-                  if (callbackFinally) callbackFinally(response);
-                },
-                error: function (error) {
-                  if (callbackFinally) callbackFinally(error);
-                }
-              });
-            } else {
-              if (callback) callback(response);
-              if (callbackFinally) callbackFinally(response);
-            }
-          },
-          error: function (error) {
-            if (callbackFinally) callbackFinally(error);
-          }
-        });
-      }
-    }
-
-    //append dom for export tool
-    $('#crowd-tools-row-' + self.id).append(
-      '<div class="form-group"> \
-        <div class="dropdown"> \
-          <button class="btn btn-primary dropdown-toggle" type="button" id="crowd-tools-export-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
-            <i class="fa fa-download"></i> Export \
-          </button> \
-          <div class="dropdown-menu" aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"></div> \
-        </div> \
-      </div>'
-    );
-
-    //draw a button for each conceptual model and put the name on data attribute
-    $.each(self.config.availableConceptualModels, function (conceptualModelName) {
-      $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').append(
-        '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-export-check-schema-' + self.id + '">' + conceptualModelName.toUpperCase() + ' Schema</button>'
-      );
-    });
-
-    //append dom for the schemas modal when check export schemas
-    $('body').append(
-      '<div id="crowd-tools-export-check-schema-modal-' + self.id + '" class="modal fade"> \
-        <div class="modal-dialog modal-dialog-scrollable modal-lg"> \
-          <div class="modal-content"> \
-            <div class="modal-header"> \
-              <h5 class="modal-title"></h5> \
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
-                <span aria-hidden="true">&times;</span> \
-              </button> \
-            </div> \
-            <div class="modal-body"><pre id="crowd-tools-export-check-schema-modal-pre-' + self.id + '" \
-            style="overflow: hidden; overflow-wrap: break-word;"></pre></div> \
-            <div class="modal-footer"> \
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
-              <button class="btn btn-dark" data-clipboard-target="#crowd-tools-export-check-schema-modal-pre-' + self.id + '"> \
-                Copy to Clipboard \
-              </button> \
-              <button class="btn btn-dark" data-model="" id="crowd-tools-export-schema-' + self.id + '">Download</button> \
-            </div> \
-          </div> \
-        </div> \
-      </div>'
-    );
-
-    //init copy clipboard functionality
-    new ClipboardJS('.btn');
-
-    //event handler when click export check schema
-    $('[name="crowd-tools-export-check-schema-' + self.id + '"]').on('click', function (event) {
-      var btn = this;
-      event.stopPropagation();
-
-      var model = $(this).attr('data-model');
-      $('#crowd-tools-export-schema-' + self.id).attr('data-model', model);
-
-      var originalBtn = $(btn).html();
-      $(btn).html(originalBtn + ' <i class="loading fa fa-circle-o-notch fa-spin"></i>');
-
-      self.tools.export.exportTo(model,
-        function (schema) {
-          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('Export ' + model.toUpperCase() + ' Schema');
-          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(schema, null, 4));
-          $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
-          // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
-        },
-        function () {
-          $(btn).html(originalBtn);
-          $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
-        }
-      );
-
-      $(".tooltip").tooltip('hide');
-    });
-
-    //event handler when click download exported schema
-    $('#crowd-tools-export-schema-' + self.id).on('click', function () {
-      var model = $(this).attr('data-model');
-
-      self.tools.export.exportTo(model, function (schema) {
-        $("<a />", {
-          "download": model + "-schema.json",
-          "href": "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(schema, null, 4)),
-        }).appendTo("body")
-          .click(function () {
-            $(this).remove()
-          })[0].click();
-      });
-    });
-  }
-  self.tools.export.init();
-
-  //import tool
-  self.tools.import.init = function () {
-    //this function do the import actions when the model is not changed using self.tools.import.diagramToImport object
-    self.tools.import.importFromLocal = function () {
-      self.fromJSONSchema(self.tools.import.diagramToImport.schema);
-      self.config.actualFile = self.tools.import.diagramToImport.file;
-      self.tools.file.updateActualFile();
-    };
-
-    //this function is called from outside editor for load a file through load modal or internally for import tool
-    self.tools.import.importFrom = function (diagram) {
-      //preserve the actual diagram to be imported
-      self.tools.import.diagramToImport = diagram;
-
-      //in case that actual conceptual model was the same of the file, just load it from schema
-      if (diagram.model == self.config.conceptualModel.name) {
-        if (self.hasChanges()) {
-          $('#crowd-tools-import-advertisement-' + self.id).modal('show');
-          $('.modal').modal('hide');
-        } else {
-          self.tools.import.importFromLocal();
-          $('.modal').modal('hide');
-        }
-      }
-      //in case that actual conceptual model was different, redirect to url of the correct model sending the diagram schema as parameter
-      else {
-        if (self.config.availableConceptualModels[diagram.model].initPalette != null) {
-          if (self.config.ngRouter) {
-            self.config.ngRouter.navigate(['/editor/' + diagram.model], { state: { schema: diagram.schema, file: diagram.file } });
-            $('.modal').modal('hide');
-          } else
-            window.location.href = '/editor/' + diagram.model;
-        } else {
-          if (self.config.tools && self.config.tools.import && self.config.tools.import.errors && self.config.tools.import.errors.missingModelPalette)
-            self.config.tools.import.errors.missingModelPalette(diagram.model);
-          else
-            alert('There is no palette for the conceptual model ' + model.toUpperCase() + '.');
-        }
-      }
-    };
-
-    //append dom for the advertisement modal when try to import a diagram
-    $('body').append(
-      '<div id="crowd-tools-import-advertisement-' + self.id + '" class="modal fade"> \
-        <div class="modal-dialog"> \
-          <div class="modal-content"> \
-            <div class="modal-header"> \
-              <h5 class="modal-title">Import Diagram</h5> \
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
-                <span aria-hidden="true">&times;</span> \
-              </button> \
-            </div> \
-            <div class="modal-body"> \
-              <p>Are you sure you want to import the diagram?</p> \
-              <p><b>Changes may not be saved</b></p> \
-            </div> \
-            <div class="modal-footer"> \
-              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
-              <button id="crowd-tools-import-advertisement-proceed-' + self.id + '" \
-              type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
-            </div> \
-          </div> \
-        </div> \
-      </div>'
-    );
-
-    //event handler when click proceed button in advertisement for import diagram
-    $('#crowd-tools-import-advertisement-proceed-' + self.id).on('click', function () {
-      self.tools.import.importFromLocal();
-      $(".tooltip").tooltip('hide');
-    });
-
-    //append dom for import tool
-    $('#crowd-tools-row-' + self.id).append(
-      '<div class="form-group"> \
-        <div class="dropdown"> \
-          <button class="btn btn-primary dropdown-toggle" type="button" id="crowd-tools-import-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
-            <i class="fa fa-upload"></i> Import \
-          </button> \
-          <div class="dropdown-menu" aria-labelledby="crowd-tools-import-dropdown-' + self.id + '"></div> \
-        </div> \
-      </div>'
-    );
-
-    //draw a button for each conceptual model and put the name on data attribute
-    $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
-      if (conceptualModel.initPalette != null) {
-        $('[aria-labelledby="crowd-tools-import-dropdown-' + self.id + '"]').append(
-          '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-import-check-schema-' + self.id + '">' + conceptualModelName.toUpperCase() + ' Schema</button>'
-        );
-      }
-    });
-
-    //append dom for the schemas modal when check import schemas
-    $('body').append(
-      '<div id="crowd-tools-import-check-schema-modal-' + self.id + '" class="modal fade"> \
-        <div class="modal-dialog modal-dialog-scrollable modal-lg"> \
-          <div class="modal-content"> \
-            <div class="modal-header"> \
-              <h5 class="modal-title"></h5> \
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
-                <span aria-hidden="true">&times;</span> \
-              </button> \
-            </div> \
-            <div class="modal-body"> \
-              <div class="form-group"> \
-                <label for="crowd-tools-import-file-' + self.id + '">Select a schema file</label> \
-                <div class="custom-file"> \
-                  <input type="file" class="custom-file-input" id="crowd-tools-import-file-' + self.id + '"> \
-                  <label class="custom-file-label" for="crowd-tools-import-file-' + self.id + '">Choose file</label> \
-                </div> \
-              </div> \
-              <div class="form-group"> \
-                <label for="crowd-tools-import-raw-' + self.id + '">Or paste the JSON directly</label> \
-                <textarea class="form-control" id="crowd-tools-import-raw-' + self.id + '" rows="10"></textarea> \
-              </div> \
-            </div> \
-            <div class="modal-footer"> \
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
-              <button class="btn btn-dark" data-model="" id="crowd-tools-import-schema-' + self.id + '">Upload</button> \
-            </div> \
-          </div> \
-        </div> \
-      </div>'
-    );
-
-    //event when select a file to import
-    $('#crowd-tools-import-file-' + self.id).on('change', function () {
-      var fileName = 'Choose file';
-      if (this.files[0])
-        fileName = document.getElementById('crowd-tools-import-file-' + self.id).files[0].name;
-      $(this).next('.custom-file-label').html(fileName);
-
-      var fr = new FileReader();
-      fr.onload = function () {
-        $('#crowd-tools-import-raw-' + self.id).val(fr.result);
-      }
-      fr.readAsText(this.files[0]);
-    });
-
-    //event handler when click import check schema
-    $('[name="crowd-tools-import-check-schema-' + self.id + '"]').on('click', function (event) {
-      var btn = this;
-      event.stopPropagation();
-
-      var model = $(this).attr('data-model');
-      $('#crowd-tools-import-schema-' + self.id).attr('data-model', model);
-
-      $('#crowd-tools-import-check-schema-modal-' + self.id + ' .modal-title').html('Import ' + model.toUpperCase() + ' Schema');
-      $('#crowd-tools-import-check-schema-modal-' + self.id).modal('show');
-
-      $('[aria-labelledby="crowd-tools-import-dropdown-' + self.id + '"]').dropdown('hide');
-      $(".tooltip").tooltip('hide');
-    });
-
-    //event handler when click upload imported schema
-    $('#crowd-tools-import-schema-' + self.id).on('click', function () {
-      self.tools.import.importFrom({ model: $(this).attr('data-model'), schema: JSON.parse($('#crowd-tools-import-raw-' + self.id).val()), file: self.config.actualFile });
-
-    });
-
-    //event on close import modal
-    $('#crowd-tools-import-check-schema-modal-' + self.id).on("hidden.bs.modal", function () {
-      $('#crowd-tools-import-file-' + self.id).val('');
-      $('#crowd-tools-import-file-' + self.id).next('.custom-file-label').html('Choose file');
-      $('#crowd-tools-import-raw-' + self.id).val('');
-    });
-  }
-  self.tools.import.init();
-
-  //save to cloud tool
-  self.tools.save.init = function () {
-    //function to open save as modal
-    self.tools.save.saveAs = function () {
-      if (self.config.ngFiles) {
-        if (self.config.ngFiles.save) {
-          if (self.config.ngFiles.save.modal) {
-            self.toBase64(function (preview) {
-              self.config.ngComponent.preview = preview;
-            });
-            $('#' + self.config.ngFiles.save.modal).modal('show');
-          }
-        }
-      }
-    };
-
-    //append dom for save tool
-    $('#crowd-tools-row-' + self.id).append(
-      '<div class="form-group"> \
-        <div class="btn-group"> \
-          <button type="button" class="btn btn-primary" id="crowd-tools-save-input-save-' + self.id + '" \
-          data-toggle="tooltip" data-original-title="Save Diagram on Cloud" data-placement="bottom"> \
-            <i class="fa fa-cloud-upload"></i> Save \
-          </button> \
-          <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-reference="parent"> \
-            <span class="sr-only">Toggle Dropdown</span> \
-          </button> \
-          <div class="dropdown-menu"> \
-            <button class="dropdown-item" id="crowd-tools-save-input-saveas-' + self.id + '">Save as</button> \
-          </div> \
-        </div> \
-      </div>'
-    );
-
-    //event handler when click save
-    $('#crowd-tools-save-input-save-' + self.id).on('click', function () {
-      if (self.config.actualFile)
-        self.config.ngComponent[self.config.ngFiles.save.put]();
-      else
-        self.tools.save.saveAs();
-
-      $(".tooltip").tooltip('hide');
-      $(this).blur();
-    });
-
-    //event handler when click save as
-    $('#crowd-tools-save-input-saveas-' + self.id).on('click', function () {
-      self.tools.save.saveAs();
-
-      $(".tooltip").tooltip('hide');
-      $(this).blur();
-    });
-  }
-  self.tools.save.init();
-
-  //load from cloud tool
-  self.tools.load.init = function () {
-    //append dom for load tool
-    $('#crowd-tools-row-' + self.id).append(
-      '<div class="form-group"> \
-        <button class="btn btn-primary iconify" id="crowd-tools-load-input-' + self.id + '" type="button" \
-        data-toggle="tooltip" data-original-title="Load Diagram from Cloud" data-placement="bottom" > \
-        <i class="fa fa-cloud-download"></i> Load</button> \
-      </div>'
-    );
-
-    //event handler when click load
-    $('#crowd-tools-load-input-' + self.id).on('click', function () {
-      if (self.config.ngFiles) {
-        if (self.config.ngFiles.load) {
-          if (self.config.ngFiles.load.modal) {
-            $('#' + self.config.ngFiles.load.modal).modal('show');
-          }
-          if (self.config.ngFiles.load.get) {
-            self.config.ngComponent[self.config.ngFiles.load.get]();
-          }
-        }
-      }
-      $(".tooltip").tooltip('hide');
-      $(this).blur();
-    });
-  }
-  self.tools.load.init();
-
-  //actual file label tool
-  self.tools.file.init = function () {
-    //update the actual file label if a file is loaded
-    self.tools.file.updateActualFile = function () {
-      if (self.config.actualFile && self.config.actualFile.name)
-        $('#crowd-tools-actual-file-' + self.id).html(self.config.actualFile.name);
-      else
-        $('#crowd-tools-actual-file-' + self.id).html('-');
-
-      $('.modal').modal('hide');
-    }
-
-    self.tools.file.getFile = function (callback) {
-      if (self.config.actualFile) {
-        self.config.actualFile.content = self.toJSONSchema();
-        self.config.actualFile.model = self.config.conceptualModel.name;
-        self.toBase64(function (preview) {
-          self.config.actualFile.preview = preview;
-          callback(self.config.actualFile);
-        });
-      } else {
-        var newFile = {};
-        newFile.content = self.toJSONSchema();
-        newFile.model = self.config.conceptualModel.name;
-        self.toBase64(function (preview) {
-          newFile.preview = preview;
-          callback(newFile);
-        });
-      }
-    }
-
-    //append dom for file tool
-    $('#crowd-tools-row-' + self.id).append(
-      '<label data-toggle="tooltip" data-original-title="Diagram loaded from Cloud" data-placement="bottom"><i class="fa fa-file-code-o"></i>: \
-        <span id="crowd-tools-actual-file-' + self.id + '"></span> \
-      </label> \
-      <div class="form-group"> \
-        <button class="btn btn-danger iconify" id="crowd-tools-file-new-input-' + self.id + '" type="button" \
-        data-toggle="tooltip" data-original-title="Create New Diagram" data-placement="bottom" > \
-        <i class="fa fa-file"></i> New</button> \
-      </div>'
-    );
-
-    //append dom for the advertisement modal when try to make new file
-    $('body').append(
-      '<div id="crowd-tools-file-new-advertisement-' + self.id + '" class="modal fade"> \
-        <div class="modal-dialog"> \
-          <div class="modal-content"> \
-            <div class="modal-header"> \
-              <h5 class="modal-title">Create new Diagram</h5> \
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
-                <span aria-hidden="true">&times;</span> \
-              </button> \
-            </div> \
-            <div class="modal-body"> \
-              <p>Are you sure you want to create a new diagram?</p> \
-              <p><b>Changes may not be saved</b></p> \
-            </div> \
-            <div class="modal-footer"> \
-              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
-              <button id="crowd-tools-file-new-advertisement-proceed-' + self.id + '" \
-              type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
-            </div> \
-          </div> \
-        </div> \
-      </div>'
-    );
-
-    //event handler when click clear workspace that open advertisement modal
-    $('#crowd-tools-file-new-input-' + self.id).on('click', function () {
-      if (self.hasChanges()) {
-        $('#crowd-tools-file-new-advertisement-' + self.id).modal('show');
-      }
-      $(".tooltip").tooltip('hide');
-      $(this).blur();
-    });
-
-    //event handler when click proceed button in advertisement for clear workspace
-    $('#crowd-tools-file-new-advertisement-proceed-' + self.id).on('click', function () {
-      //clear the workspace elements
-      self.workspace.graph.clear();
-      //center workspace scroll
-      setTimeout(() => self.workspace.centerScroll());
-      //clear the actual file
-      self.config.actualFile = null;
-      self.tools.file.updateActualFile();
-
-      $(".tooltip").tooltip('hide');
-    });
-  }
-  self.tools.file.init();
-
-  //change conceptual model tool
-  self.tools.model.init = function () {
-    //append dom for change conceptual model tool
-    $('#crowd-tools-row-' + self.id).append(
-      '<div class="form-group"> \
-        <div class="dropdown"> \
-          <button class="btn btn-danger dropdown-toggle" type="button" id="crowd-tools-model-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
-            <i class="fa fa-th"></i> Model \
-          </button> \
-          <div class="dropdown-menu" aria-labelledby="crowd-tools-model-dropdown-' + self.id + '"></div> \
-        </div> \
-      </div>'
-    );
-
-    //draw a button for each conceptual model and put the name on data attribute
-    $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
-      if (conceptualModel.initPalette != null) {
-        $('[aria-labelledby="crowd-tools-model-dropdown-' + self.id + '"]').append(
-          // '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-input-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
-          '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-model-advertisement-proceed-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
-          //'<a href="/editor/' + conceptualModelName + '" class="dropdown-item ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '">' + conceptualModelName.toUpperCase() + '</a>'
-        );
-      }
-    })
-
-    // (not in use)
-    //append dom for the advertisement modal when try to change conceptual model
-    $('body').append(
-      '<div id="crowd-tools-model-advertisement-' + self.id + '" class="modal fade"> \
-        <div class="modal-dialog"> \
-          <div class="modal-content"> \
-            <div class="modal-header"> \
-              <h5 class="modal-title">Change Conceptual Model</h5> \
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
-                <span aria-hidden="true">&times;</span> \
-              </button> \
-            </div> \
-            <div class="modal-body"> \
-              <p>Are you sure you want to change the conceptual model?</p> \
-              <p><b>You lost not saved changes</b></p> \
-            </div> \
-            <div class="modal-footer"> \
-              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
-              <button name="crowd-tools-model-advertisement-proceed-' + self.id + '" \
-              type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
-            </div> \
-          </div> \
-        </div> \
-      </div>'
-    );
-
-    // (not in use)
-    //event handler when click model change that open advertisement modal
-    $('[name=crowd-tools-model-input-' + self.id + "]").on('click', function () {
-      $('#crowd-tools-model-advertisement-' + self.id).modal('show');
-      $('#crowd-tools-model-advertisement-proceed-' + self.id).attr('data-model', $(this).attr('data-model'));
-      $(".tooltip").tooltip('hide');
-    });
-
-    //event handler when click proceed button in advertisement for model change
-    $('[name=crowd-tools-model-advertisement-proceed-' + self.id + "]").on('click', function () {
-      console.log('/editor/' + $(this).attr('data-model'));
-      if (self.config.ngRouter)
-        self.config.ngRouter.navigate(['/editor/' + $(this).attr('data-model')], { state: { file: self.config.actualFile } });
-      else
-        window.location.href = '/editor/' + $(this).attr('data-model');
-    });
-  }
-  self.tools.model.init();
-
-  //translate conceptual model tool
-  self.tools.translate.init = function () {
-    //append dom for change translate tool
-    $('#crowd-tools-row-' + self.id).append(
-      '<div class="form-group"> \
-      <div class="dropdown"> \
-        <button class="btn btn-danger dropdown-toggle" type="button" id="crowd-tools-translate-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
-          <i class="fa fa-random"></i> Translate \
-        </button> \
-        <div class="dropdown-menu" aria-labelledby="crowd-tools-translate-dropdown-' + self.id + '"></div> \
-      </div> \
-    </div>'
-    );
-
-    //draw a button for each conceptual model and put the name on data attribute
-    $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
-      if (conceptualModel.initPalette != null) {
-        $('[aria-labelledby="crowd-tools-translate-dropdown-' + self.id + '"]').append(
-          '<button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-translate-schema-' + self.id + '" ' + (self.config.conceptualModel.name == conceptualModel.name ? 'disabled' : '') + '>' + conceptualModelName.toUpperCase() + '</button>'
-        );
-      }
-    })
-
-    //event handler when click a translate button
-    $('[name=crowd-tools-translate-schema-' + self.id + "]").on('click', function () {
-      var btn = this;
-      event.stopPropagation();
-
-      var model = $(this).attr('data-model');
-      $('#crowd-tools-translate-schema-' + self.id).attr('data-model', model);
-
-      var originalBtn = $(btn).html();
-      $(btn).html(originalBtn + ' <i class="loading fa fa-circle-o-notch fa-spin"></i>');
-
-      self.tools.export.exportTo(model,
-        function (schema) {
-          schema.hasPositions = false;
-          self.tools.import.importFrom({ model: model, schema: schema, file: self.config.actualFile });
-        },
-        function () {
-          $(btn).html(originalBtn);
-          $('[aria-labelledby="crowd-tools-translate-dropdown-' + self.id + '"]').dropdown('hide');
-        }
-      );
-    });
-  }
-  self.tools.translate.init();
-
-  //clear workspace tool
-  self.tools.clearWorkspace.init = function () {
-    //append dom for clear workspace tool
-    $('#crowd-tools-row-' + self.id).append(
-      '<div class="form-group"> \
-        <button class="btn btn-danger" id="crowd-tools-clear-workspace-input-' + self.id + '" type="button" \
-        data-toggle="tooltip" data-original-title="Clear Diagram" data-placement="bottom" > \
-        <i class="material-icons">delete_forever</i></button> \
-      </div>'
-    );
-
-    //append dom for the advertisement modal when try clear workspace
-    $('body').append(
-      '<div id="crowd-tools-clear-workspace-advertisement-' + self.id + '" class="modal fade"> \
-        <div class="modal-dialog"> \
-          <div class="modal-content"> \
-            <div class="modal-header"> \
-              <h5 class="modal-title">Clear Diagram</h5> \
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
-                <span aria-hidden="true">&times;</span> \
-              </button> \
-            </div> \
-            <div class="modal-body"> \
-              <p>Are you sure you want to clear the diagram?</p> \
-            </div> \
-            <div class="modal-footer"> \
-              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
-              <button id="crowd-tools-clear-workspace-advertisement-proceed-' + self.id + '" \
-              type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
-            </div> \
-          </div> \
-        </div> \
-      </div>'
-    );
-
-    //event handler when click clear workspace that open advertisement modal
-    $('#crowd-tools-clear-workspace-input-' + self.id).on('click', function () {
-      if (self.hasChanges()) {
-        $('#crowd-tools-clear-workspace-advertisement-' + self.id).modal('show');
-      }
-      $(".tooltip").tooltip('hide');
-      $(this).blur();
-    });
-
-    //event handler when click proceed button in advertisement for clear workspace
-    $('#crowd-tools-clear-workspace-advertisement-proceed-' + self.id).on('click', function () {
-      //clear the workspace elements
-      self.workspace.graph.clear();
-      //center workspace scroll
-      setTimeout(() => self.workspace.centerScroll());
-
-      $(".tooltip").tooltip('hide');
-    });
-  }
-  self.tools.clearWorkspace.init();
 
   $('[data-toggle="tooltip"]').tooltip({ html: true });
 }
@@ -2170,6 +2485,10 @@ CrowdEditor.prototype.fromJSONSchema = function (schema) {
 
   //call the function to load a json schema for the specific conceptual model
   self.config.conceptualModel.fromJSONSchema(self, schema);
+
+  //hide tools
+  self.workspace.linkClickedFlag = false;
+  self.workspace.paper.hideTools();
 }
 
 CrowdEditor.prototype.toBase64 = function (callback) {

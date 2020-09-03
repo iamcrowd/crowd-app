@@ -4,13 +4,16 @@ import { environment } from '../../environments/environment';
 import { DiagramService } from '../services/diagram.service';
 import { Diagram } from '../shared/models/diagram.model';
 import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
 
 declare var iziToast;
+declare var $;
 
 declare var CrowdEditor;
 declare var CrowdEditorEer;
 declare var CrowdEditorUml;
 declare var CrowdMetamodel;
+declare var CrowdReasoning;
 
 @Component({
   selector: 'app-editor',
@@ -23,6 +26,8 @@ export class EditorComponent implements OnInit {
   editor: any;
   //actual conceptual model for the editor palette
   conceptualModel: string;
+  //actual edited diagram
+  diagram: Diagram;
   //diagrams loaded from db
   diagrams: Diagram[] = [];
   //for actual editing file (that is saved on cloud)
@@ -31,6 +36,8 @@ export class EditorComponent implements OnInit {
   schema: object;
   //reference to actual preview of diagram
   preview: string;
+  //to manage event from where is setted an action
+  setEvent: any;
 
   //diagram save form
   diagramForm: FormGroup;
@@ -40,12 +47,14 @@ export class EditorComponent implements OnInit {
     Validators.maxLength(30),
     Validators.pattern('[a-zA-Z0-9_-\\s]*')
   ]);
+  // diagramMeta = new FormControl('checked');
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private diagramService: DiagramService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    public auth: AuthService
   ) {
     this.route.params.subscribe(params => {
       this.conceptualModel = params.conceptualModel;
@@ -61,6 +70,8 @@ export class EditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(this.auth.currentUser);
+
     this.file = this.router.getCurrentNavigation()?.extras?.state?.file;
     this.schema = this.router.getCurrentNavigation()?.extras?.state?.schema;
 
@@ -68,7 +79,7 @@ export class EditorComponent implements OnInit {
       uml: CrowdEditorUml,
       eer: CrowdEditorEer,
       orm: { name: 'orm' },
-      meta: { name: 'meta' }
+      kf: { name: 'kf' }
     }
 
     this.editor = new CrowdEditor({
@@ -81,6 +92,18 @@ export class EditorComponent implements OnInit {
           iziToast.error({
             title: 'Error',
             message: 'There was an error when trying to call Metamodel API<br>' +
+              (error.responseJSON != null
+                ? error.responseJSON.error + "<br>" + error.responseJSON.message
+                : error.responseText),
+          });
+        }
+      }),
+      reasoningApi: new CrowdReasoning({
+        url: environment.reasoningUrl,
+        error: (error) => {
+          iziToast.error({
+            title: 'Error',
+            message: 'There was an error when trying to call Reasoning API<br>' +
               (error.responseJSON != null
                 ? error.responseJSON.error + "<br>" + error.responseJSON.message
                 : error.responseText),
@@ -110,20 +133,29 @@ export class EditorComponent implements OnInit {
       ngRouter: this.router,
       ngFiles: {
         load: {
-          modal: 'crowd-tools-load-modal',
+          // modal: 'crowd-tools-load-modal',
           get: 'getDiagrams'
         },
         save: {
           modal: 'crowd-tools-save-modal',
           put: 'editDiagram'
-        }
+        },
+        rename: {
+          // modal: 'crowd-tools-rename-modal',
+          set: 'setDiagram'
+        },
+        delete: {
+          set: 'setDiagram'
+        },
+        user: this.auth?.currentUser?._id
       },
       preloadedSchema: this.schema,
       actualFile: this.file
     });
 
     this.diagramForm = this.formBuilder.group({
-      diagramName: this.diagramName
+      diagramName: this.diagramName,
+      // diagramMeta: this.diagramMeta
     });
   }
 
@@ -133,47 +165,152 @@ export class EditorComponent implements OnInit {
 
   getDiagrams(): void {
     this.diagramService.getDiagrams().subscribe(
-      data => this.diagrams = data,
+      data => {
+        this.diagrams = data;
+
+        $('#crowd-tools-load-modal').modal();
+        setTimeout(() => $('[data-toggle="tooltip"]').tooltip({ html: true }));
+      },
       error => console.log(error)
     );
   }
 
+  setDiagram(action: string, diagram: Diagram, event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    this.diagram = diagram ? diagram : this.editor.config.actualFile;
+    this.diagramName.setValue(this.diagram.name);
+    this.setEvent = event;
+
+    switch (action) {
+      case 'rename':
+        $('#crowd-tools-rename-modal').modal();
+        break;
+      case 'delete':
+        $('#crowd-tools-delete-modal').modal();
+        break;
+    }
+
+    $('[data-toggle="tooltip"]').tooltip('hide');
+    if (event) $(event.currentTarget).blur();
+  }
+
   loadDiagram(diagram: Diagram): void {
-    this.editor.tools.import.importFrom({ model: diagram.model, schema: diagram.content, file: diagram });
+    if (diagram.meta) {
+      var actualConceptualModel = this.editor.config.conceptualModel.name;
+      this.editor.config.metamodelApi.request({
+        from: 'meta',
+        to: actualConceptualModel,
+        data: diagram.meta,
+        success: (response) => {
+          response.hasPositions = false;
+          this.editor.tools.import.importFrom({ model: actualConceptualModel, schema: response, file: diagram });
+        }
+      });
+    } else {
+      this.editor.tools.import.importFrom({ model: diagram.model, schema: diagram.content, file: diagram });
+    }
   }
 
   editDiagram(): void {
-    this.editor.tools.file.getFile((diagram) => {
+    this.editor.tools.file.getFile((diagram, translateError) => {
+      if (translateError && diagram.meta) {
+        diagram.meta = null;
+      }
+      console.log(diagram);
       this.diagramService.editDiagram(diagram).subscribe(
-        res => iziToast.success({ message: 'Diagram saved successfully.' }),
-        error => iziToast.error({ message: 'There was an error when try to save the Diagram.' })
+        res => {
+          if (!translateError) {
+            iziToast.success({ message: '<b>Diagram saved successfully.</b>' });
+          } else {
+            iziToast.warning({
+              message: '<b>Diagram saved successfully.</b><br>' +
+                'Metamodel cannot be generated due an translate error, this means that your diagram can\'t be translated to another conceptual model.'
+            });
+          }
+        },
+        error => {
+          console.log(error);
+          iziToast.error({ message: 'There was an error when try to save the Diagram.' })
+        }
       );
     });
+  }
+
+  renameDiagram(): void {
+    if (this.diagramForm.valid) {
+      if (this.diagram._id == this.editor?.config?.actualFile?._id)
+        this.editor.config.actualFile.name = this.diagramName.value;
+      this.diagram.name = this.diagramName.value;
+      this.diagramService.editDiagram(this.diagram).subscribe(
+        res => {
+          iziToast.success({ message: '<b>Diagram renamed successfully.</b>' });
+          this.editor.tools.file.updateActualFile({ parent: 'crowd-tools-rename-modal' });
+          this.resetDiagramForm();
+        },
+        error => {
+          console.log(error);
+          iziToast.error({ message: 'There was an error when try to rename the Diagram.' })
+        }
+      );
+    }
   }
 
   addDiagram(): void {
     console.log('addDiagram');
     this.diagramForm.markAllAsTouched();
     if (this.diagramForm.valid) {
-      this.editor.tools.file.getFile((diagram) => {
-        diagram._id = null;
+      this.editor.tools.file.getFile((diagram, translateError) => {
+        delete diagram._id;
         diagram.name = this.diagramName.value;
+        // if (this.diagramMeta.value != 'checked') {
+        //   delete diagram.meta;
+        // }
         this.diagramService.addDiagram(diagram).subscribe(
           res => {
-            console.log(res);
-            iziToast.success({ message: 'Diagram saved successfully.' });
+            if (!translateError) {
+              iziToast.success({ message: '<b>Diagram saved successfully.</b>' });
+            } else {
+              iziToast.warning({
+                message: '<b>Diagram saved successfully.</b><br>' +
+                  'Metamodel cannot be generated due an translate error, this means that your diagram can\'t be translated to another conceptual model.'
+              });
+            }
             this.editor.config.actualFile = res;
             this.editor.tools.file.updateActualFile();
             this.resetDiagramForm();
           },
-          error => iziToast.error({ message: 'There was an error when try to save the Diagram.' })
+          error => {
+            console.log(error);
+            iziToast.error({ message: 'There was an error when try to save the Diagram.' })
+          }
         );
       });
     }
   }
 
+  deleteDiagram(): void {
+    this.diagramService.deleteDiagram(this.diagram).subscribe(
+      data => {
+        iziToast.success({ message: 'Diagram deleted successfully.' });
+        if (this.diagram._id == this.editor?.config?.actualFile?._id) {
+          this.editor.config.actualFile = null;
+          this.editor.tools.file.updateActualFile({ parent: false });
+          this.editor.tools.clearWorkspace.clear();
+        }
+
+        if (this.setEvent) this.getDiagrams();
+        this.resetDiagramForm();
+      },
+      error => console.log(error),
+    );
+  }
+
   resetDiagramForm(): void {
     this.diagramForm.reset();
+    this.diagram = null;
+    this.setEvent = null;
   }
 
   setValid(control): object {

@@ -46,11 +46,11 @@ export class AppComponent implements AfterViewChecked {
       close: false,
       overlay: true,
       displayMode: 'replace',
-      zindex: 999,
+      zindex: 1051,
       theme: 'dark',
       icon: 'fa fa-user',
       color: 'grey',
-      message: 'Are you sure you want to logout?',
+      message: 'Are you sure want to logout?',
       position: 'topCenter',
       buttons: [
         ['<button>Cancel</button>', function (instance, toast) {

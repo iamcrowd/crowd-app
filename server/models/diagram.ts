@@ -9,7 +9,7 @@ const diagramSchema = new mongoose.Schema({
   preview: String
 });
 
-// Omit the __v when returning a diagram
+//omit the __v when returning a diagram
 diagramSchema.set('toJSON', {
   transform: (doc, ret, options) => {
     delete ret.__v;

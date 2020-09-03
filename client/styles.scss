@@ -6,33 +6,6 @@ body {
   margin: 0;
 }
 
-.input-group {
-  margin-bottom: 15px;
-}
-
-.jumbotron {
-  border-radius: unset !important;
-}
-
-pre {
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 10px;
-  padding: 15px 25px;
-  color: wheat !important;
-}
-
-.custom-file-label {
-  color: #dee2e6 !important;
-  background-color: #000 !important;
-  border: 1px solid #6c757d !important;
-}
-
-.custom-file-label::after {
-  color: #ced4da !important;
-  background-color: #343a40 !important;
-  border-color: #343a40 !important;
-}
-
 //break text on iziToasts
 .iziToast > .iziToast-body .iziToast-texts {
   word-break: break-word;
@@ -89,3 +62,69 @@ input:-webkit-autofill {
 
 /* Importing Bootstrap SCSS file. */
 @import "~bootstrap/scss/bootstrap";
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.jumbotron {
+  border-radius: unset !important;
+}
+
+//for fix color on pre
+pre {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  padding: 15px 25px;
+  color: wheat !important;
+}
+
+//for fix color on file input
+.custom-file-label {
+  color: #dee2e6 !important;
+  background-color: #000 !important;
+  border: 1px solid #6c757d !important;
+}
+
+.custom-file-label::after {
+  color: #ced4da !important;
+  background-color: #343a40 !important;
+  border-color: #343a40 !important;
+}
+
+//for bootstrap nested dropdown
+.dropdown-menu {
+  margin-top: 0;
+}
+.dropdown-menu .dropdown-toggle::after {
+  vertical-align: middle;
+  border-left: 4px solid;
+  border-bottom: 4px solid transparent;
+  border-top: 4px solid transparent;
+}
+.dropdown-menu .dropdown .dropdown-menu {
+  left: 100%;
+  top: 0%;
+  margin: 0 20px;
+  border-width: 0;
+}
+.dropdown-menu .dropdown .dropdown-menu.left {
+  right: 100%;
+  left: auto;
+}
+
+.dropdown-menu > li a:hover,
+.dropdown-menu > li.show {
+  background: #212529;
+  color: white;
+}
+.dropdown-menu > li.show > a {
+  color: white;
+}
+
+@media (min-width: 768px) {
+  .dropdown-menu .dropdown .dropdown-menu {
+    margin: 0;
+    border-width: 1px;
+  }
+}

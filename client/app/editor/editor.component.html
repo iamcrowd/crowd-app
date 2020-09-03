@@ -4,7 +4,7 @@
   <div class="modal-dialog modal-dialog-scrollable modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Load Diagram from Cloud</h5>
+        <h5 class="modal-title"><i class="fa fa-fw fa-cloud-download"></i> Load Diagram from Cloud</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -13,14 +13,32 @@
         <div class="row">
           <div class="col-md-6 col-lg-3 col-xl-3" *ngFor="let diagram of diagrams">
             <div class="card text-white bg-dark mb-3" (click)="loadDiagram(diagram)">
+              <div class="crowd-diagram-load-button" *ngIf="diagram.preview">
+                <p>Load</p>
+              </div>
               <div class="card-header">
-                <span class="crowd-model-label {{diagram.model}}">{{diagram.model}}</span>{{diagram.name}}
+                <span *ngIf="!diagram.meta" class="crowd-model-label {{diagram.model}}">{{diagram.model}}</span>
+                <span *ngIf="diagram.meta" class="crowd-model-label meta">KF</span>{{diagram.name}}
               </div>
               <div class="card-body crowd-diagram-preview-container" *ngIf="diagram.preview">
                 <img class="crowd-diagram-preview" src="{{diagram.preview}}" />
+                <div class="crowd-diagram-buttons">
+                  <button class="btn btn-danger pull-right crowd-diagram-btn"
+                    (click)="setDiagram('delete', diagram, $event)" data-toggle="tooltip" data-original-title="Delete">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                  <button class="btn btn-primary pull-right crowd-diagram-btn"
+                    (click)="setDiagram('rename', diagram, $event)" data-toggle="tooltip" data-original-title="Rename">
+                    <i class="fa fa-pencil-square-o"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+        <div *ngIf="!diagrams.length" style="text-align: center;">
+          <i class="material-icons" style="font-size: 165px;">folder_shared</i>
+          <p><b>You haven't saved Diagrams on your Cloud.</b></p>
         </div>
       </div>
       <div class="modal-footer">
@@ -34,7 +52,7 @@
   <div class="modal-dialog modal-dialog-scrollable modal-sm">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Save Diagram on Cloud</h5>
+        <h5 class="modal-title"><i class="fa fa-fw fa-cloud-upload"></i> Save Diagram on Cloud</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -45,34 +63,110 @@
             <img class="crowd-diagram-preview-save" src="{{preview}}" />
           </div>
         </div>
-        <form [formGroup]="diagramForm"  autocomplete="off">
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text">
-                <i class="fa fa-fw fa-file"></i>
-              </span>
-            </div>
-            <input class="form-control" type="text" name="diagramName" formControlName="diagramName" placeholder="Name"
-              [ngClass]="setValid('diagramName')" autocomplete="off">
-            <div class="invalid-feedback">
-              <div *ngIf="diagramName.errors && diagramName.errors.required">
-                Name is required
+        <form [formGroup]="diagramForm" autocomplete="off">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">
+                  <i class="fa fa-fw fa-file"></i>
+                </span>
               </div>
-              <div *ngIf="diagramName.errors && (diagramName.errors.minlength || diagramName.errors.maxlength)">
-                Name must be at 4-30 characters long
-              </div>
-              <div *ngIf="diagramName.errors && diagramName.errors.pattern">
-                Name can only have characters, numbers and _ or - symbols
+              <input class="form-control" type="text" name="diagramName" formControlName="diagramName"
+                placeholder="Name" [ngClass]="setValid('diagramName')" autocomplete="off">
+              <div class="invalid-feedback">
+                <div *ngIf="diagramName.errors && diagramName.errors.required">
+                  Name is required
+                </div>
+                <div *ngIf="diagramName.errors && (diagramName.errors.minlength || diagramName.errors.maxlength)">
+                  Name must be at 4-30 characters long
+                </div>
+                <div *ngIf="diagramName.errors && diagramName.errors.pattern">
+                  Name can only have characters, numbers and _ or - symbols
+                </div>
               </div>
             </div>
           </div>
+          <!-- <div class="form-group form-check">
+            <input class="form-check-input" type="checkbox" name="diagramMeta" formControlName="diagramMeta" checked>
+            <label class="form-check-label" for="diagramMeta">Save as META model for translateable diagram</label>
+          </div> -->
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" (click)="resetDiagramForm()">Close</button>
-        <button class="btn btn-dark pull-right" type="submit" (click)="addDiagram()">
+        <button type="submit" class="btn btn-dark pull-right" (click)="addDiagram()">
           <i class="fa fa-save"></i> Save
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="crowd-tools-rename-modal" class="modal fade">
+  <div class="modal-dialog modal-dialog-scrollable modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa fa-fw fa-pencil-square-o"></i> Rename Diagram</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="diagramForm" autocomplete="off">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">
+                  <i class="fa fa-fw fa-file"></i>
+                </span>
+              </div>
+              <input class="form-control" type="text" name="diagramName" formControlName="diagramName"
+                placeholder="Name" [ngClass]="setValid('diagramName')" autocomplete="off">
+              <div class="invalid-feedback">
+                <div *ngIf="diagramName.errors && diagramName.errors.required">
+                  Name is required
+                </div>
+                <div *ngIf="diagramName.errors && (diagramName.errors.minlength || diagramName.errors.maxlength)">
+                  Name must be at 4-30 characters long
+                </div>
+                <div *ngIf="diagramName.errors && diagramName.errors.pattern">
+                  Name can only have characters, numbers and _ or - symbols
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="form-group form-check">
+            <input class="form-check-input" type="checkbox" name="diagramMeta" formControlName="diagramMeta" checked>
+            <label class="form-check-label" for="diagramMeta">Save as META model for translateable diagram</label>
+          </div> -->
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="resetDiagramForm()">Close</button>
+        <button type="submit" class="btn btn-dark pull-right" (click)="renameDiagram()">
+          <i class="fa fa-save"></i> Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="crowd-tools-delete-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa fa-fw fa-trash"></i> Delete Diagram</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure want to delete diagram named <b>{{diagramName.value}}</b>?</p>
+        <p><b>This action cannot be reverted</b></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="resetDiagramForm()">Cancel</button>
+        <button type="submit" class="btn btn-danger" data-dismiss="modal" (click)="deleteDiagram()">Proceed</button>
       </div>
     </div>
   </div>
