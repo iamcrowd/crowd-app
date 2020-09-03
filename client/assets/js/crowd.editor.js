@@ -307,6 +307,10 @@ CrowdEditor.prototype.initTools = function () {
   self.tools.translate = {};
   self.tools.clearWorkspace = {};
 
+  self.tools.view = {};
+  self.tools.viewScrollbar = {};
+  self.tools.collapseClasses = {};
+
   self.tools.reasoning = {};
 
   self.tools.zoom = {};
@@ -321,7 +325,7 @@ CrowdEditor.prototype.initTools = function () {
     '<div class="form-group"><div class="btn-group" id="crowd-tools-menu-' + self.id + '" role="group"></div></div>'
   );
 
-  //file tool
+  //file tools
   self.tools.file.init = function () {
     //update the actual file label if a file is loaded
     self.tools.file.updateActualFile = function (config) {
@@ -386,7 +390,7 @@ CrowdEditor.prototype.initTools = function () {
     //append files dropdown for all files related tools
     $('#crowd-tools-menu-' + self.id).append(
       '<div class="btn-group dropdown" id="crowd-tools-file-btn-' + self.id + '"> \
-        <button class="btn btn-light dropdown-toggle" type="button" id="crowd-tools-file-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+        <button class="btn btn-dark dropdown-toggle" type="button" id="crowd-tools-file-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
           <i class="fa fa-fw fa-file"></i> File \
         </button> \
         <ul class="dropdown-menu" aria-labelledby="crowd-tools-file-dropdown-' + self.id + '"></ul> \
@@ -823,10 +827,21 @@ CrowdEditor.prototype.initTools = function () {
           self.config.metamodelApi.request({
             from: 'kf',
             to: self.config.conceptualModel.name,
-            data: self.tools.import.diagramToImport.schema,
+            data: diagram.schema,
             success: (response) => {
               response.hasPositions = false;
               self.tools.import.importFrom({ model: self.config.conceptualModel.name, schema: response, file: self.config.conceptualModel.file });
+            }
+          });
+          return;
+        } else if (!self.config.availableConceptualModels[diagram.model].initPalette) {
+          self.config.metamodelApi.request({
+            from: diagram.model,
+            to: 'kf',
+            data: diagram.schema,
+            success: (response) => {
+              response.hasPositions = false;
+              self.tools.import.importFrom({ model: 'kf', schema: response, file: self.config.conceptualModel.file });
             }
           });
           return;
@@ -912,12 +927,12 @@ CrowdEditor.prototype.initTools = function () {
 
       //draw a button for each conceptual model and put the name on data attribute
       $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
-        if (conceptualModel.initPalette != null || conceptualModel.name == 'kf') {
-          $('[aria-labelledby="crowd-tools-import-dropdown-' + self.id + '"]').append(
-            '<li><button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-import-check-schema-' + self.id + '">' +
-            '<i class="fa fa-fw fa-long-arrow-left"></i> ' + conceptualModelName.toUpperCase() + ' Schema</button></li>'
-          );
-        }
+        // if (conceptualModel.initPalette != null || conceptualModel.name == 'kf') {
+        $('[aria-labelledby="crowd-tools-import-dropdown-' + self.id + '"]').append(
+          '<li><button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-import-check-schema-' + self.id + '">' +
+          '<i class="fa fa-fw fa-long-arrow-left"></i> ' + conceptualModelName.toUpperCase() + ' Schema</button></li>'
+        );
+        // }
       });
 
       //append dom for the schemas modal when check import schemas
@@ -1008,12 +1023,12 @@ CrowdEditor.prototype.initTools = function () {
   }
   self.tools.file.init();
 
-  //edit tool
+  //edit tools
   self.tools.edit.init = function () {
     //append edit dropdown for all edit related tools
     $('#crowd-tools-menu-' + self.id).append(
       '<div class="btn-group dropdown" id="crowd-tools-edit-btn-' + self.id + '"> \
-        <button class="btn btn-light dropdown-toggle" type="button" id="crowd-tools-edit-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+        <button class="btn btn-dark dropdown-toggle" type="button" id="crowd-tools-edit-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
           <i class="fa fa-fw fa-pencil"></i> Edit \
         </button> \
         <ul class="dropdown-menu" aria-labelledby="crowd-tools-edit-dropdown-' + self.id + '"></ul> \
@@ -1285,6 +1300,72 @@ CrowdEditor.prototype.initTools = function () {
     });
   }
   self.tools.edit.init();
+
+  //view tools
+  self.tools.view.init = function () {
+    //append edit dropdown for all view related tools
+    $('#crowd-tools-menu-' + self.id).append(
+      '<div class="btn-group dropdown" id="crowd-tools-view-btn-' + self.id + '"> \
+        <button class="btn btn-dark dropdown-toggle" type="button" id="crowd-tools-view-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+          <i class="fa fa-fw fa-eye"></i> View \
+        </button> \
+        <ul class="dropdown-menu" aria-labelledby="crowd-tools-view-dropdown-' + self.id + '"></ul> \
+      </div>'
+    );
+
+    //view scrollbar tool
+    self.tools.viewScrollbar.init = function () {
+      //append dom for view scrollbar tool
+      $('[aria-labelledby="crowd-tools-view-dropdown-' + self.id + '"]').append(
+        '<li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" title="Show/Hide Scrollbar"> \
+            <button class="dropdown-item" id="crowd-tools-view-scrollbar-input-' + self.id + '"> \
+            <i class="fa fa-fw fa-window-maximize"></i> Scrollbars</button> \
+          </span> \
+        </li>'
+      );
+
+      //event handler when click view scrollbar
+      $('#crowd-tools-view-scrollbar-input-' + self.id).on('click', function () {
+        $('#crowd-workspace-' + self.id).css('overflow', $('#crowd-workspace-' + self.id).css('overflow') == 'hidden' ? 'scroll' : 'hidden');
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.viewScrollbar.init();
+
+    //collapse classes tool
+    self.tools.collapseClasses.init = function () {
+      //append dom for collapse classes tool
+      $('[aria-labelledby="crowd-tools-view-dropdown-' + self.id + '"]').append(
+        '<li class="dropdown-divider"></li> \
+        <li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" \
+          title="' + (self.config.conceptualModel.name != 'uml' ? 'This functionality is only available for UML model' : 'Show/Hide Attributes and Methods on Classes') + '"> \
+            <button class="dropdown-item" id="crowd-tools-collapse-classes-input-' + self.id + '" \
+            ' + (self.config.conceptualModel.name != 'uml' ? 'style="pointer-events: none;" disabled' : '') + '> \
+            <i id="crowd-tools-collapse-classes-icon-' + self.id + '" class="fa fa-fw fa-compress"></i> Collapse Classes</button> \
+          </span> \
+        </li>'
+      );
+
+      //event handler when click collapse classes
+      $('#crowd-tools-collapse-classes-input-' + self.id).on('click', function () {
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.collapseClasses.init();
+
+    //activate bootstrap nested dropdowns for edit tools
+    $('#crowd-tools-view-btn-' + self.id).bootnavbar({});
+
+    //blur on hide
+    $('#crowd-tools-view-btn-' + self.id).on('hide.bs.dropdown', function () {
+      $('#crowd-tools-view-dropdown-' + self.id).blur();
+    });
+  }
+  self.tools.view.init();
 
   //reasoning tool
   self.tools.reasoning.init = function () {
