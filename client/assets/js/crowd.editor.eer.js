@@ -229,7 +229,6 @@ var CrowdEditorEer = {
       parentType: 'inheritance',
       type: 'inheritance',
       subtype: 'overlaped',
-      uri: 'http://crowd.fi.uncoma.edu.ar#inheritance',
       attrs: {
         text: {
           fill: 'white',
@@ -242,8 +241,8 @@ var CrowdEditorEer = {
         }
       },
       size: {
-        width: 40,
-        height: 40
+        width: 30,
+        height: 30
       }
     });
 
@@ -280,10 +279,11 @@ var CrowdEditorEer = {
     //add joint eer connector to palette links
     crowd.palette.links.connector = new joint.shapes.standard.Link({
       type: 'connector',
-      cardinality: null,
+      cardinality: 'N',
       total: false,
       inherit: false,
-      uri: 'http://crowd.fi.uncoma.edu.ar#connector',
+      inheritChild: false,
+      uri: 'http://crowd.fi.uncoma.edu.ar#role',
       attrs: {
         line: {
           stroke: 'black',
@@ -297,7 +297,10 @@ var CrowdEditorEer = {
       labels: [{
         attrs: {
           text: {
-            text: null
+            text: 'N'
+          },
+          rect: {
+            fill: getCSS('background-color', 'crowd-workspace')
           }
         }
       }]
@@ -306,10 +309,11 @@ var CrowdEditorEer = {
     //add joint eer total connector to palette links
     crowd.palette.links.total = new joint.shapes.standard.DoubleLink({
       type: 'connector',
-      cardinality: null,
+      cardinality: 'N',
       total: true,
       inherit: false,
-      uri: 'http://crowd.fi.uncoma.edu.ar#connector',
+      inheritChild: false,
+      uri: 'http://crowd.fi.uncoma.edu.ar#role',
       attrs: {
         line: {
           stroke: getCSS('background-color', 'crowd-workspace'),
@@ -326,7 +330,10 @@ var CrowdEditorEer = {
       labels: [{
         attrs: {
           text: {
-            text: null
+            text: 'N'
+          },
+          rect: {
+            fill: getCSS('background-color', 'crowd-workspace')
           }
         }
       }]
@@ -338,7 +345,12 @@ var CrowdEditorEer = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.entity,
-        x: '100%', y: '50%', offset: { x: 25, y: 10 },
+        x: config.position?.x ? config.position?.x : '100%',
+        y: config.position?.y ? config.position?.y : '50%',
+        offset: {
+          x: config.offset?.x ? config.offset?.x : 25,
+          y: config.offset?.y ? config.offset?.y : 10
+        },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.entity,
@@ -350,7 +362,9 @@ var CrowdEditorEer = {
         link: {
           type: config.total ? 'total' : 'connector',
           props: {
-            cardinality: config.cardinality
+            cardinality: config.cardinality ? config.cardinality : 'N',
+            inherit: config.inherit ? config.inherit : false,
+            inheritChild: config.inheritChild ? config.inheritChild : false
           }
         }
       });
@@ -361,7 +375,12 @@ var CrowdEditorEer = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.weakEntity,
-        x: '0%', y: '50%', offset: { x: -25, y: 10 },
+        x: config.position?.x ? config.position?.x : '0%',
+        y: config.position?.y ? config.position?.y : '50%',
+        offset: {
+          x: config.offset?.x ? config.offset?.x : -25,
+          y: config.offset?.y ? config.offset?.y : 10
+        },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.weakEntity,
@@ -373,7 +392,9 @@ var CrowdEditorEer = {
         link: {
           type: config.total ? 'total' : 'connector',
           props: {
-            cardinality: config.cardinality
+            cardinality: config.cardinality ? config.cardinality : 'N',
+            inherit: config.inherit ? config.inherit : false,
+            inheritChild: config.inheritChild ? config.inheritChild : false
           }
         }
       });
@@ -384,7 +405,12 @@ var CrowdEditorEer = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.relationship,
-        x: '100%', y: '50%', offset: { x: 25, y: 10 },
+        x: config.position?.x ? config.position?.x : '100%',
+        y: config.position?.y ? config.position?.y : '50%',
+        offset: {
+          x: config.offset?.x ? config.offset?.x : 25,
+          y: config.offset?.y ? config.offset?.y : 10
+        },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.relationship,
@@ -396,7 +422,9 @@ var CrowdEditorEer = {
         link: {
           type: config.total ? 'total' : 'connector',
           props: {
-            cardinality: config.cardinality
+            cardinality: config.cardinality ? config.cardinality : 'N',
+            inherit: config.inherit ? config.inherit : false,
+            inheritChild: config.inheritChild ? config.inheritChild : false
           }
         }
       });
@@ -407,7 +435,12 @@ var CrowdEditorEer = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.weakRelationship,
-        x: '0%', y: '50%', offset: { x: -25, y: 10 },
+        x: config.position?.x ? config.position?.x : '0%',
+        y: config.position?.y ? config.position?.y : '50%',
+        offset: {
+          x: config.offset?.x ? config.offset?.x : -25,
+          y: config.offset?.y ? config.offset?.y : 10
+        },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
           background: crowd.palette.colors.weakRelationship,
@@ -419,7 +452,9 @@ var CrowdEditorEer = {
         link: {
           type: config.total ? 'total' : 'connector',
           props: {
-            cardinality: config.cardinality
+            cardinality: config.cardinality ? config.cardinality : 'N',
+            inherit: config.inherit ? config.inherit : false,
+            inheritChild: config.inheritChild ? config.inheritChild : false
           }
         }
       })
@@ -438,7 +473,10 @@ var CrowdEditorEer = {
         }
       }),
       link: {
-        type: 'connector'
+        type: 'connector',
+        props: {
+          cardinality: '1'
+        }
       }
     });
 
@@ -455,7 +493,10 @@ var CrowdEditorEer = {
         }
       }),
       link: {
-        type: 'connector'
+        type: 'connector',
+        props: {
+          cardinality: '1'
+        }
       }
     });
 
@@ -472,7 +513,10 @@ var CrowdEditorEer = {
         }
       }),
       link: {
-        type: 'connector'
+        type: 'connector',
+        props: {
+          cardinality: '1'
+        }
       }
     });
 
@@ -489,7 +533,10 @@ var CrowdEditorEer = {
         }
       }),
       link: {
-        type: 'connector'
+        type: 'connector',
+        props: {
+          cardinality: '1'
+        }
       }
     });
 
@@ -509,6 +556,11 @@ var CrowdEditorEer = {
         }),
         link: {
           type: config.total ? 'total' : 'connector',
+          props: {
+            cardinality: 'N',
+            inherit: config.inherit ? config.inherit : true,
+            inheritChild: config.inheritChild ? config.inheritChild : false
+          }
         }
       });
     }
@@ -526,8 +578,8 @@ var CrowdEditorEer = {
       tools: crowd.workspace.tools.elements.basicTools.concat([
         linkAttributeTool,
         linkKeyAttributeTool,
-        linkRelationshipTool({ cardinality: '1' }),
-        linkWeakRelationshipTool({ total: false, cardinality: '1' }),
+        linkRelationshipTool(),
+        linkWeakRelationshipTool({ cardinality: '1' }),
         linkMultivaluedAttributeTool,
         linkInheritanceTool()
       ])
@@ -539,8 +591,8 @@ var CrowdEditorEer = {
       tools: crowd.workspace.tools.elements.basicTools.concat([
         linkAttributeTool,
         linkWeakKeyAttributeTool,
-        linkRelationshipTool({ cardinality: '1' }),
-        linkWeakRelationshipTool({ total: true, cardinality: 'N' }),
+        linkRelationshipTool(),
+        linkWeakRelationshipTool({ total: true }),
         linkMultivaluedAttributeTool,
         linkInheritanceTool()
       ])
@@ -552,8 +604,9 @@ var CrowdEditorEer = {
       tools: crowd.workspace.tools.elements.basicTools.concat([
         linkAttributeTool,
         linkKeyAttributeTool,
-        linkEntityTool({ cardinality: '1' }),
-        linkWeakEntityTool({ total: false, cardinality: '1' })
+        linkEntityTool(),
+        linkWeakEntityTool(),
+        linkInheritanceTool()
       ])
     });
 
@@ -564,7 +617,8 @@ var CrowdEditorEer = {
         linkAttributeTool,
         linkWeakKeyAttributeTool,
         linkEntityTool({ cardinality: '1' }),
-        linkWeakEntityTool({ total: true, cardinality: 'N' })
+        linkWeakEntityTool({ total: true }),
+        linkInheritanceTool()
       ])
     });
 
@@ -580,8 +634,10 @@ var CrowdEditorEer = {
     crowd.workspace.tools.elements.elementsToolsView['inheritance'] = new joint.dia.ToolsView({
       name: 'inheritance-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkEntityTool({ cardinality: 'U' }),
-        linkWeakEntityTool({ cardinality: 'U' })
+        linkEntityTool({ inherit: true, inheritChild: true, position: { y: '25%' }, offset: { y: -1 } }),
+        linkWeakEntityTool({ inherit: true, inheritChild: true, position: { y: '25%' }, offset: { y: -1 } }),
+        linkRelationshipTool({ inherit: true, inheritChild: true, position: { y: '75%' }, offset: { y: 20 } }),
+        linkWeakRelationshipTool({ inherit: true, inheritChild: true, position: { y: '75%' }, offset: { y: 20 } })
       ])
     });
   },
@@ -628,12 +684,9 @@ var CrowdEditorEer = {
       // console.log('change:uri', { element, newUri });
 
       if (element.isElement() && element.attributes.parentType != "inheritance") {
-        var newName = newUri.split('#');
-        newName.shift();
-        newName = newName.join('#');
-        element.attr('text/text', joint.util.breakText(fromURI(newName), { width: element.attributes.size.width }));
-        // element.attr('text/text', fromURI(newName));
-        element.attributes.name = fromURI(newName);
+        element.attr('text/text', joint.util.breakText(fromURI(newUri), { width: element.attributes.size.width }));
+        // element.attr('text/text', fromURI(newUri));
+        element.attributes.name = fromURI(newUri);
         $('#crowd-inspector-content--name--' + crowd.id).val(element.attributes.name);
       }
     });
@@ -653,23 +706,34 @@ var CrowdEditorEer = {
       // console.log('change:cardinality', { link, newCardinality });
 
       if (link.isLink()) {
-        link.labels([{
-          attrs: {
-            text: {
-              text: (newCardinality != "null" ? newCardinality : null),
-              class: newCardinality == 'U' ? 'crowd-link-text inherit' : ''
+        var isConnectedAttribute =
+          link.getSourceElement()?.attributes?.parentType == 'attribute' ||
+          link.getTargetElement()?.attributes?.parentType == 'attribute'
+
+        console.log(link, !link.attributes.inherit);
+        if (!link.attributes.inherit) {
+          // if (newCardinality == "null" || newCardinality == null) {
+          //   link.prop('cardinality', 'N');
+          // }
+
+          link.labels([{
+            attrs: {
+              text: {
+                text: (!isConnectedAttribute || newCardinality != '1' ? newCardinality : null),
+                class: ''
+              },
+              rect: {
+                fill: getCSS('background-color', 'crowd-workspace')
+              }
             },
-            rect: {
-              fill: newCardinality == 'U' ? "none" : getCSS('background-color', 'crowd-workspace')
+            position: {
+              angle: null,
+              args: {
+                keepGradient: false
+              }
             }
-          },
-          position: {
-            angle: newCardinality == 'U' ? -90 : null,
-            args: {
-              keepGradient: newCardinality == 'U' ? true : false
-            }
-          }
-        }]);
+          }]);
+        }
       }
     });
 
@@ -691,14 +755,73 @@ var CrowdEditorEer = {
 
         //redraw the link with the new style
         linkView.render();
+
+        if (newTotal)
+          link.prop('inheritChild', false);
+        crowd.inspector.loadContent();
+      }
+    });
+
+    //event when the link inherit change
+    crowd.workspace.graph.on('change:inherit', function (link, newInherit) {
+      // console.log('change:inherit', { link, newInherit });
+
+      if (link.isLink()) {
+        if (newInherit) {
+          link.trigger('change:inheritChild', link, link.prop('inheritChild'));
+        } else {
+          link.trigger('change:cardinality', link, link.prop('cardinality'));
+        }
+        crowd.inspector.loadContent();
+      }
+    });
+
+    //event when the link inherit child change
+    crowd.workspace.graph.on('change:inheritChild', function (link, newInheritChild) {
+      // console.log('change:inheritChild', { link, newInheritChild });
+
+      if (link.isLink()) {
+        var linkSourceType = link.getSourceElement()?.attributes?.parentType;
+        var linkTargetType = link.getTargetElement()?.attributes?.parentType;
+
+        if (link.attributes.inherit) {
+          link.labels([{
+            attrs: {
+              text: {
+                text: newInheritChild ? 'U' : null,
+                class: newInheritChild ? 'crowd-link-text inherit' : ''
+              },
+              rect: {
+                fill: newInheritChild ? "none" : getCSS('background-color', 'crowd-workspace')
+              }
+            },
+            position: {
+              angle: newInheritChild ? (linkSourceType == 'inheritance' || (linkSourceType == null && linkTargetType != 'inheritance') ? -90 : 90) : null,
+              args: {
+                keepGradient: newInheritChild
+              }
+            }
+          }]);
+          if (newInheritChild)
+            link.prop('total', false);
+        }
+
+        crowd.inspector.loadContent();
+      }
+    });
+
+    //event when the links source or target change
+    crowd.workspace.graph.on('change:source change:target', function (link, newSourceTarget) {
+      // console.log('change:source change:target', { link, newSourceTarget });
+
+      if (link.isLink()) {
+        link.trigger('change:cardinality', link, link.prop('cardinality'));
+        link.trigger('change:inheritChild', link, link.prop('inheritChild'));
       }
     });
   },
   initInspector: function (crowd) {
     //add uri attribute to content for all types
-    crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
-
-    //add name attribute to content if it is of the correct type
     switch (crowd.inspector.model.attributes.type) {
       case 'entity':
       case 'weakEntity':
@@ -709,9 +832,26 @@ var CrowdEditorEer = {
       case 'keyAttribute':
       case 'weakKeyAttribute':
       case 'derivedAttribute':
-        crowd.inspector.addAttribute({ label: 'Name', property: 'name', type: 'text', input: 'textarea' });
+      case 'connector':
+        if (crowd.inspector.model.attributes.type != 'connector' || !crowd.inspector.model.attributes.inherit)
+          crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
         break;
     }
+
+    //add name attribute to content if it is of the correct type
+    // switch (crowd.inspector.model.attributes.type) {
+    //   case 'entity':
+    //   case 'weakEntity':
+    //   case 'relationship':
+    //   case 'weakRelationship':
+    //   case 'attribute':
+    //   case 'multivaluedAttribute':
+    //   case 'keyAttribute':
+    //   case 'weakKeyAttribute':
+    //   case 'derivedAttribute':
+    //     crowd.inspector.addAttribute({ label: 'Name', property: 'name', type: 'text', input: 'textarea' });
+    //     break;
+    // }
 
     //add is weak attribute for entity and weak entity
     switch (crowd.inspector.model.attributes.type) {
@@ -775,16 +915,23 @@ var CrowdEditorEer = {
     //add the cardinality and total attribute for connector
     switch (crowd.inspector.model.attributes.type) {
       case 'connector':
-        crowd.inspector.addAttribute({
-          label: 'Cardinality', property: 'cardinality', type: 'multiple',
-          values: [
-            { label: 'None', value: null },
-            { label: '1', value: '1' },
-            { label: 'N', value: 'N' },
-            { label: 'U (inherit child)', value: 'U' },
-          ]
-        });
+        crowd.inspector.addAttribute({ label: 'Is for Inheritance?', property: 'inherit', type: 'boolean', map: { true: true, false: false } });
+        if (!crowd.inspector.model.attributes.inherit) {
+          crowd.inspector.addAttribute({
+            label: 'Cardinality', property: 'cardinality', type: 'multiple',
+            values: [
+              // { label: 'None', value: null },
+              { label: '1', value: '1' },
+              { label: 'N', value: 'N' },
+              // { label: 'U (inherit child)', value: 'U' },
+            ]
+          });
+        } else {
+          crowd.inspector.addAttribute({ label: 'Is Child Connector?', property: 'inheritChild', type: 'boolean', map: { true: true, false: false } });
+        }
+        // if (!crowd.inspector.model.attributes.inherit || !crowd.inspector.model.attributes.inheritChild) {
         crowd.inspector.addAttribute({ label: 'Is Total?', property: 'total', type: 'boolean', map: { true: true, false: false } });
+        // }
         break;
     }
   },
@@ -796,6 +943,14 @@ var CrowdEditorEer = {
       relationships: [],
       links: []
     };
+
+    var attributeTypeMap = {
+      'attribute': 'normal',
+      'keyAttribute': 'key',
+      'weakKeyAttribute': 'normal',
+      'multivaluedAttribute': 'normal',
+      'derivedAttribute': 'normal',
+    }
 
     //mapping of datatypes to the requested format of schema
     var datatypeMap = {
@@ -813,7 +968,7 @@ var CrowdEditorEer = {
 
     //mapping of inheritances to the requested format of schema
     var inheritanceSubtypeMap = {
-      'disjoint': 'disjoint',
+      'disjoint': 'exclusive',
       'overlaped': 'overlapping',
       'union': 'union'
     }
@@ -836,7 +991,7 @@ var CrowdEditorEer = {
             id: element.cid,
             uri: element.attributes.uri,
             name: element.attributes.uri,
-            type: element.attributes.type,
+            type: attributeTypeMap[element.attributes.type],
             datatype: datatypeMap[element.attributes.datatype],
             position: element.attributes.position,
             size: element.attributes.size,
@@ -908,9 +1063,7 @@ var CrowdEditorEer = {
         case 'inheritance':
           //create the link for this inheritance
           var inheritanceLink = {
-            id: element.cid,
-            uri: element.attributes.uri,
-            name: element.attributes.uri,
+            name: element.cid,
             parent: null,
             entities: [],
             constraint: [
@@ -922,20 +1075,24 @@ var CrowdEditorEer = {
           }
           //search for links connected to the inheritance for add entities to inheritance link
           crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
-            var connectedEntity = link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'entity'
-              ? link.getSourceElement()
-              : (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'entity'
-                ? link.getTargetElement()
-                : null);
-            if (connectedEntity) {
-              if (!link.attributes.cardinality) {
-                inheritanceLink.parent = connectedEntity.attributes.uri;
-                if (link.attributes.total) {
-                  inheritanceLink.constraint.push('exclusive');
+            if (link.attributes.inherit) {
+              var connectedEntity = link.attributes.source.id != element.id
+                && (link.getSourceElement().attributes.parentType == 'entity' || link.getSourceElement().attributes.parentType == 'relationship')
+                ? link.getSourceElement()
+                : (link.attributes.target.id != element.id
+                  && (link.getTargetElement().attributes.parentType == 'entity' || link.getTargetElement().attributes.parentType == 'relationship')
+                  ? link.getTargetElement()
+                  : null);
+              if (connectedEntity) {
+                if (!link.attributes.inheritChild) {
+                  inheritanceLink.parent = connectedEntity.attributes.uri;
+                  if (link.attributes.total) {
+                    inheritanceLink.constraint.push('exclusive');
+                  }
                 }
-              }
-              else {
-                inheritanceLink.entities.push(connectedEntity.attributes.uri);
+                else {
+                  inheritanceLink.entities.push(connectedEntity.attributes.uri);
+                }
               }
             }
           });
@@ -955,6 +1112,11 @@ var CrowdEditorEer = {
     var inheritancesObj = {};
     var linksObj = {};
 
+    var attributeTypeMap = {
+      'normal': 'attribute',
+      'key': 'keyAttribute',
+    }
+
     //mapping of datatypes to the editor format
     var datatypeMap = {
       'String': 'varchar',
@@ -964,12 +1126,12 @@ var CrowdEditorEer = {
 
     //mapping of cardinalities to the editor format
     var cardinalityMap = function (cardinality) {
-      return cardinality.indexOf('*') != -1 ? 'N' : '1';
+      return cardinality?.indexOf('*') != -1 ? 'N' : '1';
     }
 
     //mapping of inheritances to the editor format
     var inheritanceSubtypeMap = {
-      'disjoint': 'disjoint',
+      'exclusive': 'disjoint',
       'overlapping': 'overlaped',
       'union': 'union'
     }
@@ -983,10 +1145,7 @@ var CrowdEditorEer = {
           $.each(entity, function (attribute, value) {
             switch (attribute) {
               case 'name':
-                var newName = value.split('#');
-                newName.shift();
-                newName = newName.join('#');
-                entitiesObj[entity.name].prop(attribute, fromURI(newName));
+                entitiesObj[entity.name].prop('uri', value);
                 break;
               case 'position': case 'size':
                 entitiesObj[entity.name].prop(attribute, value)
@@ -999,15 +1158,12 @@ var CrowdEditorEer = {
       //add each attribute and their properties
       if (schema.attributes) {
         schema.attributes.forEach(function (attribute) {
-          attributesObj[attribute.name] = crowd.palette.elements[attribute.type].clone();
+          attributesObj[attribute.name] = crowd.palette.elements[attributeTypeMap[attribute.type]].clone();
           crowd.workspace.graph.addCell(attributesObj[attribute.name]);
           $.each(attribute, function (attr, value) {
             switch (attr) {
               case 'name':
-                var newName = value.split('#');
-                newName.shift();
-                newName = newName.join('#');
-                attributesObj[attribute.name].prop(attr, fromURI(newName));
+                attributesObj[attribute.name].prop('uri', value);
                 break;
               case 'datatype':
                 attributesObj[attribute.name].prop(attr, datatypeMap[value]);
@@ -1030,10 +1186,7 @@ var CrowdEditorEer = {
               $.each(link, function (attribute, value) {
                 switch (attribute) {
                   case 'name':
-                    var newName = value.split('#');
-                    newName.shift();
-                    newName = newName.join('#');
-                    relationshipsObj[link.name].prop(attribute, fromURI(newName));
+                    relationshipsObj[link.name].prop('uri', value);
                     break;
                   case 'position': case 'size':
                     relationshipsObj[link.name].prop(attribute, value)
@@ -1045,39 +1198,50 @@ var CrowdEditorEer = {
                 linksObj[link.roles[index]].source(relationshipsObj[link.name]);
                 linksObj[link.roles[index]].target(entitiesObj[link.entities[index]]);
                 crowd.workspace.graph.addCell(linksObj[link.roles[index]]);
-                linksObj[link.roles[index]].prop('cardinality', cardinalityMap(link.cardinality[index]));
+                linksObj[link.roles[index]].prop('uri', link.roles[index]);
+                linksObj[link.roles[index]].prop('cardinality', cardinalityMap(link?.cardinality[index]));
               });
               break;
-            case 'isa':
-              inheritancesObj[link.name] = crowd.palette.elements.inheritance.clone();
-              crowd.workspace.graph.addCell(inheritancesObj[link.name]);
-              $.each(link, function (attribute, value) {
-                switch (attribute) {
-                  case 'constraint':
-                    inheritancesObj[link.name].prop('subtype', inheritanceSubtypeMap[value[0]]);
-                    break;
-                  case 'position': case 'size': case 'uri':
-                    inheritancesObj[link.name].prop(attribute, value)
-                    break;
-                }
-              });
-              var inheritanceName = link.name.split('#');
-              inheritanceName.shift();
-              inheritanceName = inheritanceName.join('#');
+          }
+        });
 
-              var parentLinkName = link.parent + '-' + inheritanceName;
+        schema.links.forEach(function (link) {
+          switch (link.type) {
+            case 'isa':
+              var inheritanceName = link.name.split('_')[0];
+              if (!inheritancesObj[inheritanceName]) {
+                inheritancesObj[inheritanceName] = crowd.palette.elements.inheritance.clone();
+                crowd.workspace.graph.addCell(inheritancesObj[inheritanceName]);
+                $.each(link, function (attribute, value) {
+                  switch (attribute) {
+                    case 'constraint':
+                      inheritancesObj[inheritanceName].prop('subtype', value[0] ? inheritanceSubtypeMap[value[0]] : 'overlaped');
+                      break;
+                    case 'position': case 'size': case 'uri':
+                      inheritancesObj[inheritanceName].prop(attribute, value)
+                      break;
+                  }
+                });
+              }
+
+              var parentLinkName = link.parent + '-' + fromURI(inheritanceName);
               linksObj[parentLinkName] = crowd.palette.links.connector.clone();
-              linksObj[parentLinkName].source(inheritancesObj[link.name]);
-              linksObj[parentLinkName].target(entitiesObj[link.parent]);
+              linksObj[parentLinkName].source(inheritancesObj[inheritanceName]);
+              linksObj[parentLinkName].target(entitiesObj[link.parent] ? entitiesObj[link.parent] : relationshipsObj[link.parent]);
               crowd.workspace.graph.addCell(linksObj[parentLinkName]);
+              linksObj[parentLinkName].prop('uri', parentLinkName);
+              linksObj[parentLinkName].prop('inherit', true);
 
               link.entities.forEach(function (connectedEntity, index) {
-                var linkName = link.entities[index] + '-' + inheritanceName;
+                console.log(connectedEntity);
+                var linkName = link.entities[index] + '-' + fromURI(inheritanceName);
                 linksObj[linkName] = crowd.palette.links.connector.clone();
-                linksObj[linkName].source(inheritancesObj[link.name]);
-                linksObj[linkName].target(entitiesObj[link.entities[index]]);
+                linksObj[linkName].source(inheritancesObj[inheritanceName]);
+                linksObj[linkName].target(entitiesObj[connectedEntity] ? entitiesObj[connectedEntity] : relationshipsObj[connectedEntity]);
                 crowd.workspace.graph.addCell(linksObj[linkName]);
-                linksObj[linkName].prop('cardinality', 'U');
+                linksObj[linkName].prop('uri', linkName);
+                linksObj[linkName].prop('inherit', true);
+                linksObj[linkName].prop('inheritChild', true);
               });
               break;
           }
@@ -1090,6 +1254,7 @@ var CrowdEditorEer = {
               linksObj[link.uri].source(attributesObj[link.attribute]);
               linksObj[link.uri].target(link.entity ? entitiesObj[link.entity] : relationshipsObj[link.relationship]);
               crowd.workspace.graph.addCell(linksObj[link.uri]);
+              linksObj[link.uri].prop('cardinality', '1');
               break;
           }
         });

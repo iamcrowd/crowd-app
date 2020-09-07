@@ -30,7 +30,7 @@ $alt-accent: #262a2e;
   position: absolute;
   top: 0px;
   left: 200px;
-  right: 200px;
+  right: 300px;
   height: inherit !important;
   display: flex;
   flex-direction: column;
@@ -40,10 +40,10 @@ $alt-accent: #262a2e;
   position: absolute;
   top: 0px;
   right: 0px;
-  width: 200px;
+  width: 300px;
   height: inherit !important;
   // display: flex;
-  grid-template-rows: auto 200px;
+  grid-template-rows: auto 300px;
 }
 
 .crowd-tools {
@@ -174,7 +174,7 @@ $alt-accent: #262a2e;
   position: absolute;
   top: 0px;
   bottom: 200px;
-  width: 200px;
+  width: 300px;
   user-select: none;
   display: flex;
   flex-direction: column;
@@ -239,7 +239,7 @@ $alt-accent: #262a2e;
 
 .crowd-map-scrollable {
   position: relative;
-  width: 200px;
+  width: 300px;
   height: 200px;
   background-color: rgba(197, 197, 197, 1);
   // cursor: grab;

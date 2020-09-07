@@ -109,9 +109,30 @@ function toURI(str) {
 }
 
 function fromURI(str) {
-  return capitalize(str.split('-').join(' '));
+  return str != null ? capitalize(getURIFragment(str).split('-').join(' ')) : str;
 }
 
 function capitalize(str) {
   return str.toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+}
+
+function toInfixCaps(str) {
+  return lowerFirstLetter(removeSpaces(str));
+}
+
+function lowerFirstLetter(str) {
+  return str.charAt(0).toLowerCase() + str.slice(1);
+}
+
+function removeSpaces(str) {
+  return str.split(' ').join('');
+}
+
+function getURIFragment(uri) {
+  var separator = '/';
+  if (uri.indexOf('#') != -1) separator = '#';
+
+  var fragment = uri.split(separator);
+  fragment = fragment[fragment.length - 1];
+  return fragment;
 }

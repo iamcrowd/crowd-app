@@ -87,8 +87,8 @@ CrowdEditor.prototype.init = function () {
     self.enumerate.getNumber = function (cell) {
       var maxNumber = 0;
       self.workspace.graph.getCells().forEach(function (existentCell) {
-        if (existentCell.attributes.uri.indexOf(cell.attributes.uri + '-') != -1) {
-          var number = parseInt(existentCell.attributes.uri.split(cell.attributes.uri + '-')[1]);
+        if (existentCell.attributes.uri?.indexOf(cell.attributes.uri + '-') != -1) {
+          var number = parseInt(existentCell.attributes.uri?.split(cell.attributes.uri + '-')[1]);
           if (!isNaN(number)) {
             maxNumber = number > maxNumber ? number : maxNumber;
           }
@@ -273,7 +273,8 @@ CrowdEditor.prototype.initPalette = function () {
 
         //enumerate the uri of the new element to differentiate it from others
         if (self.config.enumerate) {
-          s.prop('uri', s.prop('uri') + '-' + self.enumerate.getNumber(s));
+          if (s.prop('uri'))
+            s.prop('uri', s.prop('uri') + '-' + self.enumerate.getNumber(s));
         }
 
         //fit paper to the new content
@@ -1039,14 +1040,20 @@ CrowdEditor.prototype.initTools = function () {
     self.tools.layout.init = function () {
       //this function do the automatic layout (it's used in external functionalities)
       self.tools.layout.doLayout = function () {
-        joint.layout.DirectedGraph.layout(self.workspace.graph,
-          {
-            marginX: 100,
-            marginY: 100
-          }
-        );
+        setTimeout(() => {
+          joint.layout.DirectedGraph.layout(self.workspace.graph,
+            {
+              marginX: 100,
+              marginY: 100
+            }
+          );
 
-        setTimeout(() => self.workspace.fitPaper());
+          setTimeout(() => {
+            self.workspace.fitPaper();
+            self.workspace.paper.hideTools();
+            self.inspector.hideInformation();
+          });
+        }, 100);
       }
 
       //append dom for layout tool
@@ -2061,7 +2068,8 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
           elementView.model.resize(newSize.width, newSize.height, { direction: config.direction });
 
           //re-set name for wrap it to the new size
-          elementView.model.trigger('change:name', elementView.model, elementView.model.prop('name'));
+          if (elementView.model.prop('name'))
+            elementView.model.trigger('change:name', elementView.model, elementView.model.prop('name'));
         });
 
         $('#crowd-workspace-' + self.id).on('mouseup.finishResizing', function (evt) {
@@ -2217,8 +2225,8 @@ CrowdEditor.prototype.initInspector = function () {
         dom = $('<span class="row"> \
           <div class="col"> \
             <div class="form-check"> \
-              <input class="form-check-input" type="checkbox" value="" id="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '"> \
-              <label class="form-check-label" for="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '">' + attribute.label + '</label> \
+              <input class="form-check-input" type="checkbox" value="" id="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '"> \
+              <label class="form-check-label" for="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '">' + attribute.label + '</label> \
             </div> \
           </div> \
         </span>');
@@ -2234,9 +2242,9 @@ CrowdEditor.prototype.initInspector = function () {
         attribute.values.forEach(function (value) {
           $(dom).find('.form-group').append(
             '<div class="form-check form-check-inline"> \
-              <input class="form-check-input" type="radio" name="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '" \
-              id="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + value.value + '-' + self.id + '" value="' + value.value + '"> \
-              <label class="form-check-label" for="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + value.value + '-' + self.id + '">' + value.label + '</label> \
+              <input class="form-check-input" type="radio" name="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '" \
+              id="crowd-inspector-content-' + attribute.elementID + '-' + value.value + '-' + self.id + '" value="' + value.value + '"> \
+              <label class="form-check-label" for="crowd-inspector-content-' + attribute.elementID + '-' + value.value + '-' + self.id + '">' + value.label + '</label> \
             </div>'
           );
         });
@@ -2246,18 +2254,43 @@ CrowdEditor.prototype.initInspector = function () {
           <div class="col"> \
             <div class="form-group"> \
               ' + (attribute.label ? '<label>' + attribute.label + '</label>' : '') + '\
-              <' + (attribute.input == 'textarea' ? 'textarea rows="3"' : 'input type="text"') + ' placeholder="' + (attribute.placeholder ? attribute.placeholder : attribute.label) + '" class="form-control" id="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '" /> \
+              <' + (attribute.input == 'textarea' ? 'textarea rows="' + (attribute.inputRows ? attribute.inputRows : 3) + '"' : 'input type="text"') + ' \
+              placeholder="' + (attribute.placeholder ? attribute.placeholder : attribute.label) + '" \
+              class="form-control" id="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '" /> \
             </div> \
           </div> \
         </span>');
+        break;
+      case 'object':
+        dom = $('<span class="row"> \
+          <div class="col"> \
+            <div class="form-group" id="crowd-inspector-parameters-' + attribute.elementID + '-' + self.id + '"> \
+              ' + (attribute.label ? '<label>' + attribute.label + '</label><br>' : '') + '\
+            </div> \
+          </div> \
+        </span>');
+        attribute.parameters.forEach(function (parameter) {
+          //change parameter data with their parent references
+          parameter.container = attribute.elementID;
+          parameter.parentProperty = attribute.property + (attribute.index !== '' ? '/' + attribute.index : '');
+          parameter.index = '';
+          parameter.elementID = formatSelector(parameter.container + '-' + parameter.property + '-' + parameter.index);
+          parameter.propertyPath =
+            (parameter.parentProperty !== '' ? parameter.parentProperty + '/' : '') +
+            parameter.property +
+            (parameter.index !== '' ? '/' + parameter.index : '');
+          //add the dom of each parameter to the attribute dom
+          $(dom).find('#crowd-inspector-parameters-' + attribute.elementID + '-' + self.id)
+            .append(self.inspector._makeAttributeDom(parameter));
+        });
         break;
       case 'list':
         dom = $('<span class="row"> \
           <div class="form-group"> \
             ' + (attribute.label ? '<label>' + attribute.label + '</label>' : '') + '\
-            <div class="form-group" id="crowd-inspector-content-elements-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '"></div> \
+            <div class="form-group" id="crowd-inspector-content-elements-' + attribute.elementID + '-' + self.id + '"></div> \
             <div class="text-center"> \
-              <button class="btn btn-primary" id="crowd-inspector-content-add-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '" \
+              <button class="btn btn-primary" id="crowd-inspector-content-add-' + attribute.elementID + '-' + self.id + '" \
               data-toggle="tooltip" data-original-title="Add element" data-placement="top"><i class="fa fa-fw fa-plus"></i></button> \
             </div> \
           </div> \
@@ -2268,19 +2301,32 @@ CrowdEditor.prototype.initInspector = function () {
     if (attribute.canRemove) {
       $(dom).append(
         '<div class="col-3"> \
-          <button class="btn btn-danger"  id="crowd-inspector-content-remove-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '" \
+          <button class="btn btn-danger"  id="crowd-inspector-content-remove-' + attribute.elementID + '-' + self.id + '" \
           data-toggle="tooltip" data-original-title="Remove element" data-placement="top"><i class="fa fa-fw fa-minus"></i></button> \
         </div>'
       );
     }
-    return dom;
+
+    var jumpLine;
+    if (attribute.container == '')
+      jumpLine = $('<hr>');
+
+    return dom.add(jumpLine);
   }
 
   //append an specified attribute to the content dom element
   self.inspector.addAttribute = function (attribute) {
     //check if attribute is inside a container else assign a empty string for selector usage
     attribute.container = attribute.container != null ? attribute.container : '';
+    attribute.parentProperty = attribute.parentProperty != null ? attribute.parentProperty : '';
     attribute.index = attribute.index != null ? attribute.index : '';
+    //compound the element ID for the actual attribute
+    attribute.elementID = formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index);
+    //compound the property path of the attribute with the parentProperty, property and index
+    attribute.propertyPath =
+      (attribute.parentProperty !== '' ? attribute.parentProperty + '/' : '') +
+      attribute.property +
+      (attribute.index !== '' ? '/' + attribute.index : '');
 
     //append dom element to the inspector content
     if (attribute.container != '')
@@ -2288,53 +2334,13 @@ CrowdEditor.prototype.initInspector = function () {
     else
       $('#crowd-inspector-' + self.id + ' .crowd-inspector-content').append(self.inspector._makeAttributeDom(attribute));
 
-    //get the property value and map it in case that a map is defined
-    var propertyValue = attribute.map
-      ? Object.keys(attribute.map).find(key =>
-        attribute.map[key] == (attribute.index !== ''
-          ? self.inspector.model.prop(attribute.property)[attribute.index]
-          : self.inspector.model.prop(attribute.property)))
-      : (attribute.index !== ''
-        ? self.inspector.model.prop(attribute.property)[attribute.index]
-        : self.inspector.model.prop(attribute.property));
-
-    //set the dom input value with the property value according to the attribute type
-    switch (attribute.type) {
-      case 'boolean':
-        $('#crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id).prop("checked", propertyValue == 'true');
-        break;
-      case 'multiple':
-        $('#crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + propertyValue + '-' + self.id).prop("checked", true);
-        break;
-      case 'text': default:
-        $('#crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id).val(propertyValue);
-        break;
-      case 'list':
-        for (var i = 0; i < propertyValue.length; i++) {
-          self.inspector.addAttribute($.extend({}, attribute.template, {
-            container: (attribute.container + '-' + attribute.property + '-' + attribute.index),
-            property: attribute.property,
-            index: i,
-            canRemove: true
-          }));
-        }
-        $('#crowd-inspector-content-add-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id).on('click', function () {
-          self.inspector.addAttribute($.extend({}, attribute.template, {
-            container: (attribute.container + '-' + attribute.property + '-' + attribute.index),
-            property: attribute.property,
-            index: self.inspector.model.prop(attribute.property).length,
-            canRemove: true
-          }));
-          self.inspector.model.prop(attribute.property + '/' + self.inspector.model.prop(attribute.property).length, '');
-          $(".tooltip").tooltip('hide');
-        });
-        break;
-    }
+    self.inspector._setAttribute(attribute);
 
     if (attribute.canRemove) {
-      $('#crowd-inspector-content-remove-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id).on('click', function () {
+      $('#crowd-inspector-content-remove-' + attribute.elementID + '-' + self.id).on('click', function () {
         var newValue = self.inspector.model.prop(attribute.property).slice();
         newValue.splice(attribute.index, 1);
+        self.inspector.model.prop(attribute.property, null);
         self.inspector.model.prop(attribute.property, newValue);
         console.log('remove', attribute.property, newValue);
         self.inspector.loadContent();
@@ -2342,9 +2348,70 @@ CrowdEditor.prototype.initInspector = function () {
       });
     }
 
-    //event when the input is modified that change the model property value by the user input
-    $('#crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id +
-      ',[name="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '"]').on('keyup change', function () {
+    self.inspector._setEventAttribute(attribute);
+
+    attribute.parameters?.forEach(function (parameter) {
+      self.inspector._setEventAttribute(parameter);
+    });
+
+    $('[data-toggle="tooltip"]').tooltip({ html: true });
+  }
+
+  //set the dom input value with the property value according to the attribute type
+  self.inspector._setAttribute = function (attribute) {
+    //get the property value and map it in case that a map is defined
+    var propertyValue = attribute.map
+      ? Object.keys(attribute.map).find(key =>
+        attribute.map[key] == self.inspector.model.prop(attribute.propertyPath)
+      )
+      : self.inspector.model.prop(attribute.propertyPath);
+
+    switch (attribute.type) {
+      case 'boolean':
+        $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id).prop("checked", propertyValue == 'true');
+        break;
+      case 'multiple':
+        $('#crowd-inspector-content-' + attribute.elementID + '-' + propertyValue + '-' + self.id).prop("checked", true);
+        break;
+      case 'text': default:
+        $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id).val(propertyValue);
+        break;
+      case 'object':
+        attribute.parameters.forEach(function (parameter) {
+          self.inspector._setAttribute(parameter);
+        });
+        break;
+      case 'list':
+        for (var i = 0; i < propertyValue.length; i++) {
+          self.inspector.addAttribute($.extend({}, attribute.template, {
+            container: attribute.elementID,
+            property: attribute.property + (attribute.index !== '' ? '/' + attribute.index : ''),
+            index: i,
+            canRemove: true
+          }));
+        }
+        $('#crowd-inspector-content-add-' + attribute.elementID + '-' + self.id).on('click', function () {
+          // self.inspector.addAttribute($.extend({}, attribute.template, {
+          //   container: attribute.elementID,
+          //   property: attribute.property + (attribute.index !== '' ? '/' + attribute.index : ''),
+          //   index: self.inspector.model.prop(attribute.property).length,
+          //   canRemove: true
+          // }));
+          self.inspector.model.prop(attribute.property + '/' + self.inspector.model.prop(attribute.property).length, (attribute.default ? attribute.default : ''));
+          self.inspector.loadContent();
+          $(".tooltip").tooltip('hide');
+        });
+        break;
+    }
+  }
+
+  //set event when the input is modified that change the model property value by the user input
+  self.inspector._setEventAttribute = function (attribute) {
+    //need to clone the object because event would be attached to this object and it can be iterated in the caller method
+    attribute = $.extend({}, attribute);
+    //event when change the correspondent/s input/s to the attribute sended
+    $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id +
+      ',[name="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '"]').on('keyup change', function () {
         var newPropertyValue;
 
         //get the dom input value according to the attribute type
@@ -2354,7 +2421,7 @@ CrowdEditor.prototype.initInspector = function () {
             newPropertyValue = $(this).prop('checked');
             break;
           case 'multiple':
-            newPropertyValue = $('[name="crowd-inspector-content-' + formatSelector(attribute.container + '-' + attribute.property + '-' + attribute.index) + '-' + self.id + '"]:checked').val();
+            newPropertyValue = $('[name="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '"]:checked').val();
             break;
           case 'text': default:
             newPropertyValue = $(this).val();
@@ -2367,24 +2434,24 @@ CrowdEditor.prototype.initInspector = function () {
           : newPropertyValue;
 
         //set the model property value to the new value
-        self.inspector.model.prop(attribute.property + (attribute.index !== '' ? '/' + attribute.index : ''), newPropertyValue == "null" ? null : newPropertyValue);
+        self.inspector.model.prop(attribute.propertyPath, newPropertyValue == "null" ? null : newPropertyValue);
       });
-
-    $('[data-toggle="tooltip"]').tooltip({ html: true });
   }
 
   self.inspector.loadContent = function () {
-    //toggle the content on
-    self.inspector.toggleContent(true);
+    if (self.inspector.model) {
+      //toggle the content on
+      self.inspector.toggleContent(true);
 
-    //make the title with the name of the element or link
-    $('#crowd-inspector-' + self.id + ' .crowd-inspector-title').html(formatString(self.inspector.model.attributes.type));
+      //make the title with the name of the element or link
+      $('#crowd-inspector-' + self.id + ' .crowd-inspector-title').html(formatString(self.inspector.model.attributes.type));
 
-    //clear attributes of the lastest model
-    self.inspector.clearAttributes();
+      //clear attributes of the lastest model
+      self.inspector.clearAttributes();
 
-    //call initialization of inspector for the specific conceptual model
-    self.config.conceptualModel.initInspector(self);
+      //call initialization of inspector for the specific conceptual model
+      self.config.conceptualModel.initInspector(self);
+    }
   }
 
   //append dom element that shows an empty message on the inspector
