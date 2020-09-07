@@ -224,6 +224,13 @@ $alt-accent: #262a2e;
   padding-left: 12px;
 }
 
+.crowd-inspector-content .form-group > .row {
+  border-left: 5px rgba(0, 0, 0, 0.2) solid;
+  padding: 5px 10px 0px 5px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0px 5px 5px 0px;
+}
+
 .crowd-map {
   display: table-row;
   background-color: white;

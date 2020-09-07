@@ -2300,7 +2300,7 @@ CrowdEditor.prototype.initInspector = function () {
 
     if (attribute.canRemove) {
       $(dom).append(
-        '<div class="col-3"> \
+        '<div class="col-2"> \
           <button class="btn btn-danger"  id="crowd-inspector-content-remove-' + attribute.elementID + '-' + self.id + '" \
           data-toggle="tooltip" data-original-title="Remove element" data-placement="top"><i class="fa fa-fw fa-minus"></i></button> \
         </div>'
