@@ -701,38 +701,53 @@ var CrowdEditorEer = {
       }
     });
 
-    //event when the links cardinality change
-    crowd.workspace.graph.on('change:cardinality', function (link, newCardinality) {
+    //event when the links cardinality or uri change
+    crowd.workspace.graph.on('change:cardinality change:uri', function (link, newCardinalityUri) {
       // console.log('change:cardinality', { link, newCardinality });
 
       if (link.isLink()) {
+        var newCardinality = link.attributes.cardinality;
+        var newUri = link.attributes.uri;
+
         var isConnectedAttribute =
           link.getSourceElement()?.attributes?.parentType == 'attribute' ||
           link.getTargetElement()?.attributes?.parentType == 'attribute'
 
-        console.log(link, !link.attributes.inherit);
         if (!link.attributes.inherit) {
           // if (newCardinality == "null" || newCardinality == null) {
           //   link.prop('cardinality', 'N');
           // }
 
-          link.labels([{
-            attrs: {
-              text: {
-                text: (!isConnectedAttribute || newCardinality != '1' ? newCardinality : null),
-                class: ''
+          link.labels([
+            {
+              attrs: {
+                text: {
+                  text: (!isConnectedAttribute || newCardinality != '1' ? newCardinality : null),
+                  class: ''
+                },
+                rect: {
+                  fill: getCSS('background-color', 'crowd-workspace')
+                }
               },
-              rect: {
-                fill: getCSS('background-color', 'crowd-workspace')
+              position: {
+                angle: null,
+                args: {
+                  keepGradient: false
+                }
               }
             },
-            position: {
-              angle: null,
-              args: {
-                keepGradient: false
+            {
+              attrs: {
+                text: {
+                  text: fromURI(newUri),
+                }
+              },
+              position: {
+                distance: 0.25,
+                offset: -20
               }
             }
-          }]);
+          ]);
         }
       }
     });
@@ -1231,6 +1246,7 @@ var CrowdEditorEer = {
               crowd.workspace.graph.addCell(linksObj[parentLinkName]);
               linksObj[parentLinkName].prop('uri', parentLinkName);
               linksObj[parentLinkName].prop('inherit', true);
+              linksObj[parentLinkName].prop('total', link.constraint?.covering != null);
 
               link.entities.forEach(function (connectedEntity, index) {
                 console.log(connectedEntity);

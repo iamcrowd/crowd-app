@@ -60,9 +60,9 @@ CrowdEditor.prototype.init = function () {
   $('#crowd-container-side-' + self.id).append('<div class="crowd-map" id="crowd-map-' + self.id + '"></div>');
 
   self.initPalette();
-  self.initTools();
   self.initWorkspace();
   self.initInspector();
+  self.initTools();
   self.initMap();
 
   //fit and center the paper for first time
@@ -1002,7 +1002,10 @@ CrowdEditor.prototype.initTools = function () {
 
       //event handler when click upload imported schema
       $('#crowd-tools-import-schema-' + self.id).on('click', function () {
-        self.tools.import.importFrom({ model: $(this).attr('data-model'), schema: JSON.parse($('#crowd-tools-import-raw-' + self.id).val()), file: self.config.actualFile });
+        var schema = JSON.parse($('#crowd-tools-import-raw-' + self.id).val());
+        if (JSON.stringify(schema).indexOf('"position": {') == -1)
+          schema.hasPositions = false;
+        self.tools.import.importFrom({ model: $(this).attr('data-model'), schema: schema, file: self.config.actualFile });
       });
 
       //event on close import modal
@@ -1343,6 +1346,25 @@ CrowdEditor.prototype.initTools = function () {
 
     //collapse classes tool
     self.tools.collapseClasses.init = function () {
+      self.tools.collapseClasses.collapsed = false;
+      self.tools.collapseClasses.elementsHeights = {};
+
+      self.tools.collapseClasses.updateCollapsed = function () {
+        self.workspace.graph.getElements().forEach(function (element) {
+          element.prop('collapsed', self.tools.collapseClasses.collapsed);
+        });
+
+        setTimeout(() => {
+          self.workspace.fitPaper();
+          self.workspace.paper.hideTools();
+          self.inspector.hideInformation();
+        });
+      }
+
+      self.workspace.graph.on('add remove', function () {
+        self.tools.collapseClasses.updateCollapsed();
+      });
+
       //append dom for collapse classes tool
       $('[aria-labelledby="crowd-tools-view-dropdown-' + self.id + '"]').append(
         '<li class="dropdown-divider"></li> \
@@ -1358,6 +1380,11 @@ CrowdEditor.prototype.initTools = function () {
 
       //event handler when click collapse classes
       $('#crowd-tools-collapse-classes-input-' + self.id).on('click', function () {
+        self.tools.collapseClasses.collapsed = !self.tools.collapseClasses.collapsed;
+        $('#crowd-tools-collapse-classes-icon-' + self.id).removeClass(self.tools.collapseClasses.collapsed ? 'fa-compress' : 'fa-expand');
+        $('#crowd-tools-collapse-classes-icon-' + self.id).addClass(self.tools.collapseClasses.collapsed ? 'fa-expand' : 'fa-compress');
+        self.tools.collapseClasses.updateCollapsed();
+
         $(".tooltip").tooltip('hide');
         $(this).blur();
       });

@@ -9,6 +9,7 @@ var CrowdEditorUml = {
       abstractAlt: getCSS('color', 'crowd-abstract-alt-color'),
       interface: getCSS('color', 'crowd-interface-color'),
       interfaceAlt: getCSS('color', 'crowd-interface-alt-color'),
+      inheritance: getCSS('color', 'crowd-inheritance-color'),
     }
 
     //add joint uml class to palette elements
@@ -21,6 +22,7 @@ var CrowdEditorUml = {
         attributes: [],
         methods: []
       },
+      collapsed: false,
       attrs: {
         '.uml-class-name-rect': {
           fill: crowd.palette.colors.class,
@@ -57,6 +59,7 @@ var CrowdEditorUml = {
         attributes: [],
         methods: []
       },
+      collapsed: false,
       attrs: {
         '.uml-class-name-rect': {
           fill: crowd.palette.colors.abstract,
@@ -93,6 +96,7 @@ var CrowdEditorUml = {
         attributes: [],
         methods: []
       },
+      collapsed: false,
       attrs: {
         '.uml-class-name-rect': {
           fill: crowd.palette.colors.interface,
@@ -117,6 +121,29 @@ var CrowdEditorUml = {
         width: 90,
         height: 90
       },
+    });
+
+    //add joint uml inheritance to palette elements
+    crowd.palette.elements.inheritance = new joint.shapes.erd.Attribute({
+      parentType: 'inheritance',
+      type: 'inheritance',
+      subtype: 'overlaped',
+      covering: false,
+      attrs: {
+        text: {
+          fill: 'white',
+          text: 'o',
+          class: 'crowd-element-text inheritance'
+        },
+        '.outer': {
+          fill: crowd.palette.colors.inheritance,
+          stroke: crowd.palette.colors.inheritance
+        }
+      },
+      size: {
+        width: 30,
+        height: 30
+      }
     });
 
     //add joint uml association to palette links
@@ -207,6 +234,7 @@ var CrowdEditorUml = {
         source: null,
         target: null
       },
+      inheritChild: false,
       direction: 'target',
       uri: 'http://crowd.fi.uncoma.edu.ar#generalization',
       attrs: {
@@ -233,6 +261,7 @@ var CrowdEditorUml = {
         source: null,
         target: null
       },
+      inheritChild: false,
       direction: 'target',
       uri: 'http://crowd.fi.uncoma.edu.ar#implementation',
       attrs: {
@@ -250,8 +279,8 @@ var CrowdEditorUml = {
     });
   },
   initElementsToolsViews: function (crowd) {
-    //add the link tool with the uml association link type to the basic tools of crowd editor
-    crowd.workspace.tools.elements.basicTools.push(crowd.workspace.tools.elements.linkTool({
+    //link tool with the uml association link type
+    var linkAssociationTool = crowd.workspace.tools.elements.linkTool({
       link: {
         type: 'association',
         props: {
@@ -266,10 +295,10 @@ var CrowdEditorUml = {
           placement: "right"
         }
       })
-    }));
+    });
 
-    //add the link tool with the uml aggregation link type to the basic tools of crowd editor
-    crowd.workspace.tools.elements.basicTools.push(crowd.workspace.tools.elements.linkTool({
+    //link tool with the uml aggregation link type
+    var linkAggregationTool = crowd.workspace.tools.elements.linkTool({
       link: {
         type: 'aggregation',
         props: {
@@ -285,10 +314,10 @@ var CrowdEditorUml = {
           placement: "top"
         }
       })
-    }));
+    });
 
-    //add the link tool with the uml composition link type to the basic tools of crowd editor
-    crowd.workspace.tools.elements.basicTools.push(crowd.workspace.tools.elements.linkTool({
+    //link tool with the uml composition link type
+    var linkCompositionTool = crowd.workspace.tools.elements.linkTool({
       link: {
         type: 'composition',
         props: {
@@ -304,26 +333,37 @@ var CrowdEditorUml = {
           placement: "right"
         }
       })
-    }));
+    });
 
-    //add the link tool with the uml generalization link type to the basic tools of crowd editor
-    crowd.workspace.tools.elements.basicTools.push(crowd.workspace.tools.elements.linkTool({
-      link: {
-        type: 'generalization'
-      },
-      x: '50%',
-      offset: { x: 0, y: -15 },
-      markup: crowd.workspace.tools.elements.markup({
-        icon: 'call_merge',
-        tooltip: {
-          title: 'Click and drag to connect the object with a <b class="crowd-bold-color">generalization</b>',
-          placement: "top"
-        }
-      })
-    }));
+    //link tool with the uml generalization link type
+    var linkGeneralizationTool = function (config) {
+      config = config ? config : {};
+      return crowd.workspace.tools.elements.linkTool({
+        link: {
+          type: 'generalization',
+          props: {
+            direction: config.direction ? config.direction : 'target',
+            inheritChild: config.inheritChild != null ? config.inheritChild : false
+          }
+        },
+        x: config.position?.x ? config.position?.x : '50%',
+        y: config.position?.y ? config.position?.y : null,
+        offset: {
+          x: config.offset?.x ? config.offset?.x : 0,
+          y: config.offset?.y ? config.offset?.y : -15
+        },
+        markup: crowd.workspace.tools.elements.markup({
+          icon: config.icon ? config.icon : 'call_merge',
+          tooltip: {
+            title: 'Click and drag to connect the object with a <b class="crowd-bold-color">generalization</b>' + (config.inheritChild ? ' child' : ' parent'),
+            placement: "top"
+          }
+        })
+      });
+    };
 
-    //link tool with the uml implementation link type to the basic tools of crowd editor
-    crowd.workspace.tools.elements.basicTools.push(crowd.workspace.tools.elements.linkTool({
+    //link tool with the uml implementation link type
+    var linkImplementationTool = crowd.workspace.tools.elements.linkTool({
       link: {
         type: 'implementation'
       },
@@ -336,7 +376,7 @@ var CrowdEditorUml = {
           placement: "top"
         }
       })
-    }));
+    });
 
     //link tool for classes
     var linkClassTool = function (config) {
@@ -356,6 +396,7 @@ var CrowdEditorUml = {
           type: config.type,
           props: {
             cardinality: config.cardinality,
+            inheritChild: config.inheritChild != null ? config.inheritChild : false,
             direction: config.direction
           }
         }
@@ -380,6 +421,7 @@ var CrowdEditorUml = {
           type: config.type,
           props: {
             cardinality: config.cardinality,
+            inheritChild: config.inheritChild != null ? config.inheritChild : false,
             direction: config.direction
           }
         }
@@ -404,7 +446,33 @@ var CrowdEditorUml = {
           type: config.type,
           props: {
             cardinality: config.cardinality,
+            inheritChild: config.inheritChild != null ? config.inheritChild : false,
             direction: config.direction
+          }
+        }
+      });
+    };
+
+    //link tool for inheritance
+    var linkInheritanceTool = function (config) {
+      config = config ? config : {};
+      return crowd.workspace.tools.elements.linkElementTool({
+        elementType: crowd.palette.elements.inheritance,
+        x: '75%', y: '100%', offset: { x: 12, y: 35 },
+        markup: crowd.workspace.tools.elements.markup({
+          icon: 'share',
+          background: crowd.palette.colors.inheritance,
+          tooltip: {
+            title: 'Click and drag to make a <b class="crowd-inheritance-color">inheritance</b> and connect with it',
+            placement: "left"
+          }
+        }),
+        link: {
+          type: config.type,
+          props: {
+            cardinality: config.cardinality,
+            direction: config.direction,
+            inheritChild: config.inheritChild != null ? config.inheritChild : true
           }
         }
       });
@@ -414,9 +482,15 @@ var CrowdEditorUml = {
     crowd.workspace.tools.elements.elementsToolsView['class'] = new joint.dia.ToolsView({
       name: 'class-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkAssociationTool,
+        linkAggregationTool,
+        linkCompositionTool,
+        linkGeneralizationTool(),
+        linkImplementationTool,
         linkClassTool({ type: 'association', cardinality: { source: '0..1', target: '0..1' }, direction: null }),
         linkAbstractTool({ type: 'generalization', cardinality: { source: null, target: null }, direction: 'target' }),
         linkInterfaceTool({ type: 'implementation', cardinality: { source: null, target: null }, direction: 'target' }),
+        linkInheritanceTool({ type: 'generalization', cardinality: { source: null, target: null }, direction: 'source', inheritChild: false }),
       ])
     });
 
@@ -424,9 +498,15 @@ var CrowdEditorUml = {
     crowd.workspace.tools.elements.elementsToolsView['abstract'] = new joint.dia.ToolsView({
       name: 'abstract-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkClassTool({ type: 'association', cardinality: { source: '0..1', target: '0..1' }, direction: null }),
+        linkAssociationTool,
+        linkAggregationTool,
+        linkCompositionTool,
+        linkGeneralizationTool(),
+        linkImplementationTool,
+        linkClassTool({ type: 'generalization', cardinality: { source: '0..1', target: '0..1' }, direction: 'source' }),
         linkAbstractTool({ type: 'association', cardinality: { source: '0..1', target: '0..1' }, direction: null }),
         linkInterfaceTool({ type: 'implementation', cardinality: { source: null, target: null }, direction: 'target' }),
+        linkInheritanceTool({ type: 'generalization', cardinality: { source: null, target: null }, direction: 'source', inheritChild: false }),
       ])
     });
 
@@ -434,9 +514,27 @@ var CrowdEditorUml = {
     crowd.workspace.tools.elements.elementsToolsView['interface'] = new joint.dia.ToolsView({
       name: 'interface-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkAssociationTool,
+        linkAggregationTool,
+        linkCompositionTool,
+        linkGeneralizationTool(),
+        linkImplementationTool,
         linkClassTool({ type: 'implementation', cardinality: { source: null, target: null }, direction: 'source' }),
-        linkAbstractTool({ type: 'implementation', cardinality: { source: null, target: null }, direction: 'target' }),
+        linkAbstractTool({ type: 'implementation', cardinality: { source: null, target: null }, direction: 'source' }),
         linkInterfaceTool({ type: 'implementation', cardinality: { source: null, target: null }, direction: 'target' }),
+        linkInheritanceTool({ type: 'generalization', cardinality: { source: null, target: null }, direction: 'source', inheritChild: false }),
+      ])
+    });
+
+    //create tools view for inheritance
+    crowd.workspace.tools.elements.elementsToolsView['inheritance'] = new joint.dia.ToolsView({
+      name: 'inheritance-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkGeneralizationTool(),
+        linkGeneralizationTool({ icon: 'play_for_work', position: { x: '100%' }, offset: { x: 25, y: -15 }, inheritChild: true, direction: null }),
+        linkClassTool({ type: 'generalization', cardinality: { source: null, target: null }, direction: null, inheritChild: true }),
+        linkAbstractTool({ type: 'generalization', cardinality: { source: null, target: null }, direction: null, inheritChild: true }),
+        linkInterfaceTool({ type: 'generalization', cardinality: { source: null, target: null }, direction: null, inheritChild: true }),
       ])
     });
   },
@@ -493,7 +591,7 @@ var CrowdEditorUml = {
       //get element view
       var elementView = element.findView(crowd.workspace.paper);
 
-      element.size({ width: 20, height: 20 });
+      element.size({ width: 70, height: 60 });
       setTimeout(function () {
         for (var i = 0; i < 10; i++) {
           var bbox = elementView.getBBox();
@@ -516,7 +614,7 @@ var CrowdEditorUml = {
     crowd.workspace.graph.on('change:attributes', function (element, newAttributes, opt) {
       // console.log('change:attributes', { element, previosAttributes: element._previousAttributes.attributes, newAttributes, opt });
 
-      if (element.isElement()) {
+      if (element.isElement() && !element.prop('collapsed')) {
         //adjust element size if add or remove element
         // if (element._previousAttributes.attributes.length > newAttributes.length)
         //   element.size(element.size().width, element.size().height - 10);
@@ -531,7 +629,7 @@ var CrowdEditorUml = {
     crowd.workspace.graph.on('change:methods', function (element, newMethods, opt) {
       // console.log('change:methods', { element, previosMethods: element._previousAttributes.methods, newMethods, opt });
 
-      if (element.isElement()) {
+      if (element.isElement() && !element.prop('collapsed')) {
         //adjust element size if add or remove element
         // if (element._previousAttributes.methods.length > newMethods.length)
         //   element.size(element.size().width, element.size().height - 10);
@@ -544,7 +642,7 @@ var CrowdEditorUml = {
 
     //event when the elements properties/attributes (semantic attributes) change
     crowd.workspace.graph.on('change:properties', function (element, newProperties, opt) {
-      // console.log('change:properties', { element, previosAttributes: element._previousAttributes.attributes, newProperties, opt });
+      console.log('change:properties', { element, previosAttributes: element._previousAttributes.attributes, newProperties, opt });
 
       if (element.isElement()) {
         //set visual attributes property on element
@@ -565,6 +663,55 @@ var CrowdEditorUml = {
         // crowd.workspace.renderElementTools(elementView);
       }
     });
+
+    //event when the elements collapsed option change
+    crowd.workspace.graph.on('change:collapsed', function (element, newCollapsed, opt) {
+      // console.log('change:collapsed', { element, newCollapsed, opt });
+
+      if (element.isElement()) {
+        if (element.prop('attrs/.uml-class-attrs-rect/height') != 0 && element.prop('attrs/.uml-class-methods-rect/height') != 0) {
+          element.prop('.uml-class-attrs-rect/lastHeight', element.prop('attrs/.uml-class-attrs-rect/height'));
+          element.prop('.uml-class-attrs-text/lastText', element.prop('attrs/.uml-class-attrs-text/text'));
+          element.prop('.uml-class-methods-rect/lastHeight', element.prop('attrs/.uml-class-methods-rect/height'));
+          element.prop('.uml-class-methods-text/lastText', element.prop('attrs/.uml-class-methods-text/text'));
+        }
+
+        element.prop('attrs/.uml-class-attrs-rect/visibility', newCollapsed ? 'hidden' : 'visible');
+        element.prop('attrs/.uml-class-attrs-text/fill-opacity', newCollapsed ? '0' : '1');
+        // element.prop('attrs/.uml-class-attrs-text/text',
+        //   newCollapsed ? '' : element.prop('.uml-class-attrs-text/lastText'));
+        // element.prop('attrs/.uml-class-attrs-rect/height',
+        //   newCollapsed ? 0 : element.prop('.uml-class-attrs-rect/lastHeight'));
+
+        element.prop('attrs/.uml-class-methods-rect/visibility', newCollapsed ? 'hidden' : 'visible');
+        element.prop('attrs/.uml-class-methods-text/fill-opacity', newCollapsed ? '0' : '1');
+        // element.prop('attrs/.uml-class-methods-text/text',
+        //   newCollapsed ? '' : element.prop('.uml-class-methods-text/lastText'));
+        // element.prop('attrs/.uml-class-methods-rect/height',
+        //   newCollapsed ? 0 : element.prop('.uml-class-methods-rect/lastHeight'));
+
+        if (!newCollapsed) {
+          setTimeout(function () {
+            // var tempProp = element.prop('properties');
+            // element.prop('properties', { attributes: [], methods: [] });
+            // element.prop('properties', tempProp);
+            // var elementView = element.findView(self.workspace.paper);
+            // elementView.render();
+          });
+        }
+      }
+    });
+
+    //event when change element size
+    crowd.workspace.graph.on('change:size', function (element, newSize, opt) {
+      if (element.prop('collapsed')) {
+        // element.prop('attrs/.uml-class-attrs-text/text', '');
+        // element.prop('attrs/.uml-class-attrs-rect/height', 0);
+        // element.prop('attrs/.uml-class-methods-text/text', '');
+        // element.prop('attrs/.uml-class-methods-rect/height', 0);
+      }
+    });
+
 
     //event when the links type change (types are: association, aggregation, composition, etc)
     crowd.workspace.graph.on('change:type', function (link, newType) {
@@ -680,6 +827,38 @@ var CrowdEditorUml = {
       linkView.render();
     });
 
+    //event when the link inherit child change
+    crowd.workspace.graph.on('change:inheritChild', function (link, newInheritChild) {
+      // console.log('change:inheritChild', { link, newInheritChild });
+
+      if (link.isLink()) {
+        if (newInheritChild)
+          link.prop('direction', null);
+        else
+          link.prop('direction', 'target');
+        crowd.inspector.loadContent();
+      }
+    });
+
+    //event when the elements (specificly inheritance) subtype change
+    crowd.workspace.graph.on('change:subtype', function (element, newSubtype) {
+      // console.log('change:subtype', { element, newSubtype });
+
+      if (element.isElement() && element.prop('type') == 'inheritance') {
+        var subtypesText = { overlaped: 'o', disjoint: 'd' };
+        element.attr('text/text', (element.prop('covering') ? 'c,' : '') + subtypesText[newSubtype]);
+      }
+    });
+
+    //event when the elements (specificly inheritance) covering change
+    crowd.workspace.graph.on('change:covering', function (element, newCovering) {
+      // console.log('change:covering', { element, newCovering });
+
+      if (element.isElement() && element.prop('type') == 'inheritance') {
+        element.trigger('change:subtype', element, element.prop('subtype'));
+      }
+    });
+
     //event when the links source or target change
     crowd.workspace.graph.on('change:source change:target', function (link, newSourceTarget) {
       // console.log('change:source change:target', { link, newSourceTarget });
@@ -764,6 +943,14 @@ var CrowdEditorUml = {
         break;
     }
 
+    //add the inherit child attribute if are generalization or implementation links
+    switch (crowd.inspector.model.attributes.type) {
+      case 'generalization':
+      case 'implementation':
+        crowd.inspector.addAttribute({ label: 'Is Child Connector?', property: 'inheritChild', type: 'boolean', map: { true: true, false: false } });
+        break;
+    }
+
     //add the nullable direction attribute if are association links
     switch (crowd.inspector.model.attributes.type) {
       case 'association':
@@ -784,13 +971,15 @@ var CrowdEditorUml = {
       case 'composition':
       case 'generalization':
       case 'implementation':
-        crowd.inspector.addAttribute({
-          label: 'Direction', property: 'direction', type: 'multiple',
-          values: [
-            { label: 'Source', value: 'source' },
-            { label: 'Target', value: 'target' },
-          ]
-        });
+        if (!crowd.inspector.model.attributes.inheritChild) {
+          crowd.inspector.addAttribute({
+            label: 'Direction', property: 'direction', type: 'multiple',
+            values: [
+              { label: 'Source', value: 'source' },
+              { label: 'Target', value: 'target' },
+            ]
+          });
+        }
         break;
     }
 
@@ -815,6 +1004,20 @@ var CrowdEditorUml = {
         });
         // crowd.inspector.addAttribute({ label: 'Cardinality Source', property: 'cardinality/source', type: 'text' });
         // crowd.inspector.addAttribute({ label: 'Cardinality Target', property: 'cardinality/target', type: 'text' });
+        break;
+    }
+
+    //add the subtype attribute for inheritance
+    switch (crowd.inspector.model.attributes.type) {
+      case 'inheritance':
+        crowd.inspector.addAttribute({
+          label: 'Type', property: 'subtype', type: 'multiple',
+          values: [
+            { label: 'Overlaped', value: 'overlaped' },
+            { label: 'Disjoint', value: 'disjoint' },
+          ]
+        });
+        crowd.inspector.addAttribute({ label: 'Covering?', property: 'covering', type: 'boolean', map: { true: true, false: false } });
         break;
     }
   },
@@ -856,9 +1059,9 @@ var CrowdEditorUml = {
               connectedClass = link.getTargetElement();
             }
 
-            if (connectedClass) {
+            if (connectedClass && connectedClass?.attributes?.parentType == 'class') {
               jsonSchema.links.push({
-                uri: link.attributes.uri,
+                ...linkTypeMap[link.attributes.type] != 'generalization' ? { uri: link.attributes.uri } : {},
                 name: link.attributes.uri,
                 ...linkTypeMap[link.attributes.type] == 'generalization' ? { parent: connectedClass.attributes.uri } : {},
                 classes: [
@@ -889,6 +1092,42 @@ var CrowdEditorUml = {
             }
           });
           break;
+        case 'inheritance':
+          //create the link for this inheritance
+          var inheritanceLink = {
+            name: element.cid,
+            parent: null,
+            classes: [],
+            constraint: [],
+            type: 'generalization',
+            position: element.attributes.position,
+            size: element.attributes.size
+          }
+          if (element.attributes.subtype == 'disjoint') inheritanceLink.constraint.push('disjoint');
+          if (element.attributes.covering) inheritanceLink.constraint.push('covering');
+
+          //search for links connected to the inheritance for add classes to inheritance link
+          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+            if (link.attributes.type == 'generalization') {
+              var connectedClass = link.attributes.source.id != element.id
+                && (link.getSourceElement().attributes.parentType == 'class')
+                ? link.getSourceElement()
+                : (link.attributes.target.id != element.id
+                  && (link.getTargetElement().attributes.parentType == 'class')
+                  ? link.getTargetElement()
+                  : null);
+              if (connectedClass) {
+                if (!link.attributes.inheritChild) {
+                  inheritanceLink.parent = connectedClass.attributes.uri;
+                }
+                else {
+                  inheritanceLink.classes.push(connectedClass.attributes.uri);
+                }
+              }
+            }
+          });
+          jsonSchema.links.push(inheritanceLink);
+          break;
       }
     });
 
@@ -898,6 +1137,7 @@ var CrowdEditorUml = {
     console.log('loadUML', schema);
 
     var classesObj = {};
+    var inheritancesObj = {};
     var linksObj = {};
 
     if (schema) {
@@ -925,40 +1165,89 @@ var CrowdEditorUml = {
       //add each link and their properties
       if (schema.links) {
         schema.links.forEach(function (link) {
-          linksObj[link.name] = crowd.palette.links[link.type].clone();
-          crowd.workspace.graph.addCell(linksObj[link.name]);
-          $.each(link, function (attribute, value) {
-            switch (attribute) {
-              case 'name':
-                linksObj[link.name].prop('uri', value);
-                break;
-              case 'classes':
-                if (link.type == "generalization") {
-                  linksObj[link.name].source(classesObj[value[0]]);
-                } else {
-                  linksObj[link.name].source(classesObj[value[0]]);
-                  linksObj[link.name].target(classesObj[value[1]]);
-                  linksObj[link.name].prop('direction', null);
+          if (link.type != "generalization" || (link.classes.length <= 1 && link.constraint.length <= 0)) {
+            console.log('common', link);
+            linksObj[link.name] = crowd.palette.links[link.type].clone();
+            crowd.workspace.graph.addCell(linksObj[link.name]);
+            $.each(link, function (attribute, value) {
+              switch (attribute) {
+                case 'name':
+                  linksObj[link.name].prop('uri', value);
+                  break;
+                case 'classes':
+                  if (link.type == "generalization") {
+                    linksObj[link.name].source(classesObj[value[0]]);
+                  } else {
+                    linksObj[link.name].source(classesObj[value[0]]);
+                    linksObj[link.name].target(classesObj[value[1]]);
+                    linksObj[link.name].prop('direction', null);
+                  }
+                  break;
+                case 'parent':
+                  linksObj[link.name].target(classesObj[value]);
+                  break;
+                case 'multiplicity':
+                  linksObj[link.name].prop('cardinality/source', value[0]);
+                  linksObj[link.name].prop('cardinality/target', value[1]);
+                  break;
+                case 'roles':
+                  linksObj[link.name].prop('roles/source', value[0]);
+                  linksObj[link.name].prop('roles/target', value[1]);
+                  break;
+                default:
+                  linksObj[link.name].prop(attribute, value)
+                  break;
+              }
+            });
+          } else {
+            console.log('inheritance', link);
+            var inheritanceName = link.name;//link.name.split('_')[0];
+            if (!inheritancesObj[inheritanceName]) {
+              inheritancesObj[inheritanceName] = crowd.palette.elements.inheritance.clone();
+              crowd.workspace.graph.addCell(inheritancesObj[inheritanceName]);
+              $.each(link, function (attribute, value) {
+                switch (attribute) {
+                  case 'constraint':
+                    value?.forEach(function (constraint) {
+                      switch (constraint) {
+                        case 'disjoint':
+                          inheritancesObj[inheritanceName].prop('subtype', 'disjoint');
+                          break;
+                        case 'covering':
+                          inheritancesObj[inheritanceName].prop('covering', true);
+                          break;
+                      }
+                    });
+                    break;
+                  case 'position': case 'size': case 'uri':
+                    inheritancesObj[inheritanceName].prop(attribute, value)
+                    break;
                 }
-                break;
-              case 'parent':
-                linksObj[link.name].target(classesObj[value]);
-                break;
-              case 'multiplicity':
-                linksObj[link.name].prop('cardinality/source', value[0]);
-                linksObj[link.name].prop('cardinality/target', value[1]);
-                break;
-              case 'roles':
-                linksObj[link.name].prop('roles/source', value[0]);
-                linksObj[link.name].prop('roles/target', value[1]);
-                break;
-              default:
-                linksObj[link.name].prop(attribute, value)
-                break;
+              });
             }
-          });
+
+            var parentLinkName = link.parent + '-' + fromURI(inheritanceName);
+            linksObj[parentLinkName] = crowd.palette.links.generalization.clone();
+            linksObj[parentLinkName].source(inheritancesObj[inheritanceName]);
+            linksObj[parentLinkName].target(classesObj[link.parent]);
+            crowd.workspace.graph.addCell(linksObj[parentLinkName]);
+            linksObj[parentLinkName].prop('uri', parentLinkName);
+
+
+            link.classes.forEach(function (connectedClass, index) {
+              console.log(connectedClass);
+              var linkName = link.classes[index] + '-' + fromURI(inheritanceName);
+              linksObj[linkName] = crowd.palette.links.generalization.clone();
+              linksObj[linkName].source(inheritancesObj[inheritanceName]);
+              linksObj[linkName].target(classesObj[connectedClass]);
+              crowd.workspace.graph.addCell(linksObj[linkName]);
+              linksObj[linkName].prop('uri', linkName);
+              linksObj[linkName].prop('inheritChild', true);
+            });
+          }
         });
       }
+
     }
   },
 }
