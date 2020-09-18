@@ -565,17 +565,26 @@ var CrowdEditorEer = {
       });
     }
 
-    //add the link tool with the eer connector link type to the basic tools of crowd editor
-    crowd.workspace.tools.elements.basicTools.push(crowd.workspace.tools.elements.linkTool({
-      link: {
-        type: 'connector'
-      }
-    }));
+    //link tool for generic link connection
+    var linkTool = function (config) {
+      config = config ? config : {};
+      return crowd.workspace.tools.elements.linkTool({
+        link: {
+          type: 'connector',
+          props: {
+            cardinality: config.cardinality ? config.cardinality : 'N',
+            inherit: config.inherit ? config.inherit : false,
+            inheritChild: config.inheritChild ? config.inheritChild : false
+          }
+        }
+      });
+    }
 
     //create tools view for entities
     crowd.workspace.tools.elements.elementsToolsView['entity'] = new joint.dia.ToolsView({
       name: 'entity-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool(),
         linkAttributeTool,
         linkKeyAttributeTool,
         linkRelationshipTool(),
@@ -589,6 +598,7 @@ var CrowdEditorEer = {
     crowd.workspace.tools.elements.elementsToolsView['weakEntity'] = new joint.dia.ToolsView({
       name: 'weak-entity-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool(),
         linkAttributeTool,
         linkWeakKeyAttributeTool,
         linkRelationshipTool(),
@@ -602,6 +612,7 @@ var CrowdEditorEer = {
     crowd.workspace.tools.elements.elementsToolsView['relationship'] = new joint.dia.ToolsView({
       name: 'relationship-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool(),
         linkAttributeTool,
         linkKeyAttributeTool,
         linkEntityTool(),
@@ -614,6 +625,7 @@ var CrowdEditorEer = {
     crowd.workspace.tools.elements.elementsToolsView['weakRelationship'] = new joint.dia.ToolsView({
       name: 'weak-relationship-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool(),
         linkAttributeTool,
         linkWeakKeyAttributeTool,
         linkEntityTool({ cardinality: '1' }),
@@ -626,6 +638,7 @@ var CrowdEditorEer = {
     crowd.workspace.tools.elements.elementsToolsView['attribute'] = new joint.dia.ToolsView({
       name: 'attribute-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({ cardinality: '1' }),
         linkAttributeTool
       ])
     });
@@ -634,6 +647,7 @@ var CrowdEditorEer = {
     crowd.workspace.tools.elements.elementsToolsView['inheritance'] = new joint.dia.ToolsView({
       name: 'inheritance-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({ inherit: true, inheritChild: true }),
         linkEntityTool({ inherit: true, inheritChild: true, position: { y: '25%' }, offset: { y: -1 } }),
         linkWeakEntityTool({ inherit: true, inheritChild: true, position: { y: '25%' }, offset: { y: -1 } }),
         linkRelationshipTool({ inherit: true, inheritChild: true, position: { y: '75%' }, offset: { y: 20 } }),
@@ -834,6 +848,48 @@ var CrowdEditorEer = {
         link.trigger('change:inheritChild', link, link.prop('inheritChild'));
       }
     });
+
+    //mark or unmark the element or link when the syntax property changed
+    crowd.workspace.graph.on('change:syntax', function (cell, newSyntax) {
+      // console.log('change:syntax', { cell, newSyntax });
+      var syntaxError = newSyntax && newSyntax != '';
+      var color = 'red';
+      if (cell.isElement()) {
+        color = syntaxError ? color : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke');
+        cell.attr('.outer/stroke', color);
+      } else if (cell.isLink()) {
+        if (!cell?.attributes?.total) {
+          color = syntaxError ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
+          cell.attr('line/stroke', color);
+        } else {
+          color = syntaxError ? color : crowd.palette.links.total.attr('outline/stroke');
+          cell.attr('outline/stroke', color);
+        }
+      }
+
+      if (!syntaxError)
+        cell.trigger('change:semantic', cell, cell.prop('semantic'));
+    });
+
+    //mark or unmark the element or link when the semantic property changed
+    crowd.workspace.graph.on('change:semantic', function (cell, newSemantic) {
+      // console.log('change:semantic', { cell, newSemantic });
+      var unsatisfiable = newSemantic?.contents?.find(function (content) { return content.value == 'unsatisfiable' });
+      var color = getCSS('color', 'crowd-unsat-color');
+      if (cell.isElement()) {
+        color = unsatisfiable != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke');
+        cell.attr('.outer/stroke', color);
+      } else if (cell.isLink()) {
+        if (!cell?.attributes?.total) {
+          color = unsatisfiable != null ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
+          cell.attr('line/stroke', color);
+        } else {
+          color = unsatisfiable != null ? color : crowd.palette.links.total.attr('outline/stroke');
+          cell.attr('outline/stroke', color);
+        }
+      }
+      crowd.inspector.loadContent();
+    });
   },
   initInspector: function (crowd) {
     //add uri attribute to content for all types
@@ -921,7 +977,7 @@ var CrowdEditorEer = {
           values: [
             { label: 'Overlaped', value: 'overlaped' },
             { label: 'Disjoint', value: 'disjoint' },
-            { label: 'Union', value: 'union' },
+            // { label: 'Union', value: 'union' },
           ]
         });
         break;
@@ -949,6 +1005,14 @@ var CrowdEditorEer = {
         // }
         break;
     }
+
+    //add the syntax alert message when there's a syntax error
+    if (crowd.inspector.model.attributes.syntax && crowd.inspector.model.attributes.syntax != '')
+      crowd.inspector.addAttribute({ property: 'syntax', type: 'alert', color: 'danger' });
+
+    //add the semantic alert message when there's a semantic error
+    if (crowd.inspector.model.attributes.semantic && crowd.inspector.model.attributes.semantic.contents?.length)
+      crowd.inspector.addAttribute({ property: 'semantic', type: 'alert', color: 'warning' });
   },
   toJSONSchema: function (crowd) {
     //define basic structure of eer json according to schema
@@ -985,7 +1049,7 @@ var CrowdEditorEer = {
     var inheritanceSubtypeMap = {
       'disjoint': 'exclusive',
       'overlaped': 'overlapping',
-      'union': 'union'
+      // 'union': 'union'
     }
 
     //iterates each element and add it to the correspondent collection
@@ -1102,7 +1166,7 @@ var CrowdEditorEer = {
                 if (!link.attributes.inheritChild) {
                   inheritanceLink.parent = connectedEntity.attributes.uri;
                   if (link.attributes.total) {
-                    inheritanceLink.constraint.push('exclusive');
+                    inheritanceLink.constraint.push('union');
                   }
                 }
                 else {
@@ -1148,7 +1212,7 @@ var CrowdEditorEer = {
     var inheritanceSubtypeMap = {
       'exclusive': 'disjoint',
       'overlapping': 'overlaped',
-      'union': 'union'
+      // 'union': 'union'
     }
 
     if (schema) {
@@ -1230,7 +1294,9 @@ var CrowdEditorEer = {
                 $.each(link, function (attribute, value) {
                   switch (attribute) {
                     case 'constraint':
-                      inheritancesObj[inheritanceName].prop('subtype', value[0] ? inheritanceSubtypeMap[value[0]] : 'overlaped');
+                      value.forEach(function (constraint) {
+                        if (constraint == 'exclusive') inheritancesObj[inheritanceName].prop('subtype', 'disjoint');
+                      });
                       break;
                     case 'position': case 'size': case 'uri':
                       inheritancesObj[inheritanceName].prop(attribute, value)
@@ -1240,13 +1306,13 @@ var CrowdEditorEer = {
               }
 
               var parentLinkName = link.parent + '-' + fromURI(inheritanceName);
-              linksObj[parentLinkName] = crowd.palette.links.connector.clone();
+              linksObj[parentLinkName] = crowd.palette.links[link.constraint?.find((value) => value == 'union') != null ? 'total' : 'connector'].clone();
               linksObj[parentLinkName].source(inheritancesObj[inheritanceName]);
               linksObj[parentLinkName].target(entitiesObj[link.parent] ? entitiesObj[link.parent] : relationshipsObj[link.parent]);
               crowd.workspace.graph.addCell(linksObj[parentLinkName]);
               linksObj[parentLinkName].prop('uri', parentLinkName);
               linksObj[parentLinkName].prop('inherit', true);
-              linksObj[parentLinkName].prop('total', link.constraint?.covering != null);
+              linksObj[parentLinkName].prop('total', link.constraint?.find((value) => value == 'union') != null);
 
               link.entities.forEach(function (connectedEntity, index) {
                 console.log(connectedEntity);
@@ -1277,4 +1343,165 @@ var CrowdEditorEer = {
       }
     }
   },
+  initSyntaxValidator: function (crowd) {
+    //define for each element type with wich another element type can connect and with wich link type and specific attributes of it
+    crowd.syntax.canConnect = {
+      entity: {
+        relationship: { connector: { inherit: false } },
+        weakRelationship: { connector: { inherit: false, cardinality: '1', total: false } },
+        keyAttribute: { connector: { inherit: false, total: false } },
+        attribute: { connector: { inherit: false, total: false } },
+        multivaluedAttribute: { connector: { inherit: false, total: false } },
+        derivedAttribute: { connector: { inherit: false, total: false } },
+        inheritance: { connector: { inherit: true } },
+      },
+      weakEntity: {
+        relationship: { connector: { inherit: false } },
+        weakRelationship: { connector: { inherit: false, cardinality: 'N', total: true } },
+        weakKeyAttribute: { connector: { inherit: false, total: false } },
+        attribute: { connector: { inherit: false, total: false } },
+        multivaluedAttribute: { connector: { inherit: false, total: false } },
+        derivedAttribute: { connector: { inherit: false, total: false } },
+        inheritance: { connector: { inherit: true } },
+      },
+      relationship: {
+        entity: { connector: { inherit: false } },
+        weakEntity: { connector: { inherit: false } },
+        keyAttribute: { connector: { inherit: false, total: false } },
+        attribute: { connector: { inherit: false, total: false } },
+        //multivaluedAttribute: { connector: { inherit: false, total: false } },
+        derivedAttribute: { connector: { inherit: false, total: false } },
+        inheritance: { connector: { inherit: true } },
+      },
+      weakRelationship: {
+        entity: { connector: { inherit: false, cardinality: '1', total: false } },
+        weakEntity: { connector: { inherit: false, cardinality: 'N', total: true } },
+        weakKeyAttribute: { connector: { inherit: false, total: false } },
+        attribute: { connector: { inherit: false, total: false } },
+        //multivaluedAttribute: { connector: { inherit: false, total: false } },
+        derivedAttribute: { connector: { inherit: false, total: false } },
+        inheritance: { connector: { inherit: true } },
+      },
+      keyAttribute: {
+        entity: { connector: { inherit: false, total: false } },
+        relationship: { connector: { inherit: false, total: false } },
+      },
+      weakKeyAttribute: {
+        weakEntity: { connector: { inherit: false, total: false } },
+        weakRelationship: { connector: { inherit: false, total: false } },
+      },
+      attribute: {
+        entity: { connector: { inherit: false, total: false } },
+        weakEntity: { connector: { inherit: false, total: false } },
+        relationship: { connector: { inherit: false, total: false } },
+        weakRelationship: { connector: { inherit: false, total: false } },
+        attribute: { connector: { inherit: false, total: false } },
+      },
+      multivaluedAttribute: {
+        entity: { connector: { inherit: false, total: false } },
+        weakEntity: { connector: { inherit: false, total: false } },
+      },
+      derivedAttribute: {
+        entity: { connector: { inherit: false, total: false } },
+        weakEntity: { connector: { inherit: false, total: false } },
+        relationship: { connector: { inherit: false, total: false } },
+        weakRelationship: { connector: { inherit: false, total: false } },
+      },
+      inheritance: {
+        entity: { connector: { inherit: true } },
+        weakEntity: { connector: { inherit: true } },
+        relationship: { connector: { inherit: true } },
+        weakRelationship: { connector: { inherit: true } },
+      },
+    };
+
+    //do the syntax validation of an entity
+    crowd.syntax.validate.canConnect = function (options) {
+      try {
+        var error = new Error();
+        if (options?.elementA?.attributes?.type && options?.elementB?.attributes?.type && options?.link?.attributes?.type) {
+          var check = crowd.syntax.canConnect[options.elementA.attributes.type][options.elementB.attributes.type];
+          if (check) {
+            check = check[options.link.attributes.type];
+            if (check) {
+              $.each(check, function (key, value) {
+                if (options.link.attributes[key] != value) {
+                  error.name = 'link'
+                  error.message = 'Invalid link'
+                  throw error;
+                }
+              });
+
+              //case there's no exception reset syntax errors values
+              options?.elementA?.prop('syntax', null);
+              options?.elementB?.prop('syntax', null);
+              options?.link?.prop('syntax', null);
+            } else {
+              error.name = 'connection-link'
+              error.message = 'Invalid connection link type';
+              throw error;
+            }
+          } else {
+            error.name = 'connection-element'
+            error.message = 'Invalid connection element type';
+            throw error;
+          }
+        } else {
+          error.name = 'disconnected'
+          error.message = 'Disconnected elements';
+          throw error;
+        }
+      } catch (error) {
+        console.log(error.name, error.message);
+        error.message = '<b>Syntax Error</b><br>' + error.message;
+        switch (error.name) {
+          case 'link': case 'connection-link':
+            if (options?.link?.attributes) options.link.prop('syntax', error.message);
+            break;
+          case 'connection-element':
+            if (options?.elementA?.attributes) options.elementA.prop('syntax', error.message + ' (' + options?.elementB?.attributes?.type + ')');
+            if (options?.elementB?.attributes) options.elementB.prop('syntax', error.message + ' (' + options?.elementA?.attributes?.type + ')');
+            if (options?.link?.attributes) options.link.prop('syntax', error.message + ' (' + options?.elementA?.attributes?.type + '-' + options?.elementB?.attributes?.type + ')');
+            break;
+          case 'disconnected':
+            if (options?.elementA?.attributes) options.elementA.prop('syntax', error.message);
+            if (options?.elementB?.attributes) options.elementB.prop('syntax', error.message);
+            if (options?.link?.attributes) options.link.prop('syntax', error.message);
+            break;
+        }
+      } finally {
+        crowd.inspector.loadContent();
+      }
+    };
+
+    //do the syntax validation of an entity
+    // crowd.syntax.validate.entity = function (options) {
+
+    // };
+
+    //event when add or remove cell (element or link) into the diagram
+    // crowd.workspace.graph.on('add remove', function (cell) {
+
+    // });
+
+    //event when the links source or target change
+    crowd.workspace.graph.on('change add remove', function (link, newSourceTarget) {
+      // console.log('change:source change:target', { link, previosAttributes: link._previousAttributes, newSourceTarget });
+
+      if (link.isLink()) {
+        crowd.syntax.validate.canConnect({
+          elementA: link.getSourceElement(),
+          elementB: link.getTargetElement(),
+          link: link
+        });
+      }
+    });
+  },
+  initReasoningValidator: function (crowd) {
+    //todo
+  },
+  fromReasoning: function (crowd, reasoning) {
+    //use generic semantic mark of the editor
+    crowd.reasoning.genericMark(reasoning);
+  }
 }

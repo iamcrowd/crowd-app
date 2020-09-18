@@ -47,16 +47,29 @@ input:-webkit-autofill {
   height: 8px;
 }
 
-::-webkit-scrollbar-track {
+.bootstrap::-webkit-scrollbar-track {
+  background: #eeeeee;
+}
+
+.bootstrap::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 10px;
+}
+
+.bootstrap::-webkit-scrollbar-thumb:hover {
+  background: #7a7a7a;
+}
+
+.bootstrap-dark::-webkit-scrollbar-track {
   background: #212529;
 }
 
-::-webkit-scrollbar-thumb {
+.bootstrap-dark::-webkit-scrollbar-thumb {
   background: #1b1b1b;
   border-radius: 10px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.bootstrap-dark::-webkit-scrollbar-thumb:hover {
   background: #181818;
 }
 
@@ -71,22 +84,22 @@ input:-webkit-autofill {
   border-radius: unset !important;
 }
 
-//for fix color on pre
-pre {
+//for fix color on pre (bootstrap dark)
+.bootstrap-dark pre {
   background: rgba(0, 0, 0, 0.5);
   border-radius: 10px;
   padding: 15px 25px;
   color: wheat !important;
 }
 
-//for fix color on file input
-.custom-file-label {
+//for fix color on file input (bootstrap dark)
+.bootstrap-dark .custom-file-label {
   color: #dee2e6 !important;
   background-color: #000 !important;
   border: 1px solid #6c757d !important;
 }
 
-.custom-file-label::after {
+.bootstrap-dark .custom-file-label::after {
   color: #ced4da !important;
   background-color: #343a40 !important;
   border-color: #343a40 !important;
@@ -115,10 +128,20 @@ pre {
 
 .dropdown-menu > li a:hover,
 .dropdown-menu > li.show {
+  background: #d3d3d3;
+  color: #212529;
+}
+.dropdown-menu > li.show > a {
+  color: #212529;
+}
+
+//fix color for dropdown li hover (bootstrap dark)
+.bootstrap-dark .dropdown-menu > li a:hover,
+.bootstrap-dark .dropdown-menu > li.show {
   background: #212529;
   color: white;
 }
-.dropdown-menu > li.show > a {
+.bootstrap-dark .dropdown-menu > li.show > a {
   color: white;
 }
 

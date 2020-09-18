@@ -29,8 +29,17 @@ CrowdEditor.prototype.init = function () {
   if (!self.config.conceptualModel.initInspector) {
     self.config.conceptualModel.initInspector = function () { console.warn("CrowdEditor conceptual model inspector is not defined."); }
   }
+  if (!self.config.conceptualModel.initSyntaxValidator) {
+    self.config.conceptualModel.initSyntaxValidator = function () { console.warn("CrowdEditor conceptual model syntax validator is not defined."); }
+  }
+  if (!self.config.conceptualModel.initReasoningValidator) {
+    self.config.conceptualModel.initReasoningValidator = function () { console.warn("CrowdEditor conceptual model reasoning validator is not defined."); }
+  }
   if (!self.config.conceptualModel.fromJSONSchema) {
     self.config.conceptualModel.fromJSONSchema = function () { console.warn("CrowdEditor conceptual model fromJSONSchema is not defined."); }
+  }
+  if (self.config.reasoningApi && !self.config.conceptualModel.fromReasoning) {
+    self.config.conceptualModel.fromReasoning = function () { console.warn("CrowdEditor conceptual model fromReasoning is not defined and the Reasoning API is active."); }
   }
 
   $("#" + this.config.selector).html('');
@@ -64,6 +73,8 @@ CrowdEditor.prototype.init = function () {
   self.initInspector();
   self.initTools();
   self.initMap();
+  self.initSyntaxValidator();
+  self.initReasoningValidator();
 
   //fit and center the paper for first time
   self.workspace.fitPaper();
@@ -312,7 +323,9 @@ CrowdEditor.prototype.initTools = function () {
   self.tools.viewScrollbar = {};
   self.tools.collapseClasses = {};
 
+  self.tools.tools = {};
   self.tools.reasoning = {};
+  self.tools.clearReasoning = {};
 
   self.tools.zoom = {};
   self.tools.gridSize = {};
@@ -352,11 +365,11 @@ CrowdEditor.prototype.initTools = function () {
           self.tools.export.exportTo({
             model: 'kf',
             //try to export to meta
-            callback: function (metaSchema) {
+            success: function (metaSchema) {
               self.config.actualFile.meta = metaSchema;
             },
             //finally do the callback with or without the meta
-            callbackFinally: function (data) {
+            finally: function (data) {
               //   alert('Metamodel cannot be generated due an translate error, this means that your diagram can\'t be translated to another conceptual model.');
               callback(self.config.actualFile, data.statusText == 'error' ? data : null);
             },
@@ -372,11 +385,11 @@ CrowdEditor.prototype.initTools = function () {
           self.tools.export.exportTo({
             model: 'kf',
             //try to export to meta
-            callback: function (metaSchema) {
+            success: function (metaSchema) {
               newFile.meta = metaSchema;
             },
             //finally do the callback with or without the meta
-            callbackFinally: function (data) {
+            finally: function (data) {
               //   alert('Metamodel cannot be generated due an translate error, this means that your diagram can\'t be translated to another conceptual model.');
               callback(newFile, data.statusText == 'error' ? data : null);
             },
@@ -658,10 +671,10 @@ CrowdEditor.prototype.initTools = function () {
     self.tools.export.init = function () {
       //define function to convert the actual model json schema to another model using the metamodelApi
       //in case the parameter model was equal to the actual model it exports json without using metamodelApi
-      self.tools.export.exportTo = function (config) {
-        if (self.config.conceptualModel.name == self.config.availableConceptualModels[config.model].name) {
-          if (config.callback) config.callback(self.config.conceptualModel.toJSONSchema(self));
-          if (config.callbackFinally) config.callbackFinally(self.config.conceptualModel.toJSONSchema(self));
+      self.tools.export.exportTo = function (options) {
+        if (self.config.conceptualModel.name == self.config.availableConceptualModels[options?.model].name) {
+          if (options?.success) options.success(self.config.conceptualModel.toJSONSchema(self));
+          if (options?.finally) options.finally(self.config.conceptualModel.toJSONSchema(self));
         }
         else {
           self.config.metamodelApi.request({
@@ -669,29 +682,29 @@ CrowdEditor.prototype.initTools = function () {
             to: 'kf',
             data: self.config.conceptualModel.toJSONSchema(self),
             success: function (response) {
-              if (self.config.availableConceptualModels[config.model].name != 'kf') {
+              if (self.config.availableConceptualModels[options?.model].name != 'kf') {
                 self.config.metamodelApi.request({
                   from: 'kf',
-                  to: self.config.availableConceptualModels[config.model].name,
+                  to: self.config.availableConceptualModels[options?.model].name,
                   data: response,
                   success: function (response) {
-                    if (config.callback) config.callback(response);
-                    if (config.callbackFinally) config.callbackFinally(response);
+                    if (options?.success) options.success(response);
+                    if (options?.finally) options.finally(response);
                   },
                   error: function (error) {
-                    if (config.callbackFinally) config.callbackFinally(error);
+                    if (options?.finally) options.finally(error);
                   },
-                  hideError: config.hideError
+                  hideError: options?.hideError
                 });
               } else {
-                if (config.callback) config.callback(response);
-                if (config.callbackFinally) config.callbackFinally(response);
+                if (options?.success) options.success(response);
+                if (options?.finally) options.finally(response);
               }
             },
             error: function (error) {
-              if (config.callbackFinally) config.callbackFinally(error);
+              if (options?.finally) options.finally(error);
             },
-            hideError: config.hideError
+            hideError: options?.hideError
           });
         }
       }
@@ -766,13 +779,13 @@ CrowdEditor.prototype.initTools = function () {
 
         self.tools.export.exportTo({
           model: model,
-          callback: function (schema) {
+          success: function (schema) {
             $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export ' + model.toUpperCase() + ' Schema');
             $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(schema, null, 4));
             $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
             // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
           },
-          callbackFinally: function () {
+          finally: function () {
             $(btn).html(originalBtn);
             $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
           }
@@ -789,7 +802,7 @@ CrowdEditor.prototype.initTools = function () {
 
         self.tools.export.exportTo({
           model: model,
-          callback: function (schema) {
+          success: function (schema) {
             $("<a />", {
               "download": model + "-schema.json",
               "href": "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(schema, null, 4)),
@@ -1213,11 +1226,11 @@ CrowdEditor.prototype.initTools = function () {
 
         self.tools.export.exportTo({
           model: model,
-          callback: function (schema) {
+          success: function (schema) {
             schema.hasPositions = false;
             self.tools.import.importFrom({ model: model, schema: schema, file: self.config.actualFile });
           },
-          callbackFinally: function () {
+          finally: function () {
             $(btn).html(originalBtn);
             $('[aria-labelledby="crowd-tools-translate-dropdown-' + self.id + '"]').dropdown('hide');
           }
@@ -1391,7 +1404,7 @@ CrowdEditor.prototype.initTools = function () {
     }
     self.tools.collapseClasses.init();
 
-    //activate bootstrap nested dropdowns for edit tools
+    //activate bootstrap nested dropdowns for view tools
     $('#crowd-tools-view-btn-' + self.id).bootnavbar({});
 
     //blur on hide
@@ -1401,25 +1414,180 @@ CrowdEditor.prototype.initTools = function () {
   }
   self.tools.view.init();
 
-  //reasoning tool
-  self.tools.reasoning.init = function () {
-    //append dom for reasoning tool
-    $('#crowd-tools-row-' + self.id).append(
-      '<div class="form-group"> \
-      <button class="btn btn-warning iconify" id="crowd-tools-reasoning-input-' + self.id + '" type="button" \
-      data-toggle="tooltip" data-original-title="Call Reasoner" data-placement="bottom"> \
-      <i class="fa fa-flask"></i> Reasoning</button> \
-    </div>'
+  //tools tools
+  self.tools.tools.init = function () {
+    //append edit dropdown for all tools related tools
+    $('#crowd-tools-menu-' + self.id).append(
+      '<div class="btn-group dropdown" id="crowd-tools-tools-btn-' + self.id + '"> \
+        <button class="btn btn-dark dropdown-toggle" type="button" id="crowd-tools-tools-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+          <i class="fa fa-fw fa-wrench"></i> Tools \
+        </button> \
+        <ul class="dropdown-menu" aria-labelledby="crowd-tools-tools-dropdown-' + self.id + '"></ul> \
+      </div>'
     );
 
-    //event handler when click reasoning
-    $('#crowd-tools-reasoning-input-' + self.id).on('click', function () {
-      //to do
-      $(".tooltip").tooltip('hide');
-      $(this).blur();
+    //reasoning tool
+    self.tools.reasoning.init = function () {
+      //call the reasoning with the actual diagram transalted to meta
+      self.tools.reasoning.callReasoning = function (options) {
+        self.tools.export.exportTo({
+          model: 'kf',
+          success: function (schema) {
+            console.log('success meta', schema);
+            self.config.reasoningApi.request({
+              kf: schema,
+              reasoner: options?.reasoner,
+              success: (res) => {
+                if (options?.success) options?.success({ reasoning: res })
+                // self.config.metamodelApi.request({
+                //   from: 'kf',
+                //   to: self.config.conceptualModel.name,
+                //   data: res.KF,
+                //   success: (schema) => { if (options?.success) options?.success({ schema: schema, reasoning: res }) },
+                //   error: (error) => { if (options?.error) options?.error(error) }
+                // });
+              },
+              error: (error) => { if (options?.error) options?.error(error) }
+            });
+          }
+        });
+      };
+
+      //append dom for reasoning tool and clear reasoning tool
+      $('[aria-labelledby="crowd-tools-tools-dropdown-' + self.id + '"]').append(
+        '<li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" title="Call Reasoner"> \
+            <button class="dropdown-item" id="crowd-tools-reasoning-input-' + self.id + '"> \
+            <i class="fa fa-fw fa-flask"></i> Reasoning</button> \
+          </span> \
+        </li>'
+      );
+      // $('#crowd-tools-row-' + self.id).append(
+      //   '<div class="form-group"> \
+      //     <button class="btn btn-warning iconify" id="crowd-tools-reasoning-input-' + self.id + '" type="button" \
+      //     data-toggle="tooltip" data-original-title="Call Reasoner" data-placement="bottom"> \
+      //     <i class="fa fa-flask"></i> Reasoning</button> \
+      //   </div>'
+      // );
+
+      //append dom for modal to set reasoning options before call reasoning api
+      $('body').append(
+        '<div id="crowd-tools-reasoning-options-modal-' + self.id + '" class="modal fade"> \
+          <div class="modal-dialog modal-dialog-scrollable modal-sm"> \
+            <div class="modal-content"> \
+              <div class="modal-header"> \
+                <h5 class="modal-title"><i class="fa fa-fw fa-flask"></i> Reasoning</h5> \
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+                  <span aria-hidden="true">&times;</span> \
+                </button> \
+              </div> \
+              <div class="modal-body"> \
+                <div class="form-group"> \
+                  <label for="">Reasoner</label> \
+                  <select class="form-control custom-select my-1 mr-sm-2" id="crowd-tools-reasoning-options-reasoner-' + self.id + '"> \
+                    <option>Racer</option> \
+                  </select> \
+                </div> \
+              </div> \
+              <div class="modal-footer"> \
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
+                <button class="btn btn-warning" data-model="" id="crowd-tools-reasoning-call-' + self.id + '">Call Reasoner</button> \
+              </div> \
+            </div> \
+          </div> \
+        </div>'
+      );
+
+      //event handler when click reasoning to open reasoning options
+      $('#crowd-tools-reasoning-input-' + self.id).on('click', function () {
+        $('#crowd-tools-reasoning-options-modal-' + self.id).modal('show');
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+
+      //event handler when click call reasoner
+      $('#crowd-tools-reasoning-call-' + self.id).on('click', function () {
+        self.tools.reasoning.callReasoning({
+          reasoner: $('#crowd-tools-reasoning-options-reasoner-' + self.id + ' option:selected').val(),
+          success: function (response) {
+            //call reasoning interpretation for the specific conceptual model
+            self.fromReasoning(response.reasoning);
+
+            $('#crowd-tools-reasoning-options-modal-' + self.id).modal('hide');
+
+            // response.reasoning.KF.hasPositions = false;
+            // self.tools.import.importFrom({ model: 'kf', schema: response.reasoning.KF, file: self.config.actualFile });
+          }
+        })
+      });
+    }
+    self.tools.reasoning.init();
+
+    //clear reasoning tool
+    self.tools.clearReasoning.init = function () {
+      //append dom for clear reasoning tool
+      $('[aria-labelledby="crowd-tools-tools-dropdown-' + self.id + '"]').append(
+        '<li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" title="Clear Reasoning Marks"> \
+            <button class="dropdown-item" style="color: #dc3545;" id="crowd-tools-clear-reasoning-input-' + self.id + '"> \
+            <i class="fa fa-fw fa-eraser"></i> Clear Reasoning</button> \
+          </span> \
+        </li>'
+      );
+
+      //append dom for the advertisement modal when try clear reasoning
+      $('body').append(
+        '<div id="crowd-tools-clear-reasoning-advertisement-' + self.id + '" class="modal fade"> \
+          <div class="modal-dialog"> \
+            <div class="modal-content"> \
+              <div class="modal-header"> \
+                <h5 class="modal-title"><i class="fa fa-fw fa-eraser"></i> Clear Reasoning</h5> \
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+                  <span aria-hidden="true">&times;</span> \
+                </button> \
+              </div> \
+              <div class="modal-body"> \
+                <p>Are you sure want to clear the reasoning marks?</p> \
+                <p><b>This action cannot be reverted</b></p> \
+              </div> \
+              <div class="modal-footer"> \
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
+                <button id="crowd-tools-clear-reasoning-advertisement-proceed-' + self.id + '" \
+                type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
+              </div> \
+            </div> \
+          </div> \
+        </div>'
+      );
+
+      //event handler when click clear reasoning that open advertisement modal
+      $('#crowd-tools-clear-reasoning-input-' + self.id).on('click', function () {
+        if (self.hasChanges()) {
+          $('#crowd-tools-clear-reasoning-advertisement-' + self.id).modal('show');
+        }
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+
+      //event handler when click proceed button in advertisement for clear reasoning
+      $('#crowd-tools-clear-reasoning-advertisement-proceed-' + self.id).on('click', function () {
+        self.reasoning.clearMark();
+
+        $(".tooltip").tooltip('hide');
+      });
+    }
+    self.tools.clearReasoning.init();
+
+    //activate bootstrap nested dropdowns for tools tools
+    $('#crowd-tools-tools-btn-' + self.id).bootnavbar({});
+
+    //blur on hide
+    $('#crowd-tools-tools-btn-' + self.id).on('hide.bs.dropdown', function () {
+      $('#crowd-tools-tools-dropdown-' + self.id).blur();
     });
   }
-  self.tools.reasoning.init();
+  self.tools.tools.init();
 
   //zoom tool
   self.tools.zoom.init = function () {
@@ -2043,6 +2211,7 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         console.log('resizeTool', this, { evt, elementView, buttonView });
 
         config.minSize = config.minSize ? config.minSize : { width: 20, height: 20 };
+        config.maxSize = config.maxSize ? config.maxSize : { width: 500, height: 500 };
         config.direction = config.direction ? config.direction : 'top-left';
 
         $('#crowd-workspace-' + self.id).on('mousemove.resizing', function (evt) {
@@ -2078,16 +2247,22 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
 
           //create object for the newSize and check if new width and height are bigger than min sizes individually
           var newSize = { width: elementView.model.size().width, height: elementView.model.size().height };
-          newSize.width = newSize.width + addSize.width > config.minSize.width ? newSize.width + addSize.width : newSize.width;
-          newSize.height = newSize.height + addSize.height > config.minSize.height ? newSize.height + addSize.height : newSize.height;
+          newSize.width = newSize.width + addSize.width > config.minSize.width
+            && newSize.width + addSize.width < config.maxSize.width
+            ? newSize.width + addSize.width : newSize.width;
+          newSize.height = newSize.height + addSize.height > config.minSize.height
+            && newSize.height + addSize.height < config.maxSize.height
+            ? newSize.height + addSize.height : newSize.height;
 
           //restrict new size to a multiple of grid size to simulate snap to grid effect
           if (config.snapGrid || config.snapGrid == null) {
             // var gridSize = self.workspace.paper.options.gridSize / self.workspace.paper.scale().sx;
             var gridSize = self.workspace.paper.options.gridSize;
             newSize.width = Math.round(newSize.width / gridSize) * gridSize > config.minSize.width
+              && Math.round(newSize.width / gridSize) * gridSize < config.maxSize.width
               ? Math.round(newSize.width / gridSize) * gridSize : newSize.width;
             newSize.height = Math.round(newSize.height / gridSize) * gridSize > config.minSize.height
+              && Math.round(newSize.height / gridSize) * gridSize < config.maxSize.height
               ? Math.round(newSize.height / gridSize) * gridSize : newSize.height;
           }
 
@@ -2280,13 +2455,18 @@ CrowdEditor.prototype.initInspector = function () {
         dom = $('<span class="row"> \
           <div class="col"> \
             <div class="form-group"> \
-              ' + (attribute.label ? '<label>' + attribute.label + '</label>' : '') + '\
+              ' + (attribute.label ? '<label>' + attribute.label + '</label>' : '') + ' \
               <' + (attribute.input == 'textarea' ? 'textarea rows="' + (attribute.inputRows ? attribute.inputRows : 3) + '"' : 'input type="text"') + ' \
               placeholder="' + (attribute.placeholder ? attribute.placeholder : attribute.label) + '" \
               class="form-control" id="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '" /> \
             </div> \
           </div> \
         </span>');
+        break;
+      case 'alert':
+        dom = $((attribute.label ? '<label>' + attribute.label + '</label>' : '') + ' \
+          <div class="alert alert-' + (attribute.color ? attribute.color : 'dark') + '" role="alert" \
+          id="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '"></div>');
         break;
       case 'object':
         dom = $('<span class="row"> \
@@ -2402,6 +2582,14 @@ CrowdEditor.prototype.initInspector = function () {
         break;
       case 'text': default:
         $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id).val(propertyValue);
+        break;
+      case 'alert':
+        if (propertyValue.title && propertyValue.contents) {
+          propertyValue =
+            '<b>' + propertyValue.title + '</b><br>' +
+            '<ul><li>' + propertyValue.contents.map(function (content) { return content.text ? content.text : (content.value ? content.value : content) }).join('</li><li>') + '</li>';
+        }
+        $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id).html(propertyValue);
         break;
       case 'object':
         attribute.parameters.forEach(function (parameter) {
@@ -2664,6 +2852,85 @@ CrowdEditor.prototype.fromJSONSchema = function (schema) {
   //hide tools
   self.workspace.linkClickedFlag = false;
   self.workspace.paper.hideTools();
+}
+
+CrowdEditor.prototype.initSyntaxValidator = function () {
+  var self = this;
+
+  //initialize syntax validator objects
+  self.syntax = {};
+  self.syntax.validate = {};
+
+  //call initialization of syntax validator for the specific conceptual model
+  self.config.conceptualModel.initSyntaxValidator(self);
+}
+
+CrowdEditor.prototype.initReasoningValidator = function () {
+  var self = this;
+
+  self.reasoning = {}
+
+  //clear semantic attribute of all cells
+  self.reasoning.clearMark = function () {
+    self.workspace.graph.getCells().forEach(function (cell) {
+      cell.prop('semantic', { title: 'Semantic Deductions', contents: [] });
+    });
+  };
+
+  //generic method for put semantic attributes on cells with a resoner response
+  self.reasoning.genericMark = function (reasoning) {
+    //call clear reasoning marks
+    self.reasoning.clearMark();
+
+    //mark all unsatisfiable cells with the reasoning response
+    var unsatCells = reasoning['KF output']['UNSATisfiable Entity types'].concat(reasoning['KF output']['UNSATisfiable Roles']);
+    unsatCells.forEach(function (uri) {
+      var cell = self.workspace.graph.getCells().find(function (cell) {
+        return cell.prop('uri') == uri;
+      });
+
+      cell?.prop('semantic/contents/' + cell.prop('semantic/contents').length, { value: 'unsatisfiable', text: '<span class="crowd-unsat-color"><b>Unsatisfiable</b></span>' });
+    });
+
+    //message to show for each owl axiom
+    var owlAxiomsMessagesMap = {
+      'Disjoint Class Axioms': 'Disjoint with',
+      'Disjoint DataProperty Axioms': 'Disjoint with',
+      'Disjoint ObjectProperty Axioms': 'Disjoint with',
+      'Equivalent Class Axioms': 'Equivalent with',
+      'Equivalent DataProperty Axioms': 'Equivalent with',
+      'Equivalent ObjectProperty Axioms': 'Equivalent with',
+    };
+
+    //mark all owl axioms on the cells with the reasoning response
+    $.each(reasoning['OWL Axioms'], function (axiom, axiomPairs) {
+      axiomPairs.forEach(function (uris) {
+        var cells = [];
+        cells[0] = self.workspace.graph.getCells().find(function (cell) {
+          return cell.prop('uri') == uris[0];
+        });
+        cells[1] = self.workspace.graph.getCells().find(function (cell) {
+          return cell.prop('uri') == uris[1];
+        });
+
+        if (cells[0] && cells[1]) {
+          cells[0]?.prop('semantic/contents/' + cells[0]?.prop('semantic/contents').length, owlAxiomsMessagesMap[axiom] + ' <b>' + fromURI(uris[1]) + '</b>');
+          cells[1]?.prop('semantic/contents/' + cells[1]?.prop('semantic/contents').length, owlAxiomsMessagesMap[axiom] + ' <b>' + fromURI(uris[0]) + '</b>');
+        }
+      });
+    });
+  };
+
+  //call initialization of reasoning validator for the specific conceptual model
+  self.config.conceptualModel.initReasoningValidator(self);
+}
+
+CrowdEditor.prototype.fromReasoning = function (reasoning) {
+  var self = this;
+
+  //call the function to do the semantic marks with the resoner response for the specific conceptual model
+  //it can do use of generic mark function
+  self.config.conceptualModel.fromReasoning(self, reasoning);
 }
 
 CrowdEditor.prototype.toBase64 = function (callback) {

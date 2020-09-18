@@ -108,12 +108,11 @@ $alt-accent: #262a2e;
 }
 
 .crowd-tools-actual-file-container {
-  position: sticky;
+  position: absolute;
   left: 0;
-  top: 0;
+  bottom: 0;
   z-index: 1;
   padding: 11px;
-  float: left;
 }
 
 .crowd-tools-actual-file-label {
@@ -129,12 +128,31 @@ $alt-accent: #262a2e;
   width: 100%;
   height: 100%;
   user-select: none;
-  overflow: hidden;
+  overflow: scroll;
   // z-index: 1; //fix tools dropdown menu bug
 }
 
 .crowd-workspace:active {
   cursor: grabbing;
+}
+
+/* custom scrollbar for workspace */
+.crowd-workspace::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.crowd-workspace::-webkit-scrollbar-track {
+  background: #eeeeee;
+}
+
+.crowd-workspace::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 10px;
+}
+
+.crowd-workspace::-webkit-scrollbar-thumb:hover {
+  background: #7a7a7a;
 }
 
 .crowd-workspace-scrollable {
@@ -201,6 +219,25 @@ $alt-accent: #262a2e;
   flex: 1 1 auto;
 }
 
+/* custom scrollbar for inspector */
+.crowd-inspector-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.crowd-inspector-content::-webkit-scrollbar-track {
+  background: #212529;
+}
+
+.crowd-inspector-content::-webkit-scrollbar-thumb {
+  background: #1b1b1b;
+  border-radius: 10px;
+}
+
+.crowd-inspector-content::-webkit-scrollbar-thumb:hover {
+  background: #181818;
+}
+
 .crowd-inspector .crowd-inspector-content .btn {
   height: 37px !important;
   padding: 6px 4px !important;
@@ -224,11 +261,19 @@ $alt-accent: #262a2e;
   padding-left: 12px;
 }
 
-.crowd-inspector-content .form-group > .row {
+.crowd-inspector .crowd-inspector-content .form-group > .row {
   border-left: 5px rgba(0, 0, 0, 0.2) solid;
   padding: 5px 10px 0px 5px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 0px 5px 5px 0px;
+}
+
+.crowd-inspector .crowd-inspector-content .alert {
+  word-break: break-word;
+}
+
+.crowd-inspector .crowd-inspector-content .alert ul {
+  margin-bottom: 0px !important;
 }
 
 .crowd-map {
@@ -411,6 +456,10 @@ $alt-accent: #262a2e;
 
 .crowd-interface-alt-color {
   color: rgba(78, 52, 46, 1);
+}
+
+.crowd-unsat-color {
+  color: rgba(242, 120, 57, 1);
 }
 
 .tooltip {

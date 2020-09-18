@@ -7,6 +7,10 @@ import setMongo from './mongo';
 import setRoutes from './routes';
 
 const app = express();
+
+const cors = require('cors');
+app.use(cors()); //use cors
+
 dotenv.config();
 app.set('port', (process.env.PORT || 3000));
 app.use('/', express.static(path.join(__dirname, '../public')));
@@ -24,7 +28,9 @@ async function main(): Promise<any> {
       res.sendFile(path.join(__dirname, '../public/index.html'));
     });
     if (!module.parent) {
-      app.listen(app.get('port'), () => console.log(`crowd server listening on port ${app.get('port')}`));
+      app.listen(app.get('port'), () => {
+        console.log(`crowd server listening on port ${app.get('port')}`, `(CORS-enabled)`);
+      });
     }
   } catch (err) {
     console.error(err);

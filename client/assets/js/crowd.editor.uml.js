@@ -464,7 +464,7 @@ var CrowdEditorUml = {
           background: crowd.palette.colors.inheritance,
           tooltip: {
             title: 'Click and drag to make a <b class="crowd-inheritance-color">inheritance</b> and connect with it',
-            placement: "left"
+            placement: "bottom"
           }
         }),
         link: {
@@ -584,10 +584,13 @@ var CrowdEditorUml = {
         element.attributes.name = fromURI(newUri);
         $('#crowd-inspector-content--name--' + crowd.id).val(fromURI(newUri));
         element.trigger('change:name', element, element.prop('name'));
+        if (element.attributes.parentType == 'class') classFitToContent(element);
       }
     });
 
     var classFitToContent = function (element) {
+      console.log('classFitToContent', element);
+
       //get element view
       var elementView = element.findView(crowd.workspace.paper);
 
@@ -711,7 +714,6 @@ var CrowdEditorUml = {
         // element.prop('attrs/.uml-class-methods-rect/height', 0);
       }
     });
-
 
     //event when the links type change (types are: association, aggregation, composition, etc)
     crowd.workspace.graph.on('change:type', function (link, newType) {
@@ -868,6 +870,29 @@ var CrowdEditorUml = {
         // link.trigger('change:inheritChild', link, link.prop('inheritChild'));
       }
     });
+
+    //mark or unmark the element or link when the semantic property changed
+    crowd.workspace.graph.on('change:semantic', function (cell, newSemantic) {
+      // console.log('change:semantic', { cell, newSemantic });
+      var unsatisfiable = newSemantic?.contents?.find(function (content) { return content.value == 'unsatisfiable' });
+      var color = getCSS('color', 'crowd-unsat-color');
+      var strokeWidth = 2;
+      if (cell.isElement()) {
+        color = unsatisfiable != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke');
+        strokeWidth = unsatisfiable != null ? strokeWidth : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke-width');
+        cell.attr('.uml-class-name-rect/stroke', color);
+        cell.attr('.uml-class-name-rect/stroke-width', strokeWidth);
+        cell.attr('.uml-class-attrs-rect/stroke', color);
+        cell.attr('.uml-class-attrs-rect/stroke-width', strokeWidth);
+        cell.attr('.uml-class-methods-rect/stroke', color);
+        cell.attr('.uml-class-methods-rect/stroke-width', strokeWidth);
+      } else if (cell.isLink()) {
+        color = unsatisfiable != null ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
+        cell.attr('line/stroke', color);
+      }
+
+      crowd.inspector.loadContent();
+    });
   },
   initInspector: function (crowd) {
     //add uri attribute to content for all types
@@ -1020,6 +1045,14 @@ var CrowdEditorUml = {
         crowd.inspector.addAttribute({ label: 'Covering?', property: 'covering', type: 'boolean', map: { true: true, false: false } });
         break;
     }
+
+    //add the syntax alert message when there's a syntax error
+    if (crowd.inspector.model.attributes.syntax && crowd.inspector.model.attributes.syntax != '')
+      crowd.inspector.addAttribute({ property: 'syntax', type: 'alert', color: 'danger' });
+
+    //add the semantic alert message when there's a semantic error
+    if (crowd.inspector.model.attributes.semantic && crowd.inspector.model.attributes.semantic.contents?.length)
+      crowd.inspector.addAttribute({ property: 'semantic', type: 'alert', color: 'warning' });
   },
   toJSONSchema: function (crowd) {
     //define basic structure of uml json according to schema
@@ -1250,4 +1283,14 @@ var CrowdEditorUml = {
 
     }
   },
+  initSyntaxValidator: function (crowd) {
+    //todo
+  },
+  initReasoningValidator: function (crowd) {
+    //todo
+  },
+  fromReasoning: function (crowd, reasoning) {
+    //use generic semantic mark of the editor
+    crowd.reasoning.genericMark(reasoning);
+  }
 }
