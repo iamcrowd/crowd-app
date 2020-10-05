@@ -875,16 +875,17 @@ var CrowdEditorEer = {
     crowd.workspace.graph.on('change:semantic', function (cell, newSemantic) {
       // console.log('change:semantic', { cell, newSemantic });
       var unsatisfiable = newSemantic?.contents?.find(function (content) { return content.value == 'unsatisfiable' });
-      var color = getCSS('color', 'crowd-unsat-color');
+      var inferred = newSemantic?.contents?.find(function (content) { return content.value == 'inferred' });
+      var color = unsatisfiable != null ? getCSS('color', 'crowd-unsat-color') : getCSS('color', 'crowd-inferred-color');
       if (cell.isElement()) {
-        color = unsatisfiable != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke');
+        color = unsatisfiable != null || inferred != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke');
         cell.attr('.outer/stroke', color);
       } else if (cell.isLink()) {
         if (!cell?.attributes?.total) {
-          color = unsatisfiable != null ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
+          color = unsatisfiable != null || inferred != null ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
           cell.attr('line/stroke', color);
         } else {
-          color = unsatisfiable != null ? color : crowd.palette.links.total.attr('outline/stroke');
+          color = unsatisfiable != null || inferred != null ? color : crowd.palette.links.total.attr('outline/stroke');
           cell.attr('outline/stroke', color);
         }
       }
@@ -1298,6 +1299,9 @@ var CrowdEditorEer = {
                         if (constraint == 'exclusive') inheritancesObj[inheritanceName].prop('subtype', 'disjoint');
                       });
                       break;
+                    case 'name':
+                      inheritancesObj[inheritanceName].prop('uri', value)
+                      break;
                     case 'position': case 'size': case 'uri':
                       inheritancesObj[inheritanceName].prop(attribute, value)
                       break;
@@ -1500,8 +1504,13 @@ var CrowdEditorEer = {
   initReasoningValidator: function (crowd) {
     //todo
   },
-  fromReasoning: function (crowd, reasoning) {
-    //use generic semantic mark of the editor
-    crowd.reasoning.genericMark(reasoning);
+  fromReasoning: function (crowd, schema, reasoning) {
+    //use generic semantic import and mark of the editor
+    //this is called after the reasoned schema is finished imported to the editor
+    //once the event is triggered it was cleared
+    crowd.events.onAfterFromSchema.push(function () {
+      crowd.reasoning.genericMark(reasoning);
+    });
+    crowd.reasoning.importPositionedSchema(schema);
   }
 }

@@ -148,6 +148,7 @@ var CrowdEditorUml = {
 
     //add joint uml association to palette links
     crowd.palette.links.association = new joint.shapes.standard.Link({
+      parentType: 'association',
       type: 'association',
       cardinality: {
         source: null,
@@ -173,6 +174,7 @@ var CrowdEditorUml = {
 
     //add joint uml aggregation to palette links
     crowd.palette.links.aggregation = new joint.shapes.standard.Link({
+      parentType: 'aggregation',
       type: 'aggregation',
       cardinality: {
         source: null,
@@ -199,6 +201,7 @@ var CrowdEditorUml = {
 
     //add joint uml composition to palette links
     crowd.palette.links.composition = new joint.shapes.standard.Link({
+      parentType: 'composition',
       type: 'composition',
       cardinality: {
         source: null,
@@ -225,6 +228,7 @@ var CrowdEditorUml = {
 
     //add joint uml generalization to palette links
     crowd.palette.links.generalization = new joint.shapes.standard.Link({
+      parentType: 'generalization',
       type: 'generalization',
       cardinality: {
         source: null,
@@ -252,6 +256,7 @@ var CrowdEditorUml = {
 
     //add joint uml generalization to palette links
     crowd.palette.links.implementation = new joint.shapes.standard.Link({
+      parentType: 'implementation',
       type: 'implementation',
       cardinality: {
         source: null,
@@ -539,7 +544,62 @@ var CrowdEditorUml = {
     });
   },
   initLinksToolsViews: function (crowd) {
-    //no extra links tools
+    //definition of role inheritance tool for links
+    var linkGeneralizationTool = function () {
+      return crowd.workspace.tools.links.linkTool({
+        link: {
+          type: 'generalization',
+          props: {
+            direction: 'target',
+            inheritChild: false
+          }
+        },
+        markup: crowd.workspace.tools.elements.markup({
+          icon: 'call_merge',
+          tooltip: {
+            title: 'Click and drag to connect the link with a <b class="crowd-bold-color">generalization</b> parent',
+            placement: "top"
+          },
+          attributes: {
+            circle: { cy: 0, opacity: 1 },
+            text: { x: -7, y: 7 }
+          }
+        })
+      })
+    };
+
+    //define tools view for association
+    crowd.workspace.tools.links.linksToolsView['association'] = function () {
+      return new joint.dia.ToolsView({
+        name: 'link-association-tools',
+        tools: [
+          ...crowd.workspace.tools.links.basic(),
+          ...[linkGeneralizationTool()]
+        ]
+      });
+    }
+
+    //define tools view for aggregation
+    crowd.workspace.tools.links.linksToolsView['aggregation'] = function () {
+      return new joint.dia.ToolsView({
+        name: 'link-aggregation-tools',
+        tools: [
+          ...crowd.workspace.tools.links.basic(),
+          ...[linkGeneralizationTool()]
+        ]
+      });
+    }
+
+    //define tools view for composition
+    crowd.workspace.tools.links.linksToolsView['composition'] = function () {
+      return new joint.dia.ToolsView({
+        name: 'link-composition-tools',
+        tools: [
+          ...crowd.workspace.tools.links.basic(),
+          ...[linkGeneralizationTool()]
+        ]
+      });
+    }
   },
   initChangeAttributesEvents: function (crowd) {
     //event when the elements type change (types are: entity, weakEntity, attribute, etc)
@@ -589,23 +649,23 @@ var CrowdEditorUml = {
     });
 
     var classFitToContent = function (element) {
-      console.log('classFitToContent', element);
+      // console.log('classFitToContent', element);
 
       //get element view
       var elementView = element.findView(crowd.workspace.paper);
 
-      element.size({ width: 70, height: 60 });
+      element.size({ width: 90, height: 90 });
       setTimeout(function () {
-        for (var i = 0; i < 10; i++) {
-          var bbox = elementView.getBBox();
-          element.size(bbox);
-        }
+        // for (var i = 0; i < 10; i++) {
+        // var bbox = elementView.getBBox();
+        // element.size(bbox);
+        // }
 
-        var actualSize = element.size();
-        actualSize.width += 20;
-        actualSize.height += 40;
+        // var actualSize = element.size();
+        // actualSize.width += 20;
+        // actualSize.height += 40;
 
-        element.size(actualSize);
+        // element.size(actualSize);
 
         //redraw the element and their tools with the new type style
         elementView.render();
@@ -875,11 +935,12 @@ var CrowdEditorUml = {
     crowd.workspace.graph.on('change:semantic', function (cell, newSemantic) {
       // console.log('change:semantic', { cell, newSemantic });
       var unsatisfiable = newSemantic?.contents?.find(function (content) { return content.value == 'unsatisfiable' });
-      var color = getCSS('color', 'crowd-unsat-color');
+      var inferred = newSemantic?.contents?.find(function (content) { return content.value == 'inferred' });
+      var color = unsatisfiable != null ? getCSS('color', 'crowd-unsat-color') : getCSS('color', 'crowd-inferred-color');
       var strokeWidth = 2;
       if (cell.isElement()) {
-        color = unsatisfiable != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke');
-        strokeWidth = unsatisfiable != null ? strokeWidth : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke-width');
+        color = unsatisfiable != null || inferred != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke');
+        strokeWidth = unsatisfiable != null || inferred != null ? strokeWidth : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke-width');
         cell.attr('.uml-class-name-rect/stroke', color);
         cell.attr('.uml-class-name-rect/stroke-width', strokeWidth);
         cell.attr('.uml-class-attrs-rect/stroke', color);
@@ -887,7 +948,7 @@ var CrowdEditorUml = {
         cell.attr('.uml-class-methods-rect/stroke', color);
         cell.attr('.uml-class-methods-rect/stroke-width', strokeWidth);
       } else if (cell.isLink()) {
-        color = unsatisfiable != null ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
+        color = unsatisfiable != null || inferred != null ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
         cell.attr('line/stroke', color);
       }
 
@@ -1071,34 +1132,40 @@ var CrowdEditorUml = {
     }
 
     //iterates each element and add it to the correspondent collection
-    crowd.workspace.graph.getElements().forEach(function (element) {
-      switch (element.attributes.parentType) {
-        case 'class':
-          jsonSchema.classes.push({
-            uri: element.attributes.uri,
-            name: element.attributes.uri,
-            attrs: element.attributes.properties.attributes,
-            methods: element.attributes.properties.methods,
-            position: element.attributes.position,
-            size: element.attributes.size
-          });
+    crowd.workspace.graph.getCells().forEach(function (cell) {
+      switch (cell.attributes.parentType) {
+        case 'class': case 'association': case 'aggregation': case 'composition':
+          if (cell.isElement()) {
+            jsonSchema.classes.push({
+              uri: cell.attributes.uri,
+              name: cell.attributes.uri,
+              attrs: cell.attributes.properties.attributes,
+              methods: cell.attributes.properties.methods,
+              position: cell.attributes.position,
+              size: cell.attributes.size
+            });
+          }
 
           //search for links connected to the class for add them to the links collection
-          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+          crowd.workspace.graph.getConnectedLinks(cell).forEach(function (link) {
             var connectedClass;
-            if (link.attributes.direction && link.attributes[link.attributes.direction].id != element.id) {
-              connectedClass = link.attributes.direction == 'source' ? link.getSourceElement() : link.getTargetElement();
-            } else if (!link.attributes.direction && link.attributes.target.id != element.id) {
-              connectedClass = link.getTargetElement();
+            if (link.attributes.direction && link.attributes[link.attributes.direction].id != cell.id) {
+              connectedClass = link.attributes.direction == 'source' ? link.getSourceCell() : link.getTargetCell();
+            } else if (!link.attributes.direction && link.attributes.target.id != cell.id) {
+              connectedClass = link.getTargetCell();
             }
 
-            if (connectedClass && connectedClass?.attributes?.parentType == 'class') {
+            if (connectedClass &&
+              (connectedClass?.attributes?.parentType == 'class'
+                || connectedClass?.attributes?.parentType == 'association'
+                || connectedClass?.attributes?.parentType == 'aggregation'
+                || connectedClass?.attributes?.parentType == 'composition')) {
               jsonSchema.links.push({
                 ...linkTypeMap[link.attributes.type] != 'generalization' ? { uri: link.attributes.uri } : {},
                 name: link.attributes.uri,
                 ...linkTypeMap[link.attributes.type] == 'generalization' ? { parent: connectedClass.attributes.uri } : {},
                 classes: [
-                  element.attributes.uri,
+                  cell.attributes.uri,
                   ...linkTypeMap[link.attributes.type] != 'generalization' ? [connectedClass.attributes.uri] : []
                 ],
                 type: linkTypeMap[link.attributes.type],
@@ -1111,8 +1178,8 @@ var CrowdEditorUml = {
                 ...linkTypeMap[link.attributes.type] != 'generalization' ? {
                   roles: [
                     link.attributes.direction && link.attributes.direction == 'source'
-                      ? (link.attributes.roles.target ? link.attributes.roles.target : element.attributes.uri)
-                      : (link.attributes.roles.source ? link.attributes.roles.source : element.attributes.uri),
+                      ? (link.attributes.roles.target ? link.attributes.roles.target : cell.attributes.uri)
+                      : (link.attributes.roles.source ? link.attributes.roles.source : cell.attributes.uri),
                     link.attributes.direction && link.attributes.direction == 'source'
                       ? (link.attributes.roles.source ? link.attributes.roles.source : connectedClass.attributes.uri)
                       : (link.attributes.roles.target ? link.attributes.roles.target : connectedClass.attributes.uri)
@@ -1128,26 +1195,32 @@ var CrowdEditorUml = {
         case 'inheritance':
           //create the link for this inheritance
           var inheritanceLink = {
-            name: element.cid,
+            name: cell.cid,
             parent: null,
             classes: [],
             constraint: [],
             type: 'generalization',
-            position: element.attributes.position,
-            size: element.attributes.size
+            position: cell.attributes.position,
+            size: cell.attributes.size
           }
-          if (element.attributes.subtype == 'disjoint') inheritanceLink.constraint.push('disjoint');
-          if (element.attributes.covering) inheritanceLink.constraint.push('covering');
+          if (cell.attributes.subtype == 'disjoint') inheritanceLink.constraint.push('disjoint');
+          if (cell.attributes.covering) inheritanceLink.constraint.push('covering');
 
           //search for links connected to the inheritance for add classes to inheritance link
-          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+          crowd.workspace.graph.getConnectedLinks(cell).forEach(function (link) {
             if (link.attributes.type == 'generalization') {
-              var connectedClass = link.attributes.source.id != element.id
-                && (link.getSourceElement().attributes.parentType == 'class')
-                ? link.getSourceElement()
-                : (link.attributes.target.id != element.id
-                  && (link.getTargetElement().attributes.parentType == 'class')
-                  ? link.getTargetElement()
+              var connectedClass = link.attributes.source.id != cell.id
+                && (link.getSourceCell().attributes.parentType == 'class'
+                  || link.getSourceCell().attributes.parentType == 'association'
+                  || link.getSourceCell().attributes.parentType == 'aggregation'
+                  || link.getSourceCell().attributes.parentType == 'composition')
+                ? link.getSourceCell()
+                : (link.attributes.target.id != cell.id
+                  && (link.getTargetCell().attributes.parentType == 'class'
+                    || link.getTargetCell().attributes.parentType == 'association'
+                    || link.getTargetCell().attributes.parentType == 'aggregation'
+                    || link.getTargetCell().attributes.parentType == 'composition')
+                  ? link.getTargetCell()
                   : null);
               if (connectedClass) {
                 if (!link.attributes.inheritChild) {
@@ -1199,7 +1272,6 @@ var CrowdEditorUml = {
       if (schema.links) {
         schema.links.forEach(function (link) {
           if (link.type != "generalization" || (link.classes.length <= 1 && link.constraint.length <= 0)) {
-            console.log('common', link);
             linksObj[link.name] = crowd.palette.links[link.type].clone();
             crowd.workspace.graph.addCell(linksObj[link.name]);
             $.each(link, function (attribute, value) {
@@ -1233,7 +1305,6 @@ var CrowdEditorUml = {
               }
             });
           } else {
-            console.log('inheritance', link);
             var inheritanceName = link.name;//link.name.split('_')[0];
             if (!inheritancesObj[inheritanceName]) {
               inheritancesObj[inheritanceName] = crowd.palette.elements.inheritance.clone();
@@ -1268,7 +1339,6 @@ var CrowdEditorUml = {
 
 
             link.classes.forEach(function (connectedClass, index) {
-              console.log(connectedClass);
               var linkName = link.classes[index] + '-' + fromURI(inheritanceName);
               linksObj[linkName] = crowd.palette.links.generalization.clone();
               linksObj[linkName].source(inheritancesObj[inheritanceName]);
@@ -1289,8 +1359,13 @@ var CrowdEditorUml = {
   initReasoningValidator: function (crowd) {
     //todo
   },
-  fromReasoning: function (crowd, reasoning) {
-    //use generic semantic mark of the editor
-    crowd.reasoning.genericMark(reasoning);
+  fromReasoning: function (crowd, schema, reasoning) {
+    //use generic semantic import and mark of the editor
+    //this is called after the reasoned schema is finished imported to the editor
+    //once the event is triggered it was cleared
+    crowd.events.onAfterFromSchema.push(function () {
+      crowd.reasoning.genericMark(reasoning);
+    });
+    crowd.reasoning.importPositionedSchema(schema);
   }
 }

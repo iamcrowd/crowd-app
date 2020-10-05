@@ -11,6 +11,10 @@ var CrowdEditor = function (config) {
 CrowdEditor.prototype.init = function () {
   var self = this;
 
+  //object for store general events of the editor
+  self.events = {};
+  self.events.onAfterFromSchema = [];
+
   if (!self.config.conceptualModel) {
     self.config.conceptualModel = {}
   }
@@ -147,12 +151,13 @@ CrowdEditor.prototype.initPalette = function () {
   //call initialization of palette elements and links for the specific conceptual model
   self.config.conceptualModel.initPalette(self);
 
+  //NOT USED: it has problems when connect two links
   //add styled jump over the lines when they collides
-  for (var link in self.palette.links) {
-    self.palette.links[link].connector('jumpover', {
-      size: 10
-    });
-  }
+  // for (var link in self.palette.links) {
+  //   self.palette.links[link].connector('jumpover', {
+  //     size: 10
+  //   });
+  // }
 
   //add joint graph to palette
   self.palette.graph = new joint.dia.Graph();
@@ -818,7 +823,7 @@ CrowdEditor.prototype.initTools = function () {
 
     //import tool
     self.tools.import.init = function () {
-      //this function do the import actions when the model is not changed using self.tools.import.diagramToImport object
+      //this function do the import actions when the conceptual model is not changed using self.tools.import.diagramToImport object
       self.tools.import.importFromLocal = function () {
         //load the schema on workspace
         self.fromJSONSchema(self.tools.import.diagramToImport.schema);
@@ -863,7 +868,7 @@ CrowdEditor.prototype.initTools = function () {
 
         //in case that actual conceptual model was the same of the file, just load it from schema
         if (diagram.model == self.config.conceptualModel.name) {
-          if (self.hasChanges()) {
+          if (self.hasChanges() && (diagram.forced == null || !diagram.forced)) {
             $('#crowd-tools-import-advertisement-' + self.id).modal('show');
             // $('.modal').modal('hide');
           } else {
@@ -1438,14 +1443,14 @@ CrowdEditor.prototype.initTools = function () {
               kf: schema,
               reasoner: options?.reasoner,
               success: (res) => {
-                if (options?.success) options?.success({ reasoning: res })
-                // self.config.metamodelApi.request({
-                //   from: 'kf',
-                //   to: self.config.conceptualModel.name,
-                //   data: res.KF,
-                //   success: (schema) => { if (options?.success) options?.success({ schema: schema, reasoning: res }) },
-                //   error: (error) => { if (options?.error) options?.error(error) }
-                // });
+                // if (options?.success) options?.success({ reasoning: res })
+                self.config.metamodelApi.request({
+                  from: 'kf',
+                  to: self.config.conceptualModel.name,
+                  data: res.KF,
+                  success: (schema) => { if (options?.success) options?.success({ schema: schema, reasoning: res }) },
+                  error: (error) => { if (options?.error) options?.error(error) }
+                });
               },
               error: (error) => { if (options?.error) options?.error(error) }
             });
@@ -1486,6 +1491,7 @@ CrowdEditor.prototype.initTools = function () {
                   <label for="">Reasoner</label> \
                   <select class="form-control custom-select my-1 mr-sm-2" id="crowd-tools-reasoning-options-reasoner-' + self.id + '"> \
                     <option>Racer</option> \
+                    <option>Konclude</option> \
                   </select> \
                 </div> \
               </div> \
@@ -1512,7 +1518,7 @@ CrowdEditor.prototype.initTools = function () {
           reasoner: $('#crowd-tools-reasoning-options-reasoner-' + self.id + ' option:selected').val(),
           success: function (response) {
             //call reasoning interpretation for the specific conceptual model
-            self.fromReasoning(response.reasoning);
+            self.fromReasoning(response.schema, response.reasoning);
 
             $('#crowd-tools-reasoning-options-modal-' + self.id).modal('hide');
 
@@ -1704,6 +1710,11 @@ CrowdEditor.prototype.initWorkspace = function () {
         }
       ]
     },
+    validateConnection: function (cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
+      //it allows connect links with other links
+      //in the future this function needs to be more restrictive
+      return true;
+    }
     // defaultLink: function () {
     //   return createLink();
     // },
@@ -1724,9 +1735,9 @@ CrowdEditor.prototype.initWorkspace = function () {
 
   this.initChangeAttributesEvents();
 
-  this.initLinksToolsViews();
-
   this.initElementsToolsViews();
+
+  this.initLinksToolsViews();
 
   //function to render the tools of a element view (may be used for update in case of change element type)
   self.workspace.renderElementTools = function (elementView) {
@@ -1956,14 +1967,14 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         selector: 'button',
         className: '',
         style: {
-          opacity: '0.7'
+          opacity: config.attributes?.circle?.opacity != null ? config.attributes?.circle?.opacity : '0.7'
         },
         attributes: {
-          r: 10,
-          cx: 0,
-          cy: -10,
-          fill: config.background ? config.background : 'black',
-          cursor: 'pointer'
+          r: config.attributes?.circle?.r != null ? config.attributes?.circle?.r : 10,
+          cx: config.attributes?.circle?.cx != null ? config.attributes?.circle?.cx : 0,
+          cy: config.attributes?.circle?.cy != null ? config.attributes?.circle?.cy : -10,
+          fill: config.background != null ? config.background : 'black',
+          cursor: config.attributes?.circle?.cursor != null ? config.attributes?.circle?.cursor : 'pointer'
         }
       },
       //draw the icon with the material icons of google
@@ -1972,16 +1983,16 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         tagName: 'text',
         className: 'material-icons crowd-workspace-tools-icon',
         style: {
-          'font-size': '14px'
+          'font-size': config.attributes?.text?.fontSize ? config.attributes?.text?.fontSize : '14px'
         },
         attributes: {
-          x: -7,
-          y: -3,
-          fill: 'white',
-          cursor: 'pointer',
-          title: config.tooltip.title,
+          x: config.attributes?.text?.x != null ? config.attributes?.text?.x : -7,
+          y: config.attributes?.text?.y != null ? config.attributes?.text?.y : -3,
+          fill: config.attributes?.text?.color != null ? config.attributes?.text?.color : 'white',
+          cursor: config.attributes?.text?.cursor != null ? config.attributes?.text?.cursor : 'pointer',
+          title: config.tooltip?.title != null ? config.tooltip?.title : '',
           'data-toggle': "tooltip",
-          'data-placement': config.tooltip.placement
+          'data-placement': config.tooltip?.placement != null ? config.tooltip?.placement : 'top'
         },
         textContent: config.icon
       }
@@ -2351,20 +2362,83 @@ CrowdEditor.prototype.initLinksToolsViews = function () {
   //initialize elements tools view object
   self.workspace.tools.links.linksToolsView = new Object();
 
+  self.workspace.tools.links.linkTool = function (config) {
+    return new joint.linkTools.Button({
+      focusOpacity: 1,
+      distance: config.distance != null ? config.distance : '50%',
+      offset: config.offset != null ? config.offset : 0,
+      action: function (evt, linkView, buttonView) {
+        console.log('linkTool', this, { evt, linkView, buttonView });
+        //create the link
+        var link = config.link && config.link.type ? self.palette.links[config.link.type].clone() : self.palette.links.basic.clone();
+
+        //set the source to the selected element
+        link.source({ id: this.model.id });
+
+        //get event mouse point depending on browser
+        var eventPoint = getEventClientPoint(evt);
+
+        //place it at mouse position
+        link.target({
+          x: (eventPoint.x - self.workspace.paper.translate().tx) / self.workspace.paper.scale().sx,
+          y: (eventPoint.y - self.workspace.paper.translate().ty) / self.workspace.paper.scale().sy
+          // x: (evt.originalEvent.offsetX - self.workspace.paper.translate().tx),
+          // y: (evt.originalEvent.offsetY - self.workspace.paper.translate().ty)
+        });
+
+        //add it to the graph
+        self.workspace.graph.addCell(link);
+
+        //enumerate the uri of the new link to differentiate it from others
+        if (self.config.enumerate) {
+          link.prop('uri', link.prop('uri') + '-' + self.enumerate.getNumber(link));
+        }
+
+        //change specific props of the link if they are defined
+        if (config.link && config.link.props) {
+          for (prop in config.link.props) {
+            link.prop(prop, config.link.props[prop]);
+          }
+        }
+
+        //get link view of the new link in the workspace paper
+        var linkView = link.findView(self.workspace.paper);
+
+        //simulate pointerdown event (mousedown) over the dom element of the link tool "TargetArrowhead"
+        var clickEvent = document.createEvent('MouseEvents');
+        clickEvent.initMouseEvent('mousedown', true, true, evt.view, evt.detail, evt.screenX, evt.screenY, eventPoint.x, eventPoint.y, null, null, null, null, null, new EventTarget('marker-arrowhead'));
+        linkView._toolsView.tools[2].el.dispatchEvent(clickEvent); //second position of the array correspond to "TargetArrowhead" tool
+      },
+      markup: config.markup != null ? config.markup :
+        self.workspace.tools.elements.markup({
+          icon: 'call_made', tooltip: { title: 'Click and drag to connect the object', placement: "top" },
+          attributes: {
+            circle: { cy: 0, opacity: 1 },
+            text: { x: -7, y: 7 }
+          }
+        })
+    });
+  }
+
+  //save basic tools array
+  self.workspace.tools.links.basic = function () {
+    return [
+      new joint.linkTools.Vertices(),
+      new joint.linkTools.Segments(),
+      new joint.linkTools.TargetArrowhead(), //second position of the _toolsView.tools array of the linkView
+      new joint.linkTools.SourceArrowhead(),
+      new joint.linkTools.TargetAnchor(),
+      new joint.linkTools.SourceAnchor(),
+      new joint.linkTools.Boundary(),
+      new joint.linkTools.Remove({ distance: 20 })
+    ]
+  };
+
   //create tools view for basic links
   self.workspace.tools.links.linksToolsView['basic'] = function () {
     return new joint.dia.ToolsView({
       name: 'link-basic-tools',
-      tools: [
-        new joint.linkTools.Vertices(),
-        new joint.linkTools.Segments(),
-        new joint.linkTools.TargetArrowhead(), //second position of the _toolsView.tools array of the linkView
-        new joint.linkTools.SourceArrowhead(),
-        new joint.linkTools.TargetAnchor(),
-        new joint.linkTools.SourceAnchor(),
-        new joint.linkTools.Boundary(),
-        new joint.linkTools.Remove({ distance: 20 })
-      ]
+      tools: self.workspace.tools.links.basic()
     });
   };
 
@@ -2852,6 +2926,14 @@ CrowdEditor.prototype.fromJSONSchema = function (schema) {
   //hide tools
   self.workspace.linkClickedFlag = false;
   self.workspace.paper.hideTools();
+
+  //trigger events on after finish from schema
+  if (self.events.onAfterFromSchema && Array.isArray(self.events.onAfterFromSchema)) {
+    //call all events registered
+    self.events.onAfterFromSchema.forEach(function (event) { event() });
+    //clear the events
+    self.events.onAfterFromSchema = [];
+  }
 }
 
 CrowdEditor.prototype.initSyntaxValidator = function () {
@@ -2892,6 +2974,21 @@ CrowdEditor.prototype.initReasoningValidator = function () {
       cell?.prop('semantic/contents/' + cell.prop('semantic/contents').length, { value: 'unsatisfiable', text: '<span class="crowd-unsat-color"><b>Unsatisfiable</b></span>' });
     });
 
+    //mark all inferred subsumptions cells with the reasoning response
+    var subsumptionsCells = reasoning['KF output']['Subsumptions'];
+    subsumptionsCells.forEach(function (uri) {
+      var cell = self.workspace.graph.getCells().find(function (cell) {
+        return cell.prop('uri') == uri;
+      });
+
+      cell?.prop('semantic/contents/' + cell.prop('semantic/contents').length, { value: 'inferred', text: '<span class="crowd-inferred-color"><b>Inferred Subsumption</b></span>' });
+      if (cell?.isElement()) {
+        self.workspace.graph.getConnectedLinks(cell).forEach(function (link) {
+          link.prop('semantic/contents/' + link.prop('semantic/contents').length, { value: 'inferred', text: '<span class="crowd-inferred-color"><b>Inferred Subsumption</b></span>' });
+        });
+      }
+    });
+
     //message to show for each owl axiom
     var owlAxiomsMessagesMap = {
       'Disjoint Class Axioms': 'Disjoint with',
@@ -2913,24 +3010,30 @@ CrowdEditor.prototype.initReasoningValidator = function () {
           return cell.prop('uri') == uris[1];
         });
 
-        if (cells[0] && cells[1]) {
+        if (cells[0] && cells[1] && !unsatCells.find(function (cell) { return cell == cells[0].prop('uri') || cell == cells[1].prop('uri') })) {
           cells[0]?.prop('semantic/contents/' + cells[0]?.prop('semantic/contents').length, owlAxiomsMessagesMap[axiom] + ' <b>' + fromURI(uris[1]) + '</b>');
-          cells[1]?.prop('semantic/contents/' + cells[1]?.prop('semantic/contents').length, owlAxiomsMessagesMap[axiom] + ' <b>' + fromURI(uris[0]) + '</b>');
+          if (owlAxiomsMessagesMap[axiom] == 'Equivalent with')
+            cells[1]?.prop('semantic/contents/' + cells[1]?.prop('semantic/contents').length, owlAxiomsMessagesMap[axiom] + ' <b>' + fromURI(uris[0]) + '</b>');
         }
       });
     });
   };
 
+  self.reasoning.importPositionedSchema = function (schema) {
+    var positionedSchema = $.extend(true, self.toJSONSchema(), schema);
+    self.tools.import.importFrom({ model: self.config.conceptualModel.name, schema: positionedSchema, file: self.config.actualFile, forced: true });
+  }
+
   //call initialization of reasoning validator for the specific conceptual model
   self.config.conceptualModel.initReasoningValidator(self);
 }
 
-CrowdEditor.prototype.fromReasoning = function (reasoning) {
+CrowdEditor.prototype.fromReasoning = function (schema, reasoning) {
   var self = this;
 
   //call the function to do the semantic marks with the resoner response for the specific conceptual model
   //it can do use of generic mark function
-  self.config.conceptualModel.fromReasoning(self, reasoning);
+  self.config.conceptualModel.fromReasoning(self, schema, reasoning);
 }
 
 CrowdEditor.prototype.toBase64 = function (callback) {
