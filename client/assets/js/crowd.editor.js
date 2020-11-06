@@ -1065,7 +1065,10 @@ CrowdEditor.prototype.initTools = function () {
         setTimeout(() => {
           //get only cells that have not "layoutIgnore" property
           var filteredGraph = self.workspace.graph.getSubgraph(self.workspace.graph.getCells()).filter(function (cell) {
-            return !cell.prop('layoutIgnore') && (!cell.isLink() || (!cell.getSourceCell().prop('layoutIgnore') && !cell.getTargetCell().prop('layoutIgnore')));
+            return !cell.prop('layoutIgnore') &&
+              (!cell.isLink() ||
+                (!cell.getSourceCell().prop('layoutIgnore') && !cell.getTargetCell().prop('layoutIgnore') &&
+                  !cell.getSourceCell().isLink() && !cell.getTargetCell().isLink()));
           });
 
           //layout the selected cells clones
