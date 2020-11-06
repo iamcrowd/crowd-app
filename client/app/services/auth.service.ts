@@ -32,6 +32,7 @@ export class AuthService {
   login(emailAndPassword): void {
     this.userService.login(emailAndPassword).subscribe(
       res => {
+        iziToast.success({ message: 'Logged successfully.' });
         localStorage.setItem('token', res.token);
         const decodedUser = this.decodeUserFromToken(res.token);
         this.setCurrentUser(decodedUser);
@@ -40,7 +41,7 @@ export class AuthService {
         // close all open modals
         this.modalService.dismissAll();
       },
-      error => iziToast.error({ message: 'Invalid email or password.' })
+      error => iziToast.error({ message: 'Email or password are invalid.' })
     );
   }
 

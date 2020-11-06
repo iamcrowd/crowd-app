@@ -118,8 +118,8 @@ CrowdEditor.prototype.initPalette = function () {
   var self = this;
 
   //set palette width with config values
-  $('#crowd-palette-' + self.id).css('width', self.config.palette.grid.size * self.config.palette.grid.columns + 1);
-  $('#crowd-container-middle-' + self.id).css('left', self.config.palette.grid.size * self.config.palette.grid.columns);
+  $('#crowd-palette-' + self.id).css('width', self.config.palette.grid.width * self.config.palette.grid.columns + 1);
+  $('#crowd-container-middle-' + self.id).css('left', self.config.palette.grid.width * self.config.palette.grid.columns);
 
   //initialize palette objects
   self.palette = new Object();
@@ -166,13 +166,13 @@ CrowdEditor.prototype.initPalette = function () {
   self.palette.paper = new joint.dia.Paper({
     el: $('#crowd-palette-' + self.id)[0],
     width: $('#crowd-palette-' + self.id).width(),
-    height: (Object.keys(self.palette.elements).length / self.config.palette.grid.columns + 5) * self.config.palette.grid.size,//$('#crowd-palette-' + self.id).height(),
+    height: (Object.keys(self.palette.elements).length / self.config.palette.grid.columns + 5) * self.config.palette.grid.height,//$('#crowd-palette-' + self.id).height(),
     model: self.palette.graph,
     interactive: false,
     background: {
       color: $('#crowd-palette-' + self.id).css("background-color")
     },
-    gridSize: self.config.palette.grid.size,
+    gridSize: self.config.palette.grid.height > self.config.palette.grid.width ? self.config.palette.grid.height : self.config.palette.grid.width,
     // drawGrid:
     // {
     //   name: 'mesh',
@@ -187,16 +187,16 @@ CrowdEditor.prototype.initPalette = function () {
 
   //adjust joint svg height to the space occupied by the added elements (able to scroll palette when screen is small)
   if ($('#crowd-palette-' + self.id + " svg")[0])
-    $('#crowd-palette-' + self.id + " svg")[0].setAttribute('height', (Object.keys(self.palette.elements).length / self.config.palette.grid.columns + 1) * self.config.palette.grid.size);
+    $('#crowd-palette-' + self.id + " svg")[0].setAttribute('height', (Object.keys(self.palette.elements).length / self.config.palette.grid.columns + 1) * self.config.palette.grid.height);
 
   //add palette elements to palette graph and place (change position) them on the grid
   var position = 0;
   for (var element in self.palette.elements) {
     self.palette.elements[element].attributes.position = {
-      x: ((position % self.config.palette.grid.columns) * self.config.palette.grid.size) +
-        (self.config.palette.grid.size - self.palette.elements[element].attributes.size.width) / 2,
-      y: (Math.floor(position / self.config.palette.grid.columns) * self.config.palette.grid.size) +
-        (self.config.palette.grid.size - self.palette.elements[element].attributes.size.height) / 2
+      x: ((position % self.config.palette.grid.columns) * self.config.palette.grid.width) +
+        (self.config.palette.grid.width - self.palette.elements[element].attributes.size.width) / 2,
+      y: (Math.floor(position / self.config.palette.grid.columns) * self.config.palette.grid.height) +
+        (self.config.palette.grid.height - self.palette.elements[element].attributes.size.height) / 2
     };
     self.palette.graph.addCell(self.palette.elements[element]);
     position++;
@@ -488,7 +488,8 @@ CrowdEditor.prototype.initTools = function () {
       //event handler when click proceed button in advertisement for new file
       $('#crowd-tools-file-new-advertisement-proceed-' + self.id).on('click', function () {
         //clear the workspace elements
-        self.workspace.graph.clear();
+        // self.workspace.graph.clear();
+        self.workspace.clearGraph()
         //center workspace scroll
         setTimeout(() => self.workspace.centerScroll());
         //clear the actual file
@@ -1062,7 +1063,13 @@ CrowdEditor.prototype.initTools = function () {
       //this function do the automatic layout (it's used in external functionalities)
       self.tools.layout.doLayout = function () {
         setTimeout(() => {
-          joint.layout.DirectedGraph.layout(self.workspace.graph,
+          //get only cells that have not "layoutIgnore" property
+          var filteredGraph = self.workspace.graph.getSubgraph(self.workspace.graph.getCells()).filter(function (cell) {
+            return !cell.prop('layoutIgnore') && (!cell.isLink() || (!cell.getSourceCell().prop('layoutIgnore') && !cell.getTargetCell().prop('layoutIgnore')));
+          });
+
+          //layout the selected cells clones
+          joint.layout.DirectedGraph.layout(filteredGraph,
             {
               marginX: 100,
               marginY: 100
@@ -1253,7 +1260,8 @@ CrowdEditor.prototype.initTools = function () {
       //clear the workspace and center the scroll
       self.tools.clearWorkspace.clear = function () {
         //clear the workspace elements
-        self.workspace.graph.clear();
+        // self.workspace.graph.clear();
+        self.workspace.clearGraph()
         //center workspace scroll
         setTimeout(() => self.workspace.centerScroll());
       }
@@ -1733,6 +1741,12 @@ CrowdEditor.prototype.initWorkspace = function () {
     // }
   });
 
+  self.workspace.clearGraph = function () {
+    self.workspace.graph.getCells().forEach(function (cell) {
+      cell.remove();
+    });
+  }
+
   this.initChangeAttributesEvents();
 
   this.initElementsToolsViews();
@@ -1741,10 +1755,12 @@ CrowdEditor.prototype.initWorkspace = function () {
 
   //function to render the tools of a element view (may be used for update in case of change element type)
   self.workspace.renderElementTools = function (elementView) {
-    self.workspace.paper.hideTools();
-    var toolsView = self.workspace.tools.elements.elementsToolsView[elementView.model.attributes.type];
-    elementView.addTools(toolsView != null ? toolsView : self.workspace.tools.elements.elementsToolsView.basic);
-    elementView.showTools();
+    if (elementView.model.attributes.enableTools == null || elementView.model.attributes.enableTools) {
+      self.workspace.paper.hideTools();
+      var toolsView = self.workspace.tools.elements.elementsToolsView[elementView.model.attributes.type];
+      elementView.addTools(toolsView != null ? toolsView : self.workspace.tools.elements.elementsToolsView.basic);
+      elementView.showTools();
+    }
     $('[data-toggle="tooltip"]').tooltip({ html: true });
   }
 
@@ -2096,6 +2112,11 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
       //clone the element
       var clonedElement = this.model.clone();
 
+      //fix for the case it has been type changed
+      clonedElement.markup = this.model.markup;
+      clonedElement.attributes.attrs = $.extend(true, {}, this.model.attributes.attrs);
+      clonedElement.getClassName = this.model.getClassName;
+
       //get event mouse point depending on browser
       var eventPoint = getEventClientPoint(evt);
 
@@ -2417,6 +2438,92 @@ CrowdEditor.prototype.initLinksToolsViews = function () {
             text: { x: -7, y: 7 }
           }
         })
+    });
+  }
+
+  self.workspace.tools.links.linkRoleTool = function (config) {
+    return new joint.linkTools.Button({
+      focusOpacity: 1,
+      distance: config.distance != null ? config.distance : '25%',
+      offset: config.offset != null ? config.offset : 0,
+      action: function (evt, linkView, buttonView) {
+        console.log('linkRoleTool', this, { evt, linkView, buttonView });
+        //create the link
+        var link = config.link && config.link.type ? self.palette.links[config.link.type].clone() : self.palette.links.basic.clone();
+
+        //set the source to the correspondiet port for the target role
+        console.log(this.model.ports, config.role)
+        link.source({ id: this.model.ports[config.role].id });
+
+        //get event mouse point depending on browser
+        var eventPoint = getEventClientPoint(evt);
+
+        //place it at mouse position
+        link.target({
+          x: (eventPoint.x - self.workspace.paper.translate().tx) / self.workspace.paper.scale().sx,
+          y: (eventPoint.y - self.workspace.paper.translate().ty) / self.workspace.paper.scale().sy
+          // x: (evt.originalEvent.offsetX - self.workspace.paper.translate().tx),
+          // y: (evt.originalEvent.offsetY - self.workspace.paper.translate().ty)
+        });
+
+        //add it to the graph
+        self.workspace.graph.addCell(link);
+
+        //enumerate the uri of the new link to differentiate it from others
+        if (self.config.enumerate) {
+          link.prop('uri', link.prop('uri') + '-' + self.enumerate.getNumber(link));
+        }
+
+        //change specific props of the link if they are defined
+        if (config.link && config.link.props) {
+          for (prop in config.link.props) {
+            link.prop(prop, config.link.props[prop]);
+          }
+        }
+
+        //get link view of the new link in the workspace paper
+        var linkView = link.findView(self.workspace.paper);
+
+        //simulate pointerdown event (mousedown) over the dom element of the link tool "TargetArrowhead"
+        var clickEvent = document.createEvent('MouseEvents');
+        clickEvent.initMouseEvent('mousedown', true, true, evt.view, evt.detail, evt.screenX, evt.screenY, eventPoint.x, eventPoint.y, null, null, null, null, null, new EventTarget('marker-arrowhead'));
+        linkView._toolsView.tools[2].el.dispatchEvent(clickEvent); //second position of the array correspond to "TargetArrowhead" tool
+      },
+      markup: config.markup != null ? config.markup :
+        self.workspace.tools.elements.markup({
+          icon: 'call_made', tooltip: { title: 'Click and drag to connect the object', placement: "top" },
+          attributes: {
+            circle: { cy: 0, opacity: 1 },
+            text: { x: -7, y: 7 }
+          }
+        })
+    });
+  }
+
+  self.workspace.tools.links.linkRolePort = function (config) {
+    var fakePort = new joint.shapes.basic.Circle({
+      type: "role",
+      uri: config.uri,
+      role: config.role,
+      enableTools: false,
+      size: { width: 15, height: 15 },
+      layoutIgnore: true
+    });
+    self.workspace.graph.addCell(fakePort);
+
+    var fakePortView = fakePort.findView(self.workspace.paper);
+    fakePortView.setInteractivity(false);
+    fakePort.toFront();
+
+    config.link.embed(fakePort);
+    config.link.ports[config.role] = fakePort;
+
+    var parentView = config.link.findView(self.workspace.paper);
+    self.workspace.paper.on('render:done', function (evt, b, c, d, e) {
+      if (parentView) {
+        var labelPoint = parentView.getLabelCoordinates(config.position ? config.position : { distance: 0.25, offset: 0 });
+        fakePort.position(labelPoint.x - fakePort.size().width / 2, labelPoint.y - fakePort.size().height / 2);
+      }
     });
   }
 
@@ -2918,7 +3025,8 @@ CrowdEditor.prototype.fromJSONSchema = function (schema) {
   var self = this;
 
   //clear the workspace elements
-  self.workspace.graph.clear();
+  // self.workspace.graph.clear();
+  self.workspace.clearGraph()
 
   //call the function to load a json schema for the specific conceptual model
   self.config.conceptualModel.fromJSONSchema(self, schema);

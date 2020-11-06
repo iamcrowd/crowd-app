@@ -544,7 +544,7 @@ var CrowdEditorUml = {
     });
   },
   initLinksToolsViews: function (crowd) {
-    //definition of role inheritance tool for links
+    //definition of association inheritance tool for links
     var linkGeneralizationTool = function () {
       return crowd.workspace.tools.links.linkTool({
         link: {
@@ -568,13 +568,65 @@ var CrowdEditorUml = {
       })
     };
 
+    //definition of role A inheritance tool for links
+    var linkRoleSourceGeneralizationTool = function () {
+      return crowd.workspace.tools.links.linkRoleTool({
+        role: 'roleSource',
+        distance: '25%',
+        link: {
+          type: 'generalization',
+          props: {
+            direction: 'target',
+            inheritChild: false
+          }
+        },
+        markup: crowd.workspace.tools.elements.markup({
+          icon: 'call_merge',
+          tooltip: {
+            title: 'Click and drag to connect the link role with a <b class="crowd-bold-color">generalization</b> parent',
+            placement: "top"
+          },
+          attributes: {
+            circle: { cy: 0, opacity: 1 },
+            text: { x: -7, y: 7 }
+          }
+        })
+      })
+    };
+
+    //definition of role B inheritance tool for links
+    var linkRoleTargetGeneralizationTool = function () {
+      return crowd.workspace.tools.links.linkRoleTool({
+        role: 'roleTarget',
+        distance: '75%',
+        link: {
+          type: 'generalization',
+          props: {
+            direction: 'target',
+            inheritChild: false
+          }
+        },
+        markup: crowd.workspace.tools.elements.markup({
+          icon: 'call_merge',
+          tooltip: {
+            title: 'Click and drag to connect the link role with a <b class="crowd-bold-color">generalization</b> parent',
+            placement: "top"
+          },
+          attributes: {
+            circle: { cy: 0, opacity: 1 },
+            text: { x: -7, y: 7 }
+          }
+        })
+      })
+    };
+
     //define tools view for association
     crowd.workspace.tools.links.linksToolsView['association'] = function () {
       return new joint.dia.ToolsView({
         name: 'link-association-tools',
         tools: [
           ...crowd.workspace.tools.links.basic(),
-          ...[linkGeneralizationTool()]
+          ...[linkGeneralizationTool(), linkRoleSourceGeneralizationTool(), linkRoleTargetGeneralizationTool()]
         ]
       });
     }
@@ -585,7 +637,7 @@ var CrowdEditorUml = {
         name: 'link-aggregation-tools',
         tools: [
           ...crowd.workspace.tools.links.basic(),
-          ...[linkGeneralizationTool()]
+          ...[linkGeneralizationTool(), , linkRoleSourceGeneralizationTool(), linkRoleTargetGeneralizationTool()]
         ]
       });
     }
@@ -596,10 +648,18 @@ var CrowdEditorUml = {
         name: 'link-composition-tools',
         tools: [
           ...crowd.workspace.tools.links.basic(),
-          ...[linkGeneralizationTool()]
+          ...[linkGeneralizationTool(), , linkRoleSourceGeneralizationTool(), linkRoleTargetGeneralizationTool()]
         ]
       });
     }
+
+    //add role ports for specific links when they been added
+    crowd.workspace.graph.on('add', function (link) {
+      if (link.prop('type') == 'association' || link.prop('type') == 'aggregation' || link.prop('type') == 'composition') {
+        crowd.workspace.tools.links.linkRolePort({ link: link, role: 'roleSource', position: { distance: 0.25, offset: 0 } });
+        crowd.workspace.tools.links.linkRolePort({ link: link, role: 'roleTarget', position: { distance: 0.75, offset: 0 } });
+      }
+    });
   },
   initChangeAttributesEvents: function (crowd) {
     //event when the elements type change (types are: entity, weakEntity, attribute, etc)
@@ -622,6 +682,8 @@ var CrowdEditorUml = {
         //trigger the change name event to update the text with the name of the element
         //(because it is overwrited when replaced the attributes.attrs)
         element.trigger('change:name', element, element.prop('name'));
+
+        crowd.inspector.loadContent();
       }
     });
 
@@ -861,6 +923,9 @@ var CrowdEditorUml = {
             }
           },
         ]);
+
+        if (newRoles.source && newRoles.source != "null") link.ports.roleSource.attributes.uri = newRoles.source;
+        if (newRoles.target && newRoles.target != "null") link.ports.roleTarget.attributes.uri = newRoles.target;
       }
     });
 
@@ -1147,50 +1212,107 @@ var CrowdEditorUml = {
           }
 
           //search for links connected to the class for add them to the links collection
-          crowd.workspace.graph.getConnectedLinks(cell).forEach(function (link) {
+          connectedLinks = $.map(crowd.workspace.graph.getConnectedLinks(cell), (link) => {
+            return { cell: cell, link: link };
+          });
+          if (cell.ports?.roleSource != null)
+            connectedLinks = [
+              ...connectedLinks,
+              ...$.map(crowd.workspace.graph.getConnectedLinks(cell.ports?.roleSource), (link) => {
+                return { cell: cell.ports?.roleSource, link: link };
+              })
+            ];
+          if (cell.ports?.roleTarget != null)
+            connectedLinks = [
+              ...connectedLinks,
+              ...$.map(crowd.workspace.graph.getConnectedLinks(cell.ports?.roleTarget), (link) => {
+                return { cell: cell.ports?.roleTarget, link: link };
+              })
+            ];
+
+          connectedLinks.forEach(function (link) {
             var connectedClass;
-            if (link.attributes.direction && link.attributes[link.attributes.direction].id != cell.id) {
-              connectedClass = link.attributes.direction == 'source' ? link.getSourceCell() : link.getTargetCell();
-            } else if (!link.attributes.direction && link.attributes.target.id != cell.id) {
-              connectedClass = link.getTargetCell();
+            if (link.link.attributes.direction && link.link.attributes[link.link.attributes.direction].id != link.cell.id) {
+              connectedClass = link.link.attributes.direction == 'source' ? link.link.getSourceCell() : link.link.getTargetCell();
+            } else if (!link.link.attributes.direction && link.link.attributes.target.id != link.cell.id) {
+              connectedClass = link.link.getTargetCell();
             }
 
             if (connectedClass &&
               (connectedClass?.attributes?.parentType == 'class'
                 || connectedClass?.attributes?.parentType == 'association'
                 || connectedClass?.attributes?.parentType == 'aggregation'
-                || connectedClass?.attributes?.parentType == 'composition')) {
+                || connectedClass?.attributes?.parentType == 'composition'
+                || connectedClass?.attributes?.type == 'role')) {
               jsonSchema.links.push({
-                ...linkTypeMap[link.attributes.type] != 'generalization' ? { uri: link.attributes.uri } : {},
-                name: link.attributes.uri,
-                ...linkTypeMap[link.attributes.type] == 'generalization' ? { parent: connectedClass.attributes.uri } : {},
+                ...linkTypeMap[link.link.attributes.type] != 'generalization' ? { uri: link.link.attributes.uri } : {},
+                name: link.link.attributes.uri,
+                ...linkTypeMap[link.link.attributes.type] == 'generalization' ? { parent: connectedClass.attributes.uri } : {},
                 classes: [
-                  cell.attributes.uri,
-                  ...linkTypeMap[link.attributes.type] != 'generalization' ? [connectedClass.attributes.uri] : []
+                  link.cell.attributes.uri,
+                  ...linkTypeMap[link.link.attributes.type] != 'generalization' ? [connectedClass.attributes.uri] : []
                 ],
-                type: linkTypeMap[link.attributes.type],
-                ...linkTypeMap[link.attributes.type] != 'generalization' ? {
+                type: linkTypeMap[link.link.attributes.type],
+                ...linkTypeMap[link.link.attributes.type] != 'generalization' ? {
                   multiplicity: [
-                    link.attributes.direction && link.attributes.direction == 'source' ? link.attributes.cardinality.target : link.attributes.cardinality.source,
-                    link.attributes.direction && link.attributes.direction == 'source' ? link.attributes.cardinality.source : link.attributes.cardinality.target
+                    link.link.attributes.direction && link.link.attributes.direction == 'source' ? link.link.attributes.cardinality.target : link.link.attributes.cardinality.source,
+                    link.link.attributes.direction && link.link.attributes.direction == 'source' ? link.link.attributes.cardinality.source : link.link.attributes.cardinality.target
                   ]
                 } : {},
-                ...linkTypeMap[link.attributes.type] != 'generalization' ? {
+                ...linkTypeMap[link.link.attributes.type] != 'generalization' ? {
                   roles: [
-                    link.attributes.direction && link.attributes.direction == 'source'
-                      ? (link.attributes.roles.target ? link.attributes.roles.target : cell.attributes.uri)
-                      : (link.attributes.roles.source ? link.attributes.roles.source : cell.attributes.uri),
-                    link.attributes.direction && link.attributes.direction == 'source'
-                      ? (link.attributes.roles.source ? link.attributes.roles.source : connectedClass.attributes.uri)
-                      : (link.attributes.roles.target ? link.attributes.roles.target : connectedClass.attributes.uri)
+                    link.link.attributes.direction && link.link.attributes.direction == 'source'
+                      ? (link.link.attributes.roles.target ? link.link.attributes.roles.target : link.cell.attributes.uri)
+                      : (link.link.attributes.roles.source ? link.link.attributes.roles.source : link.cell.attributes.uri),
+                    link.link.attributes.direction && link.link.attributes.direction == 'source'
+                      ? (link.link.attributes.roles.source ? link.link.attributes.roles.source : connectedClass.attributes.uri)
+                      : (link.link.attributes.roles.target ? link.link.attributes.roles.target : connectedClass.attributes.uri)
                   ]
                 } : {},
-                ...linkTypeMap[link.attributes.type] != 'association' ? {
+                ...linkTypeMap[link.link.attributes.type] != 'association' ? {
                   constraint: []
                 } : {}
               });
             }
           });
+
+          // if (cell.attributes.parentType == 'association'
+          //   || cell.attributes.parentType == 'aggregation'
+          //   || cell.attributes.parentType == 'composition') {
+          //   //search for links in roles of an association, aggregation or composition
+          //   for (let portName in cell.ports) {
+          //     if (portName == "roleSource" || portName == "roleTarget") {
+          //       var port = cell.ports[portName];
+          //       var connectedPort;
+          //       crowd.workspace.graph.getConnectedLinks(port).forEach(function (link) {
+          //         if (link.attributes.direction && link.attributes[link.attributes.direction].id != port.id) {
+          //           connectedPort = link.attributes.direction == 'source' ? link.getSourceCell() : link.getTargetCell();
+          //         } else if (!link.attributes.direction && link.attributes.target.id != port.id) {
+          //           connectedPort = link.getTargetCell();
+          //         }
+
+          //         if (connectedPort) {
+          //           var roleChildUri = port.attributes.role == 'roleSource'
+          //             ? cell.attributes.roles.source
+          //             : cell.attributes.roles.target;
+          //           var roleParentUri = connectedPort.attributes.role == "roleSource"
+          //             ? connectedPort.getParentCell().attributes.roles.source
+          //             : connectedPort.getParentCell().attributes.roles.target;
+
+          //           jsonSchema.links.push({
+          //             name: link.attributes.uri,
+          //             parent: roleParentUri,
+          //             classes: [
+          //               roleChildUri,
+          //             ],
+          //             type: "generalization",
+          //             contraints: []
+          //           });
+          //         }
+          //       });
+          //     }
+          //   }
+          // }
           break;
         case 'inheritance':
           //create the link for this inheritance
@@ -1245,6 +1367,13 @@ var CrowdEditorUml = {
     var classesObj = {};
     var inheritancesObj = {};
     var linksObj = {};
+    var rolesObj = {};
+
+    function getObj(name) {
+      if (classesObj[name]) return classesObj[name];
+      else if (linksObj[name]) return linksObj[name];
+      else if (rolesObj[name]) return rolesObj[name];
+    }
 
     if (schema) {
       //add each class and their properties
@@ -1270,6 +1399,7 @@ var CrowdEditorUml = {
 
       //add each link and their properties
       if (schema.links) {
+        //create links and inheritances objects with their main properties
         schema.links.forEach(function (link) {
           if (link.type != "generalization" || (link.classes.length <= 1 && link.constraint.length <= 0)) {
             linksObj[link.name] = crowd.palette.links[link.type].clone();
@@ -1279,18 +1409,6 @@ var CrowdEditorUml = {
                 case 'name':
                   linksObj[link.name].prop('uri', value);
                   break;
-                case 'classes':
-                  if (link.type == "generalization") {
-                    linksObj[link.name].source(classesObj[value[0]]);
-                  } else {
-                    linksObj[link.name].source(classesObj[value[0]]);
-                    linksObj[link.name].target(classesObj[value[1]]);
-                    linksObj[link.name].prop('direction', null);
-                  }
-                  break;
-                case 'parent':
-                  linksObj[link.name].target(classesObj[value]);
-                  break;
                 case 'multiplicity':
                   linksObj[link.name].prop('cardinality/source', value[0]);
                   linksObj[link.name].prop('cardinality/target', value[1]);
@@ -1298,6 +1416,21 @@ var CrowdEditorUml = {
                 case 'roles':
                   linksObj[link.name].prop('roles/source', value[0]);
                   linksObj[link.name].prop('roles/target', value[1]);
+                  rolesObj[value[0]] = linksObj[link.name].ports.roleSource;
+                  rolesObj[value[1]] = linksObj[link.name].ports.roleTarget;
+                  break;
+                case 'classes':
+                  if (link.type == "generalization" && classesObj[value[0]]) {
+                    linksObj[link.name].source(classesObj[value[0]]);
+                  } else if (classesObj[value[0]] && classesObj[value[1]]) {
+                    linksObj[link.name].source(classesObj[value[0]]);
+                    linksObj[link.name].target(classesObj[value[1]]);
+                    linksObj[link.name].prop('direction', null);
+                  }
+                  break;
+                case 'parent':
+                  if (classesObj[value])
+                    linksObj[link.name].target(classesObj[value]);
                   break;
                 default:
                   linksObj[link.name].prop(attribute, value)
@@ -1332,20 +1465,49 @@ var CrowdEditorUml = {
 
             var parentLinkName = link.parent + '-' + fromURI(inheritanceName);
             linksObj[parentLinkName] = crowd.palette.links.generalization.clone();
-            linksObj[parentLinkName].source(inheritancesObj[inheritanceName]);
-            linksObj[parentLinkName].target(classesObj[link.parent]);
             crowd.workspace.graph.addCell(linksObj[parentLinkName]);
+            linksObj[parentLinkName].source(inheritancesObj[inheritanceName]);
             linksObj[parentLinkName].prop('uri', parentLinkName);
-
 
             link.classes.forEach(function (connectedClass, index) {
               var linkName = link.classes[index] + '-' + fromURI(inheritanceName);
               linksObj[linkName] = crowd.palette.links.generalization.clone();
-              linksObj[linkName].source(inheritancesObj[inheritanceName]);
-              linksObj[linkName].target(classesObj[connectedClass]);
               crowd.workspace.graph.addCell(linksObj[linkName]);
+              linksObj[linkName].source(inheritancesObj[inheritanceName]);
               linksObj[linkName].prop('uri', linkName);
               linksObj[linkName].prop('inheritChild', true);
+            });
+          }
+        });
+
+        //set targets and sources of each link onces all possible linkeable objects are created
+        schema.links.forEach(function (link) {
+          if (link.type != "generalization" || (link.classes.length <= 1 && link.constraint.length <= 0)) {
+            $.each(link, function (attribute, value) {
+              switch (attribute) {
+                case 'classes':
+                  if (link.type == "generalization" && !classesObj[value[0]]) {
+                    linksObj[link.name].source(getObj(value[0]));
+                  } else if (!classesObj[value[0]] && !classesObj[value[1]]) {
+                    linksObj[link.name].source(getObj(value[0]));
+                    linksObj[link.name].target(getObj(value[1]));
+                    linksObj[link.name].prop('direction', null);
+                  }
+                  break;
+                case 'parent':
+                  if (!classesObj[value])
+                    linksObj[link.name].target(getObj(value));
+                  break;
+              }
+            });
+          } else {
+            var inheritanceName = link.name;
+            var parentLinkName = link.parent + '-' + fromURI(inheritanceName);
+            linksObj[parentLinkName].target(getObj(link.parent));
+
+            link.classes.forEach(function (connectedClass, index) {
+              var linkName = link.classes[index] + '-' + fromURI(inheritanceName);
+              linksObj[linkName].target(getObj(connectedClass));
             });
           }
         });

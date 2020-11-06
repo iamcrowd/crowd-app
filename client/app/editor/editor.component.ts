@@ -12,6 +12,7 @@ declare var $;
 declare var CrowdEditor;
 declare var CrowdEditorEer;
 declare var CrowdEditorUml;
+declare var CrowdEditorOrm;
 declare var CrowdMetamodel;
 declare var CrowdReasoning;
 
@@ -78,8 +79,14 @@ export class EditorComponent implements OnInit {
     const availableConceptualModels = {
       uml: CrowdEditorUml,
       eer: CrowdEditorEer,
-      orm: { name: 'orm' },
+      orm: CrowdEditorOrm,
       kf: { name: 'kf' }
+    }
+
+    const paletteSizes = {
+      uml: { width: 100, height: 100, columns: 2 },
+      eer: { width: 100, height: 100, columns: 2 },
+      orm: { width: 120, height: 60, columns: 1 },
     }
 
     this.editor = new CrowdEditor({
@@ -111,10 +118,7 @@ export class EditorComponent implements OnInit {
         }
       }),
       palette: {
-        grid: {
-          size: 100,
-          columns: 2
-        }
+        grid: paletteSizes[this.conceptualModel] ? paletteSizes[this.conceptualModel] : { width: 100, height: 100, columns: 2 }
       },
       enumerate: true,
       tools: {

@@ -678,6 +678,8 @@ var CrowdEditorEer = {
         //trigger the change name event to update the text with the name of the element
         //(because it is overwrited when replaced the attributes.attrs)
         element.trigger('change:name', element, element.prop('name'));
+
+        crowd.inspector.loadContent();
       }
     });
 
@@ -1349,134 +1351,134 @@ var CrowdEditorEer = {
   },
   initSyntaxValidator: function (crowd) {
     //define for each element type with wich another element type can connect and with wich link type and specific attributes of it
-    crowd.syntax.canConnect = {
-      entity: {
-        relationship: { connector: { inherit: false } },
-        weakRelationship: { connector: { inherit: false, cardinality: '1', total: false } },
-        keyAttribute: { connector: { inherit: false, total: false } },
-        attribute: { connector: { inherit: false, total: false } },
-        multivaluedAttribute: { connector: { inherit: false, total: false } },
-        derivedAttribute: { connector: { inherit: false, total: false } },
-        inheritance: { connector: { inherit: true } },
-      },
-      weakEntity: {
-        relationship: { connector: { inherit: false } },
-        weakRelationship: { connector: { inherit: false, cardinality: 'N', total: true } },
-        weakKeyAttribute: { connector: { inherit: false, total: false } },
-        attribute: { connector: { inherit: false, total: false } },
-        multivaluedAttribute: { connector: { inherit: false, total: false } },
-        derivedAttribute: { connector: { inherit: false, total: false } },
-        inheritance: { connector: { inherit: true } },
-      },
-      relationship: {
-        entity: { connector: { inherit: false } },
-        weakEntity: { connector: { inherit: false } },
-        keyAttribute: { connector: { inherit: false, total: false } },
-        attribute: { connector: { inherit: false, total: false } },
-        //multivaluedAttribute: { connector: { inherit: false, total: false } },
-        derivedAttribute: { connector: { inherit: false, total: false } },
-        inheritance: { connector: { inherit: true } },
-      },
-      weakRelationship: {
-        entity: { connector: { inherit: false, cardinality: '1', total: false } },
-        weakEntity: { connector: { inherit: false, cardinality: 'N', total: true } },
-        weakKeyAttribute: { connector: { inherit: false, total: false } },
-        attribute: { connector: { inherit: false, total: false } },
-        //multivaluedAttribute: { connector: { inherit: false, total: false } },
-        derivedAttribute: { connector: { inherit: false, total: false } },
-        inheritance: { connector: { inherit: true } },
-      },
-      keyAttribute: {
-        entity: { connector: { inherit: false, total: false } },
-        relationship: { connector: { inherit: false, total: false } },
-      },
-      weakKeyAttribute: {
-        weakEntity: { connector: { inherit: false, total: false } },
-        weakRelationship: { connector: { inherit: false, total: false } },
-      },
-      attribute: {
-        entity: { connector: { inherit: false, total: false } },
-        weakEntity: { connector: { inherit: false, total: false } },
-        relationship: { connector: { inherit: false, total: false } },
-        weakRelationship: { connector: { inherit: false, total: false } },
-        attribute: { connector: { inherit: false, total: false } },
-      },
-      multivaluedAttribute: {
-        entity: { connector: { inherit: false, total: false } },
-        weakEntity: { connector: { inherit: false, total: false } },
-      },
-      derivedAttribute: {
-        entity: { connector: { inherit: false, total: false } },
-        weakEntity: { connector: { inherit: false, total: false } },
-        relationship: { connector: { inherit: false, total: false } },
-        weakRelationship: { connector: { inherit: false, total: false } },
-      },
-      inheritance: {
-        entity: { connector: { inherit: true } },
-        weakEntity: { connector: { inherit: true } },
-        relationship: { connector: { inherit: true } },
-        weakRelationship: { connector: { inherit: true } },
-      },
-    };
+    // crowd.syntax.canConnect = {
+    //   entity: {
+    //     relationship: { connector: { inherit: false } },
+    //     weakRelationship: { connector: { inherit: false, cardinality: '1', total: false } },
+    //     keyAttribute: { connector: { inherit: false, total: false } },
+    //     attribute: { connector: { inherit: false, total: false } },
+    //     multivaluedAttribute: { connector: { inherit: false, total: false } },
+    //     derivedAttribute: { connector: { inherit: false, total: false } },
+    //     inheritance: { connector: { inherit: true } },
+    //   },
+    //   weakEntity: {
+    //     relationship: { connector: { inherit: false } },
+    //     weakRelationship: { connector: { inherit: false, cardinality: 'N', total: true } },
+    //     weakKeyAttribute: { connector: { inherit: false, total: false } },
+    //     attribute: { connector: { inherit: false, total: false } },
+    //     multivaluedAttribute: { connector: { inherit: false, total: false } },
+    //     derivedAttribute: { connector: { inherit: false, total: false } },
+    //     inheritance: { connector: { inherit: true } },
+    //   },
+    //   relationship: {
+    //     entity: { connector: { inherit: false } },
+    //     weakEntity: { connector: { inherit: false } },
+    //     keyAttribute: { connector: { inherit: false, total: false } },
+    //     attribute: { connector: { inherit: false, total: false } },
+    //     //multivaluedAttribute: { connector: { inherit: false, total: false } },
+    //     derivedAttribute: { connector: { inherit: false, total: false } },
+    //     inheritance: { connector: { inherit: true } },
+    //   },
+    //   weakRelationship: {
+    //     entity: { connector: { inherit: false, cardinality: '1', total: false } },
+    //     weakEntity: { connector: { inherit: false, cardinality: 'N', total: true } },
+    //     weakKeyAttribute: { connector: { inherit: false, total: false } },
+    //     attribute: { connector: { inherit: false, total: false } },
+    //     //multivaluedAttribute: { connector: { inherit: false, total: false } },
+    //     derivedAttribute: { connector: { inherit: false, total: false } },
+    //     inheritance: { connector: { inherit: true } },
+    //   },
+    //   keyAttribute: {
+    //     entity: { connector: { inherit: false, total: false } },
+    //     relationship: { connector: { inherit: false, total: false } },
+    //   },
+    //   weakKeyAttribute: {
+    //     weakEntity: { connector: { inherit: false, total: false } },
+    //     weakRelationship: { connector: { inherit: false, total: false } },
+    //   },
+    //   attribute: {
+    //     entity: { connector: { inherit: false, total: false } },
+    //     weakEntity: { connector: { inherit: false, total: false } },
+    //     relationship: { connector: { inherit: false, total: false } },
+    //     weakRelationship: { connector: { inherit: false, total: false } },
+    //     attribute: { connector: { inherit: false, total: false } },
+    //   },
+    //   multivaluedAttribute: {
+    //     entity: { connector: { inherit: false, total: false } },
+    //     weakEntity: { connector: { inherit: false, total: false } },
+    //   },
+    //   derivedAttribute: {
+    //     entity: { connector: { inherit: false, total: false } },
+    //     weakEntity: { connector: { inherit: false, total: false } },
+    //     relationship: { connector: { inherit: false, total: false } },
+    //     weakRelationship: { connector: { inherit: false, total: false } },
+    //   },
+    //   inheritance: {
+    //     entity: { connector: { inherit: true } },
+    //     weakEntity: { connector: { inherit: true } },
+    //     relationship: { connector: { inherit: true } },
+    //     weakRelationship: { connector: { inherit: true } },
+    //   },
+    // };
 
     //do the syntax validation of an entity
-    crowd.syntax.validate.canConnect = function (options) {
-      try {
-        var error = new Error();
-        if (options?.elementA?.attributes?.type && options?.elementB?.attributes?.type && options?.link?.attributes?.type) {
-          var check = crowd.syntax.canConnect[options.elementA.attributes.type][options.elementB.attributes.type];
-          if (check) {
-            check = check[options.link.attributes.type];
-            if (check) {
-              $.each(check, function (key, value) {
-                if (options.link.attributes[key] != value) {
-                  error.name = 'link'
-                  error.message = 'Invalid link'
-                  throw error;
-                }
-              });
+    // crowd.syntax.validate.canConnect = function (options) {
+    //   try {
+    //     var error = new Error();
+    //     if (options?.elementA?.attributes?.type && options?.elementB?.attributes?.type && options?.link?.attributes?.type) {
+    //       var check = crowd.syntax.canConnect[options.elementA.attributes.type][options.elementB.attributes.type];
+    //       if (check) {
+    //         check = check[options.link.attributes.type];
+    //         if (check) {
+    //           $.each(check, function (key, value) {
+    //             if (options.link.attributes[key] != value) {
+    //               error.name = 'link'
+    //               error.message = 'Invalid link'
+    //               throw error;
+    //             }
+    //           });
 
-              //case there's no exception reset syntax errors values
-              options?.elementA?.prop('syntax', null);
-              options?.elementB?.prop('syntax', null);
-              options?.link?.prop('syntax', null);
-            } else {
-              error.name = 'connection-link'
-              error.message = 'Invalid connection link type';
-              throw error;
-            }
-          } else {
-            error.name = 'connection-element'
-            error.message = 'Invalid connection element type';
-            throw error;
-          }
-        } else {
-          error.name = 'disconnected'
-          error.message = 'Disconnected elements';
-          throw error;
-        }
-      } catch (error) {
-        console.log(error.name, error.message);
-        error.message = '<b>Syntax Error</b><br>' + error.message;
-        switch (error.name) {
-          case 'link': case 'connection-link':
-            if (options?.link?.attributes) options.link.prop('syntax', error.message);
-            break;
-          case 'connection-element':
-            if (options?.elementA?.attributes) options.elementA.prop('syntax', error.message + ' (' + options?.elementB?.attributes?.type + ')');
-            if (options?.elementB?.attributes) options.elementB.prop('syntax', error.message + ' (' + options?.elementA?.attributes?.type + ')');
-            if (options?.link?.attributes) options.link.prop('syntax', error.message + ' (' + options?.elementA?.attributes?.type + '-' + options?.elementB?.attributes?.type + ')');
-            break;
-          case 'disconnected':
-            if (options?.elementA?.attributes) options.elementA.prop('syntax', error.message);
-            if (options?.elementB?.attributes) options.elementB.prop('syntax', error.message);
-            if (options?.link?.attributes) options.link.prop('syntax', error.message);
-            break;
-        }
-      } finally {
-        crowd.inspector.loadContent();
-      }
-    };
+    //           //case there's no exception reset syntax errors values
+    //           options?.elementA?.prop('syntax', null);
+    //           options?.elementB?.prop('syntax', null);
+    //           options?.link?.prop('syntax', null);
+    //         } else {
+    //           error.name = 'connection-link'
+    //           error.message = 'Invalid connection link type';
+    //           throw error;
+    //         }
+    //       } else {
+    //         error.name = 'connection-element'
+    //         error.message = 'Invalid connection element type';
+    //         throw error;
+    //       }
+    //     } else {
+    //       error.name = 'disconnected'
+    //       error.message = 'Disconnected elements';
+    //       throw error;
+    //     }
+    //   } catch (error) {
+    //     console.log(error.name, error.message);
+    //     error.message = '<b>Syntax Error</b><br>' + error.message;
+    //     switch (error.name) {
+    //       case 'link': case 'connection-link':
+    //         if (options?.link?.attributes) options.link.prop('syntax', error.message);
+    //         break;
+    //       case 'connection-element':
+    //         if (options?.elementA?.attributes) options.elementA.prop('syntax', error.message + ' (' + options?.elementB?.attributes?.type + ')');
+    //         if (options?.elementB?.attributes) options.elementB.prop('syntax', error.message + ' (' + options?.elementA?.attributes?.type + ')');
+    //         if (options?.link?.attributes) options.link.prop('syntax', error.message + ' (' + options?.elementA?.attributes?.type + '-' + options?.elementB?.attributes?.type + ')');
+    //         break;
+    //       case 'disconnected':
+    //         if (options?.elementA?.attributes) options.elementA.prop('syntax', error.message);
+    //         if (options?.elementB?.attributes) options.elementB.prop('syntax', error.message);
+    //         if (options?.link?.attributes) options.link.prop('syntax', error.message);
+    //         break;
+    //     }
+    //   } finally {
+    //     crowd.inspector.loadContent();
+    //   }
+    // };
 
     //do the syntax validation of an entity
     // crowd.syntax.validate.entity = function (options) {
@@ -1489,17 +1491,17 @@ var CrowdEditorEer = {
     // });
 
     //event when the links source or target change
-    crowd.workspace.graph.on('change add remove', function (link, newSourceTarget) {
-      // console.log('change:source change:target', { link, previosAttributes: link._previousAttributes, newSourceTarget });
+    // crowd.workspace.graph.on('change add remove', function (link, newSourceTarget) {
+    //   // console.log('change:source change:target', { link, previosAttributes: link._previousAttributes, newSourceTarget });
 
-      if (link.isLink()) {
-        crowd.syntax.validate.canConnect({
-          elementA: link.getSourceElement(),
-          elementB: link.getTargetElement(),
-          link: link
-        });
-      }
-    });
+    //   if (link.isLink()) {
+    //     crowd.syntax.validate.canConnect({
+    //       elementA: link.getSourceElement(),
+    //       elementB: link.getTargetElement(),
+    //       link: link
+    //     });
+    //   }
+    // });
   },
   initReasoningValidator: function (crowd) {
     //todo

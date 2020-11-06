@@ -56,6 +56,7 @@
               "client/assets/js/crowd.editor.js",
               "client/assets/js/crowd.editor.eer.js",
               "client/assets/js/crowd.editor.uml.js",
+              "client/assets/js/crowd.editor.orm.js",
               "client/assets/js/crowd.metamodel.js",
               "client/assets/js/crowd.reasoning.js"
             ]
@@ -144,6 +145,7 @@
               "client/assets/js/crowd.editor.js",
               "client/assets/js/crowd.editor.eer.js",
               "client/assets/js/crowd.editor.uml.js",
+              "client/assets/js/crowd.editor.orm.js",
               "client/assets/js/crowd.metamodel.js",
               "client/assets/js/crowd.reasoning.js"
             ],
