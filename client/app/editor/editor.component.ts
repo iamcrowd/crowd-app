@@ -80,7 +80,8 @@ export class EditorComponent implements OnInit {
       uml: CrowdEditorUml,
       eer: CrowdEditorEer,
       orm: CrowdEditorOrm,
-      kf: { name: 'kf' }
+      kf: { name: 'kf', export: true },
+      owl: { name: 'owl', import: false }
     }
 
     const paletteSizes = {
@@ -95,6 +96,7 @@ export class EditorComponent implements OnInit {
       conceptualModel: availableConceptualModels[this.conceptualModel] ? availableConceptualModels[this.conceptualModel] : CrowdEditorUml,
       metamodelApi: new CrowdMetamodel({
         url: environment.metamodelUrl,
+        owlUrl: environment.metamodelOwlUrl,
         error: (error) => {
           iziToast.error({
             title: 'Error',

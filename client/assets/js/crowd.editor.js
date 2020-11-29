@@ -737,11 +737,13 @@ CrowdEditor.prototype.initTools = function () {
       );
 
       //draw a button for each conceptual model and put the name on data attribute
-      $.each(self.config.availableConceptualModels, function (conceptualModelName) {
-        $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').append(
-          '<li><button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-export-check-schema-' + self.id + '">' +
-          '<i class="fa fa-fw fa-long-arrow-right"></i> ' + conceptualModelName.toUpperCase() + ' Schema</button></li>'
-        );
+      $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
+        if (conceptualModel.export == null || conceptualModel.export) {
+          $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').append(
+            '<li><button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-export-check-schema-' + self.id + '">' +
+            '<i class="fa fa-fw fa-long-arrow-right"></i> ' + conceptualModelName.toUpperCase() + '</button></li>'
+          );
+        }
       });
 
       //append dom for the schemas modal when check export schemas
@@ -948,11 +950,12 @@ CrowdEditor.prototype.initTools = function () {
       //draw a button for each conceptual model and put the name on data attribute
       $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
         // if (conceptualModel.initPalette != null || conceptualModel.name == 'kf') {
-        $('[aria-labelledby="crowd-tools-import-dropdown-' + self.id + '"]').append(
-          '<li><button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-import-check-schema-' + self.id + '">' +
-          '<i class="fa fa-fw fa-long-arrow-left"></i> ' + conceptualModelName.toUpperCase() + ' Schema</button></li>'
-        );
-        // }
+        if (conceptualModel.import == null || conceptualModel.import) {
+          $('[aria-labelledby="crowd-tools-import-dropdown-' + self.id + '"]').append(
+            '<li><button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-import-check-schema-' + self.id + '">' +
+            '<i class="fa fa-fw fa-long-arrow-left"></i> ' + conceptualModelName.toUpperCase() + '</button></li>'
+          );
+        }
       });
 
       //append dom for the schemas modal when check import schemas
@@ -1453,6 +1456,7 @@ CrowdEditor.prototype.initTools = function () {
             self.config.reasoningApi.request({
               kf: schema,
               reasoner: options?.reasoner,
+              cards: options?.cards,
               success: (res) => {
                 // if (options?.success) options?.success({ reasoning: res })
                 self.config.metamodelApi.request({
@@ -1505,6 +1509,12 @@ CrowdEditor.prototype.initTools = function () {
                     <option>Konclude</option> \
                   </select> \
                 </div> \
+                <div class="form-group form-check"> \
+                  <input type="checkbox" class="form-check-input" id="crowd-tools-reasoning-options-cards-' + self.id + '"> \
+                  <label class="form-check-label" for="crowd-tools-reasoning-options-cards-' + self.id + '">Reason Cardinalities</label><br> \
+                  <small class="text-muted">(this may take too much time)</small><br> \
+                  <small class="text-danger">(warning: this will replace the current cardinalities with the inferred ones)</small> \
+                </div> \
               </div> \
               <div class="modal-footer"> \
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
@@ -1527,6 +1537,7 @@ CrowdEditor.prototype.initTools = function () {
       $('#crowd-tools-reasoning-call-' + self.id).on('click', function () {
         self.tools.reasoning.callReasoning({
           reasoner: $('#crowd-tools-reasoning-options-reasoner-' + self.id + ' option:selected').val(),
+          cards: $('#crowd-tools-reasoning-options-cards-' + self.id).is(":checked"),
           success: function (response) {
             //call reasoning interpretation for the specific conceptual model
             self.fromReasoning(response.schema, response.reasoning);

@@ -5,14 +5,15 @@ var CrowdReasoning = function (config) {
 CrowdReasoning.prototype.request = function (req) {
   var self = this;
 
-  console.log('ReasoningAPI: requesting ' + self.config.url);
+  console.log('ReasoningAPI: requesting ' + self.config.url, req.reasoner, req.cards);
 
   return $.ajax({
     type: "POST",
     url: self.config.url,
     data: {
       json: JSON.stringify(req.kf),
-      reasoner: req.reasoner
+      reasoner: req.reasoner,
+      cards: req.cards,
     },
     success: function (res) {
       res = JSON.parse(res);

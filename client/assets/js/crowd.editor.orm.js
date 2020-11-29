@@ -36,8 +36,8 @@ var CrowdEditorOrm = {
       const original_fill_constraint = '#FFFFFF';
       const original_strokeFill_constraint = '#A000A0';
 
-      const original_width_role = 28;
-      const original_height_role = 17;
+      const original_width_role = 90;
+      const original_height_role = 40;
       const original_rx_role = 3;
       const original_ry_role = 3;
       const original_fill_role = '#FFFFFF';
@@ -182,6 +182,108 @@ var CrowdEditorOrm = {
               tagName: 'text',
               selector: 'label'
             }
+          ]
+        }
+      );
+
+      //define orm role unary shape in joint
+      joint.dia.Element.define('orm.RoleUnary',
+        {
+          size: {
+            width: original_width_role,
+            height: original_height_role,
+          },
+          attrs: {
+            root: { magnet: false },
+            rel: {
+              magnet: 'passive',
+              y: 5,
+              x: 25,
+              width: 40,
+              height: 25,
+              strokeWidth: 2,
+              stroke: original_strokeFill_role,
+              rx: original_rx_role,
+              ry: original_ry_role,
+              fill: original_fill_role
+            },
+            unique: {
+              x1: 25,
+              y1: 0,
+              x2: 65,
+              y2: 0,
+              strokeWidth: 3,
+              stroke: '#8A0868',
+              'stroke-linecap': 'round'
+            },
+            label: {
+              text: 'role name',
+              textVerticalAnchor: 'middle',
+              textAnchor: 'middle',
+              x: 45,
+              y: 45,
+              fill: original_strokeFill_role,
+              fontSize: 14,
+              'font-family': 'Arial'
+            },
+            labelBackground: {
+              ref: 'label',
+              refX: 0,
+              refY: 0,
+              refHeight: '100%',
+              refWidth: '100%',
+              fill: '#ffffff'
+            },
+            leftRead: {
+              ref: 'label',
+              refX: '-13px',
+              refY: '20%',
+              fill: original_strokeFill_role,
+              display: 'none'
+            }
+          }
+        },
+        {
+          markup: [
+            {
+              tagName: 'g',
+              class: 'rotatable',
+              children: [
+                {
+                  tagName: 'g',
+                  class: 'scalable',
+                  children: [
+                    {
+                      tagName: 'rect',
+                      selector: 'rel'
+                    },
+                    {
+                      tagName: 'line',
+                      selector: 'unique'
+                    },
+                    {
+                      tagName: 'rect',
+                      selector: 'labelBackground',
+                    },
+                    {
+                      tagName: 'text',
+                      selector: 'label'
+                    },
+                    {
+                      tagName: 'path',
+                      selector: 'leftRead',
+                      attributes: {
+                        'd': 'M0 5 L8 0 L8 10 Z',
+                        'fill': original_strokeFill_role,
+                        'stroke': original_strokeFill_role,
+                        'stroke-width': 1,
+                        'pointer-events': 'none'
+                      }
+                    }
+                  ]
+                },
+              ]
+            },
           ]
         }
       );
@@ -376,8 +478,6 @@ var CrowdEditorOrm = {
               fontSize: 24,
               'text-anchor': 'start',
               transform: 'rotate(90 -1.8749999999999998,-2.5000000000000004)'
-
-
             },
             '.line2': {
               'stroke-linecap': 'null',
@@ -477,6 +577,15 @@ var CrowdEditorOrm = {
       type: 'value',
       name: 'Value',
       uri: 'http://crowd.fi.uncoma.edu.ar#value'
+    });
+
+    //add joint orm role unary to palette elements
+    crowd.palette.elements.roleUnary = new joint.shapes.orm.RoleUnary({
+      parentType: 'role',
+      type: 'roleUnary',
+      name: 'Role',
+      read: 'right',
+      uri: 'http://crowd.fi.uncoma.edu.ar#role'
     });
 
     //add joint orm union constraint to palette elements
@@ -627,6 +736,15 @@ var CrowdEditorOrm = {
       }
     });
 
+    //event when the role read change
+    crowd.workspace.graph.on('change:read', function (element, newRead) {
+      // console.log('change:uri', { element, newUri });
+
+      if (element.isElement() && element.attributes.parentType == "role") {
+        element.attr('leftRead/display', newRead == 'left' ? 'unset' : 'none');
+      }
+    });
+
     //event when the elements (specificly inheritance) subtype change
     crowd.workspace.graph.on('change:subtype', function (element, newSubtype) {
       // console.log('change:subtype', { element, newSubtype });
@@ -744,6 +862,7 @@ var CrowdEditorOrm = {
       case 'entity':
       case 'entityReferenceMode':
       case 'value':
+      case 'roleUnary':
         if (crowd.inspector.model.attributes.type != 'connector' || !crowd.inspector.model.attributes.inherit)
           crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
         break;
@@ -770,6 +889,13 @@ var CrowdEditorOrm = {
             { label: 'Value', value: 'value' },
           ]
         });
+        break;
+    }
+
+    //add read attribute for roles
+    switch (crowd.inspector.model.attributes.parentType) {
+      case 'role':
+        crowd.inspector.addAttribute({ label: 'Read to left?', property: 'read', type: 'boolean', map: { true: 'left', false: 'right' } });
         break;
     }
 

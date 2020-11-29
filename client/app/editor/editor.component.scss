@@ -45,11 +45,13 @@
   background: rgba(0, 0, 0, 0.7);
   text-align: center;
   transition: height 0.3s;
+  color: rgba(0, 0, 0, 0);
 }
 
 .card:hover > .crowd-diagram-load-button {
   display: unset;
   height: 100%;
+  color: white;
 }
 
 .crowd-diagram-load-button > p {
@@ -59,8 +61,19 @@
   font-weight: 500;
 }
 
+.crowd-diagram-header {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .crowd-diagram-preview {
   background: white;
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  object-position: top;
+  overflow: hidden;
   // border-radius: 0px 0px 4px 4px;
 }
 

@@ -12,11 +12,13 @@
       <div class="modal-body">
         <div class="row">
           <div class="col-md-6 col-lg-3 col-xl-3" *ngFor="let diagram of diagrams">
-            <div class="card text-white bg-dark mb-3" (click)="loadDiagram(diagram)">
+            <div class="card text-white bg-dark mb-3" (click)="loadDiagram(diagram)" title="{{diagram.name}}"
+              data-toggle="tooltip" data-placement="top" data-container="#crowd-tools-load-modal"
+              data-boundary="viewport" data-trigger="hover">
               <div class="crowd-diagram-load-button" *ngIf="diagram.preview">
                 <p>Load</p>
               </div>
-              <div class="card-header">
+              <div class="card-header crowd-diagram-header">
                 <span *ngIf="!diagram.meta" class="crowd-model-label {{diagram.model}}">{{diagram.model}}</span>
                 <span *ngIf="diagram.meta" class="crowd-model-label meta">KF</span>{{diagram.name}}
               </div>
