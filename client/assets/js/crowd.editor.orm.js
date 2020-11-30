@@ -38,8 +38,6 @@ var CrowdEditorOrm = {
 
       const original_width_role = 90;
       const original_height_role = 40;
-      const original_rx_role = 3;
-      const original_ry_role = 3;
       const original_fill_role = '#FFFFFF';
       const original_strokeFill_role = '#333333';
 
@@ -204,8 +202,8 @@ var CrowdEditorOrm = {
               height: 25,
               strokeWidth: 2,
               stroke: original_strokeFill_role,
-              rx: original_rx_role,
-              ry: original_ry_role,
+              // rx: original_rx_role,
+              // ry: original_ry_role,
               fill: original_fill_role
             },
             unique: {
@@ -236,11 +234,10 @@ var CrowdEditorOrm = {
               fill: '#ffffff'
             },
             leftRead: {
+              display: 'none',
               ref: 'label',
               refX: '-13px',
               refY: '20%',
-              fill: original_strokeFill_role,
-              display: 'none'
             }
           },
         },
@@ -307,8 +304,8 @@ var CrowdEditorOrm = {
               height: 25,
               strokeWidth: 2,
               stroke: original_strokeFill_role,
-              rx: original_rx_role,
-              ry: original_ry_role,
+              // rx: original_rx_role,
+              // ry: original_ry_role,
               fill: original_fill_role
             },
             relRight: {
@@ -320,8 +317,8 @@ var CrowdEditorOrm = {
               height: 25,
               strokeWidth: 2,
               stroke: original_strokeFill_role,
-              rx: original_rx_role,
-              ry: original_ry_role,
+              // rx: original_rx_role,
+              // ry: original_ry_role,
               fill: original_fill_role
             },
             uniqueLeft: {
@@ -372,11 +369,11 @@ var CrowdEditorOrm = {
               fill: '#ffffff'
             },
             leftRead: {
+              display: 'none',
               ref: 'label',
               refX: '-13px',
               refY: '20%',
-              fill: original_strokeFill_role,
-              display: 'none'
+              fill: original_strokeFill_role
             }
           },
         },
@@ -782,15 +779,60 @@ var CrowdEditorOrm = {
 
     //add joint orm connector to palette links
     crowd.palette.links.connector = new joint.shapes.standard.Link({
+      parentType: 'connector',
       type: 'connector',
-      inherit: false,
+      direction: null,
+      mandatory: true,
       attrs: {
         line: {
           stroke: 'black',
           strokeWidth: 2,
           sourceMarker: {},
           targetMarker: {
-            d: ''
+            stroke: '#A000A0',
+            fill: '#A000A0',
+            d: 'M 16 0 a 8 8 0 1 0 0 1'
+          }
+        }
+      }
+    });
+
+    //add joint orm inheritance connector to palette links
+    crowd.palette.links.inheritanceConnector = new joint.shapes.standard.Link({
+      parentType: 'connector',
+      type: 'inheritanceConnector',
+      direction: 'target',
+      mandatory: false,
+      attrs: {
+        line: {
+          stroke: '#A000A0',
+          strokeWidth: 3,
+          sourceMarker: {},
+          targetMarker: {
+            stroke: '#A000A0',
+            fill: '#A000A0',
+            d: 'M 20 10 0 0 20 -10 Z'
+          }
+        }
+      }
+    });
+
+    //add joint orm constraint connector to palette links
+    crowd.palette.links.constraintConnector = new joint.shapes.standard.Link({
+      parentType: 'connector',
+      type: 'constraintConnector',
+      direction: 'target',
+      mandatory: false,
+      attrs: {
+        line: {
+          stroke: '#A000A0',
+          'stroke-dasharray': '6 4',
+          strokeWidth: 2,
+          sourceMarker: {},
+          targetMarker: {
+            stroke: '#A000A0',
+            fill: '#A000A0',
+            d: 'M 20 10 0 0 20 -10 Z'
           }
         }
       }
@@ -802,19 +844,64 @@ var CrowdEditorOrm = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkTool({
         link: {
-          type: 'connector',
+          type: config.type ? config.type : 'connector',
+          port: config.port ? config.port : null,
+          manget: config.manget ? config.manget : null,
           props: {
-            inherit: config.inherit ? config.inherit : false
+            mandatory: config.mandatory ? config.mandatory : false,
+            direction: config.direction ? config.direction : null
           }
-        }
+        },
+        x: config.position?.x ? config.position?.x : '100%',
+        y: config.position?.y ? config.position?.y : null,
+        offset: {
+          x: config.offset?.x ? config.offset?.x : 25,
+          y: config.offset?.y ? config.offset?.y : -15
+        },
+        markup: crowd.workspace.tools.elements.markup({
+          icon: config.icon ? config.icon : 'call_made',
+          tooltip: {
+            title: config.title ? config.title : 'Click and drag to connect the object',
+            placement: config.placement ? config.placement : "right"
+          }
+        })
       });
     }
+
+    //link tool with the inheritance link type
+    var linkInheritanceTool = function (config) {
+      config = config ? config : {};
+      return crowd.workspace.tools.elements.linkTool({
+        link: {
+          type: 'inheritanceConnector',
+          port: config.port ? config.port : null,
+          manget: config.manget ? config.manget : null,
+          props: {
+            direction: config.direction ? config.direction : 'target',
+          }
+        },
+        x: config.position?.x ? config.position?.x : '50%',
+        y: config.position?.y ? config.position?.y : null,
+        offset: {
+          x: config.offset?.x ? config.offset?.x : 0,
+          y: config.offset?.y ? config.offset?.y : -15
+        },
+        markup: crowd.workspace.tools.elements.markup({
+          icon: config.icon ? config.icon : 'call_merge',
+          tooltip: {
+            title: 'Click and drag to connect the object with a <b class="crowd-bold-color">inheritance</b> connector',
+            placement: 'top'
+          }
+        })
+      });
+    };
 
     //create tools view for entities
     crowd.workspace.tools.elements.elementsToolsView['entity'] = new joint.dia.ToolsView({
       name: 'entity-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool()
+        linkTool(),
+        linkInheritanceTool()
       ])
     });
 
@@ -822,7 +909,8 @@ var CrowdEditorOrm = {
     crowd.workspace.tools.elements.elementsToolsView['entityReferenceMode'] = new joint.dia.ToolsView({
       name: 'entity-ref-mode-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool()
+        linkTool(),
+        linkInheritanceTool()
       ])
     });
 
@@ -830,7 +918,111 @@ var CrowdEditorOrm = {
     crowd.workspace.tools.elements.elementsToolsView['value'] = new joint.dia.ToolsView({
       name: 'value-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool()
+        linkTool(),
+        linkInheritanceTool()
+      ])
+    });
+
+    //create tools view for role unary
+    crowd.workspace.tools.elements.elementsToolsView['roleUnary'] = new joint.dia.ToolsView({
+      name: 'role-unary-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({
+          port: 'left',
+          magnet: 'rel'
+        })
+      ])
+    });
+
+    //create tools view for role binary
+    crowd.workspace.tools.elements.elementsToolsView['roleBinary'] = new joint.dia.ToolsView({
+      name: 'role-binary-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({
+          port: 'left',
+          magnet: 'relLeft',
+          position: { x: '0%', y: '50%' },
+          offset: { x: -25, y: 10 },
+          icon: 'arrow_backward',
+          placement: 'left',
+          title: 'Click and drag to connect the object with a connector from <b class="crowd-bold-color">left</b>'
+        }),
+        linkTool({
+          port: 'right',
+          magnet: 'relRight',
+          position: { x: '100%', y: '50%' },
+          offset: { x: 25, y: 10 },
+          icon: 'arrow_forward',
+          placement: 'right',
+          title: 'Click and drag to connect the object with a connector from <b class="crowd-bold-color">right</b>'
+        }),
+      ])
+    });
+
+    //create tools view for constraint union
+    crowd.workspace.tools.elements.elementsToolsView['union'] = new joint.dia.ToolsView({
+      name: 'union-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({
+          type: 'constraintConnector',
+          title: 'Click and drag to connect the object with a <b class="crowd-bold-color">constraint</b> connector'
+        })
+      ])
+    });
+
+    //create tools view for constraint exclusive
+    crowd.workspace.tools.elements.elementsToolsView['exclusive'] = new joint.dia.ToolsView({
+      name: 'exclusive-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({
+          type: 'constraintConnector',
+          title: 'Click and drag to connect the object with a <b class="crowd-bold-color">constraint</b> connector'
+        })
+      ])
+    });
+
+    //create tools view for constraint exclusive exhaustive
+    crowd.workspace.tools.elements.elementsToolsView['exclusiveExhaustive'] = new joint.dia.ToolsView({
+      name: 'exclusive-exhaustive-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({
+          type: 'constraintConnector',
+          title: 'Click and drag to connect the object with a <b class="crowd-bold-color">constraint</b> connector'
+        })
+      ])
+    });
+
+    //create tools view for constraint subset
+    crowd.workspace.tools.elements.elementsToolsView['subset'] = new joint.dia.ToolsView({
+      name: 'subset-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({
+          type: 'constraintConnector',
+          title: 'Click and drag to connect the object with a <b class="crowd-bold-color">constraint</b> connector'
+        }),
+        // linkTool({
+        //   type: 'constraintConnector', icon: 'maximize', position: { x: '75%', y: null }, offset: { x: 12, y: -15 },
+        //   placement: 'top', title: 'Click and drag to connect the object with a <b class="crowd-bold-color">constraint</b> connector'
+        // }),
+        linkTool({
+          type: 'constraintConnector',
+          direction: 'target',
+          icon: 'arrow_forward',
+          position: { x: '100%', y: '50%' },
+          offset: { x: 25, y: 10 },
+          title: 'Click and drag to connect the object with a <b class="crowd-bold-color">constraint</b> connector directioned'
+        })
+      ])
+    });
+
+    //create tools view for constraint equality
+    crowd.workspace.tools.elements.elementsToolsView['equality'] = new joint.dia.ToolsView({
+      name: 'equality-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({
+          type: 'constraintConnector',
+          title: 'Click and drag to connect the object with a <b class="crowd-bold-color">constraint</b> connector'
+        })
       ])
     });
   },
@@ -924,61 +1116,92 @@ var CrowdEditorOrm = {
       }
     });
 
-    //event when the elements (specificly inheritance) subtype change
-    crowd.workspace.graph.on('change:subtype', function (element, newSubtype) {
-      // console.log('change:subtype', { element, newSubtype });
-
-      if (element.isElement() && element.prop('type') == 'inheritance') {
-        var subtypesText = { overlaped: 'o', disjoint: 'd', union: 'U' };
-        element.attr('text/text', subtypesText[newSubtype]);
-      }
-    });
-
-    //event when the link inherit change
-    crowd.workspace.graph.on('change:inherit', function (link, newInherit) {
-      // console.log('change:inherit', { link, newInherit });
+    //event when the links type change (types are: association, aggregation, composition, etc)
+    crowd.workspace.graph.on('change:type', function (link, newType) {
+      // console.log('change:type', { link, newType });
 
       if (link.isLink()) {
-        if (newInherit) {
-          link.trigger('change:inheritChild', link, link.prop('inheritChild'));
-        } else {
-          link.trigger('change:cardinality', link, link.prop('cardinality'));
+        //replace link attributes and markup with the palette default component of the newtype
+        link.attributes.attrs = $.extend(true, {}, crowd.palette.links[newType].attributes.attrs);
+        link.markup = crowd.palette.links[newType].markup;
+
+        //get link view
+        var linkView = link.findView(crowd.workspace.paper);
+
+        //redraw the link with the new style
+        linkView.render();
+
+        //trigger the change direction event to update the marker with the direction of the link
+        //(because it is overwrited when replaced the attributes.attrs)
+        //check if the newType is valid with that direction
+        if (newType != 'connector' && newType != 'constraintConnector' && (!link.prop('direction') || link.prop('direction') == 'null'))
+          link.attributes.direction = 'target';
+        else if (newType == 'connector')
+          link.attributes.direction = null;
+        link.trigger('change:direction', link, link.prop('direction'));
+
+        if (newType == 'inheritanceConnector' || newType == 'constraintConnector') {
+          link.attributes.mandatory = false;
         }
+        link.trigger('change:mandatory', link, link.prop('mandatory'));
+
         crowd.inspector.loadContent();
       }
     });
 
     //event when the link inherit child change
-    crowd.workspace.graph.on('change:inheritChild', function (link, newInheritChild) {
-      // console.log('change:inheritChild', { link, newInheritChild });
+    crowd.workspace.graph.on('change:mandatory', function (link, newMandatory) {
+      // console.log('change:mandatory', { link, newMandatory });
 
       if (link.isLink()) {
         var linkSourceType = link.getSourceElement()?.attributes?.parentType;
-        var linkTargetType = link.getTargetElement()?.attributes?.parentType;
+        // var linkTargetType = link.getTargetElement()?.attributes?.parentType;
 
-        if (link.attributes.inherit) {
-          link.labels([{
-            attrs: {
-              text: {
-                text: newInheritChild ? 'U' : null,
-                class: newInheritChild ? 'crowd-link-text inherit' : ''
-              },
-              rect: {
-                fill: newInheritChild ? "none" : getCSS('background-color', 'crowd-workspace')
-              }
-            },
-            position: {
-              angle: newInheritChild ? (linkSourceType == 'inheritance' || (linkSourceType == null && linkTargetType != 'inheritance') ? -90 : 90) : null,
-              args: {
-                keepGradient: newInheritChild
-              }
-            }
-          }]);
-          if (newInheritChild)
-            link.prop('total', false);
+        if (link.attributes.type == 'connector') {
+          if (linkSourceType == 'entity') {
+            link.attributes.attrs.line.sourceMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.targetMarker);
+            link.attributes.attrs.line.targetMarker = {};
+          } else {
+            link.attributes.attrs.line.targetMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.targetMarker);
+            link.attributes.attrs.line.sourceMarker = {};
+          }
+
+          link.attr('line/sourceMarker/display', newMandatory ? 'unset' : 'none');
+          link.attr('line/targetMarker/display', newMandatory ? 'unset' : 'none');
+
+          //get link view
+          var linkView = link.findView(crowd.workspace.paper);
+
+          //redraw the link with the new style
+          linkView.render();
         }
 
         crowd.inspector.loadContent();
+      }
+    });
+
+    //event when the links direction change
+    crowd.workspace.graph.on('change:direction', function (link, newDirection) {
+      // console.log('change:direction', { link, newDirection });
+
+      if (link.isLink()) {
+        if (newDirection == 'source') {
+          link.attributes.attrs.line.sourceMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.targetMarker);
+          link.attributes.attrs.line.targetMarker = {};
+        }
+        else if (newDirection == 'target') {
+          link.attributes.attrs.line.targetMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.targetMarker);
+          link.attributes.attrs.line.sourceMarker = {};
+        } else {
+          link.attributes.attrs.line.targetMarker = {};
+          link.attributes.attrs.line.sourceMarker = {};
+        }
+
+        //get link view
+        var linkView = link.findView(crowd.workspace.paper);
+
+        //redraw the link with the new style
+        linkView.render();
       }
     });
 
@@ -987,8 +1210,7 @@ var CrowdEditorOrm = {
       // console.log('change:source change:target', { link, newSourceTarget });
 
       if (link.isLink()) {
-        link.trigger('change:cardinality', link, link.prop('cardinality'));
-        link.trigger('change:inheritChild', link, link.prop('inheritChild'));
+        link.trigger('change:mandatory', link, link.prop('mandatory'));
       }
     });
 
@@ -1043,8 +1265,7 @@ var CrowdEditorOrm = {
       case 'value':
       case 'roleUnary':
       case 'roleBinary':
-        if (crowd.inspector.model.attributes.type != 'connector' || !crowd.inspector.model.attributes.inherit)
-          crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
+        crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
         break;
     }
 
@@ -1123,10 +1344,51 @@ var CrowdEditorOrm = {
         break;
     }
 
-    //add type attribute for connectors
+    //add type and direction attribute for connectors
+    switch (crowd.inspector.model.attributes.parentType) {
+      case 'connector':
+        crowd.inspector.addAttribute({
+          label: 'Type', property: 'type', type: 'multiple',
+          values: [
+            { label: 'Normal', value: 'connector' },
+            { label: 'Inheritance', value: 'inheritanceConnector' },
+            { label: 'Constraint', value: 'constraintConnector' },
+          ]
+        });
+        break;
+    }
+
+    //add mandatory attribute for normal connectors
     switch (crowd.inspector.model.attributes.type) {
       case 'connector':
-        crowd.inspector.addAttribute({ label: 'Is for Inheritance?', property: 'inherit', type: 'boolean', map: { true: true, false: false } });
+        crowd.inspector.addAttribute({ label: 'Mandatory?', property: 'mandatory', type: 'boolean', map: { true: true, false: false } });
+        break;
+    }
+
+    //add direction attribute for inheritance connectors
+    switch (crowd.inspector.model.attributes.type) {
+      case 'inheritanceConnector':
+        crowd.inspector.addAttribute({
+          label: 'Direction', property: 'direction', type: 'multiple',
+          values: [
+            { label: 'Source', value: 'source' },
+            { label: 'Target', value: 'target' },
+          ]
+        });
+        break;
+    }
+
+    //add direction attribute for constraint connectors
+    switch (crowd.inspector.model.attributes.type) {
+      case 'constraintConnector':
+        crowd.inspector.addAttribute({
+          label: 'Direction', property: 'direction', type: 'multiple',
+          values: [
+            { label: 'None', value: null },
+            { label: 'Source', value: 'source' },
+            { label: 'Target', value: 'target' },
+          ]
+        });
         break;
     }
 

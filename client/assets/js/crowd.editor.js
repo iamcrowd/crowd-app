@@ -2074,7 +2074,11 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         var link = config.link && config.link.type ? self.palette.links[config.link.type].clone() : self.palette.links.basic.clone();
 
         //set the source to the selected element
-        link.source({ id: this.model.id });
+        link.source({
+          id: this.model.id,
+          ...config.link?.port ? { port: config.link.port } : {},
+          ...config.link?.magnet ? { magnet: config.link.magnet } : {},
+        });
 
         //get event mouse point depending on browser
         var eventPoint = getEventClientPoint(evt);
@@ -2090,6 +2094,9 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         //add it to the graph
         self.workspace.graph.addCell(link);
 
+        //to put links behind elements
+        link.toBack();
+
         //enumerate the uri of the new link to differentiate it from others
         if (self.config.enumerate) {
           link.prop('uri', link.prop('uri') + '-' + self.enumerate.getNumber(link));
@@ -2097,7 +2104,7 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
 
         //change specific props of the link if they are defined
         if (config.link && config.link.props) {
-          for (prop in config.link.props) {
+          for (let prop in config.link.props) {
             link.prop(prop, config.link.props[prop]);
           }
         }
