@@ -197,6 +197,7 @@ var CrowdEditorOrm = {
             root: { magnet: false },
             rel: {
               magnet: 'passive',
+              port: 'left',
               y: 5,
               x: 25,
               width: 40,
@@ -208,9 +209,9 @@ var CrowdEditorOrm = {
               fill: original_fill_role
             },
             unique: {
-              x1: 25,
+              x1: 30,
               y1: 0,
-              x2: 65,
+              x2: 60,
               y2: 0,
               strokeWidth: 3,
               stroke: '#8A0868',
@@ -241,7 +242,7 @@ var CrowdEditorOrm = {
               fill: original_strokeFill_role,
               display: 'none'
             }
-          }
+          },
         },
         {
           markup: [
@@ -260,6 +261,154 @@ var CrowdEditorOrm = {
                     {
                       tagName: 'line',
                       selector: 'unique'
+                    },
+                    {
+                      tagName: 'rect',
+                      selector: 'labelBackground',
+                    },
+                    {
+                      tagName: 'text',
+                      selector: 'label'
+                    },
+                    {
+                      tagName: 'path',
+                      selector: 'leftRead',
+                      attributes: {
+                        'd': 'M0 5 L8 0 L8 10 Z',
+                        'fill': original_strokeFill_role,
+                        'stroke': original_strokeFill_role,
+                        'stroke-width': 1,
+                        'pointer-events': 'none'
+                      }
+                    }
+                  ]
+                },
+              ]
+            },
+          ]
+        }
+      );
+
+      //define orm role binary shape in joint
+      joint.dia.Element.define('orm.RoleBinary',
+        {
+          size: {
+            width: original_width_role,
+            height: original_height_role,
+          },
+          attrs: {
+            root: { magnet: false },
+            relLeft: {
+              magnet: 'passive',
+              port: 'left',
+              y: 5,
+              x: 5,
+              width: 40,
+              height: 25,
+              strokeWidth: 2,
+              stroke: original_strokeFill_role,
+              rx: original_rx_role,
+              ry: original_ry_role,
+              fill: original_fill_role
+            },
+            relRight: {
+              magnet: 'passive',
+              port: 'right',
+              y: 5,
+              x: 45,
+              width: 40,
+              height: 25,
+              strokeWidth: 2,
+              stroke: original_strokeFill_role,
+              rx: original_rx_role,
+              ry: original_ry_role,
+              fill: original_fill_role
+            },
+            uniqueLeft: {
+              x1: 10,
+              y1: 0,
+              x2: 40,
+              y2: 0,
+              strokeWidth: 3,
+              stroke: '#8A0868',
+              'stroke-linecap': 'round'
+            },
+            uniqueRight: {
+              display: 'none',
+              x1: 50,
+              y1: 0,
+              x2: 80,
+              y2: 0,
+              strokeWidth: 3,
+              stroke: '#8A0868',
+              'stroke-linecap': 'round'
+            },
+            uniqueFull: {
+              display: 'none',
+              x1: 10,
+              y1: 0,
+              x2: 80,
+              y2: 0,
+              strokeWidth: 3,
+              stroke: '#8A0868',
+              'stroke-linecap': 'round'
+            },
+            label: {
+              text: 'role name',
+              textVerticalAnchor: 'middle',
+              textAnchor: 'middle',
+              x: 45,
+              y: 45,
+              fill: original_strokeFill_role,
+              fontSize: 14,
+              'font-family': 'Arial'
+            },
+            labelBackground: {
+              ref: 'label',
+              refX: 0,
+              refY: 0,
+              refHeight: '100%',
+              refWidth: '100%',
+              fill: '#ffffff'
+            },
+            leftRead: {
+              ref: 'label',
+              refX: '-13px',
+              refY: '20%',
+              fill: original_strokeFill_role,
+              display: 'none'
+            }
+          },
+        },
+        {
+          markup: [
+            {
+              tagName: 'g',
+              class: 'rotatable',
+              children: [
+                {
+                  tagName: 'g',
+                  class: 'scalable',
+                  children: [
+                    {
+                      tagName: 'rect',
+                      selector: 'relLeft'
+                    },
+                    {
+                      tagName: 'rect',
+                      selector: 'relRight'
+                    },
+                    {
+                      tagName: 'line',
+                      selector: 'uniqueLeft'
+                    },
+                    {
+                      tagName: 'line',
+                      selector: 'uniqueRight'
+                    },
+                    {
+                      tagName: 'line',
+                      selector: 'uniqueFull'
                     },
                     {
                       tagName: 'rect',
@@ -588,6 +737,19 @@ var CrowdEditorOrm = {
       uri: 'http://crowd.fi.uncoma.edu.ar#role'
     });
 
+    //add joint orm role binary to palette elements
+    crowd.palette.elements.roleBinary = new joint.shapes.orm.RoleBinary({
+      parentType: 'role',
+      type: 'roleBinary',
+      name: 'Role',
+      read: 'right',
+      cardinality: {
+        left: 'one',
+        right: 'many'
+      },
+      uri: 'http://crowd.fi.uncoma.edu.ar#role'
+    });
+
     //add joint orm union constraint to palette elements
     crowd.palette.elements.union = new joint.shapes.orm.Union({
       parentType: 'constraint',
@@ -738,10 +900,27 @@ var CrowdEditorOrm = {
 
     //event when the role read change
     crowd.workspace.graph.on('change:read', function (element, newRead) {
-      // console.log('change:uri', { element, newUri });
+      // console.log('change:read', { element, newRead });
 
       if (element.isElement() && element.attributes.parentType == "role") {
         element.attr('leftRead/display', newRead == 'left' ? 'unset' : 'none');
+      }
+    });
+
+    //event when the role cardinality change
+    crowd.workspace.graph.on('change:cardinality', function (element, newCardinality) {
+      // console.log('change:cardinality', { element, newCardinality });
+
+      if (element.isElement() && element.attributes.parentType == "role" && newCardinality) {
+        if (newCardinality.left == 'many' && newCardinality.right == 'many') {
+          element.attr('uniqueLeft/display', 'none');
+          element.attr('uniqueRight/display', 'none');
+          element.attr('uniqueFull/display', 'unset');
+        } else {
+          element.attr('uniqueLeft/display', newCardinality.left == 'one' ? 'unset' : 'none');
+          element.attr('uniqueRight/display', newCardinality.right == 'one' ? 'unset' : 'none');
+          element.attr('uniqueFull/display', 'none');
+        }
       }
     });
 
@@ -863,6 +1042,7 @@ var CrowdEditorOrm = {
       case 'entityReferenceMode':
       case 'value':
       case 'roleUnary':
+      case 'roleBinary':
         if (crowd.inspector.model.attributes.type != 'connector' || !crowd.inspector.model.attributes.inherit)
           crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
         break;
@@ -896,6 +1076,30 @@ var CrowdEditorOrm = {
     switch (crowd.inspector.model.attributes.parentType) {
       case 'role':
         crowd.inspector.addAttribute({ label: 'Read to left?', property: 'read', type: 'boolean', map: { true: 'left', false: 'right' } });
+    }
+
+    //add cardinality attribute for role binary
+    switch (crowd.inspector.model.attributes.type) {
+      case 'roleBinary':
+        crowd.inspector.addAttribute({
+          label: 'Cardinality', property: 'cardinality', type: 'object',
+          parameters: [
+            {
+              label: 'Left', property: 'left', type: 'multiple',
+              values: [
+                { label: 'One', value: 'one' },
+                { label: 'Many', value: 'many' },
+              ]
+            },
+            {
+              label: 'Right', property: 'right', type: 'multiple',
+              values: [
+                { label: 'One', value: 'one' },
+                { label: 'Many', value: 'many' },
+              ]
+            },
+          ]
+        });
         break;
     }
 

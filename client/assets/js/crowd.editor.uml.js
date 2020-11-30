@@ -1212,7 +1212,7 @@ var CrowdEditorUml = {
           }
 
           //search for links connected to the class for add them to the links collection
-          connectedLinks = $.map(crowd.workspace.graph.getConnectedLinks(cell), (link) => {
+          var connectedLinks = $.map(crowd.workspace.graph.getConnectedLinks(cell), (link) => {
             return { cell: cell, link: link };
           });
           if (cell.ports?.roleSource != null)
