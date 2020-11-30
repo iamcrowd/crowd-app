@@ -239,10 +239,10 @@ CrowdEditor.prototype.initPalette = function () {
     });
 
     $('body').on('mouseup.fly', function (e) {
-      var x = e.pageX;
-      var y = e.pageY;
-      var target = self.workspace.paper.$el.offset();
-      var origin = self.palette.paper.$el.offset();
+      // var x = e.pageX;
+      // var y = e.pageY;
+      // var target = self.workspace.paper.$el.offset();
+      // var origin = self.palette.paper.$el.offset();
 
       //dropped over workspaces and not over palette
       // if ((x > target.left && x < target.left + self.workspace.paper.$el.width() && y > target.top && y < target.top + self.workspace.paper.$el.height()) &&
@@ -885,8 +885,9 @@ CrowdEditor.prototype.initTools = function () {
             if (self.config.ngRouter) {
               self.config.ngRouter.navigate(['/editor/' + diagram.model], { state: { schema: diagram.schema, file: diagram.file } });
               // $('.modal').modal('hide');
-            } else
+            } else {
               window.location.href = '/editor/' + diagram.model;
+            }
           } else {
             if (self.config.tools && self.config.tools.import && self.config.tools.import.errors && self.config.tools.import.errors.missingModelPalette)
               self.config.tools.import.errors.missingModelPalette(diagram.model);
@@ -1007,7 +1008,7 @@ CrowdEditor.prototype.initTools = function () {
 
       //event handler when click import check schema
       $('[name="crowd-tools-import-check-schema-' + self.id + '"]').on('click', function (event) {
-        var btn = this;
+        // var btn = this;
         event.stopPropagation();
 
         var model = $(this).attr('data-model');
@@ -2235,7 +2236,7 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
 
         //change specific props of the link if they are defined
         if (config.link && config.link.props) {
-          for (prop in config.link.props) {
+          for (let prop in config.link.props) {
             link.prop(prop, config.link.props[prop]);
           }
         }
@@ -2438,7 +2439,7 @@ CrowdEditor.prototype.initLinksToolsViews = function () {
 
         //change specific props of the link if they are defined
         if (config.link && config.link.props) {
-          for (prop in config.link.props) {
+          for (let prop in config.link.props) {
             link.prop(prop, config.link.props[prop]);
           }
         }
@@ -2497,7 +2498,7 @@ CrowdEditor.prototype.initLinksToolsViews = function () {
 
         //change specific props of the link if they are defined
         if (config.link && config.link.props) {
-          for (prop in config.link.props) {
+          for (let prop in config.link.props) {
             link.prop(prop, config.link.props[prop]);
           }
         }
@@ -2653,18 +2654,6 @@ CrowdEditor.prototype.initInspector = function () {
           );
         });
         break;
-      case 'text': default:
-        dom = $('<span class="row"> \
-          <div class="col"> \
-            <div class="form-group"> \
-              ' + (attribute.label ? '<label>' + attribute.label + '</label>' : '') + ' \
-              <' + (attribute.input == 'textarea' ? 'textarea rows="' + (attribute.inputRows ? attribute.inputRows : 3) + '"' : 'input type="text"') + ' \
-              placeholder="' + (attribute.placeholder ? attribute.placeholder : attribute.label) + '" \
-              class="form-control" id="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '" /> \
-            </div> \
-          </div> \
-        </span>');
-        break;
       case 'alert':
         dom = $((attribute.label ? '<label>' + attribute.label + '</label>' : '') + ' \
           <div class="alert alert-' + (attribute.color ? attribute.color : 'dark') + '" role="alert" \
@@ -2701,6 +2690,18 @@ CrowdEditor.prototype.initInspector = function () {
             <div class="text-center"> \
               <button class="btn btn-primary" id="crowd-inspector-content-add-' + attribute.elementID + '-' + self.id + '" \
               data-toggle="tooltip" data-original-title="Add element" data-placement="top"><i class="fa fa-fw fa-plus"></i></button> \
+            </div> \
+          </div> \
+        </span>');
+        break;
+      case 'text': default:
+        dom = $('<span class="row"> \
+          <div class="col"> \
+            <div class="form-group"> \
+              ' + (attribute.label ? '<label>' + attribute.label + '</label>' : '') + ' \
+              <' + (attribute.input == 'textarea' ? 'textarea rows="' + (attribute.inputRows ? attribute.inputRows : 3) + '"' : 'input type="text"') + ' \
+              placeholder="' + (attribute.placeholder ? attribute.placeholder : attribute.label) + '" \
+              class="form-control" id="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '" /> \
             </div> \
           </div> \
         </span>');
@@ -2782,9 +2783,7 @@ CrowdEditor.prototype.initInspector = function () {
       case 'multiple':
         $('#crowd-inspector-content-' + attribute.elementID + '-' + propertyValue + '-' + self.id).prop("checked", true);
         break;
-      case 'text': default:
-        $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id).val(propertyValue);
-        break;
+
       case 'alert':
         if (propertyValue.title && propertyValue.contents) {
           propertyValue =
@@ -2818,6 +2817,9 @@ CrowdEditor.prototype.initInspector = function () {
           self.inspector.loadContent();
           $(".tooltip").tooltip('hide');
         });
+        break;
+      case 'text': default:
+        $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id).val(propertyValue);
         break;
     }
   }

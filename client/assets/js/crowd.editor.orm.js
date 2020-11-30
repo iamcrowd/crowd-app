@@ -321,6 +321,19 @@ var CrowdEditorOrm = {
               // ry: original_ry_role,
               fill: original_fill_role
             },
+            relCenter: {
+              magnet: 'passive',
+              port: 'center',
+              y: 5,
+              x: 44,
+              width: 2,
+              height: 25,
+              strokeWidth: 2,
+              stroke: original_strokeFill_role,
+              // rx: original_rx_role,
+              // ry: original_ry_role,
+              fill: original_fill_role
+            },
             uniqueLeft: {
               x1: 10,
               y1: 0,
@@ -394,6 +407,10 @@ var CrowdEditorOrm = {
                     {
                       tagName: 'rect',
                       selector: 'relRight'
+                    },
+                    {
+                      tagName: 'rect',
+                      selector: 'relCenter'
                     },
                     {
                       tagName: 'line',
