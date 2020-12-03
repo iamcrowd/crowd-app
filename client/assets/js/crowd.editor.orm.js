@@ -1418,7 +1418,201 @@ var CrowdEditorOrm = {
       crowd.inspector.addAttribute({ property: 'semantic', type: 'alert', color: 'warning' });
   },
   toJSONSchema: function (crowd) {
-    //todo
+    //define basic structure of orm json according to schema
+    var jsonSchema = {
+      entities: [],
+      relationships: [],
+      attributes: [], //not used
+      inheritances: [], //not used
+      connectors: []
+    };
+
+    //mapping of cardinalities to the requested format of schema
+    var cardinalityMap = {
+      'one': '1..1',
+      'many': '1..*'
+    }
+
+    //mapping of role types to the requested format of schema
+    var roleTypeMap = {
+      'roleUnary': 'unaryFactType',
+      'roleBinary': 'binaryFactType'
+    }
+
+    //mapping of constraints types to the requested format of schema
+    var constraintTypeMap = {
+      'union': 'union',
+      'exclusive': 'exclusive',
+      'exclusiveExhaustive': 'exclusive',
+      'subset': 'subset',
+      'equality': 'equality'
+    }
+
+    //mapping of constraints types to the requested format of schema in inheritances
+    var constraintTypeInheritanceMap = {
+      'union': ['union'],
+      'exclusive': ['exclusive'],
+      'exclusiveExhaustive': ['exclusive', 'union'],
+      'subset': [],
+      'equality': ['equality']
+    }
+
+    var rolePortMap = {
+      'left': 'http://crowd.fi.uncoma.edu.ar#left',
+      'right': 'http://crowd.fi.uncoma.edu.ar#right',
+      'center': 'http://crowd.fi.uncoma.edu.ar#center'
+    }
+
+    //iterates each element and add it to the correspondent collection
+    crowd.workspace.graph.getElements().forEach(function (element) {
+      switch (element.attributes.parentType) {
+        case 'entity':
+          jsonSchema.entities.push({
+            id: element.cid,
+            uri: element.attributes.uri,
+            name: element.attributes.uri,
+            ref: element.attributes.refUri,
+            type: 'entity',
+            position: element.attributes.position,
+            size: element.attributes.size,
+          });
+
+          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+            if (link.attributes.type == 'inheritanceConnector' &&
+              link.getSourceElement().attributes.parentType == 'entity' &&
+              link.getTargetElement().attributes.parentType == 'entity') {
+              var parentEntity;
+              var childEntity;
+              if (link.attributes.direction == 'source' && link.attributes.source.id == element.attributes.id) {
+                parentEntity = link.getSourceElement();
+                childEntity = link.getTargetElement();
+              } else if (link.attributes.direction == 'target' && link.attributes.target.id == element.attributes.id) {
+                parentEntity = link.getTargetElement();
+                childEntity = link.getSourceElement();
+              }
+
+              if (parentEntity && childEntity) {
+                var inheritance = {
+                  name: link.cid,
+                  parent: parentEntity.attributes.uri,
+                  entities: [childEntity.attributes.uri],
+                  type: 'subtyping',
+                  subtypingContraint: [],
+                  position: element.attributes.position,
+                  size: element.attributes.size,
+                }
+
+                crowd.workspace.graph.getConnectedLinks(link).forEach(function (inheritanceLink) {
+                  if (inheritanceLink.attributes.type == 'constraintConnector') {
+                    var connectedConstraint;
+                    if (inheritanceLink.attributes.source.id != link.id && inheritanceLink.getSourceElement().attributes.parentType == 'constraint') {
+                      connectedConstraint = inheritanceLink.getSourceElement();
+                    } else if (inheritanceLink.attributes.target.id != link.id && inheritanceLink.getTargetElement().attributes.parentType == 'constraint') {
+                      connectedConstraint = inheritanceLink.getTargetElement();
+                    }
+
+                    if (connectedConstraint)
+                      inheritance.subtypingContraint = inheritance.subtypingContraint.concat(constraintTypeInheritanceMap[connectedConstraint.attributes.type]);
+                  }
+                });
+
+                jsonSchema.connectors.push(inheritance);
+              }
+            }
+          });
+          break;
+        case 'role':
+          var role = {
+            uri: element.attributes.uri,
+            name: element.attributes.uri,
+            inverseReading: element.attributes.read == 'left',
+            entities: [],
+            uniquenessConstraints: [],
+            mandatory: [],
+            type: roleTypeMap[element.attributes.type],
+            position: element.attributes.position,
+            size: element.attributes.size,
+          }
+
+          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+            if (link.attributes.type == 'connector') {
+              var connectedEntity;
+              var port;
+              if (link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'entity') {
+                connectedEntity = link.getSourceElement();
+                port = link.attributes.target.port;
+              } else if (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'entity') {
+                connectedEntity = link.getTargetElement();
+                port = link.attributes.source.port;
+              }
+
+              if (connectedEntity && port) {
+                if (element.attributes.type == 'roleUnary') {
+                  role.entities.push(connectedEntity.attributes.uri);
+                  if (link.attributes.mandatory) role.mandatory.push(connectedEntity.attributes.uri);
+                  role.uniquenessConstraints.push(cardinalityMap['one']);
+                } else if (element.attributes.type == 'roleBinary') {
+                  if (port == 'left') {
+                    role.entities.unshift(connectedEntity.attributes.uri);
+                    if (link.attributes.mandatory) role.mandatory.unshift(connectedEntity.attributes.uri);
+                    role.uniquenessConstraints.unshift(cardinalityMap[element.attributes.cardinality[port]]);
+                  } else if (port == 'right') {
+                    role.entities.push(connectedEntity.attributes.uri);
+                    if (link.attributes.mandatory) role.mandatory.push(connectedEntity.attributes.uri);
+                    role.uniquenessConstraints.push(cardinalityMap[element.attributes.cardinality[port]]);
+                  }
+                }
+              }
+            }
+          });
+
+          jsonSchema.relationships.push(role);
+          break;
+        case 'constraint':
+          var constraint = {
+            id: element.cid,
+            name: element.cid,
+            parent: '',
+            ...element.attributes.type == 'subset' ? { factParent: [] } : {},
+            factTypes: [],
+            ...element.attributes.type == 'subset' ? { factParentPosition: [] } : {},
+            factPosition: [],
+            type: 'roleConstraint',
+            roleContraint: constraintTypeMap[element.attributes.type],
+            position: element.attributes.position,
+            size: element.attributes.size,
+          }
+
+          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+            if (link.attributes.type == 'constraintConnector') {
+              var connectedRole;
+              var port;
+              if (link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'role') {
+                connectedRole = link.getSourceElement();
+                port = link.attributes.source.port;
+              } else if (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'role') {
+                connectedRole = link.getTargetElement();
+                port = link.attributes.target.port;
+              }
+
+              if (connectedRole && port) {
+                if (element.attributes.type == 'subset' && link.attributes.direction != null) {
+                  constraint.factParent.push(connectedRole.attributes.uri);
+                  constraint.factParentPosition.push(rolePortMap[port]);
+                } else {
+                  constraint.factTypes.push(connectedRole.attributes.uri);
+                  constraint.factPosition.push(rolePortMap[port]);
+                }
+              }
+            }
+          });
+
+          if (constraint.factTypes.length) jsonSchema.connectors.push(constraint);
+          break;
+      }
+    });
+
+    return jsonSchema;
   },
   fromJSONSchema: function (crowd, schema) {
     //todo

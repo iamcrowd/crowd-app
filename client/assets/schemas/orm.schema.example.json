@@ -105,11 +105,89 @@
         "http://crowd.fi.uncoma.edu.ar#Pointer"
       ],
       "type": "subtyping",
-      "subtypingContraint": ["exclusive","union"],
+      "subtypingContraint": [
+        "exclusive",
+        "union"
+      ],
       "position": {
         "x": 587.5,
         "y": 320.5
       }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#S1",
+      "parent": "",
+      "factTypes": [
+        "http://crowd.fi.uncoma.edu.ar#role_name",
+        "http://crowd.fi.uncoma.edu.ar#role_name"
+      ],
+      "factPosition": [
+        "http://crowd.fi.uncoma.edu.ar#left",
+        "http://crowd.fi.uncoma.edu.ar#right"
+      ],
+      "id": "c342",
+      "type": "roleConstraint",
+      "roleContraint": "equality",
+      "position": {
+        "x": 215.5,
+        "y": 280.5
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#S4",
+      "factParent": [
+        "http://crowd.fi.uncoma.edu.ar#role_name_1"
+      ],
+      "factTypes": [
+        "http://crowd.fi.uncoma.edu.ar#role_name_2",
+        "http://crowd.fi.uncoma.edu.ar#role_name_3"
+      ],
+      "factParentPosition": [
+        "http://crowd.fi.uncoma.edu.ar#center"
+      ],
+      "factPosition": [
+        "http://crowd.fi.uncoma.edu.ar#left",
+        "http://crowd.fi.uncoma.edu.ar#left"
+      ],
+      "type": "roleConstraint",
+      "roleContraint": "subset",
+      "position": {
+        "x": 315,
+        "y": 295
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#S2",
+      "parent": "http://crowd.fi.uncoma.edu.ar#Entity2",
+      "entities": [
+        "http://crowd.fi.uncoma.edu.ar#Entity4"
+      ],
+      "id": [
+        "c60",
+        "c280"
+      ],
+      "type": "subtyping",
+      "subtypingContraint": [
+        "exclusive",
+        "union"
+      ],
+      "position": {
+        "x": 555.5,
+        "y": 292.5
+      }
+    },
+    {
+      "name": "http://crowd.fi.uncoma.edu.ar#S4",
+      "parent": "http://crowd.fi.uncoma.edu.ar#Entity2",
+      "entities": [
+        "http://crowd.fi.uncoma.edu.ar#Entity4"
+      ],
+      "id": [
+        "c60",
+        "c280"
+      ],
+      "type": "subtyping",
+      "subtypingContraint": []
     }
   ]
 }
