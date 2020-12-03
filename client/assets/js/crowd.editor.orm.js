@@ -1260,8 +1260,13 @@ var CrowdEditorOrm = {
       var inferred = newSemantic?.contents?.find(function (content) { return content.value == 'inferred' });
       var color = unsatisfiable != null ? getCSS('color', 'crowd-unsat-color') : getCSS('color', 'crowd-inferred-color');
       if (cell.isElement()) {
-        color = unsatisfiable != null || inferred != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke');
-        cell.attr('.outer/stroke', color);
+        var colorMarkups = ['body/stroke'];
+        if (cell.attributes.type == 'roleUnary') colorMarkups = ['relLeft/stroke'];
+        else if (cell.attributes.type == 'roleBinary') colorMarkups = ['relLeft/stroke', 'relCenter/stroke', 'relRight/stroke'];
+        colorMarkups.forEach(function (colorMarkup) {
+          color = unsatisfiable != null || inferred != null ? color : crowd.palette.elements[cell.attributes.type]?.attr(colorMarkup);
+          cell.attr(colorMarkup, color);
+        });
       } else if (cell.isLink()) {
         if (!cell?.attributes?.total) {
           color = unsatisfiable != null || inferred != null ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
