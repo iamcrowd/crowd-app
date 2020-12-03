@@ -193,7 +193,7 @@ var CrowdEditorOrm = {
           },
           attrs: {
             root: { magnet: false },
-            rel: {
+            relLeft: {
               magnet: 'passive',
               port: 'left',
               y: 5,
@@ -253,7 +253,7 @@ var CrowdEditorOrm = {
                   children: [
                     {
                       tagName: 'rect',
-                      selector: 'rel'
+                      selector: 'relLeft'
                     },
                     {
                       tagName: 'line',
@@ -946,7 +946,7 @@ var CrowdEditorOrm = {
       tools: crowd.workspace.tools.elements.basicTools.concat([
         linkTool({
           port: 'left',
-          magnet: 'rel'
+          magnet: 'relLeft'
         })
       ])
     });
@@ -1578,7 +1578,7 @@ var CrowdEditorOrm = {
             ...element.attributes.type == 'subset' ? { factParentPosition: [] } : {},
             factPosition: [],
             type: 'roleConstraint',
-            roleContraint: constraintTypeMap[element.attributes.type],
+            roleConstraint: constraintTypeMap[element.attributes.type],
             position: element.attributes.position,
             size: element.attributes.size,
           }
@@ -1615,7 +1615,153 @@ var CrowdEditorOrm = {
     return jsonSchema;
   },
   fromJSONSchema: function (crowd, schema) {
-    //todo
+    console.log('loadORM', schema);
+
+    var entitiesObj = {};
+    var rolesObj = {};
+    var constraintsObj = {};
+    var linksObj = {};
+
+    //mapping of cardinalities to the editor format
+    var cardinalityMap = function (cardinality) {
+      return cardinality?.indexOf('*') != -1 ? 'many' : 'one';
+    }
+
+    var constraintTypeInheritanceMap = function (constraints) {
+      var constraintsResult = [...constraints];
+      if (constraints.find(e => e == 'exclusive') && constraints.find(e => e == 'union')) {
+        constraintsResult.push('exclusiveExhaustive');
+        constraintsResult = constraintsResult.filter(e => e != 'exclusive' && e != 'union');
+      }
+      constraintsResult = constraintsResult.filter(e => e != 'subset');
+
+      return constraintsResult;
+    }
+
+    var rolePortMap = function (port) {
+      if (port.includes('left')) return 'left';
+      if (port.includes('right')) return 'right';
+      if (port.includes('center')) return 'center';
+    }
+
+    if (schema) {
+      //add each entity and their properties
+      if (schema.entities) {
+        schema.entities.forEach(function (entity) {
+          entitiesObj[entity.name] = crowd.palette.elements.entity.clone();
+          crowd.workspace.graph.addCell(entitiesObj[entity.name]);
+          $.each(entity, function (attribute, value) {
+            switch (attribute) {
+              case 'name':
+                entitiesObj[entity.name].prop('uri', value);
+                break;
+              case 'position': case 'size':
+                entitiesObj[entity.name].prop(attribute, value)
+                break;
+            }
+          });
+        });
+      }
+
+      //add each role and their properties
+      if (schema.relationships) {
+        schema.relationships.forEach(function (relationship) {
+          var isBinary = relationship.entities.length > 1;
+          rolesObj[relationship.name] = crowd.palette.elements[isBinary ? 'roleBinary' : 'roleUnary'].clone();
+          crowd.workspace.graph.addCell(rolesObj[relationship.name]);
+          $.each(relationship, function (attribute, value) {
+            switch (attribute) {
+              case 'name':
+                rolesObj[relationship.name].prop('uri', value);
+                break;
+              case 'inverseReading':
+                rolesObj[relationship.name].prop('read', value ? 'left' : 'right');
+                break;
+              case 'uniquenessConstraints':
+                if (isBinary) {
+                  rolesObj[relationship.name].prop('cardinality/left', cardinalityMap(value[0]));
+                  rolesObj[relationship.name].prop('cardinality/right', cardinalityMap(value[1]));
+                }
+                break;
+              case 'position': case 'size':
+                rolesObj[relationship.name].prop(attribute, value)
+                break;
+            }
+          });
+
+          relationship.entities.forEach(function (entity, index) {
+            linksObj[relationship.name + '#' + entity] = crowd.palette.links.connector.clone();
+            linksObj[relationship.name + '#' + entity].source({
+              id: rolesObj[relationship.name].id, port: index == 0 ? 'left' : 'right', magnet: index == 0 ? 'relLeft' : 'relRight'
+            });
+            linksObj[relationship.name + '#' + entity].target(entitiesObj[entity]);
+            crowd.workspace.graph.addCell(linksObj[relationship.name + '#' + entity]);
+            linksObj[relationship.name + '#' + entity].prop('mandatory', relationship.mandatory.find(e => e == entity));
+            linksObj[relationship.name + '#' + entity].toBack();
+          });
+        });
+      }
+
+      //add inheritances and constraints and their properties
+      if (schema.connectors) {
+        schema.connectors.forEach(function (connector) {
+          if (connector.type == 'subtyping') {
+            connector.entities.forEach(function (entity) {
+              linksObj[connector.name + "#" + entity] = crowd.palette.links.inheritanceConnector.clone();
+              linksObj[connector.name + "#" + entity].source(entitiesObj[connector.parent]);
+              linksObj[connector.name + "#" + entity].target(entitiesObj[entity]);
+              crowd.workspace.graph.addCell(linksObj[connector.name + "#" + entity]);
+              linksObj[connector.name + "#" + entity].toBack();
+            });
+            constraintTypeInheritanceMap(connector.subtypingContraint).forEach(function (constraint) {
+              console.log('inherConstraint', constraint);
+              constraintsObj[connector.name + "#" + constraint] = crowd.palette.elements[constraint].clone();
+              crowd.workspace.graph.addCell(constraintsObj[connector.name + "#" + constraint]);
+              connector.entities.forEach(function (entity) {
+                linksObj[connector.name + "#" + entity + "#" + constraint] = crowd.palette.links.constraintConnector.clone();
+                linksObj[connector.name + "#" + entity + "#" + constraint].source(constraintsObj[connector.name + "#" + constraint]);
+                linksObj[connector.name + "#" + entity + "#" + constraint].target(linksObj[connector.name + "#" + entity]);
+                crowd.workspace.graph.addCell(linksObj[connector.name + "#" + entity + "#" + constraint]);
+                linksObj[connector.name + "#" + entity + "#" + constraint].prop('direction', null);
+                linksObj[connector.name + "#" + entity + "#" + constraint].toBack();
+              });
+            });
+          } else if (connector.type == 'roleConstraint') {
+            constraintsObj[connector.name] = crowd.palette.elements[connector.roleConstraint].clone();
+            crowd.workspace.graph.addCell(constraintsObj[connector.name]);
+            $.each(connector, function (attribute, value) {
+              switch (attribute) {
+                case 'position': case 'size':
+                  constraintsObj[connector.name].prop(attribute, value)
+                  break;
+              }
+            });
+
+            connector.factTypes.forEach(function (factType, index) {
+              linksObj[connector.name + "#" + factType] = crowd.palette.links.constraintConnector.clone();
+              linksObj[connector.name + "#" + factType].source(constraintsObj[connector.name]);
+              linksObj[connector.name + "#" + factType].target({
+                id: rolesObj[factType].id, port: rolePortMap(connector.factPosition[index]), magnet: 'rel' + capitalize(rolePortMap(connector.factPosition[index]))
+              });
+              crowd.workspace.graph.addCell(linksObj[connector.name + "#" + factType]);
+              linksObj[connector.name + "#" + factType].prop('direction', null);
+              linksObj[connector.name + "#" + factType].toBack();
+            });
+
+            connector.factParent?.forEach(function (factParent, index) {
+              linksObj[connector.name + "#" + factParent] = crowd.palette.links.constraintConnector.clone();
+              linksObj[connector.name + "#" + factParent].source(constraintsObj[connector.name]);
+              linksObj[connector.name + "#" + factParent].target({
+                id: rolesObj[factParent].id, port: rolePortMap(connector.factParentPosition[index]), magnet: 'rel' + capitalize(rolePortMap(connector.factParentPosition[index]))
+              });
+              crowd.workspace.graph.addCell(linksObj[connector.name + "#" + factParent]);
+              linksObj[connector.name + "#" + factParent].prop('direction', 'target');
+              linksObj[connector.name + "#" + factParent].toBack();
+            });
+          }
+        });
+      }
+    }
   },
   initSyntaxValidator: function (crowd) {
     //todo
