@@ -1071,8 +1071,8 @@ CrowdEditor.prototype.initTools = function () {
           var filteredGraph = self.workspace.graph.getSubgraph(self.workspace.graph.getCells()).filter(function (cell) {
             return !cell.prop('layoutIgnore') &&
               (!cell.isLink() ||
-                (!cell.getSourceCell().prop('layoutIgnore') && !cell.getTargetCell().prop('layoutIgnore') &&
-                  !cell.getSourceCell().isLink() && !cell.getTargetCell().isLink()));
+                (!cell.getSourceCell()?.prop('layoutIgnore') && !cell.getTargetCell()?.prop('layoutIgnore') &&
+                  !cell.getSourceCell()?.isLink() && !cell.getTargetCell()?.isLink()));
           });
 
           //layout the selected cells clones
@@ -1379,7 +1379,7 @@ CrowdEditor.prototype.initTools = function () {
 
     //collapse classes tool
     self.tools.collapseClasses.init = function () {
-      self.tools.collapseClasses.collapsed = false;
+      self.tools.collapseClasses.collapsed = true;
       self.tools.collapseClasses.elementsHeights = {};
 
       self.tools.collapseClasses.updateCollapsed = function () {

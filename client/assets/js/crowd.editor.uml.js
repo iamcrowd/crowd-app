@@ -47,6 +47,8 @@ var CrowdEditorUml = {
         width: 90,
         height: 90
       },
+      uncollapsedMarkup: '<g class="rotatable"><g class="scalable"><rect class="uml-class-name-rect"/><rect class="uml-class-attrs-rect"/><rect class="uml-class-methods-rect"/></g><text class="uml-class-name-text"/><text class="uml-class-attrs-text"/><text class="uml-class-methods-text"/></g>',
+      collapsedMarkup: '<g class="rotatable"><g class="scalable"><rect class="uml-class-name-rect"/></g><text class="uml-class-name-text"/></g>'
     });
 
     //add joint uml abstract to palette elements
@@ -84,6 +86,8 @@ var CrowdEditorUml = {
         width: 90,
         height: 90
       },
+      uncollapsedMarkup: '<g class="rotatable"><g class="scalable"><rect class="uml-class-name-rect"/><rect class="uml-class-attrs-rect"/><rect class="uml-class-methods-rect"/></g><text class="uml-class-name-text"/><text class="uml-class-attrs-text"/><text class="uml-class-methods-text"/></g>',
+      collapsedMarkup: '<g class="rotatable"><g class="scalable"><rect class="uml-class-name-rect"/></g><text class="uml-class-name-text"/></g>'
     });
 
     //add joint uml interface to palette elements
@@ -121,6 +125,8 @@ var CrowdEditorUml = {
         width: 90,
         height: 90
       },
+      uncollapsedMarkup: '<g class="rotatable"><g class="scalable"><rect class="uml-class-name-rect"/><rect class="uml-class-attrs-rect"/><rect class="uml-class-methods-rect"/></g><text class="uml-class-name-text"/><text class="uml-class-attrs-text"/><text class="uml-class-methods-text"/></g>',
+      collapsedMarkup: '<g class="rotatable"><g class="scalable"><rect class="uml-class-name-rect"/></g><text class="uml-class-name-text"/></g>'
     });
 
     //add joint uml inheritance to palette elements
@@ -133,7 +139,8 @@ var CrowdEditorUml = {
         text: {
           fill: 'white',
           text: 'o',
-          class: 'crowd-element-text inheritance'
+          class: 'crowd-element-text l inheritance',
+          'dominant-baseline': 'middle'
         },
         '.outer': {
           fill: crowd.palette.colors.inheritance,
@@ -626,7 +633,8 @@ var CrowdEditorUml = {
         name: 'link-association-tools',
         tools: [
           ...crowd.workspace.tools.links.basic(),
-          ...[linkGeneralizationTool(), linkRoleSourceGeneralizationTool(), linkRoleTargetGeneralizationTool()]
+          ...[linkGeneralizationTool()]
+          // ...[linkGeneralizationTool(), linkRoleSourceGeneralizationTool(), linkRoleTargetGeneralizationTool()]
         ]
       });
     }
@@ -637,7 +645,8 @@ var CrowdEditorUml = {
         name: 'link-aggregation-tools',
         tools: [
           ...crowd.workspace.tools.links.basic(),
-          ...[linkGeneralizationTool(), , linkRoleSourceGeneralizationTool(), linkRoleTargetGeneralizationTool()]
+          ...[linkGeneralizationTool()]
+          // ...[linkGeneralizationTool(), linkRoleSourceGeneralizationTool(), linkRoleTargetGeneralizationTool()]
         ]
       });
     }
@@ -648,17 +657,18 @@ var CrowdEditorUml = {
         name: 'link-composition-tools',
         tools: [
           ...crowd.workspace.tools.links.basic(),
-          ...[linkGeneralizationTool(), , linkRoleSourceGeneralizationTool(), linkRoleTargetGeneralizationTool()]
+          ...[linkGeneralizationTool()]
+          // ...[linkGeneralizationTool(), linkRoleSourceGeneralizationTool(), linkRoleTargetGeneralizationTool()]
         ]
       });
     }
 
     //add role ports for specific links when they been added
     crowd.workspace.graph.on('add', function (link) {
-      if (link.prop('type') == 'association' || link.prop('type') == 'aggregation' || link.prop('type') == 'composition') {
-        crowd.workspace.tools.links.linkRolePort({ link: link, role: 'roleSource', position: { distance: 0.25, offset: 0 } });
-        crowd.workspace.tools.links.linkRolePort({ link: link, role: 'roleTarget', position: { distance: 0.75, offset: 0 } });
-      }
+      // if (link.prop('type') == 'association' || link.prop('type') == 'aggregation' || link.prop('type') == 'composition') {
+      //   crowd.workspace.tools.links.linkRolePort({ link: link, role: 'roleSource', position: { distance: 0.25, offset: 0 } });
+      //   crowd.workspace.tools.links.linkRolePort({ link: link, role: 'roleTarget', position: { distance: 0.75, offset: 0 } });
+      // }
     });
   },
   initChangeAttributesEvents: function (crowd) {
@@ -711,17 +721,17 @@ var CrowdEditorUml = {
     });
 
     var classFitToContent = function (element) {
-      // console.log('classFitToContent', element);
+      console.log('classFitToContent', element);
 
       //get element view
       var elementView = element.findView(crowd.workspace.paper);
 
       element.size({ width: 90, height: 90 });
       setTimeout(function () {
-        // for (var i = 0; i < 10; i++) {
-        // var bbox = elementView.getBBox();
-        // element.size(bbox);
-        // }
+        for (var i = 0; i < 10; i++) {
+          var bbox = elementView.getBBox();
+          element.size(bbox);
+        }
 
         // var actualSize = element.size();
         // actualSize.width += 20;
@@ -746,7 +756,9 @@ var CrowdEditorUml = {
         // else if (element._previousAttributes.attributes.length < newAttributes.length)
         //   element.size(element.size().width, element.size().height + 10);
 
-        classFitToContent(element);
+        setTimeout(function(){
+          classFitToContent(element);
+        });
       }
     });
 
@@ -761,13 +773,15 @@ var CrowdEditorUml = {
         // else if (element._previousAttributes.methods.length < newMethods.length)
         //   element.size(element.size().width, element.size().height + 10);
 
-        classFitToContent(element);
+        setTimeout(function(){
+          classFitToContent(element);
+        });
       }
     });
 
     //event when the elements properties/attributes (semantic attributes) change
     crowd.workspace.graph.on('change:properties', function (element, newProperties, opt) {
-      console.log('change:properties', { element, previosAttributes: element._previousAttributes.attributes, newProperties, opt });
+      // console.log('change:properties', { element, previosAttributes: element._previousAttributes.attributes, newProperties, opt });
 
       if (element.isElement()) {
         //set visual attributes property on element
@@ -793,37 +807,39 @@ var CrowdEditorUml = {
     crowd.workspace.graph.on('change:collapsed', function (element, newCollapsed, opt) {
       // console.log('change:collapsed', { element, newCollapsed, opt });
 
-      if (element.isElement()) {
-        if (element.prop('attrs/.uml-class-attrs-rect/height') != 0 && element.prop('attrs/.uml-class-methods-rect/height') != 0) {
-          element.prop('.uml-class-attrs-rect/lastHeight', element.prop('attrs/.uml-class-attrs-rect/height'));
-          element.prop('.uml-class-attrs-text/lastText', element.prop('attrs/.uml-class-attrs-text/text'));
-          element.prop('.uml-class-methods-rect/lastHeight', element.prop('attrs/.uml-class-methods-rect/height'));
-          element.prop('.uml-class-methods-text/lastText', element.prop('attrs/.uml-class-methods-text/text'));
-        }
+      if (element.isElement()
+        && crowd.palette.elements[element.prop('type')].attributes.collapsedMarkup) {
+        //replace the element markup with the collapsed markup and viceversa
+        element.markup = newCollapsed
+          ? crowd.palette.elements[element.prop('type')].attributes.collapsedMarkup
+          : (crowd.palette.elements[element.prop('type')].attributes.uncollapsedMarkup
+            ? crowd.palette.elements[element.prop('type')].attributes.uncollapsedMarkup
+            : crowd.palette.elements[element.prop('type')].markup);
 
-        element.prop('attrs/.uml-class-attrs-rect/visibility', newCollapsed ? 'hidden' : 'visible');
-        element.prop('attrs/.uml-class-attrs-text/fill-opacity', newCollapsed ? '0' : '1');
-        // element.prop('attrs/.uml-class-attrs-text/text',
-        //   newCollapsed ? '' : element.prop('.uml-class-attrs-text/lastText'));
-        // element.prop('attrs/.uml-class-attrs-rect/height',
-        //   newCollapsed ? 0 : element.prop('.uml-class-attrs-rect/lastHeight'));
+        //get element view
+        var elementView = element.findView(crowd.workspace.paper);
 
-        element.prop('attrs/.uml-class-methods-rect/visibility', newCollapsed ? 'hidden' : 'visible');
-        element.prop('attrs/.uml-class-methods-text/fill-opacity', newCollapsed ? '0' : '1');
-        // element.prop('attrs/.uml-class-methods-text/text',
-        //   newCollapsed ? '' : element.prop('.uml-class-methods-text/lastText'));
-        // element.prop('attrs/.uml-class-methods-rect/height',
-        //   newCollapsed ? 0 : element.prop('.uml-class-methods-rect/lastHeight'));
+        //calculate resize of the height of the element according to the amount of methods and attributes and the name rect size
+        var actualSize = element.size();
+        var amountAttr = element.attributes?.attributes?.length + element.attributes?.methods?.length;
+        var attrSize = 10;
+        actualSize.height = newCollapsed
+          ? parseInt($(elementView.el.getElementsByClassName('uml-class-name-rect')).attr('height'))
+          : actualSize.height + 40 + amountAttr * attrSize;
 
-        if (!newCollapsed) {
-          setTimeout(function () {
-            // var tempProp = element.prop('properties');
-            // element.prop('properties', { attributes: [], methods: [] });
-            // element.prop('properties', tempProp);
-            // var elementView = element.findView(self.workspace.paper);
-            // elementView.render();
-          });
-        }
+        //redraw the element and their tools with the new type style
+        elementView.render();
+        crowd.workspace.renderElementTools(elementView);
+
+        //apply resize and render again
+        setTimeout(function () {
+          element.size(actualSize);
+          elementView.render();
+          crowd.workspace.renderElementTools(elementView);
+
+          if (!newCollapsed)
+            classFitToContent(element);
+        });
       }
     });
 
@@ -865,18 +881,20 @@ var CrowdEditorUml = {
         }
         link.trigger('change:cardinality', link, link.prop('cardinality'));
         link.trigger('change:roles', link, link.prop('roles'));
+        link.trigger('change:uri', link, link.prop('uri'));
 
         crowd.inspector.loadContent();
       }
     });
 
     //event when the links cardinality or roles change
-    crowd.workspace.graph.on('change:cardinality change:roles', function (link, newCardinalityRole) {
+    crowd.workspace.graph.on('change:cardinality change:roles change:uri', function (link, newCardinalityRoleUri) {
       // console.log('change:cardinality', { link, newCardinality });
 
-      if (link.isLink() && newCardinalityRole != null) {
+      if (link.isLink() && newCardinalityRoleUri != null) {
         var newCardinality = link.attributes.cardinality;
         var newRoles = link.attributes.roles;
+        var newUri = link.attributes.uri;
         link.labels([
           {
             attrs: {
@@ -900,32 +918,43 @@ var CrowdEditorUml = {
               offset: 20
             }
           },
-          {
+          // {
+          //   attrs: {
+          //     text: {
+          //       text: (newRoles.source != "null" ? fromURI(newRoles.source) : null),
+          //     }
+          //   },
+          //   position: {
+          //     distance: 0.25,
+          //     offset: -20
+          //   }
+          // },
+          // {
+          //   attrs: {
+          //     text: {
+          //       text: (newRoles.target != "null" ? fromURI(newRoles.target) : null),
+          //     }
+          //   },
+          //   position: {
+          //     distance: 0.75,
+          //     offset: -20
+          //   }
+          // },
+          ...link.attributes.type != 'generalization' && link.attributes.type != 'implementation' ? [{
             attrs: {
               text: {
-                text: (newRoles.source != "null" ? fromURI(newRoles.source) : null),
+                text: fromURI(newUri),
               }
             },
             position: {
-              distance: 0.25,
-              offset: -20
+              distance: 0.5,
+              offset: 20
             }
-          },
-          {
-            attrs: {
-              text: {
-                text: (newRoles.target != "null" ? fromURI(newRoles.target) : null),
-              }
-            },
-            position: {
-              distance: 0.75,
-              offset: -20
-            }
-          },
+          }] : [],
         ]);
 
-        if (newRoles.source && newRoles.source != "null") link.ports.roleSource.attributes.uri = newRoles.source;
-        if (newRoles.target && newRoles.target != "null") link.ports.roleTarget.attributes.uri = newRoles.target;
+        // if (newRoles.source && newRoles.source != "null") link.ports.roleSource.attributes.uri = newRoles.source;
+        // if (newRoles.target && newRoles.target != "null") link.ports.roleTarget.attributes.uri = newRoles.target;
       }
     });
 
@@ -1196,6 +1225,28 @@ var CrowdEditorUml = {
       'implementation': 'generalization'
     }
 
+    //mapping of datatype to the requested format of schema
+    var datatypeMap = {
+      // 'String': 'http://www.w3.org/2001/XMLSchema#string',
+      // 'Integer': 'http://www.w3.org/2001/XMLSchema#integer',
+      // 'Boolean': 'http://www.w3.org/2001/XMLSchema#boolean',
+      'String': 'String',
+      'Integer': 'Integer',
+      'Boolean': 'Boolean',
+    }
+
+    //mapping of attributes to the requested format of schema
+    var attributesMap = function (attributes) {
+      var result = [];
+      attributes.forEach(function (attribute) {
+        result.push({
+          name: attribute.name,
+          datatype: datatypeMap[attribute.datatype]
+        });
+      });
+      return result;
+    }
+
     //iterates each element and add it to the correspondent collection
     crowd.workspace.graph.getCells().forEach(function (cell) {
       switch (cell.attributes.parentType) {
@@ -1204,7 +1255,7 @@ var CrowdEditorUml = {
             jsonSchema.classes.push({
               uri: cell.attributes.uri,
               name: cell.attributes.uri,
-              attrs: cell.attributes.properties.attributes,
+              attrs: attributesMap(cell.attributes.properties.attributes),
               methods: cell.attributes.properties.methods,
               position: cell.attributes.position,
               size: cell.attributes.size
@@ -1375,6 +1426,28 @@ var CrowdEditorUml = {
       else if (rolesObj[name]) return rolesObj[name];
     }
 
+    //mapping of datatype  to the editor format
+    var datatypeMap = {
+      'String': 'String',
+      'Integer': 'Integer',
+      'Boolean': 'Boolean',
+      'http://www.w3.org/2001/XMLSchema#string': 'String',
+      'http://www.w3.org/2001/XMLSchema#integer': 'Integer',
+      'http://www.w3.org/2001/XMLSchema#boolean': 'Boolean',
+    }
+
+    //mapping of attributes to the editor format
+    var attributesMap = function (attributes) {
+      var result = [];
+      attributes.forEach(function (attribute) {
+        result.push({
+          name: attribute.name,
+          datatype: datatypeMap[attribute.datatype]
+        });
+      });
+      return result;
+    }
+
     if (schema) {
       //add each class and their properties
       if (schema.classes) {
@@ -1387,7 +1460,7 @@ var CrowdEditorUml = {
                 classesObj[classe.name].prop('uri', value);
                 break;
               case 'attrs':
-                classesObj[classe.name].prop('properties/attributes', value)
+                classesObj[classe.name].prop('properties/attributes', attributesMap(value))
                 break;
               default:
                 classesObj[classe.name].prop(attribute, value)

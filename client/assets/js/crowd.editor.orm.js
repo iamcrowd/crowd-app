@@ -742,6 +742,7 @@ var CrowdEditorOrm = {
       type: 'value',
       label: 'Value',
       name: 'Value',
+      datatype: 'Integer',
       uri: 'http://crowd.fi.uncoma.edu.ar#value'
     });
 
@@ -1332,6 +1333,20 @@ var CrowdEditorOrm = {
         break;
     }
 
+    //add datatype attribute for values
+    switch (crowd.inspector.model.attributes.type) {
+      case 'value':
+        crowd.inspector.addAttribute({
+          label: 'Datatype', property: 'datatype', type: 'multiple',
+          values: [
+            { label: 'Integer', value: 'Integer' },
+            { label: 'String', value: 'String' },
+            { label: 'Boolean', value: 'Boolean' },
+          ]
+        });
+        break;
+    }
+
     //add read attribute for roles
     switch (crowd.inspector.model.attributes.parentType) {
       case 'role':
@@ -1462,6 +1477,16 @@ var CrowdEditorOrm = {
       'many': '0..*'
     }
 
+    //mapping of datatypes to the requested format of schema
+    var datatypeMap = {
+      // 'String': 'http://www.w3.org/2001/XMLSchema#string',
+      // 'Integer': 'http://www.w3.org/2001/XMLSchema#integer',
+      // 'Boolean': 'http://www.w3.org/2001/XMLSchema#boolean',
+      'String': 'String',
+      'Integer': 'Integer',
+      'Boolean': 'Boolean',
+    }
+
     //mapping of role types to the requested format of schema
     var roleTypeMap = {
       'roleUnary': 'unaryFactType',
@@ -1508,6 +1533,7 @@ var CrowdEditorOrm = {
             name: element.attributes.uri,
             ref: element.attributes.refUri,
             type: entityTypeMap[element.attributes.type],
+            ...element.attributes.type == 'value' ? { datatype: datatypeMap[element.attributes.datatype] } : {},
             position: element.attributes.position,
             size: element.attributes.size,
           });
@@ -1665,6 +1691,16 @@ var CrowdEditorOrm = {
       return cardinality?.indexOf('*') != -1 ? 'many' : 'one';
     }
 
+    //mapping of datatypes to the editor format
+    var datatypeMap = {
+      'String': 'String',
+      'Integer': 'Integer',
+      'Boolean': 'Boolean',
+      'http://www.w3.org/2001/XMLSchema#string': 'String',
+      'http://www.w3.org/2001/XMLSchema#integer': 'Integer',
+      'http://www.w3.org/2001/XMLSchema#boolean': 'Boolean',
+    }
+
     var constraintTypeInheritanceMap = function (constraints) {
       var constraintsResult = [...constraints];
       if (constraints.find(e => e == 'exclusive') && constraints.find(e => e == 'union')) {
@@ -1698,6 +1734,9 @@ var CrowdEditorOrm = {
             switch (attribute) {
               case 'name':
                 entitiesObj[entity.name].prop('uri', value);
+                break;
+              case 'datatype':
+                entitiesObj[entity.name].prop('datatype', datatypeMap[value]);
                 break;
               case 'position': case 'size':
                 entitiesObj[entity.name].prop(attribute, value)

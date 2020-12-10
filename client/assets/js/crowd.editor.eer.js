@@ -129,7 +129,7 @@ var CrowdEditorEer = {
       type: 'keyAttribute',
       name: 'Key\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#key-attribute',
-      datatype: 'int',
+      datatype: 'Integer',
       attrs: {
         text: {
           fill: 'white',
@@ -153,7 +153,7 @@ var CrowdEditorEer = {
       type: 'weakKeyAttribute',
       name: 'Weak Key\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#weak-key-attribute',
-      datatype: 'int',
+      datatype: 'Integer',
       attrs: {
         text: {
           fill: 'white',
@@ -177,7 +177,7 @@ var CrowdEditorEer = {
       type: 'attribute',
       name: 'Attribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#attribute',
-      datatype: 'int',
+      datatype: 'Integer',
       attrs: {
         text: {
           fill: 'white',
@@ -201,7 +201,7 @@ var CrowdEditorEer = {
       type: 'multivaluedAttribute',
       name: 'Multivalued\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#multivalued-attribute',
-      datatype: 'int',
+      datatype: 'Integer',
       attrs: {
         text: {
           fill: 'white',
@@ -233,7 +233,8 @@ var CrowdEditorEer = {
         text: {
           fill: 'white',
           text: 'o',
-          class: 'crowd-element-text inheritance'
+          class: 'crowd-element-text l inheritance',
+          'dominant-baseline': 'middle'
         },
         '.outer': {
           fill: crowd.palette.colors.inheritance,
@@ -252,7 +253,7 @@ var CrowdEditorEer = {
       type: 'derivedAttribute',
       name: 'Derived\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#derived-attribute',
-      datatype: 'int',
+      datatype: 'Integer',
       attrs: {
         text: {
           fill: 'white',
@@ -963,10 +964,9 @@ var CrowdEditorEer = {
         crowd.inspector.addAttribute({
           label: 'Datatype', property: 'datatype', type: 'multiple',
           values: [
-            { label: 'varchar', value: 'varchar' },
-            { label: 'char', value: 'char' },
-            { label: 'int', value: 'int' },
-            { label: 'bit', value: 'bit' }
+            { label: 'Integer', value: 'Integer' },
+            { label: 'String', value: 'String' },
+            { label: 'Boolean', value: 'Boolean' },
           ]
         });
         break;
@@ -1036,10 +1036,12 @@ var CrowdEditorEer = {
 
     //mapping of datatypes to the requested format of schema
     var datatypeMap = {
-      'varchar': 'String',
-      'char': 'String',
-      'int': 'Integer',
-      'bit': 'Boolean'
+      // 'String': 'http://www.w3.org/2001/XMLSchema#string',
+      // 'Integer': 'http://www.w3.org/2001/XMLSchema#integer',
+      // 'Boolean': 'http://www.w3.org/2001/XMLSchema#boolean',
+      'String': 'String',
+      'Integer': 'Integer',
+      'Boolean': 'Boolean',
     }
 
     //mapping of cardinalities to the requested format of schema
@@ -1209,9 +1211,12 @@ var CrowdEditorEer = {
 
     //mapping of datatypes to the editor format
     var datatypeMap = {
-      'String': 'varchar',
-      'Integer': 'int',
-      'Boolean': 'bit'
+      'String': 'String',
+      'Integer': 'Integer',
+      'Boolean': 'Boolean',
+      'http://www.w3.org/2001/XMLSchema#string': 'String',
+      'http://www.w3.org/2001/XMLSchema#integer': 'Integer',
+      'http://www.w3.org/2001/XMLSchema#boolean': 'Boolean',
     }
 
     //mapping of cardinalities to the editor format
