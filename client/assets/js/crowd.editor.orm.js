@@ -721,6 +721,7 @@ var CrowdEditorOrm = {
     crowd.palette.elements.entity = new joint.shapes.orm.Entity({
       parentType: 'entity',
       type: 'entity',
+      label: 'Entity Type',
       name: 'Entity',
       uri: 'http://crowd.fi.uncoma.edu.ar#entity'
     });
@@ -729,6 +730,7 @@ var CrowdEditorOrm = {
     crowd.palette.elements.entityReferenceMode = new joint.shapes.orm.EntityReferenceMode({
       parentType: 'entity',
       type: 'entityReferenceMode',
+      label: 'Entity Type',
       name: 'Entity',
       uri: 'http://crowd.fi.uncoma.edu.ar#entity',
       refUri: ''
@@ -738,28 +740,35 @@ var CrowdEditorOrm = {
     crowd.palette.elements.value = new joint.shapes.orm.Value({
       parentType: 'entity',
       type: 'value',
+      label: 'Value',
       name: 'Value',
       uri: 'http://crowd.fi.uncoma.edu.ar#value'
     });
 
     //add joint orm role unary to palette elements
-    crowd.palette.elements.roleUnary = new joint.shapes.orm.RoleUnary({
-      parentType: 'role',
-      type: 'roleUnary',
-      name: 'Role',
-      read: 'right',
-      uri: 'http://crowd.fi.uncoma.edu.ar#role'
-    });
+    // crowd.palette.elements.roleUnary = new joint.shapes.orm.RoleUnary({
+    //   parentType: 'role',
+    //   type: 'roleUnary',
+    //   label: 'Fact Type',
+    //   name: 'Role',
+    //   read: 'right',
+    //   uri: 'http://crowd.fi.uncoma.edu.ar#role'
+    // });
 
     //add joint orm role binary to palette elements
     crowd.palette.elements.roleBinary = new joint.shapes.orm.RoleBinary({
       parentType: 'role',
       type: 'roleBinary',
+      label: 'Fact Type',
       name: 'Role',
       read: 'right',
       cardinality: {
         left: 'one',
         right: 'many'
+      },
+      roles: {
+        left: 'http://crowd.fi.uncoma.edu.ar#role-a',
+        right: 'http://crowd.fi.uncoma.edu.ar#role-b'
       },
       uri: 'http://crowd.fi.uncoma.edu.ar#role'
     });
@@ -767,19 +776,22 @@ var CrowdEditorOrm = {
     //add joint orm union constraint to palette elements
     crowd.palette.elements.union = new joint.shapes.orm.Union({
       parentType: 'constraint',
-      type: 'union'
+      type: 'union',
+      label: 'Exhaustive'
     });
 
     //add joint orm exclusive constraint to palette elements
     crowd.palette.elements.exclusive = new joint.shapes.orm.Exclusive({
       parentType: 'constraint',
-      type: 'exclusive'
+      type: 'exclusive',
+      label: 'Exclusive'
     });
 
     //add joint orm exclusive exhaustive constraint to palette elements
     crowd.palette.elements.exclusiveExhaustive = new joint.shapes.orm.ExclusiveExhaustive({
       parentType: 'constraint',
-      type: 'exclusiveExhaustive'
+      type: 'exclusiveExhaustive',
+      label: 'Exclusive Exhaustive'
     });
 
     //add joint orm subset constraint to palette elements
@@ -789,15 +801,16 @@ var CrowdEditorOrm = {
     });
 
     //add joint orm equality constraint to palette elements
-    crowd.palette.elements.equality = new joint.shapes.orm.Equality({
-      parentType: 'constraint',
-      type: 'equality'
-    });
+    // crowd.palette.elements.equality = new joint.shapes.orm.Equality({
+    //   parentType: 'constraint',
+    //   type: 'equality'
+    // });
 
     //add joint orm connector to palette links
     crowd.palette.links.connector = new joint.shapes.standard.Link({
       parentType: 'connector',
       type: 'connector',
+      label: 'Connector',
       direction: null,
       mandatory: true,
       attrs: {
@@ -818,6 +831,7 @@ var CrowdEditorOrm = {
     crowd.palette.links.inheritanceConnector = new joint.shapes.standard.Link({
       parentType: 'connector',
       type: 'inheritanceConnector',
+      label: 'Subtype Connector',
       direction: 'target',
       mandatory: false,
       attrs: {
@@ -838,6 +852,7 @@ var CrowdEditorOrm = {
     crowd.palette.links.constraintConnector = new joint.shapes.standard.Link({
       parentType: 'connector',
       type: 'constraintConnector',
+      label: 'Constraint Connector',
       direction: 'target',
       mandatory: false,
       attrs: {
@@ -906,7 +921,7 @@ var CrowdEditorOrm = {
         markup: crowd.workspace.tools.elements.markup({
           icon: config.icon ? config.icon : 'call_merge',
           tooltip: {
-            title: 'Click and drag to connect the object with a <b class="crowd-bold-color">inheritance</b> connector',
+            title: 'Click and drag to connect the object with a <b class="crowd-bold-color">subtype</b> connector',
             placement: 'top'
           }
         })
@@ -1055,6 +1070,7 @@ var CrowdEditorOrm = {
         //replace element attributes and markup with the palette default component of the newtype
         element.attributes.attrs = $.extend(true, {}, crowd.palette.elements[newType].attributes.attrs);
         element.markup = crowd.palette.elements[newType].markup;
+        element.attributes.label = crowd.palette.elements[newType].attributes.label;
 
         //get element view
         var elementView = element.findView(crowd.workspace.paper);
@@ -1141,6 +1157,7 @@ var CrowdEditorOrm = {
         //replace link attributes and markup with the palette default component of the newtype
         link.attributes.attrs = $.extend(true, {}, crowd.palette.links[newType].attributes.attrs);
         link.markup = crowd.palette.links[newType].markup;
+        link.attributes.label = crowd.palette.links[newType].attributes.label;
 
         //get link view
         var linkView = link.findView(crowd.workspace.paper);
@@ -1321,11 +1338,11 @@ var CrowdEditorOrm = {
         crowd.inspector.addAttribute({ label: 'Read to left?', property: 'read', type: 'boolean', map: { true: 'left', false: 'right' } });
     }
 
-    //add cardinality attribute for role binary
+    //add cardinality and roles attributes for role binary
     switch (crowd.inspector.model.attributes.type) {
       case 'roleBinary':
         crowd.inspector.addAttribute({
-          label: 'Cardinality', property: 'cardinality', type: 'object',
+          label: 'Frequency', property: 'cardinality', type: 'object',
           parameters: [
             {
               label: 'Left', property: 'left', type: 'multiple',
@@ -1343,6 +1360,13 @@ var CrowdEditorOrm = {
             },
           ]
         });
+        crowd.inspector.addAttribute({
+          label: 'Roles', property: 'roles', type: 'object',
+          parameters: [
+            { label: 'Left', property: 'left', type: 'text', input: 'textarea', inputRows: 2, placeholder: 'Left' },
+            { label: 'Right', property: 'right', type: 'text', input: 'textarea', inputRows: 2, placeholder: 'Right' }
+          ]
+        });
         break;
     }
 
@@ -1356,11 +1380,11 @@ var CrowdEditorOrm = {
         crowd.inspector.addAttribute({
           label: 'Type', property: 'type', type: 'multiple',
           values: [
-            { label: 'Union', value: 'union' },
+            { label: 'Exhaustive', value: 'union' },
             { label: 'Exclusive', value: 'exclusive' },
             { label: 'Exclusive Exhaustive', value: 'exclusiveExhaustive' },
             { label: 'Subset', value: 'subset' },
-            { label: 'Equality', value: 'equality' },
+            // { label: 'Equality', value: 'equality' },
           ]
         });
         break;
@@ -1373,7 +1397,7 @@ var CrowdEditorOrm = {
           label: 'Type', property: 'type', type: 'multiple',
           values: [
             { label: 'Normal', value: 'connector' },
-            { label: 'Inheritance', value: 'inheritanceConnector' },
+            { label: 'Subtype', value: 'inheritanceConnector' },
             { label: 'Constraint', value: 'constraintConnector' },
           ]
         });
@@ -1434,8 +1458,8 @@ var CrowdEditorOrm = {
 
     //mapping of cardinalities to the requested format of schema
     var cardinalityMap = {
-      'one': '1..1',
-      'many': '1..*'
+      'one': '0..1',
+      'many': '0..*'
     }
 
     //mapping of role types to the requested format of schema
@@ -1462,6 +1486,12 @@ var CrowdEditorOrm = {
       'equality': ['equality']
     }
 
+    var entityTypeMap = {
+      'entity': 'entity',
+      'entityReferenceMode': 'entityRefMode',
+      'value': 'value'
+    }
+
     var rolePortMap = {
       'left': 'http://crowd.fi.uncoma.edu.ar#left',
       'right': 'http://crowd.fi.uncoma.edu.ar#right',
@@ -1477,7 +1507,7 @@ var CrowdEditorOrm = {
             uri: element.attributes.uri,
             name: element.attributes.uri,
             ref: element.attributes.refUri,
-            type: 'entity',
+            type: entityTypeMap[element.attributes.type],
             position: element.attributes.position,
             size: element.attributes.size,
           });
@@ -1534,6 +1564,7 @@ var CrowdEditorOrm = {
             entities: [],
             uniquenessConstraints: [],
             mandatory: [],
+            roles: [],
             type: roleTypeMap[element.attributes.type],
             position: element.attributes.position,
             size: element.attributes.size,
@@ -1561,10 +1592,12 @@ var CrowdEditorOrm = {
                     role.entities.unshift(connectedEntity.attributes.uri);
                     if (link.attributes.mandatory) role.mandatory.unshift(connectedEntity.attributes.uri);
                     role.uniquenessConstraints.unshift(cardinalityMap[element.attributes.cardinality[port]]);
+                    role.roles.unshift(element.attributes.roles[port]);
                   } else if (port == 'right') {
                     role.entities.push(connectedEntity.attributes.uri);
                     if (link.attributes.mandatory) role.mandatory.push(connectedEntity.attributes.uri);
                     role.uniquenessConstraints.push(cardinalityMap[element.attributes.cardinality[port]]);
+                    role.roles.push(element.attributes.roles[port]);
                   }
                 }
               }
@@ -1643,6 +1676,12 @@ var CrowdEditorOrm = {
       return constraintsResult;
     }
 
+    var entityTypeMap = {
+      'entity': 'entity',
+      'entityRefMode': 'entityReferenceMode',
+      'value': 'value'
+    }
+
     var rolePortMap = function (port) {
       if (port.includes('left')) return 'left';
       if (port.includes('right')) return 'right';
@@ -1653,7 +1692,7 @@ var CrowdEditorOrm = {
       //add each entity and their properties
       if (schema.entities) {
         schema.entities.forEach(function (entity) {
-          entitiesObj[entity.name] = crowd.palette.elements.entity.clone();
+          entitiesObj[entity.name] = crowd.palette.elements[entityTypeMap[entity.type]].clone();
           crowd.workspace.graph.addCell(entitiesObj[entity.name]);
           $.each(entity, function (attribute, value) {
             switch (attribute) {
@@ -1688,6 +1727,12 @@ var CrowdEditorOrm = {
                   rolesObj[relationship.name].prop('cardinality/right', cardinalityMap(value[1]));
                 }
                 break;
+              case 'roles':
+                if (isBinary) {
+                  rolesObj[relationship.name].prop('roles/left', value[0]);
+                  rolesObj[relationship.name].prop('roles/right', value[1]);
+                }
+                break;
               case 'position': case 'size':
                 rolesObj[relationship.name].prop(attribute, value)
                 break;
@@ -1701,7 +1746,7 @@ var CrowdEditorOrm = {
             });
             linksObj[relationship.name + '#' + entity].target(entitiesObj[entity]);
             crowd.workspace.graph.addCell(linksObj[relationship.name + '#' + entity]);
-            linksObj[relationship.name + '#' + entity].prop('mandatory', relationship.mandatory.find(e => e == entity));
+            linksObj[relationship.name + '#' + entity].prop('mandatory', relationship.mandatory.includes(entity));
             linksObj[relationship.name + '#' + entity].toBack();
           });
         });
@@ -1713,9 +1758,10 @@ var CrowdEditorOrm = {
           if (connector.type == 'subtyping') {
             connector.entities.forEach(function (entity) {
               linksObj[connector.name + "#" + entity] = crowd.palette.links.inheritanceConnector.clone();
-              linksObj[connector.name + "#" + entity].source(entitiesObj[connector.parent]);
-              linksObj[connector.name + "#" + entity].target(entitiesObj[entity]);
+              linksObj[connector.name + "#" + entity].source(entitiesObj[entity]);
+              linksObj[connector.name + "#" + entity].target(entitiesObj[connector.parent]);
               crowd.workspace.graph.addCell(linksObj[connector.name + "#" + entity]);
+              // linksObj[connector.name + "#" + entity].prop('direction', 'target');
               linksObj[connector.name + "#" + entity].toBack();
             });
             constraintTypeInheritanceMap(connector.subtypingContraint).forEach(function (constraint) {

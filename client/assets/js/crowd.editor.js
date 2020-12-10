@@ -2863,7 +2863,9 @@ CrowdEditor.prototype.initInspector = function () {
       self.inspector.toggleContent(true);
 
       //make the title with the name of the element or link
-      $('#crowd-inspector-' + self.id + ' .crowd-inspector-title').html(formatString(self.inspector.model.attributes.type));
+      $('#crowd-inspector-' + self.id + ' .crowd-inspector-title').html(
+        self.inspector.model.attributes.label ? self.inspector.model.attributes.label : formatString(self.inspector.model.attributes.type)
+      );
 
       //clear attributes of the lastest model
       self.inspector.clearAttributes();

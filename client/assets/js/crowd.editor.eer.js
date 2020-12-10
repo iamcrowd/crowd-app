@@ -1043,9 +1043,17 @@ var CrowdEditorEer = {
     }
 
     //mapping of cardinalities to the requested format of schema
-    var cardinalityMap = {
-      '1': '1..1',
-      'N': '1..*'
+    var cardinalityMap = function (cardinality, total) {
+      var result;
+      switch (cardinality) {
+        case '1':
+          result = (total ? '1' : '0') + '..1';
+          break;
+        case 'N':
+          result = (total ? '1' : '0') + '..*';
+          break;
+      }
+      return result;
     }
 
     //mapping of inheritances to the requested format of schema
@@ -1137,7 +1145,7 @@ var CrowdEditorEer = {
             if (connectedEntity) {
               relationshipLink.entities.push(connectedEntity.attributes.uri);
               relationshipLink.roles.push(link.attributes.uri);
-              relationshipLink.cardinality.push(cardinalityMap[link.attributes.cardinality]);
+              relationshipLink.cardinality.push(cardinalityMap(link.attributes.cardinality, link.attributes.total));
             }
           });
           jsonSchema.links.push(relationshipLink);
@@ -1211,6 +1219,10 @@ var CrowdEditorEer = {
       return cardinality?.indexOf('*') != -1 ? 'N' : '1';
     }
 
+    var totalMap = function (cardinality) {
+      return cardinality?.charAt(0) == '1';
+    }
+
     //mapping of inheritances to the editor format
     var inheritanceSubtypeMap = {
       'exclusive': 'disjoint',
@@ -1276,7 +1288,7 @@ var CrowdEditorEer = {
                 }
               });
               link.entities.forEach(function (connectedEntity, index) {
-                linksObj[link.roles[index]] = crowd.palette.links.connector.clone();
+                linksObj[link.roles[index]] = crowd.palette.links[totalMap(link?.cardinality[index]) ? 'total' : 'connector'].clone();
                 linksObj[link.roles[index]].source(relationshipsObj[link.name]);
                 linksObj[link.roles[index]].target(entitiesObj[link.entities[index]]);
                 crowd.workspace.graph.addCell(linksObj[link.roles[index]]);
