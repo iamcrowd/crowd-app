@@ -169,9 +169,9 @@ CrowdEditor.prototype.initPalette = function () {
     height: (Object.keys(self.palette.elements).length / self.config.palette.grid.columns + 5) * self.config.palette.grid.height,//$('#crowd-palette-' + self.id).height(),
     model: self.palette.graph,
     interactive: false,
-    background: {
-      color: $('#crowd-palette-' + self.id).css("background-color")
-    },
+    // background: {
+    //   color: $('#crowd-palette-' + self.id).css("background-color")
+    // },
     gridSize: self.config.palette.grid.height > self.config.palette.grid.width ? self.config.palette.grid.height : self.config.palette.grid.width,
     // drawGrid:
     // {
@@ -409,7 +409,7 @@ CrowdEditor.prototype.initTools = function () {
     //append files dropdown for all files related tools
     $('#crowd-tools-menu-' + self.id).append(
       '<div class="btn-group dropdown" id="crowd-tools-file-btn-' + self.id + '"> \
-        <button class="btn btn-dark dropdown-toggle" type="button" id="crowd-tools-file-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+        <button class="btn btn-adaptive dropdown-toggle" type="button" id="crowd-tools-file-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
           <i class="fa fa-fw fa-file"></i> File \
         </button> \
         <ul class="dropdown-menu" aria-labelledby="crowd-tools-file-dropdown-' + self.id + '"></ul> \
@@ -761,10 +761,10 @@ CrowdEditor.prototype.initTools = function () {
               style="overflow: hidden; overflow-wrap: break-word;"></pre></div> \
               <div class="modal-footer"> \
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
-                <button class="btn btn-dark" data-clipboard-target="#crowd-tools-export-check-schema-modal-pre-' + self.id + '"> \
+                <button class="btn btn-adaptive" data-clipboard-target="#crowd-tools-export-check-schema-modal-pre-' + self.id + '"> \
                   Copy to Clipboard \
                 </button> \
-                <button class="btn btn-dark" data-model="" id="crowd-tools-export-schema-' + self.id + '">Download</button> \
+                <button class="btn btn-adaptive" data-model="" id="crowd-tools-export-schema-' + self.id + '">Download</button> \
               </div> \
             </div> \
           </div> \
@@ -789,7 +789,10 @@ CrowdEditor.prototype.initTools = function () {
           model: model,
           success: function (schema) {
             $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export ' + model.toUpperCase() + ' Schema');
-            $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(schema, null, 4));
+            if (model == 'owl')
+              $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(escapeXML(schema));
+            else
+              $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(schema, null, 4));
             $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
             // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
           },
@@ -812,8 +815,8 @@ CrowdEditor.prototype.initTools = function () {
           model: model,
           success: function (schema) {
             $("<a />", {
-              "download": model + "-schema.json",
-              "href": "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(schema, null, 4)),
+              "download": model + "-schema." + (model == 'owl' ? 'owl' : "json"),
+              "href": (model == 'owl' ? schema : "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(schema, null, 4))),
             }).appendTo("body")
               .click(function () {
                 $(this).remove()
@@ -985,7 +988,7 @@ CrowdEditor.prototype.initTools = function () {
               </div> \
               <div class="modal-footer"> \
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
-                <button class="btn btn-dark" data-model="" id="crowd-tools-import-schema-' + self.id + '">Upload</button> \
+                <button class="btn btn-adaptive" data-model="" id="crowd-tools-import-schema-' + self.id + '">Upload</button> \
               </div> \
             </div> \
           </div> \
@@ -1055,7 +1058,7 @@ CrowdEditor.prototype.initTools = function () {
     //append edit dropdown for all edit related tools
     $('#crowd-tools-menu-' + self.id).append(
       '<div class="btn-group dropdown" id="crowd-tools-edit-btn-' + self.id + '"> \
-        <button class="btn btn-dark dropdown-toggle" type="button" id="crowd-tools-edit-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+        <button class="btn btn-adaptive dropdown-toggle" type="button" id="crowd-tools-edit-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
           <i class="fa fa-fw fa-pencil"></i> Edit \
         </button> \
         <ul class="dropdown-menu" aria-labelledby="crowd-tools-edit-dropdown-' + self.id + '"></ul> \
@@ -1349,7 +1352,7 @@ CrowdEditor.prototype.initTools = function () {
     //append edit dropdown for all view related tools
     $('#crowd-tools-menu-' + self.id).append(
       '<div class="btn-group dropdown" id="crowd-tools-view-btn-' + self.id + '"> \
-        <button class="btn btn-dark dropdown-toggle" type="button" id="crowd-tools-view-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+        <button class="btn btn-adaptive dropdown-toggle" type="button" id="crowd-tools-view-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
           <i class="fa fa-fw fa-eye"></i> View \
         </button> \
         <ul class="dropdown-menu" aria-labelledby="crowd-tools-view-dropdown-' + self.id + '"></ul> \
@@ -1439,7 +1442,7 @@ CrowdEditor.prototype.initTools = function () {
     //append edit dropdown for all tools related tools
     $('#crowd-tools-menu-' + self.id).append(
       '<div class="btn-group dropdown" id="crowd-tools-tools-btn-' + self.id + '"> \
-        <button class="btn btn-dark dropdown-toggle" type="button" id="crowd-tools-tools-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+        <button class="btn btn-adaptive dropdown-toggle" type="button" id="crowd-tools-tools-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
           <i class="fa fa-fw fa-wrench"></i> Tools \
         </button> \
         <ul class="dropdown-menu" aria-labelledby="crowd-tools-tools-dropdown-' + self.id + '"></ul> \

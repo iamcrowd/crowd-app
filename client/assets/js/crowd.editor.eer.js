@@ -644,6 +644,38 @@ var CrowdEditorEer = {
       ])
     });
 
+    //create tools view for key attribute
+    crowd.workspace.tools.elements.elementsToolsView['keyAttribute'] = new joint.dia.ToolsView({
+      name: 'key-attribute-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({ cardinality: '1' })
+      ])
+    });
+
+    //create tools view for weak key attribute
+    crowd.workspace.tools.elements.elementsToolsView['weakKeyAttribute'] = new joint.dia.ToolsView({
+      name: 'weak-key-attribute-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({ cardinality: '1' })
+      ])
+    });
+
+    //create tools view for multivalued attribute
+    crowd.workspace.tools.elements.elementsToolsView['multivaluedAttribute'] = new joint.dia.ToolsView({
+      name: 'multivalued-attribute-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({ cardinality: '1' })
+      ])
+    });
+
+    //create tools view for derived attribute
+    crowd.workspace.tools.elements.elementsToolsView['derivedAttribute'] = new joint.dia.ToolsView({
+      name: 'derived-attribute-tools',
+      tools: crowd.workspace.tools.elements.basicTools.concat([
+        linkTool({ cardinality: '1' })
+      ])
+    });
+
     //create tools view for inheritance
     crowd.workspace.tools.elements.elementsToolsView['inheritance'] = new joint.dia.ToolsView({
       name: 'inheritance-tools',

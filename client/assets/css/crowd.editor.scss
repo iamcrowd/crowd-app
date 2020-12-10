@@ -1,9 +1,15 @@
 /* theme variables */
-$primary: #191d21;
-$accent: #343a40;
+$primary: #c6c5c3;
+$accent: #e6e6e6;
 $warn: #f4511e;
-$alt-primary: #121518;
-$alt-accent: #262a2e;
+$alt-primary: #c2bcbc;
+$alt-accent: #d6d5d5;
+
+$primary-dark: #191d21;
+$accent-dark: #343a40;
+$warn-dark: #f4511e;
+$alt-primary-dark: #121518;
+$alt-accent-dark: #262a2e;
 
 .crowd-container {
   margin: 0 !important;
@@ -17,13 +23,17 @@ $alt-accent: #262a2e;
   left: 0px;
   width: 200px;
   height: inherit !important;
-  background-color: $accent;
+  background-color: $accent !important;
   border-top: 0.1px solid black;
   border-right: 0.1px solid black;
   padding: 0;
   margin: 0;
   overflow-y: auto;
   user-select: none;
+}
+
+.bootstrap-dark .crowd-palette {
+  background-color: $accent-dark !important;
 }
 
 .crowd-container-middle {
@@ -49,16 +59,24 @@ $alt-accent: #262a2e;
 .crowd-tools {
   // display: table-row;
   // flex: 0 0 auto;
-  background-color: $alt-accent;
+  background-color: $alt-accent !important;
   border-top: 0.1px solid black;
   border-bottom: 0.1px solid black;
   width: 100%;
   user-select: none;
 }
 
+.bootstrap-dark .crowd-tools {
+  background-color: $alt-accent-dark !important;
+}
+
 .crowd-tools .row {
   margin: 5px 0px 0px 0px !important;
-  color: white;
+  color: black;
+}
+
+.bootstrap-dark .crowd-tools .row {
+  color: white !important;
 }
 
 .crowd-tools .row .form-group {
@@ -185,10 +203,10 @@ $alt-accent: #262a2e;
 
 .crowd-inspector {
   display: table-row;
-  background-color: $accent;
+  background-color: $accent !important;
   border-top: 0.1px solid black;
   border-left: 0.1px solid black;
-  color: white;
+  color: black;
   position: absolute;
   top: 0px;
   bottom: 200px;
@@ -196,6 +214,11 @@ $alt-accent: #262a2e;
   user-select: none;
   display: flex;
   flex-direction: column;
+}
+
+.bootstrap-dark .crowd-inspector {
+  background-color: $accent-dark !important;
+  color: white !important;
 }
 
 .crowd-inspector .crowd-inspector-empty {
@@ -396,39 +419,39 @@ $alt-accent: #262a2e;
 }
 
 .crowd-entity-color {
-  color: rgba(33, 33, 33, 1);
+  color: rgba(215, 38, 61, 1);
 }
 
 .crowd-weak-entity-color {
-  color: rgba(66, 66, 66, 1);
+  color: rgba(226, 92, 110, 1);
 }
 
 .crowd-relationship-color {
-  color: rgba(38, 50, 56, 1);
+  color: rgba(244, 96, 54, 1);
 }
 
 .crowd-weak-relationship-color {
-  color: rgba(55, 71, 79, 1);
+  color: rgba(247, 134, 102, 1);
 }
 
 .crowd-attribute-color {
-  color: rgba(97, 97, 97, 1);
+  color: rgb(130, 158, 7);
 }
 
 .crowd-multivalued-attribute-color {
-  color: rgba(117, 117, 117, 1);
+  color: rgb(53, 139, 27);
 }
 
 .crowd-key-attribute-color {
-  color: rgba(62, 39, 35, 1);
+  color: rgba(27, 153, 139, 1);
 }
 
 .crowd-weak-key-attribute-color {
-  color: rgba(78, 52, 46, 1);
+  color: rgba(44, 218, 197, 1);
 }
 
 .crowd-inheritance-color {
-  color: rgba(191, 54, 12, 1);
+  color: rgba(83, 74, 141, 1);
 }
 
 .crowd-derived-attribute-color {
@@ -440,31 +463,55 @@ $alt-accent: #262a2e;
 }
 
 .crowd-class-color {
-  color: rgba(33, 33, 33, 1);
+  color: rgba(215, 38, 61, 1);
 }
 
 .crowd-class-alt-color {
-  color: rgba(66, 66, 66, 1);
+  color: rgba(226, 92, 110, 1);
 }
 
 .crowd-abstract-color {
-  color: rgba(38, 50, 56, 1);
+  color: rgba(244, 96, 54, 1);
 }
 
 .crowd-abstract-alt-color {
-  color: rgba(55, 71, 79, 1);
+  color: rgba(247, 134, 102, 1);
 }
 
 .crowd-interface-color {
-  color: rgba(62, 39, 35, 1);
+  color: rgba(27, 153, 139, 1);
 }
 
 .crowd-interface-alt-color {
-  color: rgba(78, 52, 46, 1);
+  color: rgba(44, 218, 197, 1);
+}
+
+.crowd-orm-entity-fill-color {
+  color: rgba(255, 255, 255, 1);
+}
+
+.crowd-orm-entity-stroke-color {
+  color: rgba(0, 0, 173, 1);
+}
+
+.crowd-orm-constraint-fill-color {
+  color: rgba(255, 255, 255, 1);
+}
+
+.crowd-orm-constraint-stroke-color {
+  color: rgba(160, 0, 160, 1);
+}
+
+.crowd-orm-role-fill-color {
+  color: rgba(255, 255, 255, 1);
+}
+
+.crowd-orm-role-stroke-color {
+  color: rgb(0, 0, 0, 1);
 }
 
 .crowd-unsat-color {
-  color: rgba(242, 120, 57, 1);
+  color: rgba(255, 0, 0, 1);
 }
 
 .crowd-inferred-color {

@@ -11,6 +11,7 @@ import { AuthService } from './services/auth.service';
 import { AuthGuardLogin } from './services/auth-guard-login.service';
 import { AuthGuardAdmin } from './services/auth-guard-admin.service';
 import { LeaveGuardEditor } from './services/leave-guard-editor.service';
+import { CookieService } from 'ngx-cookie-service';
 // Components
 import { AppComponent } from './app.component';
 import { AboutComponent } from './about/about.component';
@@ -52,7 +53,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     AuthGuardAdmin,
     LeaveGuardEditor,
     UserService,
-    DiagramService
+    DiagramService,
+    CookieService
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent]

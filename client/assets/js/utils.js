@@ -136,3 +136,11 @@ function getURIFragment(uri) {
   fragment = fragment[fragment.length - 1];
   return fragment;
 }
+
+function escapeXML(xml) {
+  return xml.replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}

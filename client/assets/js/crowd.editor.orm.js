@@ -3,16 +3,12 @@ var CrowdEditorOrm = {
   initPalette: function (crowd) {
     //colors for palette elements
     crowd.palette.colors = {
-      entity: getCSS('color', 'crowd-entity-color'),
-      weakEntity: getCSS('color', 'crowd-weak-entity-color'),
-      relationship: getCSS('color', 'crowd-relationship-color'),
-      weakRelationship: getCSS('color', 'crowd-weak-relationship-color'),
-      attribute: getCSS('color', 'crowd-attribute-color'),
-      multivaluedAttribute: getCSS('color', 'crowd-multivalued-attribute-color'),
-      keyAttribute: getCSS('color', 'crowd-key-attribute-color'),
-      weakKeyAttribute: getCSS('color', 'crowd-weak-key-attribute-color'),
-      inheritance: getCSS('color', 'crowd-inheritance-color'),
-      derivedAttribute: getCSS('color', 'crowd-derived-attribute-color')
+      entityFill: getCSS('color', 'crowd-orm-entity-fill-color'),
+      entityStroke: getCSS('color', 'crowd-orm-entity-stroke-color'),
+      constraintFill: getCSS('color', 'crowd-orm-constraint-fill-color'),
+      constraintStroke: getCSS('color', 'crowd-orm-constraint-stroke-color'),
+      roleFill: getCSS('color', 'crowd-orm-role-fill-color'),
+      roleStroke: getCSS('color', 'crowd-orm-role-stroke-color'),
     }
 
     //function to initialize orm shapes in joint
@@ -22,24 +18,24 @@ var CrowdEditorOrm = {
       const original_height_entities = 40;
       const original_size_label_entities = 14;
       const original_strokeWidth_entities = 2;
-      const original_strokeFill_entities = '#0000AD';
       const original_rx_entities = 5;
       const original_ry_entities = 5;
-      const original_fill_entities = '#FFFFFF';
       const original_dasharray_entities = '6 3';
+      const original_fill_entities = crowd.palette.colors.entityFill;
+      const original_strokeFill_entities = crowd.palette.colors.entityStroke;
 
       const original_strokeWidth_constraint = 2;
       const original_rx_constraint = 15;
       const original_ry_constraint = 15;
       const original_cx_constraint = 0;
       const original_cy_constraint = 0;
-      const original_fill_constraint = '#FFFFFF';
-      const original_strokeFill_constraint = '#A000A0';
+      const original_fill_constraint = crowd.palette.colors.constraintFill;
+      const original_strokeFill_constraint = crowd.palette.colors.constraintStroke;
 
       const original_width_role = 90;
       const original_height_role = 40;
-      const original_fill_role = '#FFFFFF';
-      const original_strokeFill_role = '#333333';
+      const original_fill_role = crowd.palette.colors.roleFill;
+      const original_strokeFill_role = crowd.palette.colors.roleStroke;
 
       //define orm entity shape in joint
       joint.dia.Element.define('orm.Entity',
@@ -216,7 +212,7 @@ var CrowdEditorOrm = {
               'stroke-linecap': 'round'
             },
             label: {
-              text: 'role name',
+              text: 'fact type',
               textVerticalAnchor: 'middle',
               textAnchor: 'middle',
               x: 45,
@@ -364,7 +360,7 @@ var CrowdEditorOrm = {
               'stroke-linecap': 'round'
             },
             label: {
-              text: 'role name',
+              text: 'fact type',
               textVerticalAnchor: 'middle',
               textAnchor: 'middle',
               x: 45,
@@ -753,7 +749,7 @@ var CrowdEditorOrm = {
     //   label: 'Fact Type',
     //   name: 'Role',
     //   read: 'right',
-    //   uri: 'http://crowd.fi.uncoma.edu.ar#role'
+    //   uri: 'http://crowd.fi.uncoma.edu.ar#fact-type'
     // });
 
     //add joint orm role binary to palette elements
@@ -771,7 +767,7 @@ var CrowdEditorOrm = {
         left: 'http://crowd.fi.uncoma.edu.ar#role-a',
         right: 'http://crowd.fi.uncoma.edu.ar#role-b'
       },
-      uri: 'http://crowd.fi.uncoma.edu.ar#role'
+      uri: 'http://crowd.fi.uncoma.edu.ar#fact-type'
     });
 
     //add joint orm union constraint to palette elements

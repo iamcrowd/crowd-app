@@ -4,8 +4,10 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LoginComponent } from './login/login.component';
 import { Router, NavigationEnd } from '@angular/router';
 import { RegisterComponent } from './register/register.component';
+import { CookieService } from 'ngx-cookie-service';
 
 declare var iziToast;
+declare var $;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -17,7 +19,8 @@ export class AppComponent implements AfterViewChecked {
     public router: Router,
     public auth: AuthService,
     private changeDetector: ChangeDetectorRef,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private cookieService: CookieService
   ) { }
 
   ngOnInit() {
@@ -25,6 +28,8 @@ export class AppComponent implements AfterViewChecked {
       position: 'topCenter',
       maxWidth: '30%'
     });
+
+    this.initDarkMode();
   }
 
   ngAfterViewChecked(): void {
@@ -66,5 +71,16 @@ export class AppComponent implements AfterViewChecked {
 
   isActive(url: string): boolean {
     return this.router.isActive(url, false);
+  }
+
+  initDarkMode() {
+    var darkmode = this.cookieService.get('crowd-darkmode') == 'true';
+    if (!darkmode) $('body').removeClass('bootstrap-dark');
+    else $('body').addClass('bootstrap-dark');
+  }
+
+  toggleDarkMode() {
+    $('body').toggleClass('bootstrap-dark');
+    this.cookieService.set('crowd-darkmode', $('body').hasClass('bootstrap-dark'));
   }
 }

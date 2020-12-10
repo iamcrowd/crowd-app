@@ -1,5 +1,5 @@
 <div class="container crowd-container">
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark crowd-navbar">
+  <nav class="navbar navbar-expand-lg navbar-adaptive bg-dark crowd-navbar">
     <a class="navbar-brand crowd-title" routerLink="/">crowd</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-supported-content"
       aria-controls="navbar-supported-content" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,6 +30,11 @@
         </li>
       </ul>
       <ul class="navbar-nav navbar-right">
+        <li class="nav-item" data-toggle="tooltip" data-original-title="Toggle Dark/Light Mode" data-placement="left">
+          <a class="nav-link" (click)="toggleDarkMode()">
+            <i class="fa fa-fw fa-lg fa-sun-o"></i>
+          </a>
+        </li>
         <li class="nav-item">
           <a class="nav-link" [routerLink]="" *ngIf="!auth.loggedIn" (click)="openRegister()">
             <i class="fa fa-fw fa-user-plus"></i> Sign Up

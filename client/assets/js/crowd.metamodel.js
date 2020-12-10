@@ -11,28 +11,41 @@ CrowdMetamodel.prototype.request = function (req) {
 
   console.log('MetamodelAPI: requesting ' + self.config.url + req.from + 'to' + req.to, req.data);
 
-  var url = self.config.url + req.from + 'to' + req.to;
-  var data = JSON.stringify(req.data);
   if (req.to == 'owl') {
-    url = self.config.owlUrl;
-    data = JSON.stringify({ json: req.data, format: 'owl2' });
+    return $.ajax({
+      type: "POST",
+      url: self.config.owlUrl,
+      data: {
+        json: JSON.stringify(req.data),
+        format: 'owl2'
+      },
+      success: function (res) {
+        console.log('MetamodelAPI: response to ' + self.config.url + req.from + 'to' + req.to, res);
+        if (req.success) req.success(res);
+      },
+      error: function (error) {
+        console.log('MetamodelAPI: error', error);
+        if (!req.hideError) self.config.error(error);
+        if (req.error) req.error(error);
+      }
+    });
+  } else {
+    return $.ajax({
+      type: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      url: self.config.url + req.from + 'to' + req.to,
+      data: JSON.stringify(req.data),
+      success: function (res) {
+        console.log('MetamodelAPI: response to ' + self.config.url + req.from + 'to' + req.to, res);
+        if (req.success) req.success(res);
+      },
+      error: function (error) {
+        console.log('MetamodelAPI: error', error);
+        if (!req.hideError) self.config.error(error);
+        if (req.error) req.error(error);
+      }
+    });
   }
-
-  return $.ajax({
-    type: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    url: url,
-    data: data,
-    success: function (res) {
-      console.log('MetamodelAPI: response to ' + self.config.url + req.from + 'to' + req.to, res);
-      if (req.success) req.success(res);
-    },
-    error: function (error) {
-      console.log('MetamodelAPI: error', error);
-      if (!req.hideError) self.config.error(error);
-      if (req.error) req.error(error);
-    }
-  });
 }
