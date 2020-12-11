@@ -679,7 +679,7 @@ var CrowdEditorUml = {
       if (element.isElement()) {
         //replace element attributes, markup and getClassName function with the palette default component of the newtype
         element.attributes.attrs = $.extend(true, {}, crowd.palette.elements[newType].attributes.attrs);
-        element.markup = crowd.palette.elements[newType].markup;
+        element.markup = element.attributes.collapsed ? crowd.palette.elements[newType].attributes.collapsedMarkup : crowd.palette.elements[newType].markup;
         element.getClassName = crowd.palette.elements[newType].getClassName;
 
         //get element view
@@ -705,6 +705,8 @@ var CrowdEditorUml = {
         // element.attributes.uri = element.attributes.uri.split("#")[0] + "#" + toURI(newName);
         // $('#crowd-inspector-content--uri--' + crowd.id).val(element.attributes.uri);
         element.findView(crowd.workspace.paper).render();
+
+        element.trigger('change:properties', element, element.prop('properties'));
       }
     });
 
@@ -721,28 +723,28 @@ var CrowdEditorUml = {
     });
 
     var classFitToContent = function (element) {
-      console.log('classFitToContent', element);
+      // console.log('classFitToContent', element);
 
       //get element view
       var elementView = element.findView(crowd.workspace.paper);
 
-      element.size({ width: 90, height: 90 });
-      setTimeout(function () {
-        for (var i = 0; i < 10; i++) {
-          var bbox = elementView.getBBox();
-          element.size(bbox);
-        }
+      // element.size({ width: 90, height: 90 });
+      // setTimeout(function () {
+      //   for (var i = 0; i < 10; i++) {
+      //     var bbox = elementView.getBBox();
+      //     element.size(bbox);
+      //   }
 
-        // var actualSize = element.size();
-        // actualSize.width += 20;
-        // actualSize.height += 40;
+      //   // var actualSize = element.size();
+      //   // actualSize.width += 20;
+      //   // actualSize.height += 40;
 
-        // element.size(actualSize);
+      //   // element.size(actualSize);
 
-        //redraw the element and their tools with the new type style
-        elementView.render();
-        crowd.workspace.renderElementTools(elementView);
-      });
+      //   //redraw the element and their tools with the new type style
+      elementView.render();
+      // crowd.workspace.renderElementTools(elementView);
+      // });
     }
 
     //event when the elements attributes change
@@ -756,7 +758,7 @@ var CrowdEditorUml = {
         // else if (element._previousAttributes.attributes.length < newAttributes.length)
         //   element.size(element.size().width, element.size().height + 10);
 
-        setTimeout(function(){
+        setTimeout(function () {
           classFitToContent(element);
         });
       }
@@ -773,7 +775,7 @@ var CrowdEditorUml = {
         // else if (element._previousAttributes.methods.length < newMethods.length)
         //   element.size(element.size().width, element.size().height + 10);
 
-        setTimeout(function(){
+        setTimeout(function () {
           classFitToContent(element);
         });
       }
@@ -785,13 +787,21 @@ var CrowdEditorUml = {
 
       if (element.isElement()) {
         //set visual attributes property on element
-        element.prop('attributes', $.map(newProperties.attributes, function (attribute) {
-          return '- ' + (attribute.name ? toInfixCaps(fromURI(attribute.name)) : '_') + ' : ' + (attribute.datatype ? attribute.datatype : '_');
-        }));
+        element.prop('attributes',
+          $.map(newProperties.attributes, function (attribute) {
+            return joint.util.breakText(
+              '- ' + (attribute.name ? toInfixCaps(fromURI(attribute.name)) : '_') + ' : ' + (attribute.datatype ? attribute.datatype : '_'),
+              { width: element.attributes.size.width + 25 }
+            );
+          })
+        );
 
         //set visual methods property on element
         element.prop('methods', $.map(newProperties.methods, function (method) {
-          return '+ ' + (method ? toInfixCaps(fromURI(method)) + '()' : '_');
+          return joint.util.breakText(
+            '+ ' + (method ? toInfixCaps(fromURI(method)) + '()' : '_'),
+            { width: element.attributes.size.width + 25 }
+          );
         }));
 
         // //get element view
