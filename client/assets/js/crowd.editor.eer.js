@@ -12,7 +12,12 @@ var CrowdEditorEer = {
       keyAttribute: getCSS('color', 'crowd-key-attribute-color'),
       weakKeyAttribute: getCSS('color', 'crowd-weak-key-attribute-color'),
       inheritance: getCSS('color', 'crowd-inheritance-color'),
-      derivedAttribute: getCSS('color', 'crowd-derived-attribute-color')
+      derivedAttribute: getCSS('color', 'crowd-derived-attribute-color'),
+      entityStroke: getCSS('color', 'crowd-entity-stroke-color'),
+      relationshipStroke: getCSS('color', 'crowd-relationship-stroke-color'),
+      attributeStroke: getCSS('color', 'crowd-attribute-stroke-color'),
+      keyAttributeStroke: getCSS('color', 'crowd-key-attribute-stroke-color'),
+      inheritanceStroke: getCSS('color', 'crowd-inheritance-stroke-color'),
     }
 
     //add joint eer entity to palette elements
@@ -23,12 +28,12 @@ var CrowdEditorEer = {
       uri: 'http://crowd.fi.uncoma.edu.ar#entity',
       attrs: {
         text: {
-          fill: 'white',
+          fill: '#000000',
           class: 'crowd-element-text'
         },
         '.outer': {
           fill: crowd.palette.colors.entity,
-          stroke: crowd.palette.colors.entity
+          stroke: crowd.palette.colors.entityStroke
         },
         '.inner': {
           fill: crowd.palette.colors.entity,
@@ -50,16 +55,16 @@ var CrowdEditorEer = {
       attrs: {
         text: {
           text: 'Weak\nEntity',
-          fill: 'white',
+          fill: '#000000',
           class: 'crowd-element-text'
         },
         '.outer': {
           fill: 'none',
-          stroke: crowd.palette.colors.weakEntity,
+          stroke: crowd.palette.colors.entityStroke,
         },
         '.inner': {
           fill: crowd.palette.colors.weakEntity,
-          stroke: crowd.palette.colors.weakEntity,
+          stroke: crowd.palette.colors.entityStroke,
           display: 'auto'
         }
       },
@@ -77,12 +82,12 @@ var CrowdEditorEer = {
       uri: 'http://crowd.fi.uncoma.edu.ar#relationship',
       attrs: {
         text: {
-          fill: 'white',
+          fill: '#000000',
           class: 'crowd-element-text s'
         },
         '.outer': {
           fill: crowd.palette.colors.relationship,
-          stroke: crowd.palette.colors.relationship
+          stroke: crowd.palette.colors.relationshipStroke
         },
         '.inner': {
           fill: crowd.palette.colors.relationship,
@@ -104,16 +109,16 @@ var CrowdEditorEer = {
       attrs: {
         text: {
           text: 'Weak\nRelationship',
-          fill: 'white',
+          fill: '#000000',
           class: 'crowd-element-text s'
         },
         '.outer': {
           fill: 'none',
-          stroke: crowd.palette.colors.weakRelationship
+          stroke: crowd.palette.colors.relationshipStroke
         },
         '.inner': {
           fill: crowd.palette.colors.weakRelationship,
-          stroke: crowd.palette.colors.weakRelationship,
+          stroke: crowd.palette.colors.relationshipStroke,
           display: 'auto'
         }
       },
@@ -132,13 +137,13 @@ var CrowdEditorEer = {
       datatype: 'Integer',
       attrs: {
         text: {
-          fill: 'white',
+          fill: '#000000',
           text: 'Key\nAttribute',
           class: 'crowd-element-text xs key-attribute'
         },
         '.outer': {
           fill: crowd.palette.colors.keyAttribute,
-          stroke: crowd.palette.colors.keyAttribute
+          stroke: crowd.palette.colors.keyAttributeStroke
         }
       },
       size: {
@@ -156,13 +161,13 @@ var CrowdEditorEer = {
       datatype: 'Integer',
       attrs: {
         text: {
-          fill: 'white',
+          fill: '#000000',
           text: 'Weak Key\nAttribute',
           class: 'crowd-element-text xs weak-key-attribute'
         },
         '.outer': {
           fill: crowd.palette.colors.weakKeyAttribute,
-          stroke: crowd.palette.colors.weakKeyAttribute,
+          stroke: crowd.palette.colors.keyAttributeStroke,
         }
       },
       size: {
@@ -180,13 +185,13 @@ var CrowdEditorEer = {
       datatype: 'Integer',
       attrs: {
         text: {
-          fill: 'white',
+          fill: '#000000',
           text: 'Attribute',
           class: 'crowd-element-text xs'
         },
         '.outer': {
           fill: crowd.palette.colors.attribute,
-          stroke: crowd.palette.colors.attribute
+          stroke: crowd.palette.colors.attributeStroke
         }
       },
       size: {
@@ -204,17 +209,17 @@ var CrowdEditorEer = {
       datatype: 'Integer',
       attrs: {
         text: {
-          fill: 'white',
+          fill: '#000000',
           text: 'Multivalued\nAttribute',
           class: 'crowd-element-text xs'
         },
         '.outer': {
           fill: 'none',
-          stroke: crowd.palette.colors.multivaluedAttribute
+          stroke: crowd.palette.colors.attributeStroke
         },
         '.inner': {
           fill: crowd.palette.colors.multivaluedAttribute,
-          stroke: crowd.palette.colors.multivaluedAttribute,
+          stroke: crowd.palette.colors.attributeStroke,
           display: 'auto'
         }
       },
@@ -231,14 +236,15 @@ var CrowdEditorEer = {
       subtype: 'overlaped',
       attrs: {
         text: {
-          fill: 'white',
+          fill: crowd.palette.colors.inheritanceStroke,
           text: 'o',
           class: 'crowd-element-text l inheritance',
           'dominant-baseline': 'middle'
         },
         '.outer': {
           fill: crowd.palette.colors.inheritance,
-          stroke: crowd.palette.colors.inheritance
+          stroke: crowd.palette.colors.inheritanceStroke,
+          'stroke-width': 2
         }
       },
       size: {
@@ -256,18 +262,18 @@ var CrowdEditorEer = {
       datatype: 'Integer',
       attrs: {
         text: {
-          fill: 'white',
+          fill: '#000000',
           text: 'Derived\nAttribute',
           class: 'crowd-element-text xs'
         },
         '.outer': {
           fill: 'none',
-          stroke: crowd.palette.colors.derivedAttribute,
+          stroke: crowd.palette.colors.attributeStroke,
           'stroke-dasharray': '3'
         },
         '.inner': {
           fill: crowd.palette.colors.derivedAttribute,
-          stroke: crowd.palette.colors.derivedAttribute,
+          stroke: crowd.palette.colors.attributeStroke,
           display: 'auto'
         }
       },
@@ -291,6 +297,8 @@ var CrowdEditorEer = {
           strokeWidth: 2,
           sourceMarker: {},
           targetMarker: {
+            stroke: 'black',
+            fill: 'black',
             d: ''
           }
         }
@@ -320,6 +328,8 @@ var CrowdEditorEer = {
           stroke: getCSS('background-color', 'crowd-workspace'),
           sourceMarker: {},
           targetMarker: {
+            stroke: 'black',
+            fill: 'black',
             d: ''
           }
         },
@@ -354,9 +364,9 @@ var CrowdEditorEer = {
         },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
-          background: crowd.palette.colors.entity,
+          // background: crowd.palette.colors.entity,
           tooltip: {
-            title: 'Click and drag to make a <b class="crowd-entity-color">entity</b> and connect with it',
+            title: 'Click and drag to make a <b class="crowd-bold-color">entity</b> and connect with it',
             placement: "right"
           }
         }),
@@ -384,9 +394,9 @@ var CrowdEditorEer = {
         },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
-          background: crowd.palette.colors.weakEntity,
+          // background: crowd.palette.colors.weakEntity,
           tooltip: {
-            title: 'Click and drag to make a <b class="crowd-weak-entity-color">weak entity</b> and connect with it',
+            title: 'Click and drag to make a <b class="crowd-bold-color">weak entity</b> and connect with it',
             placement: "left"
           }
         }),
@@ -414,9 +424,9 @@ var CrowdEditorEer = {
         },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
-          background: crowd.palette.colors.relationship,
+          // background: crowd.palette.colors.relationship,
           tooltip: {
-            title: 'Click and drag to make a <b class="crowd-relationship-color">relationship</b> and connect with it',
+            title: 'Click and drag to make a <b class="crowd-bold-color">relationship</b> and connect with it',
             placement: "right"
           }
         }),
@@ -444,9 +454,9 @@ var CrowdEditorEer = {
         },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
-          background: crowd.palette.colors.weakRelationship,
+          // background: crowd.palette.colors.weakRelationship,
           tooltip: {
-            title: 'Click and drag to make a <b class="crowd-weak-relationship-color">weak relationship</b> and connect with it',
+            title: 'Click and drag to make a <b class="crowd-bold-color">weak relationship</b> and connect with it',
             placement: "left"
           }
         }),
@@ -467,9 +477,9 @@ var CrowdEditorEer = {
       x: '50%', offset: { x: -25, y: -15 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'share',
-        background: crowd.palette.colors.attribute,
+        // background: crowd.palette.colors.attribute,
         tooltip: {
-          title: 'Click and drag to make an <b class="crowd-attribute-color">attribute</b> and connect with it',
+          title: 'Click and drag to make an <b class="crowd-bold-color">attribute</b> and connect with it',
           placement: "top"
         }
       }),
@@ -487,9 +497,9 @@ var CrowdEditorEer = {
       x: '50%', y: '100%', offset: { x: -25, y: 35 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'share',
-        background: crowd.palette.colors.multivaluedAttribute,
+        // background: crowd.palette.colors.multivaluedAttribute,
         tooltip: {
-          title: 'Click and drag to make a <b class="crowd-multivalued-attribute-color">multivalued attribute</b> and connect with it',
+          title: 'Click and drag to make a <b class="crowd-bold-color">multivalued attribute</b> and connect with it',
           placement: "bottom"
         }
       }),
@@ -507,9 +517,9 @@ var CrowdEditorEer = {
       x: '50%', offset: { x: 25, y: -15 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'share',
-        background: crowd.palette.colors.keyAttribute,
+        // background: crowd.palette.colors.keyAttribute,
         tooltip: {
-          title: 'Click and drag to make a <b class="crowd-key-attribute-color">key attribute</b> and connect with it',
+          title: 'Click and drag to make a <b class="crowd-bold-color">key attribute</b> and connect with it',
           placement: "top"
         }
       }),
@@ -527,9 +537,9 @@ var CrowdEditorEer = {
       x: '50%', offset: { x: 25, y: -15 },
       markup: crowd.workspace.tools.elements.markup({
         icon: 'share',
-        background: crowd.palette.colors.weakKeyAttribute,
+        // background: crowd.palette.colors.weakKeyAttribute,
         tooltip: {
-          title: 'Click and drag to make a <b class="crowd-weak-key-attribute-color">weak key attribute</b> and connect with it',
+          title: 'Click and drag to make a <b class="crowd-bold-color">weak key attribute</b> and connect with it',
           placement: "top"
         }
       }),
@@ -549,9 +559,9 @@ var CrowdEditorEer = {
         x: '50%', y: '100%', offset: { x: 25, y: 35 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
-          background: crowd.palette.colors.inheritance,
+          // background: crowd.palette.colors.inheritance,
           tooltip: {
-            title: 'Click and drag to make a <b class="crowd-inheritance-color">inheritance</b> and connect with it',
+            title: 'Click and drag to make a <b class="crowd-bold-color">inheritance</b> and connect with it',
             placement: "bottom"
           }
         }),
@@ -814,6 +824,11 @@ var CrowdEditorEer = {
           ? crowd.palette.links.total.markup
           : crowd.palette.links.connector.markup;
 
+        //change color if is for inheritance or not
+        link.attr((link.attributes.total ? 'outline' : 'line') + '/stroke', link.attributes.inherit ? crowd.palette.colors.inheritanceStroke : '#000000');
+        link.attr('line/targetMarker/stroke', link.attributes.inherit ? crowd.palette.colors.inheritanceStroke : '#000000');
+        link.attr('line/targetMarker/fill', link.attributes.inherit ? crowd.palette.colors.inheritanceStroke : '#000000');
+
         //get link view
         var linkView = link.findView(crowd.workspace.paper);
 
@@ -833,8 +848,14 @@ var CrowdEditorEer = {
       if (link.isLink()) {
         if (newInherit) {
           link.trigger('change:inheritChild', link, link.prop('inheritChild'));
+          link.attr((link.attributes.total ? 'outline' : 'line') + '/stroke', crowd.palette.colors.inheritanceStroke);
+          link.attr('line/targetMarker/stroke', crowd.palette.colors.inheritanceStroke);
+          link.attr('line/targetMarker/fill', crowd.palette.colors.inheritanceStroke);
         } else {
           link.trigger('change:cardinality', link, link.prop('cardinality'));
+          link.attr((link.attributes.total ? 'outline' : 'line') + '/stroke', '#000000');
+          link.attr('line/targetMarker/stroke', '#000000');
+          link.attr('line/targetMarker/fill', '#000000');
         }
         crowd.inspector.loadContent();
       }
@@ -849,9 +870,13 @@ var CrowdEditorEer = {
         var linkTargetType = link.getTargetElement()?.attributes?.parentType;
 
         if (link.attributes.inherit) {
+          link.attr((link.attributes.total ? 'outline' : 'line') + '/stroke', crowd.palette.colors.inheritanceStroke);
+          link.attr('line/targetMarker/stroke', crowd.palette.colors.inheritanceStroke);
+          link.attr('line/targetMarker/fill', crowd.palette.colors.inheritanceStroke);
           link.labels([{
             attrs: {
               text: {
+                fill: crowd.palette.colors.inheritanceStroke,
                 text: newInheritChild ? 'U' : null,
                 class: newInheritChild ? 'crowd-link-text inherit' : ''
               },

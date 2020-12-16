@@ -358,7 +358,7 @@ $alt-accent-dark: #262a2e;
 .crowd-element-text {
   font-family: sans-serif;
   font-size: 12px;
-  text-shadow: 1px 0px 0px black, -1px 0px 0px black;
+  // text-shadow: 1px 0px 0px black, -1px 0px 0px black;
   text-transform: uppercase;
 }
 
@@ -419,43 +419,63 @@ $alt-accent-dark: #262a2e;
 }
 
 .crowd-entity-color {
-  color: rgba(215, 38, 61, 1);
+  color: rgba(255, 255, 255, 1);
 }
 
 .crowd-weak-entity-color {
-  color: rgba(226, 92, 110, 1);
+  color: rgba(200, 200, 200, 1);
+}
+
+.crowd-entity-stroke-color {
+  color: rgba(0, 0, 173, 1);
 }
 
 .crowd-relationship-color {
-  color: rgba(244, 96, 54, 1);
+  color: rgba(255, 255, 255, 1);
 }
 
 .crowd-weak-relationship-color {
-  color: rgba(247, 134, 102, 1);
+  color: rgba(200, 200, 200, 1);
+}
+
+.crowd-relationship-stroke-color {
+  color: rgba(0, 0, 0, 1);
 }
 
 .crowd-attribute-color {
-  color: rgb(130, 158, 7);
+  color: rgba(255, 255, 255, 1);
 }
 
 .crowd-multivalued-attribute-color {
-  color: rgb(53, 139, 27);
+  color: rgba(200, 200, 200, 1);
 }
 
 .crowd-key-attribute-color {
-  color: rgba(27, 153, 139, 1);
+  color: rgba(255, 255, 255, 1);
 }
 
 .crowd-weak-key-attribute-color {
-  color: rgba(44, 218, 197, 1);
-}
-
-.crowd-inheritance-color {
-  color: rgba(83, 74, 141, 1);
+  color: rgba(200, 200, 200, 1);
 }
 
 .crowd-derived-attribute-color {
-  color: rgba(158, 158, 158, 1);
+  color: rgba(200, 200, 200, 1);
+}
+
+.crowd-attribute-stroke-color {
+  color: rgba(0, 0, 0, 1);
+}
+
+.crowd-key-attribute-stroke-color {
+  color: rgba(0, 0, 173, 1);
+}
+
+.crowd-inheritance-color {
+  color: rgba(255, 255, 255, 1);
+}
+
+.crowd-inheritance-stroke-color {
+  color: rgba(160, 0, 160, 1);
 }
 
 .crowd-bold-color {
@@ -463,27 +483,35 @@ $alt-accent-dark: #262a2e;
 }
 
 .crowd-class-color {
-  color: rgba(215, 38, 61, 1);
+  color: rgba(255, 255, 255, 1);
 }
 
 .crowd-class-alt-color {
-  color: rgba(226, 92, 110, 1);
+  color: rgba(200, 200, 200, 1);
 }
 
 .crowd-abstract-color {
-  color: rgba(244, 96, 54, 1);
+  color: rgba(255, 255, 255, 1);
 }
 
 .crowd-abstract-alt-color {
-  color: rgba(247, 134, 102, 1);
+  color: rgba(200, 200, 200, 1);
 }
 
 .crowd-interface-color {
-  color: rgba(27, 153, 139, 1);
+  color: rgba(255, 255, 255, 1);
 }
 
 .crowd-interface-alt-color {
-  color: rgba(44, 218, 197, 1);
+  color: rgba(200, 200, 200, 1);
+}
+
+.crowd-class-stroke-color {
+  color: rgba(0, 0, 0, 1);
+}
+
+.crowd-inheritance-stroke-color {
+  color: rgba(160, 0, 160, 1);
 }
 
 .crowd-orm-entity-fill-color {

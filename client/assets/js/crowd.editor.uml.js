@@ -10,6 +10,8 @@ var CrowdEditorUml = {
       interface: getCSS('color', 'crowd-interface-color'),
       interfaceAlt: getCSS('color', 'crowd-interface-alt-color'),
       inheritance: getCSS('color', 'crowd-inheritance-color'),
+      classStroke: getCSS('color', 'crowd-class-stroke-color'),
+      inheritanceStroke: getCSS('color', 'crowd-inheritance-stroke-color'),
     }
 
     //add joint uml class to palette elements
@@ -26,22 +28,22 @@ var CrowdEditorUml = {
       attrs: {
         '.uml-class-name-rect': {
           fill: crowd.palette.colors.class,
-          stroke: '#fff',
+          stroke: crowd.palette.colors.classStroke,
           'stroke-width': 0.5
         },
         '.uml-class-attrs-rect': {
           fill: crowd.palette.colors.classAlt,
-          stroke: '#fff',
+          stroke: crowd.palette.colors.classStroke,
           'stroke-width': 0.5
         },
         '.uml-class-methods-rect': {
           fill: crowd.palette.colors.classAlt,
-          stroke: '#fff',
+          stroke: crowd.palette.colors.classStroke,
           'stroke-width': 0.5
         },
-        '.uml-class-name-text': { fill: 'white' },
-        '.uml-class-attrs-text': { fill: 'white' },
-        '.uml-class-methods-text': { fill: 'white' }
+        '.uml-class-name-text': { fill: '#000000' },
+        '.uml-class-attrs-text': { fill: '#000000' },
+        '.uml-class-methods-text': { fill: '#000000' }
       },
       size: {
         width: 90,
@@ -65,22 +67,22 @@ var CrowdEditorUml = {
       attrs: {
         '.uml-class-name-rect': {
           fill: crowd.palette.colors.abstract,
-          stroke: '#ffffff',
+          stroke: crowd.palette.colors.classStroke,
           'stroke-width': 0.5
         },
         '.uml-class-attrs-rect': {
           fill: crowd.palette.colors.abstractAlt,
-          stroke: '#fff',
+          stroke: crowd.palette.colors.classStroke,
           'stroke-width': 0.5
         },
         '.uml-class-methods-rect': {
           fill: crowd.palette.colors.abstractAlt,
-          stroke: '#fff',
+          stroke: crowd.palette.colors.classStroke,
           'stroke-width': 0.5
         },
-        '.uml-class-name-text': { fill: 'white' },
-        '.uml-class-attrs-text': { fill: 'white' },
-        '.uml-class-methods-text': { fill: 'white' }
+        '.uml-class-name-text': { fill: '#000000' },
+        '.uml-class-attrs-text': { fill: '#000000' },
+        '.uml-class-methods-text': { fill: '#000000' }
       },
       size: {
         width: 90,
@@ -104,22 +106,22 @@ var CrowdEditorUml = {
       attrs: {
         '.uml-class-name-rect': {
           fill: crowd.palette.colors.interface,
-          stroke: '#ffffff',
+          stroke: crowd.palette.colors.classStroke,
           'stroke-width': 0.5
         },
         '.uml-class-attrs-rect': {
           fill: crowd.palette.colors.interfaceAlt,
-          stroke: '#fff',
+          stroke: crowd.palette.colors.classStroke,
           'stroke-width': 0.5
         },
         '.uml-class-methods-rect': {
           fill: crowd.palette.colors.interfaceAlt,
-          stroke: '#fff',
+          stroke: crowd.palette.colors.classStroke,
           'stroke-width': 0.5
         },
-        '.uml-class-name-text': { fill: 'white' },
-        '.uml-class-attrs-text': { fill: 'white' },
-        '.uml-class-methods-text': { fill: 'white' }
+        '.uml-class-name-text': { fill: '#000000' },
+        '.uml-class-attrs-text': { fill: '#000000' },
+        '.uml-class-methods-text': { fill: '#000000' }
       },
       size: {
         width: 90,
@@ -137,14 +139,15 @@ var CrowdEditorUml = {
       covering: false,
       attrs: {
         text: {
-          fill: 'white',
+          fill: crowd.palette.colors.inheritanceStroke,
           text: 'o',
           class: 'crowd-element-text l inheritance',
           'dominant-baseline': 'middle'
         },
         '.outer': {
           fill: crowd.palette.colors.inheritance,
-          stroke: crowd.palette.colors.inheritance
+          stroke: crowd.palette.colors.inheritanceStroke,
+          'stroke-width': 2
         }
       },
       size: {
@@ -250,11 +253,12 @@ var CrowdEditorUml = {
       uri: 'http://crowd.fi.uncoma.edu.ar#generalization',
       attrs: {
         line: {
-          stroke: 'black',
+          stroke: crowd.palette.colors.inheritanceStroke,
           strokeWidth: 2,
           sourceMarker: {},
           targetMarker: {
-            fill: 'white',
+            stroke: crowd.palette.colors.inheritanceStroke,
+            fill: crowd.palette.colors.inheritanceStroke,
             d: 'M 20 10 0 0 20 -10 Z'
           }
         }
@@ -278,12 +282,13 @@ var CrowdEditorUml = {
       uri: 'http://crowd.fi.uncoma.edu.ar#implementation',
       attrs: {
         line: {
-          stroke: 'black',
+          stroke: crowd.palette.colors.inheritanceStroke,
           strokeWidth: 2,
           strokeDasharray: '4 2',
           sourceMarker: {},
           targetMarker: {
-            fill: 'white',
+            stroke: crowd.palette.colors.inheritanceStroke,
+            fill: crowd.palette.colors.inheritanceStroke,
             d: 'M 20 10 0 0 20 -10 Z'
           }
         }
@@ -398,9 +403,9 @@ var CrowdEditorUml = {
         x: '100%', y: '50%', offset: { x: 25, y: 10 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
-          background: crowd.palette.colors.class,
+          // background: crowd.palette.colors.class,
           tooltip: {
-            title: 'Click and drag to make a <b class="crowd-class-color">class</b> and connect with it',
+            title: 'Click and drag to make a <b class="crowd-bold-color">class</b> and connect with it',
             placement: "right"
           }
         }),
@@ -423,9 +428,9 @@ var CrowdEditorUml = {
         x: '50%', y: '100%', offset: { x: 0, y: 35 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
-          background: crowd.palette.colors.abstract,
+          // background: crowd.palette.colors.abstract,
           tooltip: {
-            title: 'Click and drag to make an <b class="crowd-abstract-color">abstract</b> and connect with it',
+            title: 'Click and drag to make an <b class="crowd-bold-color">abstract</b> and connect with it',
             placement: "bottom"
           }
         }),
@@ -448,9 +453,9 @@ var CrowdEditorUml = {
         x: '0%', y: '50%', offset: { x: -25, y: 10 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
-          background: crowd.palette.colors.interface,
+          // background: crowd.palette.colors.interface,
           tooltip: {
-            title: 'Click and drag to make a <b class="crowd-interface-color">interface</b> and connect with it',
+            title: 'Click and drag to make a <b class="crowd-bold-color">interface</b> and connect with it',
             placement: "left"
           }
         }),
@@ -473,9 +478,9 @@ var CrowdEditorUml = {
         x: '75%', y: '100%', offset: { x: 12, y: 35 },
         markup: crowd.workspace.tools.elements.markup({
           icon: 'share',
-          background: crowd.palette.colors.inheritance,
+          // background: crowd.palette.colors.inheritance,
           tooltip: {
-            title: 'Click and drag to make a <b class="crowd-inheritance-color">inheritance</b> and connect with it',
+            title: 'Click and drag to make a <b class="crowd-bold-color">inheritance</b> and connect with it',
             placement: "bottom"
           }
         }),
@@ -785,7 +790,7 @@ var CrowdEditorUml = {
     crowd.workspace.graph.on('change:properties', function (element, newProperties, opt) {
       // console.log('change:properties', { element, previosAttributes: element._previousAttributes.attributes, newProperties, opt });
 
-      if (element.isElement()) {
+      if (element.isElement() && element.attributes.parentType == 'class') {
         //set visual attributes property on element
         element.prop('attributes',
           $.map(newProperties.attributes, function (attribute) {
@@ -883,12 +888,14 @@ var CrowdEditorUml = {
         //check if the newType is valid with that direction
         if (newType != 'association' && (!link.prop('direction') || link.prop('direction') == 'null'))
           link.attributes.direction = 'target';
-        link.trigger('change:direction', link, link.prop('direction'));
 
         if (newType == 'generalization' || newType == 'implementation') {
           link.attributes.cardinality = { source: null, target: null };
           link.attributes.roles = { source: null, target: null };
+          if (link.attributes.inheritChild) link.attributes.direction = null;
         }
+
+        link.trigger('change:direction', link, link.prop('direction'));
         link.trigger('change:cardinality', link, link.prop('cardinality'));
         link.trigger('change:roles', link, link.prop('roles'));
         link.trigger('change:uri', link, link.prop('uri'));
