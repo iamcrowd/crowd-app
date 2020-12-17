@@ -286,7 +286,7 @@ var CrowdEditorEer = {
     //add joint eer connector to palette links
     crowd.palette.links.connector = new joint.shapes.standard.Link({
       type: 'connector',
-      cardinality: 'N',
+      cardinality: '0..1',
       total: false,
       inherit: false,
       inheritChild: false,
@@ -306,7 +306,7 @@ var CrowdEditorEer = {
       labels: [{
         attrs: {
           text: {
-            text: 'N'
+            text: '0..1'
           },
           rect: {
             fill: getCSS('background-color', 'crowd-workspace')
@@ -318,7 +318,7 @@ var CrowdEditorEer = {
     //add joint eer total connector to palette links
     crowd.palette.links.total = new joint.shapes.standard.DoubleLink({
       type: 'connector',
-      cardinality: 'N',
+      cardinality: '0..1',
       total: true,
       inherit: false,
       inheritChild: false,
@@ -341,7 +341,7 @@ var CrowdEditorEer = {
       labels: [{
         attrs: {
           text: {
-            text: 'N'
+            text: '0..1'
           },
           rect: {
             fill: getCSS('background-color', 'crowd-workspace')
@@ -373,7 +373,7 @@ var CrowdEditorEer = {
         link: {
           type: config.total ? 'total' : 'connector',
           props: {
-            cardinality: config.cardinality ? config.cardinality : 'N',
+            cardinality: config.cardinality ? config.cardinality : '0..1',
             inherit: config.inherit ? config.inherit : false,
             inheritChild: config.inheritChild ? config.inheritChild : false
           }
@@ -403,7 +403,7 @@ var CrowdEditorEer = {
         link: {
           type: config.total ? 'total' : 'connector',
           props: {
-            cardinality: config.cardinality ? config.cardinality : 'N',
+            cardinality: config.cardinality ? config.cardinality : '0..1',
             inherit: config.inherit ? config.inherit : false,
             inheritChild: config.inheritChild ? config.inheritChild : false
           }
@@ -433,7 +433,7 @@ var CrowdEditorEer = {
         link: {
           type: config.total ? 'total' : 'connector',
           props: {
-            cardinality: config.cardinality ? config.cardinality : 'N',
+            cardinality: config.cardinality ? config.cardinality : '0..1',
             inherit: config.inherit ? config.inherit : false,
             inheritChild: config.inheritChild ? config.inheritChild : false
           }
@@ -463,7 +463,7 @@ var CrowdEditorEer = {
         link: {
           type: config.total ? 'total' : 'connector',
           props: {
-            cardinality: config.cardinality ? config.cardinality : 'N',
+            cardinality: config.cardinality ? config.cardinality : '0..1',
             inherit: config.inherit ? config.inherit : false,
             inheritChild: config.inheritChild ? config.inheritChild : false
           }
@@ -568,7 +568,7 @@ var CrowdEditorEer = {
         link: {
           type: config.total ? 'total' : 'connector',
           props: {
-            cardinality: 'N',
+            cardinality: '0..1',
             inherit: config.inherit ? config.inherit : true,
             inheritChild: config.inheritChild ? config.inheritChild : false
           }
@@ -583,7 +583,7 @@ var CrowdEditorEer = {
         link: {
           type: 'connector',
           props: {
-            cardinality: config.cardinality ? config.cardinality : 'N',
+            cardinality: config.cardinality ? config.cardinality : '0..1',
             inherit: config.inherit ? config.inherit : false,
             inheritChild: config.inheritChild ? config.inheritChild : false
           }
@@ -774,7 +774,7 @@ var CrowdEditorEer = {
 
         if (!link.attributes.inherit) {
           // if (newCardinality == "null" || newCardinality == null) {
-          //   link.prop('cardinality', 'N');
+          //   link.prop('cardinality', '0..1');
           // }
 
           link.labels([
@@ -807,6 +807,12 @@ var CrowdEditorEer = {
               }
             }
           ]);
+
+          if (newCardinality.charAt(0) != '0') {
+            link.prop('total', true);
+          } else {
+            link.prop('total', false);
+          }
         }
       }
     });
@@ -1048,20 +1054,23 @@ var CrowdEditorEer = {
       case 'connector':
         crowd.inspector.addAttribute({ label: 'Is for Inheritance?', property: 'inherit', type: 'boolean', map: { true: true, false: false } });
         if (!crowd.inspector.model.attributes.inherit) {
+          // crowd.inspector.addAttribute({
+          //   label: 'Cardinality', property: 'cardinality', type: 'multiple',
+          //   values: [
+          //     // { label: 'None', value: null },
+          //     { label: '1', value: '1' },
+          //     { label: '0..1', value: '0..1' },
+          //     // { label: 'U (inherit child)', value: 'U' },
+          //   ]
+          // });
           crowd.inspector.addAttribute({
-            label: 'Cardinality', property: 'cardinality', type: 'multiple',
-            values: [
-              // { label: 'None', value: null },
-              { label: '1', value: '1' },
-              { label: 'N', value: 'N' },
-              // { label: 'U (inherit child)', value: 'U' },
-            ]
+            label: 'Cardinality', property: 'cardinality', type: 'text', placeholder: 'example: 0..1'
           });
         } else {
           crowd.inspector.addAttribute({ label: 'Is Child Connector?', property: 'inheritChild', type: 'boolean', map: { true: true, false: false } });
+          crowd.inspector.addAttribute({ label: 'Is Total?', property: 'total', type: 'boolean', map: { true: true, false: false } });
         }
         // if (!crowd.inspector.model.attributes.inherit || !crowd.inspector.model.attributes.inheritChild) {
-        crowd.inspector.addAttribute({ label: 'Is Total?', property: 'total', type: 'boolean', map: { true: true, false: false } });
         // }
         break;
     }
@@ -1103,16 +1112,17 @@ var CrowdEditorEer = {
 
     //mapping of cardinalities to the requested format of schema
     var cardinalityMap = function (cardinality, total) {
-      var result;
-      switch (cardinality) {
-        case '1':
-          result = (total ? '1' : '0') + '..1';
-          break;
-        case 'N':
-          result = (total ? '1' : '0') + '..*';
-          break;
-      }
-      return result;
+      // var result;
+      // switch (cardinality) {
+      //   case '1':
+      //     result = (total ? '1' : '0') + '..1';
+      //     break;
+      //   case 'N':
+      //     result = (total ? '1' : '0') + '..*';
+      //     break;
+      // }
+      // return result;
+      return cardinality;
     }
 
     //mapping of inheritances to the requested format of schema
@@ -1278,7 +1288,8 @@ var CrowdEditorEer = {
 
     //mapping of cardinalities to the editor format
     var cardinalityMap = function (cardinality) {
-      return cardinality?.indexOf('*') != -1 ? 'N' : '1';
+      // return cardinality?.indexOf('*') != -1 ? 'N' : '1';
+      return cardinality;
     }
 
     var totalMap = function (cardinality) {
@@ -1437,7 +1448,7 @@ var CrowdEditorEer = {
     //   },
     //   weakEntity: {
     //     relationship: { connector: { inherit: false } },
-    //     weakRelationship: { connector: { inherit: false, cardinality: 'N', total: true } },
+    //     weakRelationship: { connector: { inherit: false, cardinality: '0..*', total: true } },
     //     weakKeyAttribute: { connector: { inherit: false, total: false } },
     //     attribute: { connector: { inherit: false, total: false } },
     //     multivaluedAttribute: { connector: { inherit: false, total: false } },
@@ -1455,7 +1466,7 @@ var CrowdEditorEer = {
     //   },
     //   weakRelationship: {
     //     entity: { connector: { inherit: false, cardinality: '1', total: false } },
-    //     weakEntity: { connector: { inherit: false, cardinality: 'N', total: true } },
+    //     weakEntity: { connector: { inherit: false, cardinality: '0..*', total: true } },
     //     weakKeyAttribute: { connector: { inherit: false, total: false } },
     //     attribute: { connector: { inherit: false, total: false } },
     //     //multivaluedAttribute: { connector: { inherit: false, total: false } },

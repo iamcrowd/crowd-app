@@ -294,7 +294,7 @@ var CrowdEditorOrm = {
             relLeft: {
               magnet: 'passive',
               port: 'left',
-              y: 5,
+              y: 15,
               x: 5,
               width: 40,
               height: 25,
@@ -307,7 +307,7 @@ var CrowdEditorOrm = {
             relRight: {
               magnet: 'passive',
               port: 'right',
-              y: 5,
+              y: 15,
               x: 45,
               width: 40,
               height: 25,
@@ -320,7 +320,7 @@ var CrowdEditorOrm = {
             relCenter: {
               magnet: 'passive',
               port: 'center',
-              y: 5,
+              y: 15,
               x: 44,
               width: 2,
               height: 25,
@@ -331,10 +331,11 @@ var CrowdEditorOrm = {
               fill: original_fill_role
             },
             uniqueLeft: {
+              display: 'none',
               x1: 10,
-              y1: 0,
+              y1: 10,
               x2: 40,
-              y2: 0,
+              y2: 10,
               strokeWidth: 3,
               stroke: '#8A0868',
               'stroke-linecap': 'round'
@@ -342,19 +343,19 @@ var CrowdEditorOrm = {
             uniqueRight: {
               display: 'none',
               x1: 50,
-              y1: 0,
+              y1: 10,
               x2: 80,
-              y2: 0,
+              y2: 10,
               strokeWidth: 3,
               stroke: '#8A0868',
               'stroke-linecap': 'round'
             },
             uniqueFull: {
-              display: 'none',
+              // display: 'none',
               x1: 10,
-              y1: 0,
+              y1: 10,
               x2: 80,
-              y2: 0,
+              y2: 10,
               strokeWidth: 3,
               stroke: '#8A0868',
               'stroke-linecap': 'round'
@@ -364,7 +365,7 @@ var CrowdEditorOrm = {
               textVerticalAnchor: 'middle',
               textAnchor: 'middle',
               x: 45,
-              y: 45,
+              y: 55,
               fill: original_strokeFill_role,
               fontSize: 14,
               'font-family': 'Arial'
@@ -383,7 +384,63 @@ var CrowdEditorOrm = {
               refX: '-13px',
               refY: '20%',
               fill: original_strokeFill_role
-            }
+            },
+            frequencyLeftLine: {
+              x1: 25,
+              y1: 15,
+              x2: 10,
+              y2: 0,
+              opacity: '0.8',
+              strokeWidth: 1,
+              stroke: '#8A0868',
+              'stroke-dasharray': '4 4'
+            },
+            frequencyRightLine: {
+              x1: 65,
+              y1: 15,
+              x2: 80,
+              y2: 0,
+              opacity: '0.8',
+              strokeWidth: 1,
+              stroke: '#8A0868',
+              'stroke-dasharray': '4 4'
+            },
+            frequencyLeftLabel: {
+              text: '0..1',
+              textVerticalAnchor: 'bottom',
+              textAnchor: 'middle',
+              x: 10,
+              y: 0,
+              fill: '#8A0868',
+              fontSize: 14,
+              'font-family': 'Arial'
+            },
+            frequencyRightLabel: {
+              text: '0..1',
+              textVerticalAnchor: 'bottom',
+              textAnchor: 'middle',
+              x: 80,
+              y: 0,
+              fill: '#8A0868',
+              fontSize: 14,
+              'font-family': 'Arial'
+            },
+            frequencyLeftLabelBackground: {
+              ref: 'frequencyLeftLabel',
+              refX: 0,
+              refY: 0,
+              refHeight: '100%',
+              refWidth: '100%',
+              fill: '#ffffff'
+            },
+            frequencyRightLabelBackground: {
+              ref: 'frequencyRightLabel',
+              refX: 0,
+              refY: 0,
+              refHeight: '100%',
+              refWidth: '100%',
+              fill: '#ffffff'
+            },
           },
         },
         {
@@ -438,7 +495,31 @@ var CrowdEditorOrm = {
                         'stroke-width': 1,
                         'pointer-events': 'none'
                       }
-                    }
+                    },
+                    {
+                      tagName: 'line',
+                      selector: 'frequencyLeftLine'
+                    },
+                    {
+                      tagName: 'line',
+                      selector: 'frequencyRightLine'
+                    },
+                    {
+                      tagName: 'rect',
+                      selector: 'frequencyLeftLabelBackground',
+                    },
+                    {
+                      tagName: 'rect',
+                      selector: 'frequencyRightLabelBackground',
+                    },
+                    {
+                      tagName: 'text',
+                      selector: 'frequencyLeftLabel'
+                    },
+                    {
+                      tagName: 'text',
+                      selector: 'frequencyRightLabel'
+                    },
                   ]
                 },
               ]
@@ -760,8 +841,8 @@ var CrowdEditorOrm = {
       name: 'Role',
       read: 'right',
       cardinality: {
-        left: 'one',
-        right: 'many'
+        left: '0..1',
+        right: '0..1'
       },
       roles: {
         left: 'http://crowd.fi.uncoma.edu.ar#role-a',
@@ -1134,15 +1215,17 @@ var CrowdEditorOrm = {
       // console.log('change:cardinality', { element, newCardinality });
 
       if (element.isElement() && element.attributes.parentType == "role" && newCardinality) {
-        if (newCardinality.left == 'many' && newCardinality.right == 'many') {
-          element.attr('uniqueLeft/display', 'none');
-          element.attr('uniqueRight/display', 'none');
-          element.attr('uniqueFull/display', 'unset');
-        } else {
-          element.attr('uniqueLeft/display', newCardinality.left == 'one' ? 'unset' : 'none');
-          element.attr('uniqueRight/display', newCardinality.right == 'one' ? 'unset' : 'none');
-          element.attr('uniqueFull/display', 'none');
-        }
+        // if (newCardinality.left == 'many' && newCardinality.right == 'many') {
+        //   element.attr('uniqueLeft/display', 'none');
+        //   element.attr('uniqueRight/display', 'none');
+        //   element.attr('uniqueFull/display', 'unset');
+        // } else {
+        //   element.attr('uniqueLeft/display', newCardinality.left == 'one' ? 'unset' : 'none');
+        //   element.attr('uniqueRight/display', newCardinality.right == 'one' ? 'unset' : 'none');
+        //   element.attr('uniqueFull/display', 'none');
+        // }
+        element.attr('frequencyLeftLabel/text', newCardinality.left);
+        element.attr('frequencyRightLabel/text', newCardinality.right);
       }
     });
 
@@ -1352,23 +1435,30 @@ var CrowdEditorOrm = {
     //add cardinality and roles attributes for role binary
     switch (crowd.inspector.model.attributes.type) {
       case 'roleBinary':
+        // crowd.inspector.addAttribute({
+        //   label: 'Frequency', property: 'cardinality', type: 'object',
+        //   parameters: [
+        //     {
+        //       label: 'Left', property: 'left', type: 'multiple',
+        //       values: [
+        //         { label: 'One', value: 'one' },
+        //         { label: 'Many', value: 'many' },
+        //       ]
+        //     },
+        //     {
+        //       label: 'Right', property: 'right', type: 'multiple',
+        //       values: [
+        //         { label: 'One', value: 'one' },
+        //         { label: 'Many', value: 'many' },
+        //       ]
+        //     },
+        //   ]
+        // });
         crowd.inspector.addAttribute({
           label: 'Frequency', property: 'cardinality', type: 'object',
           parameters: [
-            {
-              label: 'Left', property: 'left', type: 'multiple',
-              values: [
-                { label: 'One', value: 'one' },
-                { label: 'Many', value: 'many' },
-              ]
-            },
-            {
-              label: 'Right', property: 'right', type: 'multiple',
-              values: [
-                { label: 'One', value: 'one' },
-                { label: 'Many', value: 'many' },
-              ]
-            },
+            { label: 'Left', property: 'left', type: 'text', placeholder: 'Left Cardinality' },
+            { label: 'Right', property: 'right', type: 'text', placeholder: 'Right Cardinality' }
           ]
         });
         crowd.inspector.addAttribute({
@@ -1613,12 +1703,12 @@ var CrowdEditorOrm = {
                   if (port == 'left') {
                     role.entities.unshift(connectedEntity.attributes.uri);
                     if (link.attributes.mandatory) role.mandatory.unshift(connectedEntity.attributes.uri);
-                    role.uniquenessConstraints.unshift(cardinalityMap[element.attributes.cardinality[port]]);
+                    role.uniquenessConstraints.unshift(element.attributes.cardinality[port]);
                     role.roles.unshift(element.attributes.roles[port]);
                   } else if (port == 'right') {
                     role.entities.push(connectedEntity.attributes.uri);
                     if (link.attributes.mandatory) role.mandatory.push(connectedEntity.attributes.uri);
-                    role.uniquenessConstraints.push(cardinalityMap[element.attributes.cardinality[port]]);
+                    role.uniquenessConstraints.push(element.attributes.cardinality[port]);
                     role.roles.push(element.attributes.roles[port]);
                   }
                 }
@@ -1684,7 +1774,8 @@ var CrowdEditorOrm = {
 
     //mapping of cardinalities to the editor format
     var cardinalityMap = function (cardinality) {
-      return cardinality?.indexOf('*') != -1 ? 'many' : 'one';
+      // return cardinality?.indexOf('*') != -1 ? 'many' : 'one';
+      return cardinality;
     }
 
     //mapping of datatypes to the editor format
