@@ -1639,16 +1639,11 @@ var CrowdEditorOrm = {
               }
 
               if (parentEntity && childEntity) {
-                var inheritance = {
-                  name: link.cid,
-                  parent: parentEntity.attributes.uri,
-                  entities: [childEntity.attributes.uri],
-                  type: 'subtyping',
-                  subtypingContraint: [],
-                  position: element.attributes.position,
-                  size: element.attributes.size,
-                }
+                var existentInheritance = jsonSchema.connectors.find(function (connector) {
+                  return connector.type == 'subtyping' && connector.parent == parentEntity.attributes.uri;
+                });
 
+                var connectedConstraints = []
                 crowd.workspace.graph.getConnectedLinks(link).forEach(function (inheritanceLink) {
                   if (inheritanceLink.attributes.type == 'constraintConnector') {
                     var connectedConstraint;
@@ -1659,11 +1654,28 @@ var CrowdEditorOrm = {
                     }
 
                     if (connectedConstraint)
-                      inheritance.subtypingContraint = inheritance.subtypingContraint.concat(constraintTypeInheritanceMap[connectedConstraint.attributes.type]);
+                      connectedConstraints = connectedConstraints.concat(constraintTypeInheritanceMap[connectedConstraint.attributes.type]);
                   }
                 });
 
-                jsonSchema.connectors.push(inheritance);
+                if (!existentInheritance || !arraysEqual(existentInheritance.subtypingContraint, connectedConstraints)) {
+                  var inheritance = {
+                    name: link.cid,
+                    parent: parentEntity.attributes.uri,
+                    entities: [childEntity.attributes.uri],
+                    type: 'subtyping',
+                    subtypingContraint: [],
+                    position: element.attributes.position,
+                    size: element.attributes.size,
+                  }
+
+                  if (connectedConstraints)
+                    inheritance.subtypingContraint = inheritance.subtypingContraint.concat(connectedConstraints);
+
+                  jsonSchema.connectors.push(inheritance);
+                } else {
+                  existentInheritance.entities.push(childEntity.attributes.uri);
+                }
               }
             }
           });
