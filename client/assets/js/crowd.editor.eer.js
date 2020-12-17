@@ -843,7 +843,7 @@ var CrowdEditorEer = {
 
         if (newTotal)
           link.prop('inheritChild', false);
-        crowd.inspector.loadContent();
+        // crowd.inspector.loadContent();
       }
     });
 
