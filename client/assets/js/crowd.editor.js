@@ -758,7 +758,7 @@ CrowdEditor.prototype.initTools = function () {
                 </button> \
               </div> \
               <div class="modal-body"><pre id="crowd-tools-export-check-schema-modal-pre-' + self.id + '" \
-              style="overflow: hidden; overflow-wrap: break-word;"></pre></div> \
+              style="overflow: hidden; overflow-wrap: break-word; white-space: pre-wrap;"></pre></div> \
               <div class="modal-footer"> \
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
                 <button class="btn btn-adaptive" data-clipboard-target="#crowd-tools-export-check-schema-modal-pre-' + self.id + '"> \
@@ -789,10 +789,11 @@ CrowdEditor.prototype.initTools = function () {
           model: model,
           success: function (schema) {
             $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export ' + model.toUpperCase() + ' Schema');
-            if (model == 'owl')
-              $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(escapeXML(schema));
-            else
+            if (model == 'owl') {
+              $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(escapeXML(formatXML(schema)));
+            } else {
               $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(schema, null, 4));
+            }
             $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
             // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
           },
@@ -816,7 +817,7 @@ CrowdEditor.prototype.initTools = function () {
           success: function (schema) {
             $("<a />", {
               "download": model + "-schema." + (model == 'owl' ? 'owl' : "json"),
-              "href": (model == 'owl' ? schema : "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(schema, null, 4))),
+              "href": "data:application/" + (model == 'owl' ? 'xml' : 'json') + ";charset=utf-8," + encodeURIComponent((model == 'owl' ? formatXML(schema) : JSON.stringify(schema, null, 4))),
             }).appendTo("body")
               .click(function () {
                 $(this).remove()

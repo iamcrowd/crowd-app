@@ -249,15 +249,28 @@ $alt-accent-dark: #262a2e;
 }
 
 .crowd-inspector-content::-webkit-scrollbar-track {
-  background: #212529;
+  background: #eeeeee;
 }
 
 .crowd-inspector-content::-webkit-scrollbar-thumb {
-  background: #1b1b1b;
+  background: #c5c5c5;
   border-radius: 10px;
 }
 
 .crowd-inspector-content::-webkit-scrollbar-thumb:hover {
+  background: #7a7a7a;
+}
+
+.bootstrap-dark .crowd-inspector-content::-webkit-scrollbar-track {
+  background: #212529;
+}
+
+.bootstrap-dark .crowd-inspector-content::-webkit-scrollbar-thumb {
+  background: #1b1b1b;
+  border-radius: 10px;
+}
+
+.bootstrap-dark .crowd-inspector-content::-webkit-scrollbar-thumb:hover {
   background: #181818;
 }
 
@@ -535,7 +548,7 @@ $alt-accent-dark: #262a2e;
 }
 
 .crowd-orm-role-stroke-color {
-  color: rgb(0, 0, 0, 1);
+  color: rgba(0, 0, 0, 1);
 }
 
 .crowd-unsat-color {
@@ -543,7 +556,7 @@ $alt-accent-dark: #262a2e;
 }
 
 .crowd-inferred-color {
-  color: rgb(42, 116, 32);
+  color: rgba(42, 116, 32, 1);
 }
 
 .tooltip {
