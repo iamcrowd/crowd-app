@@ -3126,6 +3126,22 @@ CrowdEditor.prototype.initReasoningValidator = function () {
       }
     });
 
+    //mark all inferred cardinalities with the reasoning response
+    var cardinalitiesInferred = reasoning['KF output']['Object types cardinalities'];
+    cardinalitiesInferred.forEach(function (card) {
+      var kfRole = reasoning['KF']['Role'].find(function (kfRole) {
+        return kfRole['object type cardinality'].includes(card);
+      });
+
+      var cell = self.workspace.graph.getCells().find(function (cell) {
+        return cell.prop('uri') == kfRole.relationship;
+      });
+
+      cell?.prop('semantic/contents/' + cell.prop('semantic/contents').length,
+        { value: 'inferred', text: '<span class="crowd-inferred-color"><b>Inferred Cardinality for role </b><i>' + kfRole.rolename + '</i></span>' }
+        );
+    });
+
     //message to show for each owl axiom
     var owlAxiomsMessagesMap = {
       'Disjoint Class Axioms': 'Disjoint with',
