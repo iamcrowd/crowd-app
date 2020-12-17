@@ -1244,12 +1244,12 @@ var CrowdEditorUml = {
 
     //mapping of datatype to the requested format of schema
     var datatypeMap = {
-      // 'String': 'http://www.w3.org/2001/XMLSchema#string',
-      // 'Integer': 'http://www.w3.org/2001/XMLSchema#integer',
-      // 'Boolean': 'http://www.w3.org/2001/XMLSchema#boolean',
-      'String': 'String',
-      'Integer': 'Integer',
-      'Boolean': 'Boolean',
+      'String': 'http://www.w3.org/2001/XMLSchema#string',
+      'Integer': 'http://www.w3.org/2001/XMLSchema#integer',
+      'Boolean': 'http://www.w3.org/2001/XMLSchema#boolean',
+      // 'String': 'String',
+      // 'Integer': 'Integer',
+      // 'Boolean': 'Boolean',
     }
 
     //mapping of attributes to the requested format of schema
