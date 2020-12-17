@@ -486,7 +486,7 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '1'
+          cardinality: '0..1'
         }
       }
     });
@@ -506,7 +506,7 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '1'
+          cardinality: '0..1'
         }
       }
     });
@@ -526,7 +526,7 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '1'
+          cardinality: '0..1'
         }
       }
     });
@@ -546,7 +546,7 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '1'
+          cardinality: '0..1'
         }
       }
     });
@@ -599,7 +599,7 @@ var CrowdEditorEer = {
         linkAttributeTool,
         linkKeyAttributeTool,
         linkRelationshipTool(),
-        linkWeakRelationshipTool({ cardinality: '1' }),
+        linkWeakRelationshipTool({ cardinality: '0..1' }),
         linkMultivaluedAttributeTool,
         linkInheritanceTool()
       ])
@@ -639,8 +639,8 @@ var CrowdEditorEer = {
         linkTool(),
         linkAttributeTool,
         linkWeakKeyAttributeTool,
-        linkEntityTool({ cardinality: '1' }),
-        linkWeakEntityTool({ total: true }),
+        linkEntityTool({ cardinality: '0..1' }),
+        linkWeakEntityTool({ total: true, cardinality: '0..*' }),
         linkInheritanceTool()
       ])
     });
@@ -649,7 +649,7 @@ var CrowdEditorEer = {
     crowd.workspace.tools.elements.elementsToolsView['attribute'] = new joint.dia.ToolsView({
       name: 'attribute-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '1' }),
+        linkTool({ cardinality: '0..1' }),
         linkAttributeTool
       ])
     });
@@ -658,7 +658,7 @@ var CrowdEditorEer = {
     crowd.workspace.tools.elements.elementsToolsView['keyAttribute'] = new joint.dia.ToolsView({
       name: 'key-attribute-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '1' })
+        linkTool({ cardinality: '0..1' })
       ])
     });
 
@@ -666,7 +666,7 @@ var CrowdEditorEer = {
     crowd.workspace.tools.elements.elementsToolsView['weakKeyAttribute'] = new joint.dia.ToolsView({
       name: 'weak-key-attribute-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '1' })
+        linkTool({ cardinality: '0..1' })
       ])
     });
 
@@ -674,7 +674,7 @@ var CrowdEditorEer = {
     crowd.workspace.tools.elements.elementsToolsView['multivaluedAttribute'] = new joint.dia.ToolsView({
       name: 'multivalued-attribute-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '1' })
+        linkTool({ cardinality: '0..1' })
       ])
     });
 
@@ -682,7 +682,7 @@ var CrowdEditorEer = {
     crowd.workspace.tools.elements.elementsToolsView['derivedAttribute'] = new joint.dia.ToolsView({
       name: 'derived-attribute-tools',
       tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '1' })
+        linkTool({ cardinality: '0..1' })
       ])
     });
 
@@ -781,7 +781,7 @@ var CrowdEditorEer = {
             {
               attrs: {
                 text: {
-                  text: (!isConnectedAttribute || newCardinality != '1' ? newCardinality : null),
+                  text: (!isConnectedAttribute || newCardinality != '0..1' ? newCardinality : null),
                   class: ''
                 },
                 rect: {
