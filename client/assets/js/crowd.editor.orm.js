@@ -1903,7 +1903,7 @@ var CrowdEditorOrm = {
               linksObj[connector.name + "#" + entity].toBack();
             });
             constraintTypeInheritanceMap(connector.subtypingContraint).forEach(function (constraint) {
-              console.log('inherConstraint', constraint);
+              // console.log('inherConstraint', constraint);
               constraintsObj[connector.name + "#" + constraint] = crowd.palette.elements[constraint].clone();
               crowd.workspace.graph.addCell(constraintsObj[connector.name + "#" + constraint]);
               connector.entities.forEach(function (entity) {
@@ -1914,6 +1914,15 @@ var CrowdEditorOrm = {
                 linksObj[connector.name + "#" + entity + "#" + constraint].prop('direction', null);
                 linksObj[connector.name + "#" + entity + "#" + constraint].toBack();
               });
+
+              //position inheritance constraint circle
+              let mediumPosition = medianPoint(
+                constraintsObj[connector.name + "#" + constraint],
+                connector.entities.map(function (entity) {
+                  return linksObj[connector.name + "#" + entity]
+                })
+              );
+              constraintsObj[connector.name + "#" + constraint]?.position(mediumPosition.x, mediumPosition.y);
             });
           } else if (connector.type == 'roleConstraint') {
             constraintsObj[connector.name] = crowd.palette.elements[connector.roleConstraint].clone();
@@ -1947,10 +1956,70 @@ var CrowdEditorOrm = {
               linksObj[connector.name + "#" + factParent].prop('direction', 'target');
               linksObj[connector.name + "#" + factParent].toBack();
             });
+
+            //position constraint circle if it has not previous position
+            if (!connector.position) {
+              let mediumPosition = medianPoint(
+                constraintsObj[connector.name],
+                connector.factTypes.map(function (factType) {
+                  return rolesObj[factType]
+                }).concat(rolesObj[connector.factParent])
+              );
+              constraintsObj[connector.name]?.position(mediumPosition.x, mediumPosition.y);
+            }
           }
         });
       }
     }
+  },
+  positioningJSONSchema: function (schema, positionedSchema) {
+    var mergedSchema = $.extend(true, {}, schema);
+
+    mergedSchema.entities.forEach(function (entity) {
+      let relative = positionedSchema.entities.find(function (r) {
+        return r.uri == entity.uri || r.name == entity.name;
+      });
+
+      if (relative) {
+        entity.position = relative?.position;
+        entity.size = relative?.size;
+      }
+    });
+
+    mergedSchema.relationships.forEach(function (relationship) {
+      let relative = positionedSchema.relationships.find(function (r) {
+        return r.uri == relationship.uri || r.name == relationship.name;
+      });
+
+      if (relative) {
+        relationship.position = relative?.position;
+        relationship.size = relative?.size;
+      }
+    });
+
+    mergedSchema.attributes.forEach(function (attribute) {
+      let relative = positionedSchema.attributes.find(function (r) {
+        return r.uri == attribute.uri || r.name == attribute.name;
+      });
+
+      if (relative) {
+        attribute.position = relative?.position;
+        attribute.size = relative?.size;
+      }
+    });
+
+    mergedSchema.connectors.forEach(function (connector) {
+      let relative = positionedSchema.connectors.find(function (r) {
+        return r.name == connector.name;// && connector.type != 'subtyping';
+      });
+
+      if (relative) {
+        connector.position = relative?.position;
+        connector.size = relative?.size;
+      }
+    });
+
+    return mergedSchema;
   },
   initSyntaxValidator: function (crowd) {
     //todo

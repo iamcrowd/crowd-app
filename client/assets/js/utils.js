@@ -181,18 +181,44 @@ function arraysEqual(_arr1, _arr2) {
     !Array.isArray(_arr1)
     || !Array.isArray(_arr2)
     || _arr1.length !== _arr2.length
-    ) {
-      return false;
-    }
+  ) {
+    return false;
+  }
 
   const arr1 = _arr1.concat().sort();
   const arr2 = _arr2.concat().sort();
 
   for (let i = 0; i < arr1.length; i++) {
-      if (arr1[i] !== arr2[i]) {
-          return false;
-       }
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
   }
 
   return true;
+}
+
+function medianPoint(centerElement, aroundElements) {
+  // console.log('medianPoint', centerElement, aroundElements)
+  var mediumPosition = null;
+
+  if (centerElement && aroundElements.length) {
+    aroundElements.forEach(function (element) {
+      mediumPosition = mediumPosition
+        ? {
+          x: ((mediumPosition.x + (element.getBBox().x + element.getBBox().width / 2)) / 2),
+          y: ((mediumPosition.y + (element.getBBox().y + element.getBBox().height / 2)) / 2),
+        }
+        : {
+          x: (element.getBBox().x + element.getBBox().width / 2),
+          y: (element.getBBox().y + element.getBBox().height / 2),
+        };
+    });
+
+    mediumPosition = {
+      x: mediumPosition.x - centerElement.getBBox().width / 2,
+      y: mediumPosition.y - centerElement.getBBox().height / 2
+    }
+  }
+
+  return mediumPosition;
 }

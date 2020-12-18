@@ -1599,11 +1599,36 @@ var CrowdEditorUml = {
               var linkName = link.classes[index] + '-' + fromURI(inheritanceName);
               linksObj[linkName].target(getObj(connectedClass));
             });
+
+            //position inheritance circle if it has not previous position
+            if (!link.position) {
+              var mediumPosition = medianPoint(
+                inheritancesObj[inheritanceName],
+                link.classes.map(function (connectedClass) { return getObj(connectedClass) }).concat(getObj(link.parent))
+              );
+              inheritancesObj[inheritanceName]?.position(mediumPosition.x, mediumPosition.y);
+            }
           }
         });
       }
 
     }
+  },
+  positioningJSONSchema: function (schema, positionedSchema) {
+    var mergedSchema = $.extend(true, {}, schema);
+
+    mergedSchema.classes.forEach(function (classe) {
+      let relative = positionedSchema.classes.find(function (r) {
+        return r.uri == classe.uri || r.name == classe.name;
+      });
+
+      if (relative) {
+        classe.position = relative?.position;
+        classe.size = relative?.size;
+      }
+    });
+
+    return mergedSchema;
   },
   initSyntaxValidator: function (crowd) {
     //todo

@@ -3139,7 +3139,7 @@ CrowdEditor.prototype.initReasoningValidator = function () {
 
       cell?.prop('semantic/contents/' + cell.prop('semantic/contents').length,
         { value: 'inferred', text: '<span class="crowd-inferred-color"><b>Inferred Cardinality for role </b><i>' + kfRole.rolename + '</i></span>' }
-        );
+      );
     });
 
     //message to show for each owl axiom
@@ -3173,7 +3173,10 @@ CrowdEditor.prototype.initReasoningValidator = function () {
   };
 
   self.reasoning.importPositionedSchema = function (schema) {
-    var positionedSchema = $.extend(true, self.toJSONSchema(), schema);
+    console.log('reasoned schema', schema);
+    // var positionedSchema = $.extend(true, self.toJSONSchema(), schema);
+    var positionedSchema = self.config.conceptualModel.positioningJSONSchema(schema, self.toJSONSchema());
+    console.log('positioned reasoned schema', positionedSchema);
     self.tools.import.importFrom({ model: self.config.conceptualModel.name, schema: positionedSchema, file: self.config.actualFile, forced: true });
   }
 

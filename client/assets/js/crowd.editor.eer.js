@@ -486,7 +486,7 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '0..1'
+          cardinality: '1..1'
         }
       }
     });
@@ -506,7 +506,7 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '0..1'
+          cardinality: '1..1'
         }
       }
     });
@@ -526,7 +526,7 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '0..1'
+          cardinality: '1..1'
         }
       }
     });
@@ -546,7 +546,7 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '0..1'
+          cardinality: '1..1'
         }
       }
     });
@@ -781,7 +781,7 @@ var CrowdEditorEer = {
             {
               attrs: {
                 text: {
-                  text: (!isConnectedAttribute || newCardinality != '0..1' ? newCardinality : null),
+                  text: (!isConnectedAttribute || newCardinality != '1..1' ? newCardinality : null),
                   class: ''
                 },
                 rect: {
@@ -808,7 +808,7 @@ var CrowdEditorEer = {
             }
           ]);
 
-          if (newCardinality.charAt(0) != '0') {
+          if (newCardinality.charAt(0) != '0' && (!isConnectedAttribute || newCardinality != '1..1')) {
             link.prop('total', true);
           } else {
             link.prop('total', false);
@@ -1416,6 +1416,17 @@ var CrowdEditorEer = {
                 linksObj[linkName].prop('inherit', true);
                 linksObj[linkName].prop('inheritChild', true);
               });
+
+              //position inheritance circle if it has not previous position
+              if (!link.position) {
+                var mediumPosition = medianPoint(
+                  inheritancesObj[inheritanceName],
+                  link.entities.map(function (connectedEntity) {
+                    return entitiesObj[connectedEntity] ? entitiesObj[connectedEntity] : relationshipsObj[connectedEntity]
+                  }).concat(entitiesObj[link.parent] ? entitiesObj[link.parent] : relationshipsObj[link.parent])
+                );
+                inheritancesObj[inheritanceName]?.position(mediumPosition.x, mediumPosition.y);
+              }
               break;
           }
         });
@@ -1427,12 +1438,61 @@ var CrowdEditorEer = {
               linksObj[link.uri].source(attributesObj[link.attribute]);
               linksObj[link.uri].target(link.entity ? entitiesObj[link.entity] : relationshipsObj[link.relationship]);
               crowd.workspace.graph.addCell(linksObj[link.uri]);
-              linksObj[link.uri].prop('cardinality', '1');
+              linksObj[link.uri].prop('cardinality', '1..1');
               break;
           }
         });
       }
     }
+  },
+  positioningJSONSchema: function (schema, positionedSchema) {
+    var mergedSchema = $.extend(true, {}, schema);
+
+    mergedSchema.entities.forEach(function (entity) {
+      let relative = positionedSchema.entities.find(function (r) {
+        return r.uri == entity.uri || r.name == entity.name;
+      });
+
+      if (relative) {
+        entity.position = relative?.position;
+        entity.size = relative?.size;
+      }
+    });
+
+    mergedSchema.relationships.forEach(function (relationship) {
+      let relative = positionedSchema.relationships.find(function (r) {
+        return r.uri == relationship.uri || r.name == relationship.name;
+      });
+
+      if (relative) {
+        relationship.position = relative?.position;
+        relationship.size = relative?.size;
+      }
+    });
+
+    mergedSchema.attributes.forEach(function (attribute) {
+      let relative = positionedSchema.attributes.find(function (r) {
+        return r.uri == attribute.uri || r.name == attribute.name;
+      });
+
+      if (relative) {
+        attribute.position = relative?.position;
+        attribute.size = relative?.size;
+      }
+    });
+
+    mergedSchema.links.forEach(function (link) {
+      let relative = positionedSchema.links.find(function (r) {
+        return r.name == link.name && link.type != 'isa';
+      });
+
+      if (relative) {
+        link.position = relative?.position;
+        link.size = relative?.size;
+      }
+    });
+
+    return mergedSchema;
   },
   initSyntaxValidator: function (crowd) {
     //define for each element type with wich another element type can connect and with wich link type and specific attributes of it
