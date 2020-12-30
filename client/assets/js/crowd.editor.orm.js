@@ -331,7 +331,7 @@ var CrowdEditorOrm = {
               fill: original_fill_role
             },
             uniqueLeft: {
-              display: 'none',
+              // display: 'none',
               x1: 10,
               y1: 10,
               x2: 40,
@@ -341,7 +341,7 @@ var CrowdEditorOrm = {
               'stroke-linecap': 'round'
             },
             uniqueRight: {
-              display: 'none',
+              // display: 'none',
               x1: 50,
               y1: 10,
               x2: 80,
@@ -351,7 +351,7 @@ var CrowdEditorOrm = {
               'stroke-linecap': 'round'
             },
             uniqueFull: {
-              // display: 'none',
+              display: 'none',
               x1: 10,
               y1: 10,
               x2: 80,
@@ -386,6 +386,7 @@ var CrowdEditorOrm = {
               fill: original_strokeFill_role
             },
             frequencyLeftLine: {
+              display: 'none',
               x1: 25,
               y1: 15,
               x2: 10,
@@ -396,6 +397,7 @@ var CrowdEditorOrm = {
               'stroke-dasharray': '4 4'
             },
             frequencyRightLine: {
+              display: 'none',
               x1: 65,
               y1: 15,
               x2: 80,
@@ -406,6 +408,7 @@ var CrowdEditorOrm = {
               'stroke-dasharray': '4 4'
             },
             frequencyLeftLabel: {
+              display: 'none',
               text: '0..1',
               textVerticalAnchor: 'bottom',
               textAnchor: 'middle',
@@ -416,6 +419,7 @@ var CrowdEditorOrm = {
               'font-family': 'Arial'
             },
             frequencyRightLabel: {
+              display: 'none',
               text: '0..1',
               textVerticalAnchor: 'bottom',
               textAnchor: 'middle',
@@ -426,6 +430,7 @@ var CrowdEditorOrm = {
               'font-family': 'Arial'
             },
             frequencyLeftLabelBackground: {
+              display: 'none',
               ref: 'frequencyLeftLabel',
               refX: 0,
               refY: 0,
@@ -434,6 +439,7 @@ var CrowdEditorOrm = {
               fill: '#ffffff'
             },
             frequencyRightLabelBackground: {
+              display: 'none',
               ref: 'frequencyRightLabel',
               refX: 0,
               refY: 0,
@@ -1216,17 +1222,34 @@ var CrowdEditorOrm = {
       // console.log('change:cardinality', { element, newCardinality });
 
       if (element.isElement() && element.attributes.parentType == "role" && newCardinality) {
-        // if (newCardinality.left == 'many' && newCardinality.right == 'many') {
-        //   element.attr('uniqueLeft/display', 'none');
-        //   element.attr('uniqueRight/display', 'none');
-        //   element.attr('uniqueFull/display', 'unset');
-        // } else {
-        //   element.attr('uniqueLeft/display', newCardinality.left == 'one' ? 'unset' : 'none');
-        //   element.attr('uniqueRight/display', newCardinality.right == 'one' ? 'unset' : 'none');
-        //   element.attr('uniqueFull/display', 'none');
-        // }
+        var uniqOne = function (card) {
+          return card == '0..1' || card == '1..1';
+        };
+        var uniqMany = function (card) {
+          return card == '1..*' || (card.includes('0..') && card.split('0..')[1] != 1);
+        };
+
+        if (!uniqOne(newCardinality.left) && !uniqOne(newCardinality.right)) {
+          element.attr('uniqueLeft/display', 'none');
+          element.attr('uniqueRight/display', 'none');
+          element.attr('uniqueFull/display', 'unset');
+        } else {
+          element.attr('uniqueLeft/display', uniqOne(newCardinality.left) ? 'unset' : 'none');
+          element.attr('uniqueRight/display', uniqOne(newCardinality.right) ? 'unset' : 'none');
+          element.attr('uniqueFull/display', 'none');
+        }
+
+        var hasFreqLeft = !uniqOne(newCardinality.left) && !uniqMany(newCardinality.left);
         element.attr('frequencyLeftLabel/text', newCardinality.left);
+        element.attr('frequencyLeftLabel/display', hasFreqLeft ? 'unset' : 'none');
+        element.attr('frequencyLeftLabelBackground/display', hasFreqLeft ? 'unset' : 'none');
+        element.attr('frequencyLeftLine/display', hasFreqLeft ? 'unset' : 'none');
+
+        var hasFreqRight = !uniqOne(newCardinality.right) && !uniqMany(newCardinality.right);
         element.attr('frequencyRightLabel/text', newCardinality.right);
+        element.attr('frequencyRightLabel/display', hasFreqRight ? 'unset' : 'none');
+        element.attr('frequencyRightLabelBackground/display', hasFreqRight ? 'unset' : 'none');
+        element.attr('frequencyRightLine/display', hasFreqRight ? 'unset' : 'none');
       }
     });
 
