@@ -99,17 +99,26 @@ CrowdEditor.prototype.init = function () {
   //initialize enumerate for elements and links in case it's setted in config
   if (self.config.enumerate) {
     self.enumerate = { elements: {}, links: {} };
-    self.enumerate.getNumber = function (cell) {
+    self.enumerate.getNumber = function (cell, attr) {
+      if (!attr) attr = 'uri';
       var maxNumber = 0;
       self.workspace.graph.getCells().forEach(function (existentCell) {
-        if (existentCell.attributes.uri?.indexOf(cell.attributes.uri + '-') != -1) {
-          var number = parseInt(existentCell.attributes.uri?.split(cell.attributes.uri + '-')[1]);
+        if (existentCell.prop(attr)?.indexOf(cell.prop(attr) + '-') != -1) {
+          var number = parseInt(existentCell.prop(attr)?.split(cell.prop(attr) + '-')[1]);
           if (!isNaN(number)) {
             maxNumber = number > maxNumber ? number : maxNumber;
           }
         }
       });
       return maxNumber + 1;
+    }
+    self.enumerate.setEnumerations = function (cell) {
+      if (cell.prop('enumerate')) {
+        cell.prop('enumerate').forEach(function (attrEnum) {
+          if (cell.prop(attrEnum))
+            cell.prop(attrEnum, cell.prop(attrEnum) + '-' + self.enumerate.getNumber(cell, attrEnum));
+        });
+      }
     }
   }
 }
@@ -292,6 +301,9 @@ CrowdEditor.prototype.initPalette = function () {
           if (s.prop('uri'))
             s.prop('uri', s.prop('uri') + '-' + self.enumerate.getNumber(s));
         }
+
+        //set specific enumerations defined in element
+        self.enumerate.setEnumerations(s);
 
         //fit paper to the new content
         self.workspace.fitPaper();
@@ -1201,7 +1213,7 @@ CrowdEditor.prototype.initTools = function () {
           window.location.href = '/editor/' + $(this).attr('data-model');
       });
     }
-    self.tools.model.init();
+    // self.tools.model.init();
 
     //translate conceptual model tool
     self.tools.translate.init = function () {
@@ -2107,6 +2119,9 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
           link.prop('uri', link.prop('uri') + '-' + self.enumerate.getNumber(link));
         }
 
+        //set specific enumerations defined in element
+        self.enumerate.setEnumerations(link);
+
         //change specific props of the link if they are defined
         if (config.link && config.link.props) {
           for (let prop in config.link.props) {
@@ -2221,6 +2236,9 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
           newElement.prop('uri', newElement.prop('uri') + '-' + self.enumerate.getNumber(newElement));
         }
 
+        //set specific enumerations defined in element
+        self.enumerate.setEnumerations(newElement);
+
         //create the link of the indicated type or else basic type for connect the selected element with the new element
         var link = config.link && config.link.type ? self.palette.links[config.link.type].clone() : self.palette.links.basic.clone();
 
@@ -2237,6 +2255,9 @@ CrowdEditor.prototype.initElementsToolsViews = function () {
         if (self.config.enumerate) {
           link.prop('uri', link.prop('uri') + '-' + self.enumerate.getNumber(link));
         }
+
+        //set specific enumerations defined in element
+        self.enumerate.setEnumerations(link);
 
         //change specific props of the link if they are defined
         if (config.link && config.link.props) {
@@ -2441,6 +2462,9 @@ CrowdEditor.prototype.initLinksToolsViews = function () {
           link.prop('uri', link.prop('uri') + '-' + self.enumerate.getNumber(link));
         }
 
+        //set specific enumerations defined in element
+        self.enumerate.setEnumerations(link);
+
         //change specific props of the link if they are defined
         if (config.link && config.link.props) {
           for (let prop in config.link.props) {
@@ -2499,6 +2523,9 @@ CrowdEditor.prototype.initLinksToolsViews = function () {
         if (self.config.enumerate) {
           link.prop('uri', link.prop('uri') + '-' + self.enumerate.getNumber(link));
         }
+
+        //set specific enumerations defined in element
+        self.enumerate.setEnumerations(link);
 
         //change specific props of the link if they are defined
         if (config.link && config.link.props) {

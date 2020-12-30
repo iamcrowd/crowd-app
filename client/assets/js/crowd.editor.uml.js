@@ -170,6 +170,7 @@ var CrowdEditorUml = {
       },
       direction: 'target',
       uri: 'http://crowd.fi.uncoma.edu.ar#association',
+      enumerate: ['roles/source', 'roles/target'],
       attrs: {
         line: {
           stroke: 'black',
@@ -196,6 +197,7 @@ var CrowdEditorUml = {
       },
       direction: 'target',
       uri: 'http://crowd.fi.uncoma.edu.ar#aggregation',
+      enumerate: ['roles/source', 'roles/target'],
       attrs: {
         line: {
           stroke: 'black',
@@ -223,6 +225,7 @@ var CrowdEditorUml = {
       },
       direction: 'target',
       uri: 'http://crowd.fi.uncoma.edu.ar#composition',
+      enumerate: ['roles/source', 'roles/target'],
       attrs: {
         line: {
           stroke: 'black',
@@ -251,6 +254,7 @@ var CrowdEditorUml = {
       inheritChild: false,
       direction: 'target',
       uri: 'http://crowd.fi.uncoma.edu.ar#generalization',
+      enumerate: ['roles/source', 'roles/target'],
       attrs: {
         line: {
           stroke: crowd.palette.colors.inheritanceStroke,
@@ -280,6 +284,7 @@ var CrowdEditorUml = {
       inheritChild: false,
       direction: 'target',
       uri: 'http://crowd.fi.uncoma.edu.ar#implementation',
+      enumerate: ['roles/source', 'roles/target'],
       attrs: {
         line: {
           stroke: crowd.palette.colors.inheritanceStroke,
@@ -890,8 +895,8 @@ var CrowdEditorUml = {
           link.attributes.direction = 'target';
 
         if (newType == 'generalization' || newType == 'implementation') {
-          link.attributes.cardinality = { source: null, target: null };
-          link.attributes.roles = { source: null, target: null };
+          // link.attributes.cardinality = { source: null, target: null };
+          // link.attributes.roles = { source: null, target: null };
           if (link.attributes.inheritChild) link.attributes.direction = null;
         }
 

@@ -212,7 +212,7 @@ var CrowdEditorOrm = {
               'stroke-linecap': 'round'
             },
             label: {
-              text: 'fact type',
+              text: 'Fact Type',
               textVerticalAnchor: 'middle',
               textAnchor: 'middle',
               x: 45,
@@ -361,7 +361,7 @@ var CrowdEditorOrm = {
               'stroke-linecap': 'round'
             },
             label: {
-              text: 'fact type',
+              text: 'Fact Type',
               textVerticalAnchor: 'middle',
               textAnchor: 'middle',
               x: 45,
@@ -848,7 +848,8 @@ var CrowdEditorOrm = {
         left: 'http://crowd.fi.uncoma.edu.ar#role-a',
         right: 'http://crowd.fi.uncoma.edu.ar#role-b'
       },
-      uri: 'http://crowd.fi.uncoma.edu.ar#fact-type'
+      uri: 'http://crowd.fi.uncoma.edu.ar#fact-type',
+      enumerate: ['roles/left', 'roles/right']
     });
 
     //add joint orm union constraint to palette elements
