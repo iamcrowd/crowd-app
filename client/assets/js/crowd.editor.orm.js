@@ -1147,6 +1147,15 @@ var CrowdEditorOrm = {
     //no extra links tools
   },
   initChangeAttributesEvents: function (crowd) {
+    //initialize specific functions for orm checks
+    crowd.orm = {};
+    crowd.orm.uniqOne = function (card) {
+      return card == '0..1' || card == '1..1';
+    };
+    crowd.orm.uniqMany = function (card) {
+      return card == '1..*' || (card.includes('0..') && card.split('0..')[1] != 1);
+    };
+
     //event when the elements type change (types are: entity, weakEntity, attribute, etc)
     crowd.workspace.graph.on('change:type', function (element, newType) {
       // console.log('change:type', { element, newType });
@@ -1222,34 +1231,46 @@ var CrowdEditorOrm = {
       // console.log('change:cardinality', { element, newCardinality });
 
       if (element.isElement() && element.attributes.parentType == "role" && newCardinality) {
-        var uniqOne = function (card) {
-          return card == '0..1' || card == '1..1';
-        };
-        var uniqMany = function (card) {
-          return card == '1..*' || (card.includes('0..') && card.split('0..')[1] != 1);
-        };
-
-        if (!uniqOne(newCardinality.left) && !uniqOne(newCardinality.right)) {
+        //change uniqueness lines
+        if (!crowd.orm.uniqOne(newCardinality.left) && !crowd.orm.uniqOne(newCardinality.right)) {
           element.attr('uniqueLeft/display', 'none');
           element.attr('uniqueRight/display', 'none');
           element.attr('uniqueFull/display', 'unset');
         } else {
-          element.attr('uniqueLeft/display', uniqOne(newCardinality.left) ? 'unset' : 'none');
-          element.attr('uniqueRight/display', uniqOne(newCardinality.right) ? 'unset' : 'none');
+          element.attr('uniqueLeft/display', crowd.orm.uniqOne(newCardinality.left) ? 'unset' : 'none');
+          element.attr('uniqueRight/display', crowd.orm.uniqOne(newCardinality.right) ? 'unset' : 'none');
           element.attr('uniqueFull/display', 'none');
         }
 
-        var hasFreqLeft = !uniqOne(newCardinality.left) && !uniqMany(newCardinality.left);
+        //change frequencies visibility and values
+        var hasFreqLeft = !crowd.orm.uniqOne(newCardinality.left) && !crowd.orm.uniqMany(newCardinality.left);
         element.attr('frequencyLeftLabel/text', newCardinality.left);
         element.attr('frequencyLeftLabel/display', hasFreqLeft ? 'unset' : 'none');
         element.attr('frequencyLeftLabelBackground/display', hasFreqLeft ? 'unset' : 'none');
         element.attr('frequencyLeftLine/display', hasFreqLeft ? 'unset' : 'none');
 
-        var hasFreqRight = !uniqOne(newCardinality.right) && !uniqMany(newCardinality.right);
+        var hasFreqRight = !crowd.orm.uniqOne(newCardinality.right) && !crowd.orm.uniqMany(newCardinality.right);
         element.attr('frequencyRightLabel/text', newCardinality.right);
         element.attr('frequencyRightLabel/display', hasFreqRight ? 'unset' : 'none');
         element.attr('frequencyRightLabelBackground/display', hasFreqRight ? 'unset' : 'none');
         element.attr('frequencyRightLine/display', hasFreqRight ? 'unset' : 'none');
+
+        //change mandatory of link connected by the cardinality input
+        if (!hasFreqLeft || !hasFreqRight) {
+          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+            if (link.attributes.type == 'connector') {
+              if ((link.attributes.source?.id == element.id && link.attributes.source?.port == 'left') ||
+                (link.attributes.target?.id == element.id && link.attributes.target?.port == 'left')) {
+                link.prop('mandatory', !hasFreqLeft && newCardinality.left.charAt(0) == '1');
+              }
+
+              if ((link.attributes.source?.id == element.id && link.attributes.source?.port == 'right') ||
+                (link.attributes.target?.id == element.id && link.attributes.target?.port == 'right')) {
+                link.prop('mandatory', !hasFreqRight && newCardinality.right.charAt(0) == '1');
+              }
+            }
+          });
+        }
       }
     });
 
@@ -1312,9 +1333,31 @@ var CrowdEditorOrm = {
 
           //redraw the link with the new style
           linkView.render();
+
+          //change soruce role binary cardinality by the mandatory value
+          var sourceElem = link.getSourceElement()
+          if (sourceElem?.attributes?.type == 'roleBinary') {
+            let newCard = sourceElem.prop('cardinality/'+ link.attributes.source.port);
+            let hasFreq = !crowd.orm.uniqOne(newCard) && !crowd.orm.uniqMany(newCard);
+            if (!hasFreq) {
+              newCard = (newMandatory ? '1' : '0') + '..' + newCard.split('..')[1];
+              sourceElem.prop('cardinality/'+ link.attributes.source.port, newCard);
+            }
+          }
+
+          //change target role binary cardinality by the mandatory value
+          var targetElem = link.getTargetElement()
+          if (targetElem?.attributes?.type == 'roleBinary') {
+            let newCard = targetElem.prop('cardinality/'+ link.attributes.target.port);
+            let hasFreq = !crowd.orm.uniqOne(newCard) && !crowd.orm.uniqMany(newCard);
+            if (!hasFreq) {
+              newCard = (newMandatory ? '1' : '0') + '..' + newCard.split('..')[1];
+              targetElem.prop('cardinality/'+ link.attributes.target.port, newCard);
+            }
+          }
         }
 
-        crowd.inspector.loadContent();
+        // crowd.inspector.loadContent();
       }
     });
 
