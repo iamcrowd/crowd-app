@@ -1261,12 +1261,12 @@ var CrowdEditorOrm = {
             if (link.attributes.type == 'connector') {
               if ((link.attributes.source?.id == element.id && link.attributes.source?.port == 'left') ||
                 (link.attributes.target?.id == element.id && link.attributes.target?.port == 'left')) {
-                link.prop('mandatory', !hasFreqLeft && newCardinality.left.charAt(0) == '1');
+                if (!hasFreqLeft) link.prop('mandatory', newCardinality.left.charAt(0) == '1');
               }
 
               if ((link.attributes.source?.id == element.id && link.attributes.source?.port == 'right') ||
                 (link.attributes.target?.id == element.id && link.attributes.target?.port == 'right')) {
-                link.prop('mandatory', !hasFreqRight && newCardinality.right.charAt(0) == '1');
+                if (!hasFreqRight) link.prop('mandatory', newCardinality.right.charAt(0) == '1');
               }
             }
           });
@@ -1337,22 +1337,22 @@ var CrowdEditorOrm = {
           //change soruce role binary cardinality by the mandatory value
           var sourceElem = link.getSourceElement()
           if (sourceElem?.attributes?.type == 'roleBinary') {
-            let newCard = sourceElem.prop('cardinality/'+ link.attributes.source.port);
+            let newCard = sourceElem.prop('cardinality/' + link.attributes.source.port);
             let hasFreq = !crowd.orm.uniqOne(newCard) && !crowd.orm.uniqMany(newCard);
             if (!hasFreq) {
               newCard = (newMandatory ? '1' : '0') + '..' + newCard.split('..')[1];
-              sourceElem.prop('cardinality/'+ link.attributes.source.port, newCard);
+              sourceElem.prop('cardinality/' + link.attributes.source.port, newCard);
             }
           }
 
           //change target role binary cardinality by the mandatory value
           var targetElem = link.getTargetElement()
           if (targetElem?.attributes?.type == 'roleBinary') {
-            let newCard = targetElem.prop('cardinality/'+ link.attributes.target.port);
+            let newCard = targetElem.prop('cardinality/' + link.attributes.target.port);
             let hasFreq = !crowd.orm.uniqOne(newCard) && !crowd.orm.uniqMany(newCard);
             if (!hasFreq) {
               newCard = (newMandatory ? '1' : '0') + '..' + newCard.split('..')[1];
-              targetElem.prop('cardinality/'+ link.attributes.target.port, newCard);
+              targetElem.prop('cardinality/' + link.attributes.target.port, newCard);
             }
           }
         }
