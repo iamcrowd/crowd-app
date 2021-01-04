@@ -897,13 +897,19 @@ var CrowdEditorOrm = {
       type: 'connector',
       label: 'Connector',
       direction: null,
-      mandatory: true,
+      mandatory: false,
       attrs: {
         line: {
           stroke: 'black',
           strokeWidth: 2,
-          sourceMarker: {},
+          sourceMarker: {
+            display: 'none',
+            stroke: '#A000A0',
+            fill: '#A000A0',
+            d: 'M 16 0 a 8 8 0 1 0 0 1'
+          },
           targetMarker: {
+            display: 'none',
             stroke: '#A000A0',
             fill: '#A000A0',
             d: 'M 16 0 a 8 8 0 1 0 0 1'
@@ -965,7 +971,7 @@ var CrowdEditorOrm = {
           port: config.port ? config.port : null,
           manget: config.manget ? config.manget : null,
           props: {
-            mandatory: config.mandatory ? config.mandatory : false,
+            // mandatory: config.mandatory ? config.mandatory : false,
             direction: config.direction ? config.direction : null
           }
         },
@@ -1325,15 +1331,19 @@ var CrowdEditorOrm = {
 
         if (link.attributes.type == 'connector') {
           if (linkSourceType == 'entity') {
-            link.attributes.attrs.line.sourceMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.targetMarker);
-            link.attributes.attrs.line.targetMarker = {};
+            // link.attributes.attrs.line.sourceMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.targetMarker);
+            // link.attributes.attrs.line.targetMarker = {};
+            link.attributes.attrs.line.sourceMarker.display = newMandatory ? 'unset' : 'none'
+            link.attributes.attrs.line.targetMarker.display = 'none';
           } else {
-            link.attributes.attrs.line.targetMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.targetMarker);
-            link.attributes.attrs.line.sourceMarker = {};
+            // link.attributes.attrs.line.targetMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.targetMarker);
+            // link.attributes.attrs.line.sourceMarker = {};
+            link.attributes.attrs.line.sourceMarker.display = 'none'
+            link.attributes.attrs.line.targetMarker.display = newMandatory ? 'unset' : 'none';
           }
 
-          link.attr('line/sourceMarker/display', newMandatory ? 'unset' : 'none');
-          link.attr('line/targetMarker/display', newMandatory ? 'unset' : 'none');
+          // link.attr('line/sourceMarker/display', newMandatory ? 'unset' : 'none');
+          // link.attr('line/targetMarker/display', newMandatory ? 'unset' : 'none');
 
           //get link view
           var linkView = link.findView(crowd.workspace.paper);
@@ -1398,13 +1408,12 @@ var CrowdEditorOrm = {
       // console.log('change:source change:target', { link, newSourceTarget });
 
       if (link.isLink()) {
-        link.trigger('change:mandatory', link, link.prop('mandatory'));
-        // var sourceElem = link.getSourceElement();
-        // if (sourceElem) sourceElem.trigger('change:cardinality', sourceElem, sourceElem.prop('cardinality'));
-        // console.log('change mandatory of link connected by the cardinality input', sourceElem, sourceElem.prop('cardinality'));
+        // link.trigger('change:mandatory', link, link.prop('mandatory'));
+        var sourceElem = link.getSourceElement();
+        if (sourceElem) sourceElem.trigger('change:cardinality', sourceElem, sourceElem.prop('cardinality'));
 
-        // var targetElem = link.getTargetElement();
-        // if (targetElem) targetElem.trigger('change:cardinality', targetElem, targetElem.prop('cardinality'));
+        var targetElem = link.getTargetElement();
+        if (targetElem) targetElem.trigger('change:cardinality', targetElem, targetElem.prop('cardinality'));
       }
     });
 
@@ -1931,6 +1940,18 @@ var CrowdEditorOrm = {
           var isBinary = relationship.entities.length > 1;
           rolesObj[relationship.name] = crowd.palette.elements[isBinary ? 'roleBinary' : 'roleUnary'].clone();
           crowd.workspace.graph.addCell(rolesObj[relationship.name]);
+
+          relationship.entities.forEach(function (entity, index) {
+            linksObj[relationship.name + '#' + entity] = crowd.palette.links.connector.clone();
+            linksObj[relationship.name + '#' + entity].source({
+              id: rolesObj[relationship.name].id, port: index == 0 ? 'left' : 'right', magnet: index == 0 ? 'relLeft' : 'relRight'
+            });
+            linksObj[relationship.name + '#' + entity].target(entitiesObj[entity]);
+            crowd.workspace.graph.addCell(linksObj[relationship.name + '#' + entity]);
+            linksObj[relationship.name + '#' + entity].prop('mandatory', relationship.mandatory.includes(entity));
+            linksObj[relationship.name + '#' + entity].toBack();
+          });
+
           $.each(relationship, function (attribute, value) {
             switch (attribute) {
               case 'name':
@@ -1955,17 +1976,6 @@ var CrowdEditorOrm = {
                 rolesObj[relationship.name].prop(attribute, value)
                 break;
             }
-          });
-
-          relationship.entities.forEach(function (entity, index) {
-            linksObj[relationship.name + '#' + entity] = crowd.palette.links.connector.clone();
-            linksObj[relationship.name + '#' + entity].source({
-              id: rolesObj[relationship.name].id, port: index == 0 ? 'left' : 'right', magnet: index == 0 ? 'relLeft' : 'relRight'
-            });
-            linksObj[relationship.name + '#' + entity].target(entitiesObj[entity]);
-            crowd.workspace.graph.addCell(linksObj[relationship.name + '#' + entity]);
-            linksObj[relationship.name + '#' + entity].prop('mandatory', relationship.mandatory.includes(entity));
-            linksObj[relationship.name + '#' + entity].toBack();
           });
         });
       }
