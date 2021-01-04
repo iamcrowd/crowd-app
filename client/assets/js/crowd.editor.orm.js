@@ -1334,7 +1334,7 @@ var CrowdEditorOrm = {
           //redraw the link with the new style
           linkView.render();
 
-          //change soruce role binary cardinality by the mandatory value
+          //change source role binary cardinality by the mandatory value
           var sourceElem = link.getSourceElement()
           if (sourceElem?.attributes?.type == 'roleBinary') {
             let newCard = sourceElem.prop('cardinality/' + link.attributes.source.port);

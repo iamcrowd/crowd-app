@@ -81,6 +81,6 @@ export class AppComponent implements AfterViewChecked {
 
   toggleDarkMode() {
     $('body').toggleClass('bootstrap-dark');
-    this.cookieService.set('crowd-darkmode', $('body').hasClass('bootstrap-dark'));
+    this.cookieService.set('crowd-darkmode', $('body').hasClass('bootstrap-dark'), 365);
   }
 }

@@ -73,6 +73,20 @@ body {
   background: #181818;
 }
 
+/* custom scrollbar for modals*/
+.bootstrap-dark .modal-body::-webkit-scrollbar-track {
+  background: #212529;
+}
+
+.bootstrap-dark .modal-body::-webkit-scrollbar-thumb {
+  background: #1b1b1b;
+  border-radius: 10px;
+}
+
+.bootstrap-dark .modal-body::-webkit-scrollbar-thumb:hover {
+  background: #181818;
+}
+
 /* Importing Bootstrap SCSS file. */
 @import "~bootstrap/scss/bootstrap";
 
