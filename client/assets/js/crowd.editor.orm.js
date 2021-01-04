@@ -1153,7 +1153,14 @@ var CrowdEditorOrm = {
       return card == '0..1' || card == '1..1';
     };
     crowd.orm.uniqMany = function (card) {
-      return card == '1..*' || (card.includes('0..') && card.split('0..')[1] != 1);
+      return card == '1..*' || card == '0..*';//|| (card.includes('0..') && card.split('0..')[1] != 1);
+    };
+    crowd.orm.convertFrequency = function (card) {
+      return card.includes('0..') && card.split('0..')[1] != 1
+        ? '<=' + card.split('0..')[1]
+        : (card.includes('..*') && card.split('..*')[0] != 0
+          ? '>=' + card.split('..*')[0]
+          : card);
     };
 
     //event when the elements type change (types are: entity, weakEntity, attribute, etc)
@@ -1244,13 +1251,13 @@ var CrowdEditorOrm = {
 
         //change frequencies visibility and values
         var hasFreqLeft = !crowd.orm.uniqOne(newCardinality.left) && !crowd.orm.uniqMany(newCardinality.left);
-        element.attr('frequencyLeftLabel/text', newCardinality.left);
+        element.attr('frequencyLeftLabel/text', crowd.orm.convertFrequency(newCardinality.left));
         element.attr('frequencyLeftLabel/display', hasFreqLeft ? 'unset' : 'none');
         element.attr('frequencyLeftLabelBackground/display', hasFreqLeft ? 'unset' : 'none');
         element.attr('frequencyLeftLine/display', hasFreqLeft ? 'unset' : 'none');
 
         var hasFreqRight = !crowd.orm.uniqOne(newCardinality.right) && !crowd.orm.uniqMany(newCardinality.right);
-        element.attr('frequencyRightLabel/text', newCardinality.right);
+        element.attr('frequencyRightLabel/text', crowd.orm.convertFrequency(newCardinality.right));
         element.attr('frequencyRightLabel/display', hasFreqRight ? 'unset' : 'none');
         element.attr('frequencyRightLabelBackground/display', hasFreqRight ? 'unset' : 'none');
         element.attr('frequencyRightLine/display', hasFreqRight ? 'unset' : 'none');
@@ -1392,6 +1399,12 @@ var CrowdEditorOrm = {
 
       if (link.isLink()) {
         link.trigger('change:mandatory', link, link.prop('mandatory'));
+        // var sourceElem = link.getSourceElement();
+        // if (sourceElem) sourceElem.trigger('change:cardinality', sourceElem, sourceElem.prop('cardinality'));
+        // console.log('change mandatory of link connected by the cardinality input', sourceElem, sourceElem.prop('cardinality'));
+
+        // var targetElem = link.getTargetElement();
+        // if (targetElem) targetElem.trigger('change:cardinality', targetElem, targetElem.prop('cardinality'));
       }
     });
 
