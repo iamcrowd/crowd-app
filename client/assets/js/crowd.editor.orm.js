@@ -1408,12 +1408,13 @@ var CrowdEditorOrm = {
       // console.log('change:source change:target', { link, newSourceTarget });
 
       if (link.isLink()) {
-        // link.trigger('change:mandatory', link, link.prop('mandatory'));
         var sourceElem = link.getSourceElement();
         if (sourceElem) sourceElem.trigger('change:cardinality', sourceElem, sourceElem.prop('cardinality'));
 
         var targetElem = link.getTargetElement();
         if (targetElem) targetElem.trigger('change:cardinality', targetElem, targetElem.prop('cardinality'));
+
+        link.trigger('change:mandatory', link, link.prop('mandatory'));
       }
     });
 
