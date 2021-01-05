@@ -11,3 +11,21 @@
   padding-left: 0px;
   max-width: 100%;
 }
+
+.navbar-collapse .nav-item-collapsed {
+  display: none;
+}
+
+.navbar-collapse.show .nav-item-collapsed,
+.navbar-collapse.collapsing .nav-item-collapsed {
+  display: inline;
+}
+
+.navbar-collapse .nav-item-uncollapsed {
+  display: inline;
+}
+
+.navbar-collapse.show .nav-item-uncollapsed,
+.navbar-collapse.collapsing .nav-item-uncollapsed {
+  display: none;
+}
