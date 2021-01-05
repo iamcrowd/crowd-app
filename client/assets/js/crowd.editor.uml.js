@@ -921,7 +921,10 @@ var CrowdEditorUml = {
           {
             attrs: {
               text: {
-                text: (newCardinality.source != "null" ? newCardinality.source : null),
+                text: (newCardinality.source != "null"
+                  && link.attributes.type != 'generalization'
+                  && link.attributes.type != 'implementation'
+                  ? newCardinality.source : null),
               }
             },
             position: {
@@ -932,7 +935,10 @@ var CrowdEditorUml = {
           {
             attrs: {
               text: {
-                text: (newCardinality.target != "null" ? newCardinality.target : null),
+                text: (newCardinality.target != "null"
+                  && link.attributes.type != 'generalization'
+                  && link.attributes.type != 'implementation'
+                  ? newCardinality.target : null),
               }
             },
             position: {
