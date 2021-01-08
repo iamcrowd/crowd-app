@@ -39,6 +39,13 @@ export class EditorComponent implements OnInit {
   preview: string;
   //to manage event from where is setted an action
   setEvent: any;
+  //array of youtube video tutorials urls
+  tutorials: any = [
+     { title: 'First Steps', id: 'yfkr0LOHrL4' },
+     { title: 'Modelling', id: 'YJG-X3sMWII' },
+     { title: 'Translate', id: 'ldaZnWkvBhU' },
+     { title: 'Reasoning', id: '6IXJPw2KPuA' },
+  ];
 
   //diagram save form
   diagramForm: FormGroup;
@@ -152,6 +159,9 @@ export class EditorComponent implements OnInit {
         },
         delete: {
           set: 'setDiagram'
+        },
+        tutorials: {
+          modal: 'crowd-tools-tutorials-modal'
         },
         user: this.auth?.currentUser?._id
       },

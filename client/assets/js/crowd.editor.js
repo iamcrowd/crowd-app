@@ -344,6 +344,10 @@ CrowdEditor.prototype.initTools = function () {
   self.tools.reasoning = {};
   self.tools.clearReasoning = {};
 
+  self.tools.help = {};
+  self.tools.tutorials = {};
+  self.tools.about = {};
+
   self.tools.zoom = {};
   self.tools.gridSize = {};
   self.tools.fullscreen = {};
@@ -1633,6 +1637,111 @@ CrowdEditor.prototype.initTools = function () {
     });
   }
   self.tools.tools.init();
+
+  //tools help
+  self.tools.help.init = function () {
+    //append edit dropdown for all tools related tools
+    $('#crowd-tools-menu-' + self.id).append(
+      '<div class="btn-group dropdown" id="crowd-tools-help-btn-' + self.id + '"> \
+        <button class="btn btn-adaptive dropdown-toggle" type="button" id="crowd-tools-help-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+          <i class="fa fa-fw fa-question"></i> Help \
+        </button> \
+        <ul class="dropdown-menu" aria-labelledby="crowd-tools-help-dropdown-' + self.id + '"></ul> \
+      </div>'
+    );
+
+    //tutorials tool
+    self.tools.tutorials.init = function () {
+      //append dom for tutorials tool
+      $('[aria-labelledby="crowd-tools-help-dropdown-' + self.id + '"]').append(
+        '<li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" title="Video Tutorials List"> \
+            <button class="dropdown-item" id="crowd-tools-help-tutorials-input-' + self.id + '"> \
+            <i class="fa fa-fw fa-youtube"></i> Tutorials</button> \
+          </span> \
+        </li>'
+      );
+
+      //append dom for the tutorials modal
+      // $('body').append(
+      //   '<div id="crowd-tools-help-tutorials-modal-' + self.id + '" class="modal fade"> \
+      //     <div class="modal-dialog modal-dialog-scrollable modal-lg"> \
+      //       <div class="modal-content"> \
+      //         <div class="modal-header"> \
+      //           <h5 class="modal-title">Tutorials</h5> \
+      //           <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+      //             <span aria-hidden="true">&times;</span> \
+      //           </button> \
+      //         </div> \
+      //         <iframe width="560" height="315" src="https://www.youtube.com/embed/yfkr0LOHrL4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> \
+      //         <div class="modal-footer"> \
+      //           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
+      //         </div> \
+      //       </div> \
+      //     </div> \
+      //   </div>'
+      // );
+
+      //event handler when click tutorials
+      $('#crowd-tools-help-tutorials-input-' + self.id).on('click', function () {
+        // $('#crowd-tools-help-tutorials-modal-' + self.id).modal('show');
+        if (self.config?.ngFiles?.tutorials?.modal) {
+          $('#' + self.config.ngFiles.tutorials.modal).modal('show');
+        }
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.tutorials.init();
+
+    //about tool
+    self.tools.about.init = function () {
+      //append dom for about tool
+      $('[aria-labelledby="crowd-tools-help-dropdown-' + self.id + '"]').append(
+        '<li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" title="About crowd tool and team"> \
+            <button class="dropdown-item" id="crowd-tools-help-about-input-' + self.id + '"> \
+            <i class="fa fa-fw fa-info"></i> About <span class="crowd-font lg">crowd</span></button> \
+          </span> \
+        </li>'
+      );
+
+      //append dom for the about modal
+      $('body').append(
+        '<div id="crowd-tools-help-about-modal-' + self.id + '" class="modal fade"> \
+          <div class="modal-dialog modal-dialog-scrollable modal-sm"> \
+            <div class="modal-content"> \
+              <div class="modal-header"> \
+                <h5 class="modal-title"><i class="fa fa-fw fa-info"></i> About <span class="crowd-font lg">crowd</span></h5> \
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+                  <span aria-hidden="true">&times;</span> \
+                </button> \
+              </div> \
+              <div class="modal-body"> \
+                <p><span class="crowd-font lg">crowd</span> 2.0 tool was developed by a collaborative work of students, professors and researchers of UNComa, UNS and CONICET.</p> \
+                <br > \
+                <p class="text-muted">Realeased under the terms of the GNU General Public License</p> \
+              </div> \
+              <div class="modal-footer"> \
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
+              </div> \
+            </div> \
+          </div> \
+        </div>'
+      );
+
+      //event handler when click about
+      $('#crowd-tools-help-about-input-' + self.id).on('click', function () {
+        $('#crowd-tools-help-about-modal-' + self.id).modal('show');
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.about.init();
+  }
+  self.tools.help.init();
 
   //zoom tool
   self.tools.zoom.init = function () {

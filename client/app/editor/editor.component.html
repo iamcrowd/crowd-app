@@ -12,9 +12,9 @@
       <div class="modal-body">
         <div class="row">
           <div class="col-md-6 col-lg-3 col-xl-3" *ngFor="let diagram of diagrams">
-            <div class="card mb-3" (click)="loadDiagram(diagram)" title="{{diagram.name}}"
-              data-toggle="tooltip" data-placement="top" data-container="#crowd-tools-load-modal"
-              data-boundary="viewport" data-trigger="hover">
+            <div class="card mb-3" (click)="loadDiagram(diagram)" title="{{diagram.name}}" data-toggle="tooltip"
+              data-placement="top" data-container="#crowd-tools-load-modal" data-boundary="viewport"
+              data-trigger="hover">
               <div class="crowd-diagram-load-button" *ngIf="diagram.preview">
                 <p>Load</p>
               </div>
@@ -169,6 +169,46 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" (click)="resetDiagramForm()">Cancel</button>
         <button type="submit" class="btn btn-danger" data-dismiss="modal" (click)="deleteDiagram()">Proceed</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="crowd-tools-tutorials-modal" class="modal fade">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa fa-fw fa-youtube"></i> Tutorials</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6 col-lg-3 col-xl-3" *ngFor="let tutorial of tutorials">
+            <a href="https://www.youtube.com/watch?v={{tutorial.id}}" target="_blank">
+              <div class="card mb-3" title="{{tutorial.title}}" data-toggle="tooltip" data-placement="top"
+                data-container="#crowd-tools-tutorials-modal" data-boundary="viewport" data-trigger="hover">
+                <div class="crowd-diagram-load-button">
+                  <p><i class="fa fa-fw fa-lg fa-play"></i></p>
+                </div>
+                <div class="card-header crowd-diagram-header">
+                  {{tutorial.title}}
+                </div>
+                <div class="card-body crowd-diagram-preview-container">
+                  <img class="crowd-diagram-preview tutorial" src="http://img.youtube.com/vi/{{tutorial.id}}/0.jpg" />
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+        <div *ngIf="!tutorials.length" style="text-align: center;">
+          <i class="material-icons" style="font-size: 165px;">ondemand_video</i>
+          <p><b>There is no tutorials yet.</b></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
