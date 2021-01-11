@@ -1269,21 +1269,23 @@ var CrowdEditorOrm = {
         element.attr('frequencyRightLine/display', hasFreqRight ? 'unset' : 'none');
 
         //change mandatory of link connected by the cardinality input
-        if (!hasFreqLeft || !hasFreqRight) {
-          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
-            if (link.attributes.type == 'connector') {
-              if ((link.attributes.source?.id == element.id && link.attributes.source?.port == 'left') ||
-                (link.attributes.target?.id == element.id && link.attributes.target?.port == 'left')) {
-                if (!hasFreqLeft) link.prop('mandatory', newCardinality.left.charAt(0) == '1');
-              }
-
-              if ((link.attributes.source?.id == element.id && link.attributes.source?.port == 'right') ||
-                (link.attributes.target?.id == element.id && link.attributes.target?.port == 'right')) {
-                if (!hasFreqRight) link.prop('mandatory', newCardinality.right.charAt(0) == '1');
-              }
+        // if (!hasFreqLeft || !hasFreqRight) {
+        crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+          if (link.attributes.type == 'connector') {
+            if ((link.attributes.source?.id == element.id && link.attributes.source?.port == 'left') ||
+              (link.attributes.target?.id == element.id && link.attributes.target?.port == 'left')) {
+              // if (!hasFreqLeft)
+              link.prop('mandatory', newCardinality.left.split('..')[0] != '0');
             }
-          });
-        }
+
+            if ((link.attributes.source?.id == element.id && link.attributes.source?.port == 'right') ||
+              (link.attributes.target?.id == element.id && link.attributes.target?.port == 'right')) {
+              // if (!hasFreqRight)
+              link.prop('mandatory', newCardinality.right.split('..')[0] != '0');
+            }
+          }
+        });
+        // }
       }
     });
 
@@ -1356,10 +1358,10 @@ var CrowdEditorOrm = {
           if (sourceElem?.attributes?.type == 'roleBinary') {
             let newCard = sourceElem.prop('cardinality/' + link.attributes.source.port);
             let hasFreq = !crowd.orm.uniqOne(newCard) && !crowd.orm.uniqMany(newCard);
-            if (!hasFreq) {
-              newCard = (newMandatory ? '1' : '0') + '..' + newCard.split('..')[1];
-              sourceElem.prop('cardinality/' + link.attributes.source.port, newCard);
-            }
+            // if (!hasFreq) {
+            newCard = (newMandatory ? (hasFreq && newCard.split('..')[0] != '0' ? newCard.split('..')[0] : '1') : '0') + '..' + newCard.split('..')[1];
+            sourceElem.prop('cardinality/' + link.attributes.source.port, newCard);
+            // }
           }
 
           //change target role binary cardinality by the mandatory value
@@ -1367,10 +1369,10 @@ var CrowdEditorOrm = {
           if (targetElem?.attributes?.type == 'roleBinary') {
             let newCard = targetElem.prop('cardinality/' + link.attributes.target.port);
             let hasFreq = !crowd.orm.uniqOne(newCard) && !crowd.orm.uniqMany(newCard);
-            if (!hasFreq) {
-              newCard = (newMandatory ? '1' : '0') + '..' + newCard.split('..')[1];
-              targetElem.prop('cardinality/' + link.attributes.target.port, newCard);
-            }
+            // if (!hasFreq) {
+            newCard = (newMandatory ? (hasFreq && newCard.split('..')[0] != '0' ? newCard.split('..')[0] : '1') : '0') + '..' + newCard.split('..')[1];
+            targetElem.prop('cardinality/' + link.attributes.target.port, newCard);
+            // }
           }
         }
 
