@@ -1731,11 +1731,7 @@ var CrowdEditorOrm = {
               }
 
               if (parentEntity && childEntity) {
-                var existentInheritance = jsonSchema.connectors.find(function (connector) {
-                  return connector.type == 'subtyping' && connector.parent == parentEntity.attributes.uri;
-                });
-
-                var connectedConstraints = []
+                var connectedConstraints = [];
                 crowd.workspace.graph.getConnectedLinks(link).forEach(function (inheritanceLink) {
                   if (inheritanceLink.attributes.type == 'constraintConnector') {
                     var connectedConstraint;
@@ -1746,27 +1742,76 @@ var CrowdEditorOrm = {
                     }
 
                     if (connectedConstraint)
-                      connectedConstraints = connectedConstraints.concat(constraintTypeInheritanceMap[connectedConstraint.attributes.type]);
+                      // connectedConstraints = connectedConstraints.concat(constraintTypeInheritanceMap[connectedConstraint.attributes.type]);
+                      connectedConstraints.push(connectedConstraint);
+
+                    // var sameConstraintEntities = [];
+                    // crowd.workspace.graph.getConnectedLinks(connectedConstraint).forEach(function (connectedConstraintLink) {
+                    //   var connectedConstraintInheritance;
+                    //   if (connectedConstraintLink.attributes.source.id != connectedConstraint.id && connectedConstraintLink.getSourceElement().attributes.parentType == 'constraint') {
+                    //     connectedConstraintInheritance = connectedConstraintLink.getSourceElement();
+                    //   } else if (connectedConstraintLink.attributes.target.id != connectedConstraint.id && connectedConstraintLink.getTargetElement().attributes.parentType == 'constraint') {
+                    //     connectedConstraintInheritance = connectedConstraintLink.getTargetElement();
+                    //   }
+
+                    //   var connectedConstraintInheritanceEntity;
+                    //   if (connectedConstraintInheritance.attributes.source.id != parentEntity.id) {
+                    //     connectedConstraintInheritanceEntity = connectedConstraintInheritance.getSourceElement();
+                    //   } else if (connectedConstraintInheritance.attributes.target.id != parentEntity.id) {
+                    //     connectedConstraintInheritanceEntity = connectedConstraintInheritance.getTargetElement();
+                    //   }
+
+                    //   if (!sameConstraintEntities.find(function (e) { return e.id == connectedConstraintInheritanceEntity.id }))
+                    //     sameConstraintEntities = sameConstraintEntities.concat([connectedConstraintInheritanceEntity]);
+                    // });
                   }
                 });
 
-                if (!existentInheritance || !arraysEqual(existentInheritance.subtypingContraint, connectedConstraints)) {
-                  var inheritance = {
-                    name: link.cid,
-                    parent: parentEntity.attributes.uri,
-                    entities: [childEntity.attributes.uri],
-                    type: 'subtyping',
-                    subtypingContraint: [],
-                    position: element.attributes.position,
-                    size: element.attributes.size,
+                console.log(parentEntity.attributes.uri, childEntity.attributes.uri, connectedConstraints);
+
+                //in case that have constraints
+                if (connectedConstraints.length) {
+                  connectedConstraints.forEach(function (constraint) {
+                    var existentInheritance = jsonSchema.connectors.find(function (connector) {
+                      return connector.type == 'subtyping' && connector.parent == parentEntity.attributes.uri && connector.subtypingContraint.includes(constraint.id);
+                    });
+
+                    if (!existentInheritance) {
+                      var inheritance = {
+                        name: link.cid,
+                        parent: parentEntity.attributes.uri,
+                        entities: [childEntity.attributes.uri],
+                        type: 'subtyping',
+                        subtypingContraint: [constraint.id],
+                        position: element.attributes.position,
+                        size: element.attributes.size,
+                      }
+
+                      jsonSchema.connectors.push(inheritance);
+                    } else {
+                      existentInheritance.entities.push(childEntity.attributes.uri);
+                    }
+                  });
+                } else { //case that's only inheritance
+                  var existentInheritance = jsonSchema.connectors.find(function (connector) {
+                    return connector.type == 'subtyping' && connector.parent == parentEntity.attributes.uri && connector.subtypingContraint.length <= 0;
+                  });
+
+                  if (!existentInheritance) {
+                    var inheritance = {
+                      name: link.cid,
+                      parent: parentEntity.attributes.uri,
+                      entities: [childEntity.attributes.uri],
+                      type: 'subtyping',
+                      subtypingContraint: [],
+                      position: element.attributes.position,
+                      size: element.attributes.size,
+                    }
+
+                    jsonSchema.connectors.push(inheritance);
+                  } else {
+                    existentInheritance.entities.push(childEntity.attributes.uri);
                   }
-
-                  if (connectedConstraints)
-                    inheritance.subtypingContraint = inheritance.subtypingContraint.concat(connectedConstraints);
-
-                  jsonSchema.connectors.push(inheritance);
-                } else {
-                  existentInheritance.entities.push(childEntity.attributes.uri);
                 }
               }
             }
@@ -1863,6 +1908,33 @@ var CrowdEditorOrm = {
 
           if (constraint.factTypes.length) jsonSchema.connectors.push(constraint);
           break;
+      }
+    });
+
+    //after adding inheritance connectors
+    //proccess them to join them if is needed
+    jsonSchema.connectors.forEach(function (connector, cIndex) {
+      if (connector.type == 'subtyping') {
+        jsonSchema.connectors.forEach(function (otherConnector, ocIndex) {
+          console.log(connector.entities, otherConnector.entities, arraysEqual(connector.entities, otherConnector.entities));
+          if (cIndex != ocIndex
+            && otherConnector.type == 'subtyping'
+            && connector.parent == otherConnector.parent
+            && arraysEqual(connector.entities, otherConnector.entities)) {
+            connector.subtypingContraint = connector.subtypingContraint.concat(otherConnector.subtypingContraint);
+            jsonSchema.connectors.splice(ocIndex, 1);
+          }
+        });
+      }
+    });
+    //replace their constraints ids by their types
+    jsonSchema.connectors.forEach(function (connector) {
+      if (connector.type == 'subtyping') {
+        var typedConstraints = [];
+        connector.subtypingContraint.forEach(function (constraintId) {
+          typedConstraints = [...new Set([...typedConstraints, ...constraintTypeInheritanceMap[crowd.workspace.graph.getCell(constraintId).attributes.type]])];
+        });
+        connector.subtypingContraint = typedConstraints;
       }
     });
 
@@ -1988,12 +2060,14 @@ var CrowdEditorOrm = {
         schema.connectors.forEach(function (connector) {
           if (connector.type == 'subtyping') {
             connector.entities.forEach(function (entity) {
-              linksObj[connector.name + "#" + entity] = crowd.palette.links.inheritanceConnector.clone();
-              linksObj[connector.name + "#" + entity].source(entitiesObj[entity]);
-              linksObj[connector.name + "#" + entity].target(entitiesObj[connector.parent]);
-              crowd.workspace.graph.addCell(linksObj[connector.name + "#" + entity]);
-              // linksObj[connector.name + "#" + entity].prop('direction', 'target');
-              linksObj[connector.name + "#" + entity].toBack();
+              if (!linksObj[connector.parent + "#" + entity]) {
+                linksObj[connector.parent + "#" + entity] = crowd.palette.links.inheritanceConnector.clone();
+                linksObj[connector.parent + "#" + entity].source(entitiesObj[entity]);
+                linksObj[connector.parent + "#" + entity].target(entitiesObj[connector.parent]);
+                crowd.workspace.graph.addCell(linksObj[connector.parent + "#" + entity]);
+                // linksObj[connector.name + "#" + entity].prop('direction', 'target');
+                linksObj[connector.parent + "#" + entity].toBack();
+              }
             });
             constraintTypeInheritanceMap(connector.subtypingContraint).forEach(function (constraint) {
               // console.log('inherConstraint', constraint);
@@ -2002,7 +2076,7 @@ var CrowdEditorOrm = {
               connector.entities.forEach(function (entity) {
                 linksObj[connector.name + "#" + entity + "#" + constraint] = crowd.palette.links.constraintConnector.clone();
                 linksObj[connector.name + "#" + entity + "#" + constraint].source(constraintsObj[connector.name + "#" + constraint]);
-                linksObj[connector.name + "#" + entity + "#" + constraint].target(linksObj[connector.name + "#" + entity]);
+                linksObj[connector.name + "#" + entity + "#" + constraint].target(linksObj[connector.parent + "#" + entity]);
                 crowd.workspace.graph.addCell(linksObj[connector.name + "#" + entity + "#" + constraint]);
                 linksObj[connector.name + "#" + entity + "#" + constraint].prop('direction', null);
                 linksObj[connector.name + "#" + entity + "#" + constraint].toBack();
@@ -2012,7 +2086,7 @@ var CrowdEditorOrm = {
               let mediumPosition = medianPoint(
                 constraintsObj[connector.name + "#" + constraint],
                 connector.entities.map(function (entity) {
-                  return linksObj[connector.name + "#" + entity]
+                  return linksObj[connector.parent + "#" + entity]
                 })
               );
               constraintsObj[connector.name + "#" + constraint]?.position(mediumPosition.x, mediumPosition.y);
