@@ -23,10 +23,20 @@ export class AuthService {
     private modalService: NgbModal
   ) {
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token && !this.isTokenExpired(token)) {
       const decodedUser = this.decodeUserFromToken(token);
       this.setCurrentUser(decodedUser);
+    } else {
+      this.cleanSession();
     }
+  }
+
+  isTokenExpired(token) {
+    return this.jwtHelper.isTokenExpired(token);
+  }
+
+  getToken() {
+    return localStorage.getItem('token');
   }
 
   login(emailAndPassword): void {
@@ -46,11 +56,15 @@ export class AuthService {
   }
 
   logout(): void {
+    this.cleanSession();
+    this.router.navigate(['/']);
+  }
+
+  cleanSession(): void {
     localStorage.removeItem('token');
     this.loggedIn = false;
     this.isAdmin = false;
     this.currentUser = new User();
-    this.router.navigate(['/']);
   }
 
   decodeUserFromToken(token): object {

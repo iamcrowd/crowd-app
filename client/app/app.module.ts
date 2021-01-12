@@ -12,6 +12,9 @@ import { AuthGuardLogin } from './services/auth-guard-login.service';
 import { AuthGuardAdmin } from './services/auth-guard-admin.service';
 import { LeaveGuardEditor } from './services/leave-guard-editor.service';
 import { CookieService } from 'ngx-cookie-service';
+
+import { HttpInterceptorService } from './services/http-interceptor.service';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 // Components
 import { AppComponent } from './app.component';
 import { AboutComponent } from './about/about.component';
@@ -54,7 +57,12 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     LeaveGuardEditor,
     UserService,
     DiagramService,
-    CookieService
+    CookieService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpInterceptorService,
+      multi: true
+    }
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent]

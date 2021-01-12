@@ -25,6 +25,7 @@ export class LoginComponent implements OnInit {
     Validators.minLength(6),
     Validators.maxLength(30)
   ]);
+  rememberMe = new FormControl(localStorage.getItem('login-rememberme') == 'true', []);
 
   constructor(
     private auth: AuthService,
@@ -39,7 +40,8 @@ export class LoginComponent implements OnInit {
     }
     this.loginForm = this.formBuilder.group({
       email: this.email,
-      password: this.password
+      password: this.password,
+      rememberMe: this.rememberMe
     });
   }
 
@@ -53,6 +55,7 @@ export class LoginComponent implements OnInit {
   login(): void {
     this.loginForm.markAllAsTouched();
     if (this.loginForm.valid) {
+      localStorage.setItem('login-rememberme', this.rememberMe.value);
       this.auth.login(this.loginForm.value);
     } else {
       iziToast.error({ message: 'Some values are invalid, please check.' });

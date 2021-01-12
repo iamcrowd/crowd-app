@@ -1767,7 +1767,7 @@ var CrowdEditorOrm = {
                   }
                 });
 
-                console.log(parentEntity.attributes.uri, childEntity.attributes.uri, connectedConstraints);
+                // console.log(parentEntity.attributes.uri, childEntity.attributes.uri, connectedConstraints);
 
                 //in case that have constraints
                 if (connectedConstraints.length) {
@@ -1916,7 +1916,7 @@ var CrowdEditorOrm = {
     jsonSchema.connectors.forEach(function (connector, cIndex) {
       if (connector.type == 'subtyping') {
         jsonSchema.connectors.forEach(function (otherConnector, ocIndex) {
-          console.log(connector.entities, otherConnector.entities, arraysEqual(connector.entities, otherConnector.entities));
+          // console.log(connector.entities, otherConnector.entities, arraysEqual(connector.entities, otherConnector.entities));
           if (cIndex != ocIndex
             && otherConnector.type == 'subtyping'
             && connector.parent == otherConnector.parent
