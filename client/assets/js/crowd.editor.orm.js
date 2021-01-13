@@ -2062,6 +2062,7 @@ var CrowdEditorOrm = {
             connector.entities.forEach(function (entity) {
               if (!linksObj[connector.parent + "#" + entity]) {
                 linksObj[connector.parent + "#" + entity] = crowd.palette.links.inheritanceConnector.clone();
+                linksObj[connector.parent + "#" + entity].prop('uri', connector.name);
                 linksObj[connector.parent + "#" + entity].source(entitiesObj[entity]);
                 linksObj[connector.parent + "#" + entity].target(entitiesObj[connector.parent]);
                 crowd.workspace.graph.addCell(linksObj[connector.parent + "#" + entity]);
