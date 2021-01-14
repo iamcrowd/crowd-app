@@ -342,6 +342,7 @@ CrowdEditor.prototype.initTools = function () {
 
   self.tools.tools = {};
   self.tools.reasoning = {};
+  self.tools.undoReasoning = {};
   self.tools.clearReasoning = {};
 
   self.tools.help = {};
@@ -1573,12 +1574,67 @@ CrowdEditor.prototype.initTools = function () {
     }
     self.tools.reasoning.init();
 
+    //undo reasoning tool
+    self.tools.undoReasoning.init = function () {
+      //append dom for undo reasoning tool
+      $('[aria-labelledby="crowd-tools-tools-dropdown-' + self.id + '"]').append(
+        '<li> \
+      <span class="d-block" data-toggle="tooltip" data-placement="right" title="Remove Reasoning Inferences and Clear Marks"> \
+        <button class="dropdown-item" style="color: #dc3545;" id="crowd-tools-undo-reasoning-input-' + self.id + '"> \
+        <i class="fa fa-fw fa-undo"></i> Undo Reasoning</button> \
+      </span> \
+    </li>'
+      );
+
+      //append dom for the advertisement modal when try undo reasoning
+      $('body').append(
+        '<div id="crowd-tools-undo-reasoning-advertisement-' + self.id + '" class="modal fade"> \
+      <div class="modal-dialog"> \
+        <div class="modal-content"> \
+          <div class="modal-header"> \
+            <h5 class="modal-title"><i class="fa fa-fw fa-undo"></i> Undo Reasoning</h5> \
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+              <span aria-hidden="true">&times;</span> \
+            </button> \
+          </div> \
+          <div class="modal-body"> \
+            <p>Are you sure want to undo the reasoning inferred elements and marks?</p> \
+            <p><b>This action cannot be reverted</b></p> \
+          </div> \
+          <div class="modal-footer"> \
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> \
+            <button id="crowd-tools-undo-reasoning-advertisement-proceed-' + self.id + '" \
+            type="button" class="btn btn-danger" data-dismiss="modal">Proceed</button> \
+          </div> \
+        </div> \
+      </div> \
+    </div>'
+      );
+
+      //event handler when click undo reasoning that open advertisement modal
+      $('#crowd-tools-undo-reasoning-input-' + self.id).on('click', function () {
+        if (self.hasChanges()) {
+          $('#crowd-tools-undo-reasoning-advertisement-' + self.id).modal('show');
+        }
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+
+      //event handler when click proceed button in advertisement for undo reasoning
+      $('#crowd-tools-undo-reasoning-advertisement-proceed-' + self.id).on('click', function () {
+        self.reasoning.undoSemantic();
+
+        $(".tooltip").tooltip('hide');
+      });
+    }
+    self.tools.undoReasoning.init();
+
     //clear reasoning tool
     self.tools.clearReasoning.init = function () {
       //append dom for clear reasoning tool
       $('[aria-labelledby="crowd-tools-tools-dropdown-' + self.id + '"]').append(
         '<li> \
-          <span class="d-block" data-toggle="tooltip" data-placement="right" title="Clear Reasoning Marks"> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" title="Preserve Reasoning Inferences and Clear Marks"> \
             <button class="dropdown-item" style="color: #dc3545;" id="crowd-tools-clear-reasoning-input-' + self.id + '"> \
             <i class="fa fa-fw fa-eraser"></i> Clear Reasoning</button> \
           </span> \
@@ -3232,6 +3288,17 @@ CrowdEditor.prototype.initReasoningValidator = function () {
     });
   };
 
+  //undo new inferred cells and clear semantic attributes
+  self.reasoning.undoSemantic = function () {
+    self.workspace.graph.getCells().forEach(function (cell) {
+      if (cell.prop('semantic/contents')?.some(function (e) { return e.value == 'inferred' && e.inferredType != 'cardinality' })) {
+        cell.remove();
+      } else {
+        cell.prop('semantic', { title: 'Semantic Deductions', contents: [] });
+      }
+    });
+  };
+
   //generic method for put semantic attributes on cells with a resoner response
   self.reasoning.genericMark = function (reasoning) {
     //call clear reasoning marks
@@ -3274,7 +3341,7 @@ CrowdEditor.prototype.initReasoningValidator = function () {
       });
 
       cell?.prop('semantic/contents/' + cell.prop('semantic/contents').length,
-        { value: 'inferred', text: '<span class="crowd-inferred-color"><b>Inferred Cardinality for role </b><i>' + kfRole.rolename + '</i></span>' }
+        { inferredType: 'cardinality', value: 'inferred', text: '<span class="crowd-inferred-color"><b>Inferred Cardinality for role </b><i>' + kfRole.rolename + '</i></span>' }
       );
     });
 

@@ -1424,7 +1424,7 @@ var CrowdEditorOrm = {
     crowd.workspace.graph.on('change:syntax', function (cell, newSyntax) {
       // console.log('change:syntax', { cell, newSyntax });
       var syntaxError = newSyntax && newSyntax != '';
-      var color = 'red';
+      var color = getCSS('color', 'crowd-syntax-error-color');
       if (cell.isElement()) {
         color = syntaxError ? color : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke');
         cell.attr('.outer/stroke', color);
@@ -1718,8 +1718,8 @@ var CrowdEditorOrm = {
 
           crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
             if (link.attributes.type == 'inheritanceConnector' &&
-              link.getSourceElement().attributes.parentType == 'entity' &&
-              link.getTargetElement().attributes.parentType == 'entity') {
+              link.getSourceElement()?.attributes.parentType == 'entity' &&
+              link.getTargetElement()?.attributes.parentType == 'entity') {
               var parentEntity;
               var childEntity;
               if (link.attributes.direction == 'source' && link.attributes.source.id == element.attributes.id) {
@@ -1735,9 +1735,9 @@ var CrowdEditorOrm = {
                 crowd.workspace.graph.getConnectedLinks(link).forEach(function (inheritanceLink) {
                   if (inheritanceLink.attributes.type == 'constraintConnector') {
                     var connectedConstraint;
-                    if (inheritanceLink.attributes.source.id != link.id && inheritanceLink.getSourceElement().attributes.parentType == 'constraint') {
+                    if (inheritanceLink.attributes.source.id != link.id && inheritanceLink.getSourceElement()?.attributes.parentType == 'constraint') {
                       connectedConstraint = inheritanceLink.getSourceElement();
-                    } else if (inheritanceLink.attributes.target.id != link.id && inheritanceLink.getTargetElement().attributes.parentType == 'constraint') {
+                    } else if (inheritanceLink.attributes.target.id != link.id && inheritanceLink.getTargetElement()?.attributes.parentType == 'constraint') {
                       connectedConstraint = inheritanceLink.getTargetElement();
                     }
 
@@ -1835,10 +1835,10 @@ var CrowdEditorOrm = {
             if (link.attributes.type == 'connector') {
               var connectedEntity;
               var port;
-              if (link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'entity') {
+              if (link.attributes.source.id != element.id && link.getSourceElement()?.attributes.parentType == 'entity') {
                 connectedEntity = link.getSourceElement();
                 port = link.attributes.target.port;
-              } else if (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'entity') {
+              } else if (link.attributes.target.id != element.id && link.getTargetElement()?.attributes.parentType == 'entity') {
                 connectedEntity = link.getTargetElement();
                 port = link.attributes.source.port;
               }
@@ -1886,10 +1886,10 @@ var CrowdEditorOrm = {
             if (link.attributes.type == 'constraintConnector') {
               var connectedRole;
               var port;
-              if (link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'role') {
+              if (link.attributes.source.id != element.id && link.getSourceElement()?.attributes.parentType == 'role') {
                 connectedRole = link.getSourceElement();
                 port = link.attributes.source.port;
-              } else if (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'role') {
+              } else if (link.attributes.target.id != element.id && link.getTargetElement()?.attributes.parentType == 'role') {
                 connectedRole = link.getTargetElement();
                 port = link.attributes.target.port;
               }
@@ -2190,7 +2190,25 @@ var CrowdEditorOrm = {
     return mergedSchema;
   },
   initSyntaxValidator: function (crowd) {
-    //todo
+    //event when the links source or target change
+    // crowd.workspace.graph.on('change:source change:target', function (link, newSourceTarget) {
+    //   if (link.isLink()) {
+    //     var sourceElem = link.getSourceElement();
+    //     var targetElem = link.getTargetElement();
+    //     var currentSyntax = link.prop('syntax');
+
+    //     if (currentSyntax.contents) {
+
+    //       var sourceDisconnected = currentSyntax.contents.find(function(content) {
+    //         return content.value == 'disconnected-source';
+    //       });
+
+    //     }
+    //     link.prop('semantic/contents/' + .length,
+    //       { value: 'inferred', text: '<span class="crowd-inferred-color"><b>Inferred Cardinality for role </b><i>' + kfRole.rolename + '</i></span>' }
+    //     );
+    //   }
+    // });
   },
   initReasoningValidator: function (crowd) {
     //todo
