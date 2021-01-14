@@ -703,6 +703,9 @@ var CrowdEditorUml = {
         //(because it is overwrited when replaced the attributes.attrs)
         element.trigger('change:name', element, element.prop('name'));
 
+        element.trigger('change:syntax', element, element.prop('syntax'));
+        element.trigger('change:semantic', element, element.prop('semantic'));
+
         crowd.inspector.loadContent();
       }
     });
@@ -725,7 +728,8 @@ var CrowdEditorUml = {
       // console.log('change:uri', { element, newUri });
 
       if (element.isElement()) {
-        element.attributes.name = fromURI(newUri);
+        // element.attributes.name = fromURI(newUri);
+        element.prop('name', joint.util.breakText(fromURI(newUri), { width: element.attributes.size.width + 25 }));
         $('#crowd-inspector-content--name--' + crowd.id).val(fromURI(newUri));
         element.trigger('change:name', element, element.prop('name'));
         if (element.attributes.parentType == 'class') classFitToContent(element);
@@ -882,6 +886,8 @@ var CrowdEditorUml = {
         link.attributes.attrs = $.extend(true, {}, crowd.palette.links[newType].attributes.attrs);
         link.markup = crowd.palette.links[newType].markup;
 
+        link.prop('parentType', crowd.palette.links[newType].attributes.parentType);
+
         //get link view
         var linkView = link.findView(crowd.workspace.paper);
 
@@ -904,6 +910,9 @@ var CrowdEditorUml = {
         link.trigger('change:cardinality', link, link.prop('cardinality'));
         link.trigger('change:roles', link, link.prop('roles'));
         link.trigger('change:uri', link, link.prop('uri'));
+
+        link.trigger('change:syntax', link, link.prop('syntax'));
+        link.trigger('change:semantic', link, link.prop('semantic'));
 
         crowd.inspector.loadContent();
       }
@@ -1053,6 +1062,37 @@ var CrowdEditorUml = {
       }
     });
 
+    //mark or unmark the element or link when the syntax property changed
+    crowd.workspace.graph.on('change:syntax', function (cell, newSyntax) {
+      // console.log('change:syntax', { cell, newSyntax });
+      var syntaxError = newSyntax && newSyntax != '';
+      var color = getCSS('color', 'crowd-syntax-error-color');
+      var strokeWidth = 2;
+      if (cell.isElement()) {
+        if (cell.attributes.parentType == 'class') {
+          color = syntaxError ? color : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke');
+          strokeWidth = syntaxError ? strokeWidth : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke-width');
+          cell.attr('.uml-class-name-rect/stroke', color);
+          cell.attr('.uml-class-name-rect/stroke-width', strokeWidth);
+          cell.attr('.uml-class-attrs-rect/stroke', color);
+          cell.attr('.uml-class-attrs-rect/stroke-width', strokeWidth);
+          cell.attr('.uml-class-methods-rect/stroke', color);
+          cell.attr('.uml-class-methods-rect/stroke-width', strokeWidth);
+        } else if (cell.attributes.parentType == 'inheritance') {
+          color = syntaxError ? color : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke');
+          cell.attr('.outer/stroke', color);
+        }
+      } else if (cell.isLink()) {
+        color = syntaxError ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
+        cell.attr('line/stroke', color);
+      }
+
+      if (!syntaxError)
+        cell.trigger('change:semantic', cell, cell.prop('semantic'));
+
+      crowd.inspector.loadContent();
+    });
+
     //mark or unmark the element or link when the semantic property changed
     crowd.workspace.graph.on('change:semantic', function (cell, newSemantic) {
       // console.log('change:semantic', { cell, newSemantic });
@@ -1061,14 +1101,19 @@ var CrowdEditorUml = {
       var color = unsatisfiable != null ? getCSS('color', 'crowd-unsat-color') : getCSS('color', 'crowd-inferred-color');
       var strokeWidth = 2;
       if (cell.isElement()) {
-        color = unsatisfiable != null || inferred != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke');
-        strokeWidth = unsatisfiable != null || inferred != null ? strokeWidth : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke-width');
-        cell.attr('.uml-class-name-rect/stroke', color);
-        cell.attr('.uml-class-name-rect/stroke-width', strokeWidth);
-        cell.attr('.uml-class-attrs-rect/stroke', color);
-        cell.attr('.uml-class-attrs-rect/stroke-width', strokeWidth);
-        cell.attr('.uml-class-methods-rect/stroke', color);
-        cell.attr('.uml-class-methods-rect/stroke-width', strokeWidth);
+        if (cell.attributes.parentType == 'class') {
+          color = unsatisfiable != null || inferred != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke');
+          strokeWidth = unsatisfiable != null || inferred != null ? strokeWidth : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke-width');
+          cell.attr('.uml-class-name-rect/stroke', color);
+          cell.attr('.uml-class-name-rect/stroke-width', strokeWidth);
+          cell.attr('.uml-class-attrs-rect/stroke', color);
+          cell.attr('.uml-class-attrs-rect/stroke-width', strokeWidth);
+          cell.attr('.uml-class-methods-rect/stroke', color);
+          cell.attr('.uml-class-methods-rect/stroke-width', strokeWidth);
+        } else if (cell.attributes.parentType == 'inheritance') {
+          color = unsatisfiable != null || inferred != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke');
+          cell.attr('.outer/stroke', color);
+        }
       } else if (cell.isLink()) {
         color = unsatisfiable != null || inferred != null ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
         cell.attr('line/stroke', color);
@@ -1624,6 +1669,10 @@ var CrowdEditorUml = {
       }
 
     }
+
+    setTimeout(function () {
+      crowd.syntax.validate();
+    });
   },
   positioningJSONSchema: function (schema, positionedSchema) {
     var mergedSchema = $.extend(true, {}, schema);
@@ -1642,7 +1691,79 @@ var CrowdEditorUml = {
     return mergedSchema;
   },
   initSyntaxValidator: function (crowd) {
-    //todo
+    crowd.syntax.events = ['type', 'name', 'uri', 'attributes', 'methods', 'properties', 'direction', 'inheritChild', 'subtype', 'covering'];
+
+    crowd.syntax.errors = {
+      'class-disconnected': { value: 'class-disconnected', text: 'Class can not be disconnected of the diagram.' },
+      'inheritance-disconnected': { value: 'inheritance-disconnected', text: 'Inheritance needs at least one parent class and child class connected.' },
+      'inheritance-parent-exceed': { value: 'inheritance-parent-exceed', text: 'Inheritance can not have more than one parent class connected.' },
+      'link-disconnected': { value: 'link-disconnected', text: 'Link needs to be connected both sides.' },
+      'link-wrong-type-class': { value: 'link-disconnected', text: 'Link needs to connect two class elements.' },
+      'link-wrong-type-inheritance': { value: 'link-disconnected', text: 'Link needs to connect: <ul><li>Two classes.</li><li>One class and one inheritance.</li><li>Two associations.</li></ul>' }
+    };
+
+    crowd.syntax.validateCell = function (cell) {
+      var syntaxErrors = [];
+      // cell.prop('syntax', null);
+      if (cell.isElement()) {
+        if (cell.attributes.parentType == 'class') {
+          if (crowd.workspace.graph.getConnectedLinks(cell).length <= 0)
+            syntaxErrors.push(crowd.syntax.errors['class-disconnected']);
+        } else if ((cell.attributes.parentType == 'inheritance')) {
+          var inheritanceLinks = crowd.workspace.graph.getConnectedLinks(cell)
+          if (!inheritanceLinks) {
+            syntaxErrors.push(crowd.syntax.errors['inheritance-disconnected']);
+          } else {
+            if (
+              !inheritanceLinks.some(function (link) {
+                return (link.attributes.parentType == 'generalization' || link.attributes.parentType == 'implementation') && !link.attributes.inheritChild
+              }) ||
+              !inheritanceLinks.some(function (link) {
+                return (link.attributes.parentType == 'generalization' || link.attributes.parentType == 'implementation') && link.attributes.inheritChild
+              })
+            ) {
+              syntaxErrors.push(crowd.syntax.errors['inheritance-disconnected']);
+            } else if (
+              inheritanceLinks.filter(function (link) {
+                return (link.attributes.parentType == 'generalization' || link.attributes.parentType == 'implementation') && !link.attributes.inheritChild
+              }).length > 1
+            ) {
+              syntaxErrors.push(crowd.syntax.errors['inheritance-parent-exceed']);
+            }
+          }
+        }
+      } else if (cell.isLink()) {
+        var linkSource = cell.getSourceCell();
+        var linkTarget = cell.getTargetCell();
+        if (!linkSource || !linkTarget) {
+          syntaxErrors.push(crowd.syntax.errors['link-disconnected']);
+        } else {
+          if (cell.attributes.parentType == 'association' || cell.attributes.parentType == 'aggregation' || cell.attributes.parentType == 'composition') {
+            if (linkSource.attributes.parentType != 'class' || linkTarget.attributes.parentType != 'class') {
+              syntaxErrors.push(crowd.syntax.errors['link-wrong-type-class']);
+            }
+          } else if (cell.attributes.parentType == 'generalization' || cell.attributes.parentType == 'implementation') {
+            if (!(linkSource.attributes.parentType == 'class' && linkTarget.attributes.parentType == 'class') &&
+              !(linkSource.attributes.parentType == 'class' && linkTarget.attributes.parentType == 'inheritance') &&
+              !(linkTarget.attributes.parentType == 'class' && linkSource.attributes.parentType == 'inheritance') &&
+              !(linkTarget.attributes.parentType == 'association' && linkSource.attributes.parentType == 'association')) {
+              syntaxErrors.push(crowd.syntax.errors['link-wrong-type-inheritance']);
+            }
+          }
+        }
+      }
+      if (syntaxErrors.length)
+        cell.prop('syntax', { title: 'Syntax Errors', contents: syntaxErrors });
+      else
+        cell.prop('syntax', null);
+    }
+
+    crowd.syntax.validate = function () {
+      crowd.workspace.graph.getCells().forEach(function (cell) {
+        cell.prop('syntax', null);
+        crowd.syntax.validateCell(cell);
+      });
+    }
   },
   initReasoningValidator: function (crowd) {
     //todo

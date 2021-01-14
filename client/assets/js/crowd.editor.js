@@ -2994,25 +2994,27 @@ CrowdEditor.prototype.initInspector = function () {
         });
         break;
       case 'list':
-        for (var i = 0; i < propertyValue.length; i++) {
-          self.inspector.addAttribute($.extend({}, attribute.template, {
-            container: attribute.elementID,
-            property: attribute.property + (attribute.index !== '' ? '/' + attribute.index : ''),
-            index: i,
-            canRemove: true
-          }));
+        if (propertyValue) {
+          for (var i = 0; i < propertyValue.length; i++) {
+            self.inspector.addAttribute($.extend({}, attribute.template, {
+              container: attribute.elementID,
+              property: attribute.property + (attribute.index !== '' ? '/' + attribute.index : ''),
+              index: i,
+              canRemove: true
+            }));
+          }
+          $('#crowd-inspector-content-add-' + attribute.elementID + '-' + self.id).on('click', function () {
+            // self.inspector.addAttribute($.extend({}, attribute.template, {
+            //   container: attribute.elementID,
+            //   property: attribute.property + (attribute.index !== '' ? '/' + attribute.index : ''),
+            //   index: self.inspector.model.prop(attribute.property).length,
+            //   canRemove: true
+            // }));
+            self.inspector.model.prop(attribute.property + '/' + self.inspector.model.prop(attribute.property).length, (attribute.default ? attribute.default : ''));
+            self.inspector.loadContent();
+            $(".tooltip").tooltip('hide');
+          });
         }
-        $('#crowd-inspector-content-add-' + attribute.elementID + '-' + self.id).on('click', function () {
-          // self.inspector.addAttribute($.extend({}, attribute.template, {
-          //   container: attribute.elementID,
-          //   property: attribute.property + (attribute.index !== '' ? '/' + attribute.index : ''),
-          //   index: self.inspector.model.prop(attribute.property).length,
-          //   canRemove: true
-          // }));
-          self.inspector.model.prop(attribute.property + '/' + self.inspector.model.prop(attribute.property).length, (attribute.default ? attribute.default : ''));
-          self.inspector.loadContent();
-          $(".tooltip").tooltip('hide');
-        });
         break;
       case 'text': default:
         $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id).val(propertyValue);
@@ -3055,6 +3057,18 @@ CrowdEditor.prototype.initInspector = function () {
 
   self.inspector.loadContent = function () {
     if (self.inspector.model) {
+      //get focused element and their caret position
+      if ($(document.activeElement).prop('tagName') == 'TEXTAREA' ||
+        ($(document.activeElement).prop('tagName') == 'INPUT' && $(document.activeElement).prop('type') == 'text')) {
+        self.inspector.lastFocus = {
+          elem: $(document.activeElement).attr('id'),
+          caret: {
+            start: document.activeElement.selectionStart,
+            end: document.activeElement.selectionEnd
+          }
+        };
+      }
+
       //toggle the content on
       self.inspector.toggleContent(true);
 
@@ -3068,6 +3082,15 @@ CrowdEditor.prototype.initInspector = function () {
 
       //call initialization of inspector for the specific conceptual model
       self.config.conceptualModel.initInspector(self);
+
+      if (self.inspector.lastFocus && $("#" + self.inspector.lastFocus.elem)[0]) {
+        //set focus on last element if it exist
+        $("#" + self.inspector.lastFocus.elem).focus();
+        //set caret in the last position
+        setSelectionRange($("#" + self.inspector.lastFocus.elem)[0], self.inspector.lastFocus.caret.start, self.inspector.lastFocus.caret.end);
+        //reset last focus
+        self.inspector.lastFocus = null;
+      }
     }
   }
 
@@ -3270,10 +3293,30 @@ CrowdEditor.prototype.initSyntaxValidator = function () {
 
   //initialize syntax validator objects
   self.syntax = {};
-  self.syntax.validate = {};
+  self.syntax.events = [];
 
   //call initialization of syntax validator for the specific conceptual model
   self.config.conceptualModel.initSyntaxValidator(self);
+
+  if (self.syntax.validateCell) {
+    //call validation on connect or disconnect elements
+    self.workspace.paper.on('link:connect link:disconnect', function (linkView, evt, cellDisconnected) {
+      console.log(linkView, cellDisconnected);
+      self.syntax.validateCell(linkView.model);
+      self.syntax.validateCell(cellDisconnected.model);
+    });
+
+    //call validation on add cells, remove cells or every specific event configured
+    self.workspace.graph.on('add remove ' + $.map(self.syntax.events, function (e) { return 'change:' + e }).join(' '), function (cell) {
+      self.syntax.validateCell(cell);
+      if (cell.isLink()) {
+        var sourceCell = self.workspace.graph.getCell(cell.attributes.source.id);
+        var targetCell = self.workspace.graph.getCell(cell.attributes.target.id);
+        if (sourceCell) self.syntax.validateCell(sourceCell);
+        if (targetCell) self.syntax.validateCell(targetCell);
+      }
+    });
+  }
 }
 
 CrowdEditor.prototype.initReasoningValidator = function () {

@@ -109,11 +109,19 @@ function toURI(str) {
 }
 
 function fromURI(str) {
-  return str != null ? capitalize(getURIFragment(str).split('-').join(' ')) : str;
+  return str != null ? infixCapsReplace(capitalizeOnlyFirstLetter(getURIFragment(str).split('-').join(' '))) : str;
 }
 
 function capitalize(str) {
   return str.toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+}
+
+function capitalizeOnlyFirstLetter(str) {
+  return str.split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+}
+
+function infixCapsReplace(str) {
+  return str.replace(/([a-z])_?([A-Z])/g, '$1 $2');
 }
 
 function toInfixCaps(str) {
@@ -122,6 +130,10 @@ function toInfixCaps(str) {
 
 function lowerFirstLetter(str) {
   return str.charAt(0).toLowerCase() + str.slice(1);
+}
+
+function upperFirstLetter(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 function removeSpaces(str) {
@@ -221,4 +233,22 @@ function medianPoint(centerElement, aroundElements) {
   }
 
   return mediumPosition;
+}
+
+function setSelectionRange(input, selectionStart, selectionEnd) {
+  if (input.setSelectionRange) {
+    input.focus();
+    input.setSelectionRange(selectionStart, selectionEnd);
+  }
+  else if (input.createTextRange) {
+    var range = input.createTextRange();
+    range.collapse(true);
+    range.moveEnd('character', selectionEnd);
+    range.moveStart('character', selectionStart);
+    range.select();
+  }
+}
+
+function setCaretToPos(input, pos) {
+  setSelectionRange(input, pos, pos);
 }
