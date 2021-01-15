@@ -1333,12 +1333,12 @@ var CrowdEditorOrm = {
 
         if (link.attributes.type == 'connector') {
           if (linkSourceType == 'entity') {
-            // link.attributes.attrs.line.sourceMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.targetMarker);
+            link.attributes.attrs.line.sourceMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.sourceMarker);
             // link.attributes.attrs.line.targetMarker = {};
             link.attributes.attrs.line.sourceMarker.display = newMandatory ? 'unset' : 'none'
             link.attributes.attrs.line.targetMarker.display = 'none';
           } else {
-            // link.attributes.attrs.line.targetMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.targetMarker);
+            link.attributes.attrs.line.targetMarker = $.extend(true, {}, crowd.palette.links[link.attributes.type].attributes.attrs.line.targetMarker);
             // link.attributes.attrs.line.sourceMarker = {};
             link.attributes.attrs.line.sourceMarker.display = 'none'
             link.attributes.attrs.line.targetMarker.display = newMandatory ? 'unset' : 'none';
