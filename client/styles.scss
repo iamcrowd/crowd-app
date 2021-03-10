@@ -16,6 +16,12 @@ body {
   float: right !important;
 }
 
+//break text on modals
+.modal-body {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
 // .navbar {
 //   z-index: 2;  //fix crowd tools dropdown menu bug
 // }

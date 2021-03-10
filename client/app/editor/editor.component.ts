@@ -3,6 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { DiagramService } from '../services/diagram.service';
 import { Diagram } from '../shared/models/diagram.model';
+import { NamespaceService } from '../services/namespace.service';
+import { Namespace } from '../shared/models/namespace.model';
 import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 
@@ -31,6 +33,10 @@ export class EditorComponent implements OnInit {
   diagram: Diagram;
   //diagrams loaded from db
   diagrams: Diagram[] = [];
+  //actual edited namespace
+  namespace: Namespace;
+  //namespaces loaded from db
+  namespaces: Namespace[] = [];
   //for actual editing file (that is saved on cloud)
   file: object;
   //for preloaded schema
@@ -41,10 +47,10 @@ export class EditorComponent implements OnInit {
   setEvent: any;
   //array of youtube video tutorials urls
   tutorials: any = [
-     { title: 'First Steps', id: 'yfkr0LOHrL4' },
-     { title: 'Modelling', id: 'YJG-X3sMWII' },
-     { title: 'Translate', id: 'ldaZnWkvBhU' },
-     { title: 'Reasoning', id: '6IXJPw2KPuA' },
+    { title: 'First Steps', id: 'yfkr0LOHrL4' },
+    { title: 'Modelling', id: 'YJG-X3sMWII' },
+    { title: 'Translate', id: 'ldaZnWkvBhU' },
+    { title: 'Reasoning', id: '6IXJPw2KPuA' },
   ];
 
   //diagram save form
@@ -57,10 +63,32 @@ export class EditorComponent implements OnInit {
   ]);
   // diagramMeta = new FormControl('checked');
 
+  //namespace save form
+  namespaceForm: FormGroup;
+  namespaceUrl = new FormControl('', [
+    Validators.required,
+    Validators.maxLength(1000),
+    Validators.pattern('(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?#?')
+  ]);
+  namespacePrefix = new FormControl('', [
+    Validators.required,
+    Validators.minLength(1),
+    Validators.maxLength(100),
+    Validators.pattern('[a-zA-Z0-9_-\\s]*')
+  ]);
+  namespaceDescription = new FormControl('', [
+    Validators.maxLength(1000)
+  ]);
+  namespaceFile = new FormControl('', [
+    Validators.maxLength(1000),
+    Validators.pattern('(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?#?')
+  ]);
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private diagramService: DiagramService,
+    private namespaceService: NamespaceService,
     private formBuilder: FormBuilder,
     public auth: AuthService
   ) {
@@ -163,6 +191,9 @@ export class EditorComponent implements OnInit {
         tutorials: {
           modal: 'crowd-tools-tutorials-modal'
         },
+        namespaces: {
+          get: 'getNamespaces'
+        },
         user: this.auth?.currentUser?._id
       },
       preloadedSchema: this.schema,
@@ -172,6 +203,13 @@ export class EditorComponent implements OnInit {
     this.diagramForm = this.formBuilder.group({
       diagramName: this.diagramName,
       // diagramMeta: this.diagramMeta
+    });
+
+    this.namespaceForm = this.formBuilder.group({
+      namespaceUrl: this.namespaceUrl,
+      namespacePrefix: this.namespacePrefix,
+      namespaceDescription: this.namespaceDescription,
+      namespaceFile: this.namespaceFile
     });
   }
 
@@ -309,7 +347,7 @@ export class EditorComponent implements OnInit {
   deleteDiagram(): void {
     this.diagramService.deleteDiagram(this.diagram).subscribe(
       data => {
-        iziToast.success({ message: 'Diagram deleted successfully.' });
+        iziToast.success({ message: '<b>Diagram deleted successfully.</b>' });
         if (this.diagram._id == this.editor?.config?.actualFile?._id) {
           this.editor.config.actualFile = null;
           this.editor.tools.file.updateActualFile({ parent: false });
@@ -327,6 +365,98 @@ export class EditorComponent implements OnInit {
     this.diagramForm.reset();
     this.diagram = null;
     this.setEvent = null;
+  }
+
+  getNamespaces(): void {
+    this.namespaceService.getNamespaces().subscribe(
+      data => {
+        this.namespaces = data;
+
+        $('#crowd-tools-namespaces-modal').modal();
+        setTimeout(() => $('[data-toggle="tooltip"]').tooltip({ html: true }));
+      },
+      error => console.log(error)
+    );
+  }
+
+  setNamespace(action: string, namespace?: Namespace): void {
+    this.namespace = namespace;
+    if (this.namespace) {
+      this.namespaceUrl.setValue(this.namespace.url);
+      this.namespacePrefix.setValue(this.namespace.prefix);
+      this.namespaceDescription.setValue(this.namespace.description);
+      this.namespaceFile.setValue(this.namespace.file);
+    }
+
+    switch (action) {
+      case 'add':
+        $('#crowd-tools-namespace-modal').modal();
+        break;
+      case 'edit':
+        $('#crowd-tools-namespace-modal').modal();
+        break;
+      case 'delete':
+        $('#crowd-tools-namespace-delete-modal').modal();
+        break;
+    }
+
+    $('[data-toggle="tooltip"]').tooltip('hide');
+  }
+
+  saveNamespace(): void {
+    this.namespaceForm.markAllAsTouched();
+    if (this.namespaceForm.valid) {
+      if (!this.namespace) {
+        this.namespace = {
+          url: this.namespaceUrl.value,
+          prefix: this.namespacePrefix.value,
+          description: this.namespaceDescription.value,
+          file: this.namespaceFile.value
+        };
+        this.namespaceService.addNamespace(this.namespace).subscribe(
+          res => {
+            iziToast.success({ message: '<b>Namespace saved successfully.</b>' });
+            this.getNamespaces();
+            this.resetNamespaceForm();
+            $('#crowd-tools-namespace-modal').modal('hide');
+          },
+          error => iziToast.error({ message: 'There was an error when try to save the Namespace.' })
+        );
+      } else {
+        this.namespace.url = this.namespaceUrl.value;
+        this.namespace.prefix = this.namespacePrefix.value;
+        this.namespace.description = this.namespaceDescription.value;
+        this.namespace.file = this.namespaceFile.value;
+        this.namespaceService.editNamespace(this.namespace).subscribe(
+          res => {
+            iziToast.success({ message: '<b>Namespace saved successfully.</b>' });
+            this.getNamespaces();
+            this.resetNamespaceForm();
+            $('#crowd-tools-namespace-modal').modal('hide');
+          },
+          error => iziToast.error({ message: 'There was an error when try to save the Namespace.' })
+        );
+      }
+    } else {
+      iziToast.error({ message: 'Some values are invalid, please check.' });
+    }
+  }
+
+  deleteNamespace(): void {
+    this.namespaceService.deleteNamespace(this.namespace).subscribe(
+      data => {
+        iziToast.success({ message: '<b>Namespace deleted successfully.</b>' });
+
+        this.getNamespaces();
+        this.resetNamespaceForm();
+      },
+      error => console.log(error),
+    );
+  }
+
+  resetNamespaceForm(): void {
+    this.namespaceForm.reset();
+    this.namespace = null;
   }
 
   setValid(control): object {

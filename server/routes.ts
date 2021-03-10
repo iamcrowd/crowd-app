@@ -2,11 +2,13 @@ import * as express from 'express';
 
 import UserCtrl from './controllers/user';
 import DiagramCtrl from './controllers/diagram';
+import NamespaceCtrl from './controllers/namespace';
 
 function setRoutes(app): void {
   const router = express.Router();
   const userCtrl = new UserCtrl();
   const diagramCtrl = new DiagramCtrl();
+  const namespaceCtrl = new NamespaceCtrl();
 
   // Users
   router.route('/login').post(userCtrl.login);
@@ -24,6 +26,14 @@ function setRoutes(app): void {
   router.route('/diagram/:id').get(diagramCtrl.get);
   router.route('/diagram/:id').put(diagramCtrl.update);
   router.route('/diagram/:id').delete(diagramCtrl.delete);
+
+  //Namespaces
+  router.route('/namespaces').get(namespaceCtrl.getAll);
+  router.route('/namespaces/count').get(namespaceCtrl.count);
+  router.route('/namespace').post(namespaceCtrl.insert);
+  router.route('/namespace/:id').get(namespaceCtrl.get);
+  router.route('/namespace/:id').put(namespaceCtrl.update);
+  router.route('/namespace/:id').delete(namespaceCtrl.delete);
 
   // Apply the routes to our application with the prefix /api
   app.use('/api', router);

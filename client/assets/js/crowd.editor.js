@@ -341,6 +341,7 @@ CrowdEditor.prototype.initTools = function () {
   self.tools.collapseClasses = {};
 
   self.tools.tools = {};
+  self.tools.namespaces = {};
   self.tools.reasoning = {};
   self.tools.undoReasoning = {};
   self.tools.clearReasoning = {};
@@ -1466,6 +1467,38 @@ CrowdEditor.prototype.initTools = function () {
         <ul class="dropdown-menu" aria-labelledby="crowd-tools-tools-dropdown-' + self.id + '"></ul> \
       </div>'
     );
+
+    var loggedInMessage = 'You must be logged in to use this functionality';
+
+    //namespaces tool
+    self.tools.namespaces.init = function () {
+      //append dom for namespaces tool
+      $('[aria-labelledby="crowd-tools-tools-dropdown-' + self.id + '"]').append(
+        '<li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" \
+          title="' + (!self.config?.ngFiles?.user ? loggedInMessage : 'Edit your collection of namespaces for use it on URIs') + '" > \
+            <button class="dropdown-item" id="crowd-tools-namespaces-input-' + self.id + '" \
+            ' + (!self.config?.ngFiles?.user ? 'style="pointer-events: none;" disabled' : '') + '> \
+            <i class="fa fa-fw fa-hashtag"></i> Namespaces</button> \
+          </span> \
+        </li> \
+        <li class="dropdown-divider"></li>'
+      );
+
+      //event handler when click namespaces
+      $('#crowd-tools-namespaces-input-' + self.id).on('click', function () {
+        if (self.config?.ngFiles?.namespaces?.modal) {
+          $('#' + self.config.ngFiles.namespaces.modal).modal('show'); //not used
+        }
+        if (self.config?.ngFiles?.namespaces?.get) {
+          self.config.ngComponent[self.config.ngFiles.namespaces.get]();
+        }
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.namespaces.init();
 
     //reasoning tool
     self.tools.reasoning.init = function () {

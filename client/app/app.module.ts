@@ -7,6 +7,7 @@ import { SharedModule } from './shared/shared.module';
 // Services
 import { UserService } from './services/user.service';
 import { DiagramService } from './services/diagram.service';
+import { NamespaceService } from './services/namespace.service';
 import { AuthService } from './services/auth.service';
 import { AuthGuardLogin } from './services/auth-guard-login.service';
 import { AuthGuardAdmin } from './services/auth-guard-admin.service';
@@ -57,6 +58,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     LeaveGuardEditor,
     UserService,
     DiagramService,
+    NamespaceService,
     CookieService,
     {
       provide: HTTP_INTERCEPTORS,
