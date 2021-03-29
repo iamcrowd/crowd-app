@@ -1713,7 +1713,7 @@ var CrowdEditorUml = {
       // cell.prop('syntax', null);
       if (cell.isElement()) {
         if (cell.attributes.parentType == 'class') {
-          if (crowd.workspace.graph.getConnectedLinks(cell).length <= 0)
+          if (crowd.workspace.graph.getConnectedLinks(cell).length <= 0 && crowd.workspace.graph.getCells().length > 1)
             syntaxErrors.push(crowd.syntax.errors['class-disconnected']);
         } else if ((cell.attributes.parentType == 'inheritance')) {
           var inheritanceLinks = crowd.workspace.graph.getConnectedLinks(cell)
