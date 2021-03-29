@@ -2883,6 +2883,22 @@ CrowdEditor.prototype.initInspector = function () {
           );
         });
         break;
+      case 'select':
+        dom = $('<span class="row"> \
+          <div class="col"> \
+            <div class="form-group"> \
+              ' + (attribute.label ? '<label>' + attribute.label + '</label><br>' : '') + '\
+              <select class="custom-select custom-select-sm" id="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '"> \
+              </select> \
+            </div> \
+          </div> \
+        </span>');
+        attribute.values.forEach(function (value) {
+          $(dom).find('select').append(
+            '<option value="' + value.value + '">' + value.label + '</option>'
+          );
+        });
+        break;
       case 'alert':
         dom = $((attribute.label ? '<label>' + attribute.label + '</label>' : '') + ' \
           <div class="alert alert-' + (attribute.color ? attribute.color : 'dark') + '" role="alert" \
@@ -3066,12 +3082,14 @@ CrowdEditor.prototype.initInspector = function () {
 
         //get the dom input value according to the attribute type
         switch (attribute.type) {
-
           case 'boolean':
             newPropertyValue = $(this).prop('checked');
             break;
           case 'multiple':
             newPropertyValue = $('[name="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '"]:checked').val();
+            break;
+          case 'select':
+            newPropertyValue = $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id + ' option:selected').val();
             break;
           case 'text': default:
             newPropertyValue = $(this).val();

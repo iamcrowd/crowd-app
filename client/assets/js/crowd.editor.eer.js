@@ -134,7 +134,7 @@ var CrowdEditorEer = {
       type: 'keyAttribute',
       name: 'Key\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#key-attribute',
-      datatype: 'Integer',
+      datatype: 'string',
       attrs: {
         text: {
           fill: '#000000',
@@ -158,7 +158,7 @@ var CrowdEditorEer = {
       type: 'weakKeyAttribute',
       name: 'Weak Key\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#weak-key-attribute',
-      datatype: 'Integer',
+      datatype: 'string',
       attrs: {
         text: {
           fill: '#000000',
@@ -182,7 +182,7 @@ var CrowdEditorEer = {
       type: 'attribute',
       name: 'Attribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#attribute',
-      datatype: 'Integer',
+      datatype: 'string',
       attrs: {
         text: {
           fill: '#000000',
@@ -206,7 +206,7 @@ var CrowdEditorEer = {
       type: 'multivaluedAttribute',
       name: 'Multivalued\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#multivalued-attribute',
-      datatype: 'Integer',
+      datatype: 'string',
       attrs: {
         text: {
           fill: '#000000',
@@ -259,7 +259,7 @@ var CrowdEditorEer = {
       type: 'derivedAttribute',
       name: 'Derived\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#derived-attribute',
-      datatype: 'Integer',
+      datatype: 'string',
       attrs: {
         text: {
           fill: '#000000',
@@ -1025,11 +1025,26 @@ var CrowdEditorEer = {
           ]
         });
         crowd.inspector.addAttribute({
-          label: 'Datatype', property: 'datatype', type: 'multiple',
+          label: 'Datatype', property: 'datatype', type: 'select',
           values: [
-            { label: 'Integer', value: 'Integer' },
-            { label: 'String', value: 'String' },
-            { label: 'Boolean', value: 'Boolean' },
+            { label: 'integer', value: 'integer' },
+            { label: 'string', value: 'string' },
+            { label: 'boolean', value: 'boolean' },
+            { label: 'decimal', value: 'decimal' },
+            { label: 'float', value: 'float' },
+            { label: 'double', value: 'double' },
+            { label: 'duration', value: 'duration' },
+            { label: 'dateTime', value: 'dateTime' },
+            { label: 'time', value: 'time' },
+            { label: 'date', value: 'date' },
+            { label: 'gYear', value: 'gYear' },
+            { label: 'gYearMonth', value: 'gYearMonth' },
+            { label: 'gYearMonthDay', value: 'gYearMonthDay' },
+            { label: 'gDay', value: 'gDay' },
+            { label: 'gMonth', value: 'gMonth' },
+            { label: 'hexBinary', value: 'hexBinary' },
+            { label: 'base64Binary', value: 'base64Binary' },
+            { label: 'anyURI', value: 'anyURI' }
           ]
         });
         break;
@@ -1101,13 +1116,8 @@ var CrowdEditorEer = {
     }
 
     //mapping of datatypes to the requested format of schema
-    var datatypeMap = {
-      'String': 'http://www.w3.org/2001/XMLSchema#string',
-      'Integer': 'http://www.w3.org/2001/XMLSchema#integer',
-      'Boolean': 'http://www.w3.org/2001/XMLSchema#boolean',
-      // 'String': 'String',
-      // 'Integer': 'Integer',
-      // 'Boolean': 'Boolean',
+    var datatypeMap = function (datatype) {
+      return 'http://www.w3.org/2001/XMLSchema#' + datatype;
     }
 
     //mapping of cardinalities to the requested format of schema
@@ -1151,7 +1161,7 @@ var CrowdEditorEer = {
             uri: element.attributes.uri,
             name: element.attributes.uri,
             type: attributeTypeMap[element.attributes.type],
-            datatype: datatypeMap[element.attributes.datatype],
+            datatype: datatypeMap(element.attributes.datatype),
             position: element.attributes.position,
             size: element.attributes.size,
           });
@@ -1277,13 +1287,9 @@ var CrowdEditorEer = {
     }
 
     //mapping of datatypes to the editor format
-    var datatypeMap = {
-      'String': 'String',
-      'Integer': 'Integer',
-      'Boolean': 'Boolean',
-      'http://www.w3.org/2001/XMLSchema#string': 'String',
-      'http://www.w3.org/2001/XMLSchema#integer': 'Integer',
-      'http://www.w3.org/2001/XMLSchema#boolean': 'Boolean',
+    var datatypeMap = function (datatype) {
+      return datatype.split("http://www.w3.org/2001/XMLSchema#")[1] != null
+        ? datatype.split("http://www.w3.org/2001/XMLSchema#")[1] : datatype;
     }
 
     //mapping of cardinalities to the editor format
@@ -1333,7 +1339,7 @@ var CrowdEditorEer = {
                 attributesObj[attribute.name].prop('uri', value);
                 break;
               case 'datatype':
-                attributesObj[attribute.name].prop(attr, datatypeMap[value]);
+                attributesObj[attribute.name].prop(attr, datatypeMap(value));
                 break;
               case 'position': case 'size':
                 attributesObj[attribute.name].prop(attr, value)

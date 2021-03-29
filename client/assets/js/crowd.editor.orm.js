@@ -825,7 +825,7 @@ var CrowdEditorOrm = {
       type: 'value',
       label: 'Value',
       name: 'Value',
-      datatype: 'Integer',
+      datatype: 'string',
       uri: 'http://crowd.fi.uncoma.edu.ar#value'
     });
 
@@ -1508,11 +1508,26 @@ var CrowdEditorOrm = {
     switch (crowd.inspector.model.attributes.type) {
       case 'value':
         crowd.inspector.addAttribute({
-          label: 'Datatype', property: 'datatype', type: 'multiple',
+          label: 'Datatype', property: 'datatype', type: 'select',
           values: [
-            { label: 'Integer', value: 'Integer' },
-            { label: 'String', value: 'String' },
-            { label: 'Boolean', value: 'Boolean' },
+            { label: 'integer', value: 'integer' },
+            { label: 'string', value: 'string' },
+            { label: 'boolean', value: 'boolean' },
+            { label: 'decimal', value: 'decimal' },
+            { label: 'float', value: 'float' },
+            { label: 'double', value: 'double' },
+            { label: 'duration', value: 'duration' },
+            { label: 'dateTime', value: 'dateTime' },
+            { label: 'time', value: 'time' },
+            { label: 'date', value: 'date' },
+            { label: 'gYear', value: 'gYear' },
+            { label: 'gYearMonth', value: 'gYearMonth' },
+            { label: 'gYearMonthDay', value: 'gYearMonthDay' },
+            { label: 'gDay', value: 'gDay' },
+            { label: 'gMonth', value: 'gMonth' },
+            { label: 'hexBinary', value: 'hexBinary' },
+            { label: 'base64Binary', value: 'base64Binary' },
+            { label: 'anyURI', value: 'anyURI' }
           ]
         });
         break;
@@ -1656,13 +1671,8 @@ var CrowdEditorOrm = {
     }
 
     //mapping of datatypes to the requested format of schema
-    var datatypeMap = {
-      'String': 'http://www.w3.org/2001/XMLSchema#string',
-      'Integer': 'http://www.w3.org/2001/XMLSchema#integer',
-      'Boolean': 'http://www.w3.org/2001/XMLSchema#boolean',
-      // 'String': 'String',
-      // 'Integer': 'Integer',
-      // 'Boolean': 'Boolean',
+    var datatypeMap = function (datatype) {
+      return 'http://www.w3.org/2001/XMLSchema#' + datatype;
     }
 
     //mapping of role types to the requested format of schema
@@ -1711,7 +1721,7 @@ var CrowdEditorOrm = {
             name: element.attributes.uri,
             ref: element.attributes.refUri,
             type: entityTypeMap[element.attributes.type],
-            ...element.attributes.type == 'value' ? { datatype: datatypeMap[element.attributes.datatype] } : {},
+            ...element.attributes.type == 'value' ? { datatype: datatypeMap(element.attributes.datatype) } : {},
             position: element.attributes.position,
             size: element.attributes.size,
           });
@@ -1955,13 +1965,9 @@ var CrowdEditorOrm = {
     }
 
     //mapping of datatypes to the editor format
-    var datatypeMap = {
-      'String': 'String',
-      'Integer': 'Integer',
-      'Boolean': 'Boolean',
-      'http://www.w3.org/2001/XMLSchema#string': 'String',
-      'http://www.w3.org/2001/XMLSchema#integer': 'Integer',
-      'http://www.w3.org/2001/XMLSchema#boolean': 'Boolean',
+    var datatypeMap = function (datatype) {
+      return datatype.split("http://www.w3.org/2001/XMLSchema#")[1] != null
+        ? datatype.split("http://www.w3.org/2001/XMLSchema#")[1] : datatype;
     }
 
     var constraintTypeInheritanceMap = function (constraints) {
@@ -1999,7 +2005,7 @@ var CrowdEditorOrm = {
                 entitiesObj[entity.name].prop('uri', value);
                 break;
               case 'datatype':
-                entitiesObj[entity.name].prop('datatype', datatypeMap[value]);
+                entitiesObj[entity.name].prop('datatype', datatypeMap(value));
                 break;
               case 'position': case 'size':
                 entitiesObj[entity.name].prop(attribute, value)
