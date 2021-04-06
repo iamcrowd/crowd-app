@@ -57,6 +57,12 @@ CrowdEditor.prototype.init = function () {
   //append dom element that contains the tools and the workspace
   $('#crowd-container-' + self.id).append('<div class="crowd-container-middle" id="crowd-container-middle-' + self.id + '"></div>');
 
+  //append dom element that contain the toggle for the side panel
+  $('#crowd-container-' + self.id).append(
+    '<div class="crowd-container-side-toggle" id="crowd-container-side-toggle-' + self.id + '" \
+    data-toggle="tooltip" data-placement="left" title="Toggle Side Panel"></div>'
+  );
+
   //append dom element that contains the inspector and map
   $('#crowd-container-' + self.id).append('<div class="crowd-container-side" id="crowd-container-side-' + self.id + '"></div>');
 
@@ -71,6 +77,25 @@ CrowdEditor.prototype.init = function () {
 
   //append dom element for map
   $('#crowd-container-side-' + self.id).append('<div class="crowd-map" id="crowd-map-' + self.id + '"></div>');
+
+  //append dom element for side toggle icon
+  $('#crowd-container-side-toggle-' + self.id).append('<i id="crowd-container-side-toggle-icon-' + self.id + '" class="fa fa-chevron-right"></i>');
+
+  var toggleSide = false;
+  $('#crowd-container-side-toggle-' + self.id).on('click', function () {
+    if (!toggleSide) {
+      $('#crowd-container-side-' + self.id).css('width', '0px');
+      $('#crowd-container-side-toggle-' + self.id).css('right', '0px');
+      $('#crowd-container-middle-' + self.id).css('right', '15px');
+    } else {
+      $('#crowd-container-side-' + self.id).css('width', '300px');
+      $('#crowd-container-side-toggle-' + self.id).css('right', '300px');
+      $('#crowd-container-middle-' + self.id).css('right', '315px');
+    }
+    $('#crowd-container-side-toggle-icon-' + self.id).toggleClass('fa-chevron-right');
+    $('#crowd-container-side-toggle-icon-' + self.id).toggleClass('fa-chevron-left');
+    toggleSide = !toggleSide;
+  });
 
   self.initPalette();
   self.initWorkspace();

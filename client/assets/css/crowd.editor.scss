@@ -40,10 +40,34 @@ $alt-accent-dark: #262a2e;
   position: absolute;
   top: 0px;
   left: 200px;
-  right: 300px;
+  right: 315px;
   height: inherit !important;
   display: flex;
   flex-direction: column;
+  transition: all 1s;
+}
+
+.crowd-container-side-toggle {
+  position: absolute;
+  top: 0px;
+  right: 300px;
+  width: 15px;
+  height: inherit !important;
+  // display: flex;
+  grid-template-rows: auto 15px;
+  transition: right 1s;
+  border-top: 0.1px solid black;
+  border-left: 0.1px solid black;
+}
+
+.crowd-container-side-toggle:hover {
+  background-color: $alt-accent-dark !important;
+}
+
+.crowd-container-side-toggle i {
+  position: absolute;
+  top: 50%;
+  left: calc(50% - 5px);
 }
 
 .crowd-container-side {
@@ -54,6 +78,7 @@ $alt-accent-dark: #262a2e;
   height: inherit !important;
   // display: flex;
   grid-template-rows: auto 300px;
+  transition: all 1s;
 }
 
 .crowd-tools {
