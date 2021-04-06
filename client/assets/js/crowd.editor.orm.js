@@ -295,9 +295,9 @@ var CrowdEditorOrm = {
               magnet: 'passive',
               port: 'left',
               y: 15,
-              x: 5,
-              width: 40,
-              height: 25,
+              x: 15,
+              width: 30,
+              height: 20,
               strokeWidth: 2,
               stroke: original_strokeFill_role,
               // rx: original_rx_role,
@@ -309,8 +309,8 @@ var CrowdEditorOrm = {
               port: 'right',
               y: 15,
               x: 45,
-              width: 40,
-              height: 25,
+              width: 30,
+              height: 20,
               strokeWidth: 2,
               stroke: original_strokeFill_role,
               // rx: original_rx_role,
@@ -323,7 +323,7 @@ var CrowdEditorOrm = {
               y: 15,
               x: 44,
               width: 2,
-              height: 25,
+              height: 20,
               strokeWidth: 2,
               stroke: original_strokeFill_role,
               // rx: original_rx_role,
@@ -332,7 +332,7 @@ var CrowdEditorOrm = {
             },
             uniqueLeft: {
               // display: 'none',
-              x1: 10,
+              x1: 20,
               y1: 10,
               x2: 40,
               y2: 10,
@@ -344,7 +344,7 @@ var CrowdEditorOrm = {
               // display: 'none',
               x1: 50,
               y1: 10,
-              x2: 80,
+              x2: 70,
               y2: 10,
               strokeWidth: 3,
               stroke: '#8A0868',
@@ -906,13 +906,13 @@ var CrowdEditorOrm = {
             display: 'none',
             stroke: '#A000A0',
             fill: '#A000A0',
-            d: 'M 16 0 a 8 8 0 1 0 0 1'
+            d: 'M 12 0 a 6 6 0 1 0 0 1'
           },
           targetMarker: {
             display: 'none',
             stroke: '#A000A0',
             fill: '#A000A0',
-            d: 'M 16 0 a 8 8 0 1 0 0 1'
+            d: 'M 12 0 a 6 6 0 1 0 0 1'
           }
         }
       }
@@ -1357,22 +1357,26 @@ var CrowdEditorOrm = {
           var sourceElem = link.getSourceElement()
           if (sourceElem?.attributes?.type == 'roleBinary') {
             let newCard = sourceElem.prop('cardinality/' + link.attributes.source.port);
-            let hasFreq = !crowd.orm.uniqOne(newCard) && !crowd.orm.uniqMany(newCard);
-            // if (!hasFreq) {
-            newCard = (newMandatory ? (hasFreq && newCard.split('..')[0] != '0' ? newCard.split('..')[0] : '1') : '0') + '..' + newCard.split('..')[1];
-            sourceElem.prop('cardinality/' + link.attributes.source.port, newCard);
-            // }
+            if (newCard) {
+              let hasFreq = !crowd.orm.uniqOne(newCard) && !crowd.orm.uniqMany(newCard);
+              // if (!hasFreq) {
+              newCard = (newMandatory ? (hasFreq && newCard.split('..')[0] != '0' ? newCard.split('..')[0] : '1') : '0') + '..' + newCard.split('..')[1];
+              sourceElem.prop('cardinality/' + link.attributes.source.port, newCard);
+              // }
+            }
           }
 
           //change target role binary cardinality by the mandatory value
           var targetElem = link.getTargetElement()
           if (targetElem?.attributes?.type == 'roleBinary') {
             let newCard = targetElem.prop('cardinality/' + link.attributes.target.port);
-            let hasFreq = !crowd.orm.uniqOne(newCard) && !crowd.orm.uniqMany(newCard);
-            // if (!hasFreq) {
-            newCard = (newMandatory ? (hasFreq && newCard.split('..')[0] != '0' ? newCard.split('..')[0] : '1') : '0') + '..' + newCard.split('..')[1];
-            targetElem.prop('cardinality/' + link.attributes.target.port, newCard);
-            // }
+            if (newCard) {
+              let hasFreq = !crowd.orm.uniqOne(newCard) && !crowd.orm.uniqMany(newCard);
+              // if (!hasFreq) {
+              newCard = (newMandatory ? (hasFreq && newCard.split('..')[0] != '0' ? newCard.split('..')[0] : '1') : '0') + '..' + newCard.split('..')[1];
+              targetElem.prop('cardinality/' + link.attributes.target.port, newCard);
+              // }
+            }
           }
         }
 
@@ -2036,7 +2040,7 @@ var CrowdEditorOrm = {
           $.each(relationship, function (attribute, value) {
             switch (attribute) {
               case 'name':
-                rolesObj[relationship.name].prop('uri', value);
+                rolesObj[relationship.name].prop('uri', isURI(value) ? value : "http://crowd.fi.uncoma.edu.ar#" + value);
                 break;
               case 'inverseReading':
                 rolesObj[relationship.name].prop('read', value ? 'left' : 'right');

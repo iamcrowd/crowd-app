@@ -103,6 +103,10 @@ function getBrowser() {
   return sBrowser;
 }
 
+function isURI(str) {
+  return str.indexOf('http://') != -1
+}
+
 function toURI(str) {
   // return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); }).replace(' ', '');
   return str.split(' ').join('-').split('\n').join('-').toLowerCase();
