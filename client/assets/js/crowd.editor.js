@@ -339,6 +339,7 @@ CrowdEditor.prototype.initTools = function () {
   self.tools.view = {};
   self.tools.viewScrollbar = {};
   self.tools.collapseClasses = {};
+  self.tools.toggleRolesAssoc = {};
 
   self.tools.tools = {};
   self.tools.namespaces = {};
@@ -1445,6 +1446,79 @@ CrowdEditor.prototype.initTools = function () {
       });
     }
     self.tools.collapseClasses.init();
+
+    //toggle roles associations tool
+    self.tools.toggleRolesAssoc.init = function () {
+      self.tools.toggleRolesAssoc.toggleRoles = false;
+      self.tools.toggleRolesAssoc.toggleAssoc = true;
+
+      self.tools.toggleRolesAssoc.updateLabels = function () {
+        if (self.config.conceptualModel.name != 'uml') {
+          self.workspace.graph.getLinks().forEach(function (link) {
+            link.prop('showRoles', self.tools.toggleRolesAssoc.toggleRoles);
+            link.prop('showAssoc', self.tools.toggleRolesAssoc.toggleAssoc);
+          });
+        }
+      }
+
+      self.workspace.graph.on('add remove', function () {
+        if (self.config.conceptualModel.name != 'uml') {
+          self.tools.toggleRolesAssoc.updateLabels();
+        }
+      });
+
+      //append dom for toggle roles associations tool
+      $('[aria-labelledby="crowd-tools-view-dropdown-' + self.id + '"]').append(
+        '<li class="dropdown-divider"></li> \
+        <li class="dropdown"> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" \
+          title="' + (self.config.conceptualModel.name != 'uml' ? 'This functionality is only available for UML model' : '') + '"> \
+            <button class="dropdown-item dropdown-toggle ' + (self.config.conceptualModel.name != 'uml' ? "disabled" : "") + '" \
+            type="button" id="crowd-tools-toggle-roles-assoc-dropdown-' + self.id + '" \
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+              <i class="fa fa-fw fa-arrows-h"></i> Toggle Roles/Assoc. \
+            </button> \
+          </span> \
+          ' + (self.config.conceptualModel.name == 'uml' ?
+          '<ul class="dropdown-menu" aria-labelledby="crowd-tools-toggle-roles-assoc-dropdown-' + self.id + '" \
+          style="width: 220px"> \
+            <li><button class="dropdown-item" id="crowd-tools-toggle-roles-assoc-input-roles-' + self.id + '"> \
+            Toggle Roles \
+            <i class="fa fa-fw fa-toggle-off pull-right" id="crowd-tools-toggle-roles-assoc-check-roles-' + self.id + '"></i> \
+            </button> \
+            </li> \
+            <li><button class="dropdown-item" id="crowd-tools-toggle-roles-assoc-input-assoc-' + self.id + '"> \
+            Toggle Associations \
+            <i class="fa fa-fw fa-toggle-on pull-right" id="crowd-tools-toggle-roles-assoc-check-assoc-' + self.id + '"></i> \
+            </button> \
+            </li> \
+          </ul>' : '') + ' \
+        </li>'
+      );
+
+      //event handler when click toggle roles
+      $('#crowd-tools-toggle-roles-assoc-input-roles-' + self.id).on('click', function () {
+        self.tools.toggleRolesAssoc.toggleRoles = !self.tools.toggleRolesAssoc.toggleRoles;
+        $('#crowd-tools-toggle-roles-assoc-check-roles-' + self.id).toggleClass('fa-toggle-on');
+        $('#crowd-tools-toggle-roles-assoc-check-roles-' + self.id).toggleClass('fa-toggle-off');
+        self.tools.toggleRolesAssoc.updateLabels();
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+
+      //event handler when click toggle associations
+      $('#crowd-tools-toggle-roles-assoc-input-assoc-' + self.id).on('click', function () {
+        self.tools.toggleRolesAssoc.toggleAssoc = !self.tools.toggleRolesAssoc.toggleAssoc;
+        $('#crowd-tools-toggle-roles-assoc-check-assoc-' + self.id).toggleClass('fa-toggle-on');
+        $('#crowd-tools-toggle-roles-assoc-check-assoc-' + self.id).toggleClass('fa-toggle-off');
+        self.tools.toggleRolesAssoc.updateLabels();
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.toggleRolesAssoc.init();
 
     //activate bootstrap nested dropdowns for view tools
     $('#crowd-tools-view-btn-' + self.id).bootnavbar({});

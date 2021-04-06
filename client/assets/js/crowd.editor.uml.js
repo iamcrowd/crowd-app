@@ -180,7 +180,9 @@ var CrowdEditorUml = {
             d: 'M 20 10 0 0 20 -10 Z'
           }
         }
-      }
+      },
+      showAssoc: true,
+      showRoles: false
     });
 
     //add joint uml aggregation to palette links
@@ -209,6 +211,8 @@ var CrowdEditorUml = {
           }
         }
       },
+      showAssoc: true,
+      showRoles: false
     });
 
     //add joint uml composition to palette links
@@ -237,6 +241,8 @@ var CrowdEditorUml = {
           }
         }
       },
+      showAssoc: true,
+      showRoles: false
     });
 
     //add joint uml generalization to palette links
@@ -919,7 +925,7 @@ var CrowdEditorUml = {
     });
 
     //event when the links cardinality or roles change
-    crowd.workspace.graph.on('change:cardinality change:roles change:uri', function (link, newCardinalityRoleUri) {
+    crowd.workspace.graph.on('change:cardinality change:roles change:uri change:showAssoc change:showRoles', function (link, newCardinalityRoleUri) {
       // console.log('change:cardinality', { link, newCardinality });
 
       if (link.isLink() && newCardinalityRoleUri != null) {
@@ -955,32 +961,32 @@ var CrowdEditorUml = {
               offset: 20
             }
           },
-          // {
-          //   attrs: {
-          //     text: {
-          //       text: (newRoles.source != "null" ? fromURI(newRoles.source) : null),
-          //     }
-          //   },
-          //   position: {
-          //     distance: 0.25,
-          //     offset: -20
-          //   }
-          // },
-          // {
-          //   attrs: {
-          //     text: {
-          //       text: (newRoles.target != "null" ? fromURI(newRoles.target) : null),
-          //     }
-          //   },
-          //   position: {
-          //     distance: 0.75,
-          //     offset: -20
-          //   }
-          // },
+          {
+            attrs: {
+              text: {
+                text: (link.attributes.showRoles && newRoles.source != "null" ? fromURI(newRoles.source) : null),
+              }
+            },
+            position: {
+              distance: 0.25,
+              offset: -20
+            }
+          },
+          {
+            attrs: {
+              text: {
+                text: (link.attributes.showRoles && newRoles.target != "null" ? fromURI(newRoles.target) : null),
+              }
+            },
+            position: {
+              distance: 0.75,
+              offset: -20
+            }
+          },
           ...link.attributes.type != 'generalization' && link.attributes.type != 'implementation' ? [{
             attrs: {
               text: {
-                text: fromURI(newUri),
+                text: link.attributes.showAssoc ? fromURI(newUri) : null,
               }
             },
             position: {
