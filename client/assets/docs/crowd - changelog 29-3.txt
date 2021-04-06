@@ -1,0 +1,11 @@
+New datatypes on UML, EER and ORM2 attributes:
+-The list includes all the datatypes in XMLSchema.
+-They can be selected by a combobox now.
+Added namespaces list per user.
+-A new submenu of Tools is added.
+-It allows add, edit and delete namespaces saved on user account.
+-This namespaces will be recomended in URI's inputs in the future.
+New syntax validator for UML diagrams.
+-It mark classes and connectors in orange when they have a syntax error.
+-The detail of the syntax error on the element is shown on inspector.
+Infix caps on URIs are showed correctly on the diagram now.

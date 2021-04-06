@@ -290,6 +290,7 @@ var CrowdEditorEer = {
       total: false,
       inherit: false,
       inheritChild: false,
+      attribute: false,
       uri: 'http://crowd.fi.uncoma.edu.ar#role',
       attrs: {
         line: {
@@ -322,6 +323,7 @@ var CrowdEditorEer = {
       total: true,
       inherit: false,
       inheritChild: false,
+      attribute: false,
       uri: 'http://crowd.fi.uncoma.edu.ar#role',
       attrs: {
         line: {
@@ -486,7 +488,8 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '1..1'
+          cardinality: '1..1',
+          attribute: true
         }
       }
     });
@@ -506,7 +509,8 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '1..1'
+          cardinality: '1..1',
+          attribute: true
         }
       }
     });
@@ -526,7 +530,8 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '1..1'
+          cardinality: '1..1',
+          attribute: true
         }
       }
     });
@@ -546,7 +551,8 @@ var CrowdEditorEer = {
       link: {
         type: 'connector',
         props: {
-          cardinality: '1..1'
+          cardinality: '1..1',
+          attribute: true
         }
       }
     });
@@ -772,7 +778,7 @@ var CrowdEditorEer = {
           link.getSourceElement()?.attributes?.parentType == 'attribute' ||
           link.getTargetElement()?.attributes?.parentType == 'attribute'
 
-        if (!link.attributes.inherit) {
+        if (!link.attributes.inherit && !link.attributes.attribute) {
           // if (newCardinality == "null" || newCardinality == null) {
           //   link.prop('cardinality', '0..1');
           // }
@@ -798,7 +804,7 @@ var CrowdEditorEer = {
             {
               attrs: {
                 text: {
-                  text: fromURI(newUri),
+                  text: (!isConnectedAttribute || newCardinality != '1..1' ? fromURI(newUri) : null),
                 }
               },
               position: {
@@ -845,6 +851,14 @@ var CrowdEditorEer = {
           link.prop('inheritChild', false);
         // crowd.inspector.loadContent();
       }
+    });
+
+    //event when the link is attribute change
+    crowd.workspace.graph.on('change:attribute', function (link, newAttribute) {
+      // console.log('change:attribute', { link, newAttribute });
+
+      crowd.inspector.loadContent();
+      // }
     });
 
     //event when the link inherit change
@@ -971,7 +985,7 @@ var CrowdEditorEer = {
       case 'weakKeyAttribute':
       case 'derivedAttribute':
       case 'connector':
-        if (crowd.inspector.model.attributes.type != 'connector' || !crowd.inspector.model.attributes.inherit)
+        if (crowd.inspector.model.attributes.type != 'connector' || (!crowd.inspector.model.attributes.inherit && !crowd.inspector.model.attributes.attribute))
           crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
         break;
     }
@@ -1067,8 +1081,9 @@ var CrowdEditorEer = {
     //add the cardinality and total attribute for connector
     switch (crowd.inspector.model.attributes.type) {
       case 'connector':
-        crowd.inspector.addAttribute({ label: 'Is for Inheritance?', property: 'inherit', type: 'boolean', map: { true: true, false: false } });
-        if (!crowd.inspector.model.attributes.inherit) {
+        if (!crowd.inspector.model.attributes.attribute && !crowd.inspector.model.attributes.inherit) {
+          crowd.inspector.addAttribute({ label: 'Is for Attribute?', property: 'attribute', type: 'boolean', map: { true: true, false: false } });
+          crowd.inspector.addAttribute({ label: 'Is for Inheritance?', property: 'inherit', type: 'boolean', map: { true: true, false: false } });
           // crowd.inspector.addAttribute({
           //   label: 'Cardinality', property: 'cardinality', type: 'multiple',
           //   values: [
@@ -1081,12 +1096,15 @@ var CrowdEditorEer = {
           crowd.inspector.addAttribute({
             label: 'Cardinality', property: 'cardinality', type: 'text', placeholder: 'example: 0..1'
           });
-        } else {
-          crowd.inspector.addAttribute({ label: 'Is Child Connector?', property: 'inheritChild', type: 'boolean', map: { true: true, false: false } });
-          crowd.inspector.addAttribute({ label: 'Is Total?', property: 'total', type: 'boolean', map: { true: true, false: false } });
+        } else if (crowd.inspector.model.attributes.attribute) {
+          crowd.inspector.addAttribute({ label: 'Is for Attribute?', property: 'attribute', type: 'boolean', map: { true: true, false: false } });
+        } else if (crowd.inspector.model.attributes.inherit) {
+          crowd.inspector.addAttribute({ label: 'Is for Inheritance?', property: 'inherit', type: 'boolean', map: { true: true, false: false } });
+          if (crowd.inspector.model.attributes.inherit) {
+            crowd.inspector.addAttribute({ label: 'Is Child Connector?', property: 'inheritChild', type: 'boolean', map: { true: true, false: false } });
+            crowd.inspector.addAttribute({ label: 'Is Total?', property: 'total', type: 'boolean', map: { true: true, false: false } });
+          }
         }
-        // if (!crowd.inspector.model.attributes.inherit || !crowd.inspector.model.attributes.inheritChild) {
-        // }
         break;
     }
 
@@ -1186,8 +1204,8 @@ var CrowdEditorEer = {
                 attributeLink.entity = connectedEntity.attributes.uri;
               else if (connectedEntity.attributes.parentType == 'relationship')
                 attributeLink.relationship = connectedEntity.attributes.uri;
-              attributeLink.uri = link.attributes.uri;
-              attributeLink.name = link.attributes.uri;
+              // attributeLink.uri = link.attributes.uri;
+              // attributeLink.name = link.attributes.uri;
             }
           });
           jsonSchema.links.push(attributeLink);
@@ -1445,6 +1463,7 @@ var CrowdEditorEer = {
               linksObj[link.uri].target(link.entity ? entitiesObj[link.entity] : relationshipsObj[link.relationship]);
               crowd.workspace.graph.addCell(linksObj[link.uri]);
               linksObj[link.uri].prop('cardinality', '1..1');
+              linksObj[link.uri].prop('attribute', true);
               break;
           }
         });
