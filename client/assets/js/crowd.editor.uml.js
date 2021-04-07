@@ -926,7 +926,7 @@ var CrowdEditorUml = {
 
     //event when the links cardinality or roles change
     crowd.workspace.graph.on('change:cardinality change:roles change:uri change:showAssoc change:showRoles', function (link, newCardinalityRoleUri) {
-      // console.log('change:cardinality', { link, newCardinality });
+      // console.log('change:cardinality change:roles change:uri change:showAssoc change:showRoles', { link, newCardinalityRoleUri });
 
       if (link.isLink() && newCardinalityRoleUri != null) {
         var newCardinality = link.attributes.cardinality;

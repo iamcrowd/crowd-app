@@ -1478,7 +1478,7 @@ CrowdEditor.prototype.initTools = function () {
       self.tools.toggleRolesAssoc.toggleAssoc = true;
 
       self.tools.toggleRolesAssoc.updateLabels = function () {
-        if (self.config.conceptualModel.name != 'uml') {
+        if (self.config.conceptualModel.name == 'uml') {
           self.workspace.graph.getLinks().forEach(function (link) {
             link.prop('showRoles', self.tools.toggleRolesAssoc.toggleRoles);
             link.prop('showAssoc', self.tools.toggleRolesAssoc.toggleAssoc);
@@ -1487,37 +1487,36 @@ CrowdEditor.prototype.initTools = function () {
       }
 
       self.workspace.graph.on('add remove', function () {
-        if (self.config.conceptualModel.name != 'uml') {
+        if (self.config.conceptualModel.name == 'uml') {
           self.tools.toggleRolesAssoc.updateLabels();
         }
       });
 
       //append dom for toggle roles associations tool
       $('[aria-labelledby="crowd-tools-view-dropdown-' + self.id + '"]').append(
-        '<li class="dropdown-divider"></li> \
-        <li class="dropdown"> \
-          <span class="d-block" data-toggle="tooltip" data-placement="right" \
-          title="' + (self.config.conceptualModel.name != 'uml' ? 'This functionality is only available for UML model' : '') + '"> \
-            <button class="dropdown-item dropdown-toggle ' + (self.config.conceptualModel.name != 'uml' ? "disabled" : "") + '" \
-            type="button" id="crowd-tools-toggle-roles-assoc-dropdown-' + self.id + '" \
-            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
-              <i class="fa fa-fw fa-arrows-h"></i> Toggle Roles/Assoc. \
-            </button> \
-          </span> \
-          ' + (self.config.conceptualModel.name == 'uml' ?
+        '<li class="dropdown"> \
+          <span class="d-block" \
+          ' + (self.config.conceptualModel.name != 'uml' ? 'data-toggle="tooltip" data-placement="right" title="This functionality is only available for UML model"' : '') + '> \
+              <button class="dropdown-item ' + (self.config.conceptualModel.name != 'uml' ? "disabled" : "dropdown-toggle") + '" \
+              type="button" id="crowd-tools-toggle-roles-assoc-dropdown-' + self.id + '" \
+              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+                <i class="fa fa-fw fa-arrows-h"></i> Toggle Roles/Assoc. \
+              </button> \
+            ' + (self.config.conceptualModel.name == 'uml' ?
           '<ul class="dropdown-menu" aria-labelledby="crowd-tools-toggle-roles-assoc-dropdown-' + self.id + '" \
-          style="width: 220px"> \
-            <li><button class="dropdown-item" id="crowd-tools-toggle-roles-assoc-input-roles-' + self.id + '"> \
-            Toggle Roles \
-            <i class="fa fa-fw fa-toggle-off pull-right" id="crowd-tools-toggle-roles-assoc-check-roles-' + self.id + '"></i> \
-            </button> \
-            </li> \
-            <li><button class="dropdown-item" id="crowd-tools-toggle-roles-assoc-input-assoc-' + self.id + '"> \
-            Toggle Associations \
-            <i class="fa fa-fw fa-toggle-on pull-right" id="crowd-tools-toggle-roles-assoc-check-assoc-' + self.id + '"></i> \
-            </button> \
-            </li> \
-          </ul>' : '') + ' \
+            style="width: 220px"> \
+              <li><button class="dropdown-item" id="crowd-tools-toggle-roles-assoc-input-roles-' + self.id + '"> \
+              Toggle Roles \
+              <i class="fa fa-fw fa-toggle-off pull-right" id="crowd-tools-toggle-roles-assoc-check-roles-' + self.id + '"></i> \
+              </button> \
+              </li> \
+              <li><button class="dropdown-item" id="crowd-tools-toggle-roles-assoc-input-assoc-' + self.id + '"> \
+              Toggle Associations \
+              <i class="fa fa-fw fa-toggle-on pull-right" id="crowd-tools-toggle-roles-assoc-check-assoc-' + self.id + '"></i> \
+              </button> \
+              </li> \
+            </ul>' : '') + ' \
+          </span> \
         </li>'
       );
 
