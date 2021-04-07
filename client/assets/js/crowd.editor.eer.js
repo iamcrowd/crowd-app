@@ -1187,7 +1187,7 @@ var CrowdEditorEer = {
           var attributeLink = {
             id: element.cid,
             // uri: element.attributes.uri,
-            // name: element.attributes.uri,
+            name: element.attributes.uri,
             entity: null,
             attribute: element.attributes.uri,
             type: 'attribute'
