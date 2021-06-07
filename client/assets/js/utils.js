@@ -104,7 +104,7 @@ function getBrowser() {
 }
 
 function isURI(str) {
-  return str.indexOf('http://') != -1
+  return str.indexOf('http://') == 0;
 }
 
 function toURI(str) {
@@ -113,7 +113,65 @@ function toURI(str) {
 }
 
 function fromURI(str) {
-  return str != null ? infixCapsReplace(capitalizeOnlyFirstLetter(getURIFragment(str).split('-').join(' '))) : str;
+  if (str != null && str.indexOf("NORMAL\/FRESH") != -1) {
+    try {
+      return fromURIFresh(getURIFragment(str).substring(1, str.length - 1))
+    } catch (e) {
+      return str != null ? infixCapsReplace(capitalizeOnlyFirstLetter(getURIFragment(str).split('-').join(' '))) : str;
+    }
+  } else {
+    return str != null ? infixCapsReplace(capitalizeOnlyFirstLetter(getURIFragment(str).split('-').join(' '))) : str;
+  }
+}
+
+function fromURIFresh(str) {
+  // console.log("TERM", str);
+  if (isURI(str.substring(1, str.length - 1))) {
+    return fromURI(str.substring(1, str.length - 1));
+  } else {
+    var start = str.indexOf("(");
+    var end = str.lastIndexOf(")");
+    var symbol = str.substring(0, start);
+    // console.log("SYMBOL", symbol);
+    var elements = str.substring(start + 1, end).split(' ');
+    elements = combineElements(elements);
+    // console.log("ELEMENTS", elements);
+    var beutySymbol;
+    var infix = true;
+    switch (symbol) {
+      case 'ObjectIntersectionOf':
+        beutySymbol = '∩';
+        break;
+      case 'ObjectUnionOf':
+        beutySymbol = '∪';
+        break;
+      case 'ObjectSomeValuesFrom':
+        beutySymbol = '∃';
+        infix = false;
+        break;
+    }
+    elements = elements.map(function (element) { return fromURIFresh(element) });
+
+    return infix ? elements.join(' ' + beutySymbol + ' ') : beutySymbol + ' ' + elements[0] + '.(' + elements[1] + ')';
+  }
+}
+
+function combineElements(elements) {
+  var terms = [];
+  var openTerm = false;
+  elements.forEach(function (element) {
+    if (!openTerm) terms.push(element)
+    else terms[terms.length - 1] += ' ' + element
+    if (hasSymbol(element)) openTerm = true;
+    if (element.indexOf(')') != -1) openTerm = false;
+  });
+  return terms;
+}
+
+function hasSymbol(str) {
+  return str.indexOf("ObjectIntersectionOf") != -1 ||
+    str.indexOf("ObjectSomeValuesFrom") != -1 ||
+    str.indexOf("ObjectUnionOf") != -1;
 }
 
 function capitalize(str) {
@@ -147,9 +205,13 @@ function removeSpaces(str) {
 function getURIFragment(uri) {
   var separator = '/';
   if (uri.indexOf('#') != -1) separator = '#';
-
-  var fragment = uri.split(separator);
-  fragment = fragment[fragment.length - 1];
+  var fragment
+  if (separator == '/') {
+    fragment = uri.split(separator);
+    fragment = fragment[fragment.length - 1];
+  } else {
+    fragment = uri.substring(uri.indexOf(separator) + 1, uri.length);
+  }
   return fragment;
 }
 

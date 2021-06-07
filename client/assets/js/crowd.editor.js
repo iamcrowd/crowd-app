@@ -1123,16 +1123,73 @@ CrowdEditor.prototype.initTools = function () {
                   !cell.getSourceCell()?.isLink() && !cell.getTargetCell()?.isLink()));
           });
 
-          //layout the selected cells clones
-          joint.layout.DirectedGraph.layout(filteredGraph,
-            {
-              marginX: 100,
-              marginY: 100
+          console.log('filteredGraph', filteredGraph);
+
+          //initiate data for d3
+          var elements = [];
+
+          //set nodes for cytoscape graph
+          filteredGraph.forEach((cell) => {
+            if (cell.isElement()) {
+              elements.push({
+                data: {
+                  id: cell.id,
+                }
+              });
             }
-          );
+          });
+
+          //set links for cytoscape graph base on nodes indexes
+          filteredGraph.forEach((cell) => {
+            if (cell.isLink()) {
+              // var sourceCell = data.nodes.findIndex((element) => {
+              //   return element.name == cell.getSourceCell().id;
+              // });
+              // var targetCell = data.nodes.findIndex((element) => {
+              //   return element.name == cell.getTargetCell().id;
+              // });
+              elements.push({
+                data: {
+                  id: cell.id,
+                  source: cell.getSourceCell().id,
+                  target: cell.getTargetCell().id
+                }
+              });
+            }
+          });
+
+          var cyGraph = self.config.cytoscape({
+            elements: elements
+          });
+
+          var cyLayout = cyGraph.layout({
+            name: 'cola',
+            animate: false,
+            // padding: 1000,
+            // avoidOverlap: true,
+            edgeLength: 200,
+            maxSimulationTime: 10000,
+            fit: true,
+            // nodeSpacing: function (node) { return 40; },
+            boundingBox: { x1: 0, y1: 0, w: 2000, h: 2000 },
+            stop: () => {
+              // console.log("layouted graph", cyGraph.json().elements);
+              cyGraph.json().elements?.nodes?.forEach((node) => {
+                var graphNode = filteredGraph.find((cell) => {
+                  return cell.id == node.data?.id;
+                });
+                if (node.position?.x != null && node.position?.y != null)
+                  graphNode.set('position', { x: node.position.x, y: node.position.y });
+              });
+            }
+          });
+
+          cyLayout.run();
+
+          console.log("cytoscape", cyGraph, cyLayout);
 
           setTimeout(() => {
-            self.workspace.fitPaper();
+            // self.workspace.fitPaper();
             self.workspace.paper.hideTools();
             self.inspector.hideInformation();
           });

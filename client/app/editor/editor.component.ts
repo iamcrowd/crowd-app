@@ -7,6 +7,8 @@ import { NamespaceService } from '../services/namespace.service';
 import { Namespace } from '../shared/models/namespace.model';
 import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import cytoscape from 'cytoscape';
+import cola from 'cytoscape-cola';
 
 declare var iziToast;
 declare var $;
@@ -125,6 +127,8 @@ export class EditorComponent implements OnInit {
       orm: { width: 120, height: 70, columns: 1 },
     }
 
+    cytoscape.use(cola);
+
     this.editor = new CrowdEditor({
       selector: 'editor',
       availableConceptualModels: availableConceptualModels,
@@ -196,6 +200,7 @@ export class EditorComponent implements OnInit {
         },
         user: this.auth?.currentUser?._id
       },
+      cytoscape: cytoscape,
       preloadedSchema: this.schema,
       actualFile: this.file
     });
