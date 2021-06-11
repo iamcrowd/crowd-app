@@ -3231,6 +3231,16 @@ CrowdEditor.prototype.initInspector = function () {
         break;
       case 'text': default:
         $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id).val(propertyValue);
+        //restrict space characters on text field
+        $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id).on({
+          keydown: function (e) {
+            if (e.which === 32)
+              return false;
+          },
+          change: function () {
+            this.value = this.value.replace(/\s/g, "");
+          }
+        });
         break;
     }
   }
