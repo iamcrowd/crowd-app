@@ -905,6 +905,8 @@ var CrowdEditorUml = {
         //check if the newType is valid with that direction
         if (newType != 'association' && (!link.prop('direction') || link.prop('direction') == 'null'))
           link.attributes.direction = 'target';
+        else
+          link.attributes.direction = null;
 
         if (newType == 'generalization' || newType == 'implementation') {
           // link.attributes.cardinality = { source: null, target: null };
@@ -1208,10 +1210,10 @@ var CrowdEditorUml = {
           label: 'Type', property: 'type', type: 'multiple',
           values: [
             { label: 'Association', value: 'association' },
-            { label: 'Aggregation', value: 'aggregation' },
-            { label: 'Composition', value: 'composition' },
+            // { label: 'Aggregation', value: 'aggregation' },
+            // { label: 'Composition', value: 'composition' },
             { label: 'Generalization', value: 'generalization' },
-            { label: 'Implementation', value: 'implementation' },
+            // { label: 'Implementation', value: 'implementation' },
           ]
         });
         break;
@@ -1228,14 +1230,14 @@ var CrowdEditorUml = {
     //add the nullable direction attribute if are association links
     switch (crowd.inspector.model.attributes.type) {
       case 'association':
-        crowd.inspector.addAttribute({
-          label: 'Direction', property: 'direction', type: 'multiple',
-          values: [
-            { label: 'None', value: null },
-            { label: 'Source', value: 'source' },
-            { label: 'Target', value: 'target' },
-          ]
-        });
+        // crowd.inspector.addAttribute({
+        //   label: 'Direction', property: 'direction', type: 'multiple',
+        //   values: [
+        //     { label: 'None', value: null },
+        //     { label: 'Source', value: 'source' },
+        //     { label: 'Target', value: 'target' },
+        //   ]
+        // });
         break;
     }
 
