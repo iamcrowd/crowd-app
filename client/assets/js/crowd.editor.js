@@ -1666,6 +1666,7 @@ CrowdEditor.prototype.initTools = function () {
             self.config.reasoningApi.request({
               kf: schema,
               reasoner: options?.reasoner,
+              strategy: options?.strategy,
               cards: options?.cards,
               success: (res) => {
                 // if (options?.success) options?.success({ reasoning: res })
@@ -1719,6 +1720,13 @@ CrowdEditor.prototype.initTools = function () {
                     <option>Konclude</option> \
                   </select> \
                 </div> \
+                <div class="form-group"> \
+                  <label for="">Encoding</label> \
+                  <select class="form-control custom-select my-1 mr-sm-2" id="crowd-tools-reasoning-options-encoding-' + self.id + '"> \
+                    <option>ALCQI</option> \
+                    <option>ALCIN</option> \
+                  </select> \
+                </div> \
                 <div class="form-group form-check"> \
                   <input type="checkbox" class="form-check-input" id="crowd-tools-reasoning-options-cards-' + self.id + '"> \
                   <label class="form-check-label" for="crowd-tools-reasoning-options-cards-' + self.id + '">Reason Cardinalities</label><br> \
@@ -1747,6 +1755,7 @@ CrowdEditor.prototype.initTools = function () {
       $('#crowd-tools-reasoning-call-' + self.id).on('click', function () {
         self.tools.reasoning.callReasoning({
           reasoner: $('#crowd-tools-reasoning-options-reasoner-' + self.id + ' option:selected').val(),
+          strategy: $('#crowd-tools-reasoning-options-encoding-' + self.id + ' option:selected').val().toLowerCase(),
           cards: $('#crowd-tools-reasoning-options-cards-' + self.id).is(":checked"),
           success: function (response) {
             //call reasoning interpretation for the specific conceptual model

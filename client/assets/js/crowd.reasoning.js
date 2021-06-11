@@ -12,6 +12,7 @@ CrowdReasoning.prototype.request = function (req) {
     url: self.config.url,
     data: {
       json: JSON.stringify(req.kf),
+      strategy: req.strategy,
       reasoner: req.reasoner,
       cards: req.cards,
     },
