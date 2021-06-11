@@ -1113,7 +1113,10 @@ CrowdEditor.prototype.initTools = function () {
     //layout tool
     self.tools.layout.init = function () {
       //this function do the automatic layout (it's used in external functionalities)
-      self.tools.layout.doLayout = function () {
+      self.tools.layout.doLayout = function (options) {
+        if (!options) options = {};
+        if (!options.algorithm) options.algorithm = 'cola';
+
         setTimeout(() => {
           //get only cells that have not "layoutIgnore" property
           var filteredGraph = self.workspace.graph.getSubgraph(self.workspace.graph.getCells()).filter(function (cell) {
@@ -1162,16 +1165,51 @@ CrowdEditor.prototype.initTools = function () {
             elements: elements
           });
 
+          console.log('Layout with ' + options.algorithm + ' algorithm');
+
+          //set specific settings for each algorithm
+          layoutSettings = {
+            grid: {
+              spacingFactor: 1
+            },
+            circle: {},
+            concentric: {
+              minNodeSpacing: 200
+            },
+            breadthfirst: {},
+            // elk: {},
+            klay: {
+              klay: {
+                inLayerSpacingFactor: 2.0,
+                spacing: 100
+              }
+            },
+            // euler: {},
+            cose: {},
+            cola: {
+              edgeLength: 200,
+              maxSimulationTime: 10000,
+              // avoidOverlap: true,
+              // nodeSpacing: function (node) { return 40; },
+            }
+          }
+
+          //adjust width and height of bounding box relative to the amount of elements
+          var size = 250;
+          var amountElements = self.workspace.graph.getElements().length;
+          if (amountElements <= 20) size = 500
+          else if (amountElements <= 30) size = 750
+          else size = 1000
+
+          var w = size;
+          var h = size;
+
           var cyLayout = cyGraph.layout({
-            name: 'cola',
-            animate: false,
-            // padding: 1000,
-            // avoidOverlap: true,
-            edgeLength: 200,
-            maxSimulationTime: 10000,
+            name: options.algorithm,
             fit: true,
-            // nodeSpacing: function (node) { return 40; },
-            boundingBox: { x1: 0, y1: 0, w: 2000, h: 2000 },
+            animate: false,
+            boundingBox: { x1: 0, y1: 0, w: w, h: h },
+            ...layoutSettings[options.algorithm],
             stop: () => {
               // console.log("layouted graph", cyGraph.json().elements);
               cyGraph.json().elements?.nodes?.forEach((node) => {
@@ -1179,7 +1217,7 @@ CrowdEditor.prototype.initTools = function () {
                   return cell.id == node.data?.id;
                 });
                 if (node.position?.x != null && node.position?.y != null)
-                  graphNode.set('position', { x: node.position.x, y: node.position.y });
+                  graphNode.set('position', { x: node.position.x + 100, y: node.position.y + 100 });
               });
             }
           });
@@ -1189,7 +1227,7 @@ CrowdEditor.prototype.initTools = function () {
           console.log("cytoscape", cyGraph, cyLayout);
 
           setTimeout(() => {
-            // self.workspace.fitPaper();
+            self.workspace.fitPaper();
             self.workspace.paper.hideTools();
             self.inspector.hideInformation();
           });
@@ -1205,17 +1243,32 @@ CrowdEditor.prototype.initTools = function () {
       //   </div>'
       // );
       $('[aria-labelledby="crowd-tools-edit-dropdown-' + self.id + '"]').append(
-        '<li> \
-          <span class="d-block" data-toggle="tooltip" data-placement="right" title="Automatic Layout"> \
-            <button class="dropdown-item" id="crowd-tools-layout-input-' + self.id + '"> \
-            <i class="fa fa-fw fa-sitemap"></i> Layout</button> \
-          </span> \
+        // '<li> \
+        //   <span class="d-block" data-toggle="tooltip" data-placement="right" title="Automatic Layout"> \
+        //     <button class="dropdown-item" id="crowd-tools-layout-input-' + self.id + '"> \
+        //     <i class="fa fa-fw fa-sitemap"></i> Layout</button> \
+        //   </span> \
+        // </li>'
+        '<li class="dropdown"> \
+          <button class="dropdown-item dropdown-toggle" type="button" id="crowd-tools-layout-dropdown-' + self.id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> \
+            <i class="fa fa-fw fa-sitemap"></i> Layout \
+          </button> \
+          <ul class="dropdown-menu" aria-labelledby="crowd-tools-layout-dropdown-' + self.id + '"></ul> \
         </li>'
       );
 
-      //event handler when click layout
-      $('#crowd-tools-layout-input-' + self.id).on('click', function () {
-        self.tools.layout.doLayout();
+      //draw a button for each layout algorithm
+      $.each(['grid', 'circle', 'concentric', 'breadthfirst', 'klay', 'cose', 'cola'], function (index, algorithm) {
+        $('[aria-labelledby="crowd-tools-layout-dropdown-' + self.id + '"]').append(
+          '<button class="dropdown-item" data-algorithm="' + algorithm + '" name="crowd-tools-layout-algorithm-' + self.id + '">' +
+          '<i class="fa fa-fw fa-long-arrow-right"></i> ' + upperFirstLetter(algorithm) + '</button>'
+        );
+      })
+
+      //event handler when click layout algorithm
+      $('[name=crowd-tools-layout-algorithm-' + self.id + ']').on('click', function () {
+        var algorithm = $(this).attr('data-algorithm');
+        self.tools.layout.doLayout({ algorithm: algorithm });
 
         $(".tooltip").tooltip('hide');
         $(this).blur();
@@ -1338,7 +1391,7 @@ CrowdEditor.prototype.initTools = function () {
       })
 
       //event handler when click a translate button
-      $('[name=crowd-tools-translate-schema-' + self.id + "]").on('click', function () {
+      $('[name=crowd-tools-translate-schema-' + self.id + ']').on('click', function () {
         var btn = this;
         event.stopPropagation();
 

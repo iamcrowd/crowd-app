@@ -9,6 +9,7 @@ import { Validators, FormControl, FormGroup, FormBuilder } from '@angular/forms'
 import { AuthService } from '../services/auth.service';
 import cytoscape from 'cytoscape';
 import cola from 'cytoscape-cola';
+import klay from 'cytoscape-klay';
 
 declare var iziToast;
 declare var $;
@@ -128,6 +129,7 @@ export class EditorComponent implements OnInit {
     }
 
     cytoscape.use(cola);
+    cytoscape.use(klay);
 
     this.editor = new CrowdEditor({
       selector: 'editor',

@@ -191,11 +191,11 @@ function toInfixCaps(str) {
 }
 
 function lowerFirstLetter(str) {
-  return str.charAt(0).toLowerCase() + str.slice(1);
+  return str != null ? str.charAt(0).toLowerCase() + str.slice(1) : str;
 }
 
 function upperFirstLetter(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  return str != null ? str.charAt(0).toUpperCase() + str.slice(1) : str;
 }
 
 function removeSpaces(str) {
