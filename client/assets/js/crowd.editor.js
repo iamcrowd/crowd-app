@@ -737,6 +737,7 @@ CrowdEditor.prototype.initTools = function () {
                   from: 'kf',
                   to: self.config.availableConceptualModels[options?.model].name,
                   data: response,
+                  format: options?.format,
                   success: function (response) {
                     if (options?.success) options.success(response);
                     if (options?.finally) options.finally(response);
@@ -757,6 +758,24 @@ CrowdEditor.prototype.initTools = function () {
             hideError: options?.hideError
           });
         }
+      }
+
+      self.tools.export._owlExport = function () {
+        var encoding = $('#crowd-tools-export-options-encoding-' + self.id + ' option:selected').val();
+        $('#crowd-tools-export-options-encoding-' + self.id).prop("disabled", true);
+        $('#crowd-tools-export-options-encoding-loading-' + self.id).show();
+        self.tools.export.exportTo({
+          model: 'owl',
+          format: encoding,
+          success: function (schema) {
+            $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(escapeXML(formatXML(schema)));
+          },
+          finally: function () {
+            $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
+            $('#crowd-tools-export-options-encoding-' + self.id).prop("disabled", false);
+            $('#crowd-tools-export-options-encoding-loading-' + self.id).hide();
+          }
+        });
       }
 
       //append dom for export tool
@@ -801,8 +820,27 @@ CrowdEditor.prototype.initTools = function () {
                   <span aria-hidden="true">&times;</span> \
                 </button> \
               </div> \
-              <div class="modal-body"><pre id="crowd-tools-export-check-schema-modal-pre-' + self.id + '" \
-              style="overflow: hidden; overflow-wrap: break-word; white-space: pre-wrap;"></pre></div> \
+              <div class="modal-body"> \
+              <div id="crowd-tools-export-owl-options-' + self.id + '" style="display: none"> \
+                <div class="row"> \
+                  <div class="form-group col-6"> \
+                    <label class="" for="">Encoding &nbsp; \
+                      <div class="spinner-border spinner-border-sm text-primary" role="status" id="crowd-tools-export-options-encoding-loading-' + self.id + '" style="display: none"> \
+                        <span class="sr-only">Loading...</span> \
+                      </div>\
+                    </label> \
+                    <select class=" form-control custom-select my-1 mr-sm-2" id="crowd-tools-export-options-encoding-' + self.id + '"> \
+                      <option value="owl2-alcin">OWL2 - ALCIN</option> \
+                      <option value="owl2-alcqi">OWL2 - ALCQI</option> \
+                      <option value="owllink-alcin">OLWLink - ALCIN</option> \
+                      <option value="owllink-alcqi">OLWLink - ALCQI</option> \
+                    </select> \
+                  </div>\
+                </div> \
+              </div> \
+              <pre id="crowd-tools-export-check-schema-modal-pre-' + self.id + '" \
+              style="overflow: hidden; overflow-wrap: break-word; white-space: pre-wrap;"></pre> \
+              </div> \
               <div class="modal-footer"> \
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
                 <button class="btn btn-adaptive" data-clipboard-target="#crowd-tools-export-check-schema-modal-pre-' + self.id + '"> \
@@ -818,6 +856,11 @@ CrowdEditor.prototype.initTools = function () {
       //init copy clipboard functionality
       new ClipboardJS('.btn');
 
+      //event on select option of encoding on owl options
+      $('#crowd-tools-export-options-encoding-' + self.id).change(function () {
+        self.tools.export._owlExport();
+      });
+
       //event handler when click export check schema
       $('[name="crowd-tools-export-check-schema-' + self.id + '"]').on('click', function (event) {
         var btn = this;
@@ -826,26 +869,31 @@ CrowdEditor.prototype.initTools = function () {
         var model = $(this).attr('data-model');
         $('#crowd-tools-export-schema-' + self.id).attr('data-model', model);
 
-        var originalBtn = $(btn).html();
-        $(btn).html(originalBtn + ' <i class="loading fa fa-circle-o-notch fa-spin"></i>');
+        if (model != 'owl') {
+          $('#crowd-tools-export-owl-options-' + self.id).hide();
 
-        self.tools.export.exportTo({
-          model: model,
-          success: function (schema) {
-            $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export ' + model.toUpperCase() + ' Schema');
-            if (model == 'owl') {
-              $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(escapeXML(formatXML(schema)));
-            } else {
+          var originalBtn = $(btn).html();
+          $(btn).html(originalBtn + ' <i class="loading fa fa-circle-o-notch fa-spin"></i>');
+
+          self.tools.export.exportTo({
+            model: model,
+            success: function (schema) {
+              $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export ' + model.toUpperCase() + ' Schema');
               $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(JSON.stringify(schema, null, 4));
+              $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
+              // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
+            },
+            finally: function () {
+              $(btn).html(originalBtn);
+              $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
             }
-            $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
-            // copyToClipboard('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre');
-          },
-          finally: function () {
-            $(btn).html(originalBtn);
-            $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
-          }
-        });
+          });
+        } else {
+          $('#crowd-tools-export-owl-options-' + self.id).show();
+          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export ' + model.toUpperCase() + ' Schema');
+          $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
+          self.tools.export._owlExport();
+        }
 
         $(".tooltip").tooltip('hide');
         $(this).blur();

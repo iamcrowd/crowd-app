@@ -9,6 +9,8 @@ CrowdMetamodel.prototype.request = function (req) {
   req.from = req.from == 'kf' ? 'meta' : req.from;
   req.to = req.to == 'kf' ? 'meta' : req.to;
 
+  if (!req.format) req.format = 'owl2-alcqi';
+
   console.log('MetamodelAPI: requesting ' + self.config.url + req.from + 'to' + req.to, req.data);
 
   if (req.to == 'owl') {
@@ -17,7 +19,7 @@ CrowdMetamodel.prototype.request = function (req) {
       url: self.config.owlUrl,
       data: {
         json: JSON.stringify(req.data),
-        format: 'owl2'
+        format: req.format
       },
       success: function (res) {
         console.log('MetamodelAPI: response to ' + self.config.url + req.from + 'to' + req.to, res);
