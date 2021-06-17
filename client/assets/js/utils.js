@@ -113,15 +113,39 @@ function toURI(str) {
 }
 
 function fromURI(str) {
-  if (str != null && str.indexOf("NORMAL\/FRESH") != -1) {
+  if (str != null && str.indexOf("IMPORT") != -1) {
+    try {
+      return fromURIImport(getURIFragment(str), getImportSymbol(str))
+    } catch (e) {
+      return _fromURI(str);
+    }
+  } else if (str != null && str.indexOf("NORMAL\/FRESH") != -1) {
     try {
       return fromURIFresh(getURIFragment(str).substring(1, str.length - 1))
     } catch (e) {
-      return str != null ? infixCapsReplace(capitalizeOnlyFirstLetter(getURIFragment(str).split('-').join(' '))) : str;
+      return _fromURI(str);
     }
   } else {
-    return str != null ? infixCapsReplace(capitalizeOnlyFirstLetter(getURIFragment(str).split('-').join(' '))) : str;
+    return _fromURI(str);
   }
+}
+
+function _fromURI(str) {
+  return str != null ? infixCapsReplace(capitalizeOnlyFirstLetter(getURIFragment(str).split('-').join(' '))) : str;
+}
+
+function getImportSymbol(str) {
+  return str.indexOf("IMPORT\/UNION") != -1
+    ? '∪'
+    : (str.indexOf("IMPORT\/INTERSECTION") != -1
+      ? '∩'
+      : '-'
+    );
+}
+
+function fromURIImport(str, op) {
+  var uris = str.split('$').map(uri => fromURI(uri)).filter(uri => uri != '');
+  return uris.join(' ' + op + ' ');
 }
 
 function fromURIFresh(str) {
