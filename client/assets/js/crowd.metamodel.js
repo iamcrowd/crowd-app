@@ -19,7 +19,8 @@ CrowdMetamodel.prototype.request = function (req) {
       url: self.config.owlUrl,
       data: {
         json: JSON.stringify(req.data),
-        format: req.format
+        format: req.format,
+        syntax: req.syntax
       },
       success: function (res) {
         console.log('MetamodelAPI: response to ' + self.config.url + req.from + 'to' + req.to, res);

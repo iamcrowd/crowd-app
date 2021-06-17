@@ -738,6 +738,7 @@ CrowdEditor.prototype.initTools = function () {
                   to: self.config.availableConceptualModels[options?.model].name,
                   data: response,
                   format: options?.format,
+                  syntax: options?.syntax,
                   success: function (response) {
                     if (options?.success) options.success(response);
                     if (options?.finally) options.finally(response);
@@ -762,18 +763,22 @@ CrowdEditor.prototype.initTools = function () {
 
       self.tools.export._owlExport = function () {
         var encoding = $('#crowd-tools-export-options-encoding-' + self.id + ' option:selected').val();
+        var syntax = $('#crowd-tools-export-options-syntax-' + self.id + ' option:selected').val();
         $('#crowd-tools-export-options-encoding-' + self.id).prop("disabled", true);
-        $('#crowd-tools-export-options-encoding-loading-' + self.id).show();
+        $('#crowd-tools-export-options-syntax-' + self.id).prop("disabled", true);
+        $('#crowd-tools-export-loading-' + self.id).show();
         self.tools.export.exportTo({
           model: 'owl',
           format: encoding,
+          syntax: syntax,
           success: function (schema) {
             $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(escapeXML(formatXML(schema)));
           },
           finally: function () {
             $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
             $('#crowd-tools-export-options-encoding-' + self.id).prop("disabled", false);
-            $('#crowd-tools-export-options-encoding-loading-' + self.id).hide();
+            $('#crowd-tools-export-options-syntax-' + self.id).prop("disabled", false);
+            $('#crowd-tools-export-loading-' + self.id).hide();
           }
         });
       }
@@ -815,7 +820,10 @@ CrowdEditor.prototype.initTools = function () {
           <div class="modal-dialog modal-dialog-scrollable modal-lg"> \
             <div class="modal-content"> \
               <div class="modal-header"> \
-                <h5 class="modal-title"></h5> \
+                <h5 class="modal-title"></h5> &nbsp;\
+                <div class="spinner-border text-primary" role="status" id="crowd-tools-export-loading-' + self.id + '" style="display: none"> \
+                  <span class="sr-only">Loading...</span> \
+                </div>\
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
                   <span aria-hidden="true">&times;</span> \
                 </button> \
@@ -824,16 +832,23 @@ CrowdEditor.prototype.initTools = function () {
               <div id="crowd-tools-export-owl-options-' + self.id + '" style="display: none"> \
                 <div class="row"> \
                   <div class="form-group col-6"> \
-                    <label class="" for="">Encoding &nbsp; \
-                      <div class="spinner-border spinner-border-sm text-primary" role="status" id="crowd-tools-export-options-encoding-loading-' + self.id + '" style="display: none"> \
-                        <span class="sr-only">Loading...</span> \
-                      </div>\
-                    </label> \
+                    <label class="" for="">Encoding</label> \
                     <select class=" form-control custom-select my-1 mr-sm-2" id="crowd-tools-export-options-encoding-' + self.id + '"> \
                       <option value="owl2-alcin">OWL2 - ALCIN</option> \
                       <option value="owl2-alcqi">OWL2 - ALCQI</option> \
                       <option value="owllink-alcin">OLWLink - ALCIN</option> \
                       <option value="owllink-alcqi">OLWLink - ALCQI</option> \
+                    </select> \
+                  </div>\
+                  <div class="form-group col-6"> \
+                    <label class="" for="">Syntax</label> \
+                    <select class=" form-control custom-select my-1 mr-sm-2" id="crowd-tools-export-options-syntax-' + self.id + '"> \
+                      <option value="rdfxml">RDF/XML</option> \
+                      <option value="owlxml">OWL/XML</option> \
+                      <option value="turtle">Turtle</option> \
+                      <option value="ntriples">N-Triples</option> \
+                      <option value="manchester">Manchester</option> \
+                      <option value="functional">Functional</option> \
                     </select> \
                   </div>\
                 </div> \
@@ -857,7 +872,7 @@ CrowdEditor.prototype.initTools = function () {
       new ClipboardJS('.btn');
 
       //event on select option of encoding on owl options
-      $('#crowd-tools-export-options-encoding-' + self.id).change(function () {
+      $('#crowd-tools-export-options-encoding-' + self.id + ', #crowd-tools-export-options-syntax-' + self.id).change(function () {
         self.tools.export._owlExport();
       });
 
