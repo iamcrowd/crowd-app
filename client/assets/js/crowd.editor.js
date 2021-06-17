@@ -3350,7 +3350,7 @@ CrowdEditor.prototype.initInspector = function () {
         //restrict space characters on text field
         $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id).on({
           keydown: function (e) {
-            if (e.which === 32)
+            if (e.which === 32 || e.which === 13)
               return false;
           },
           change: function () {
