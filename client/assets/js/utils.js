@@ -135,17 +135,23 @@ function _fromURI(str) {
 }
 
 function getImportSymbol(str) {
-  return str.indexOf("IMPORT\/UNION") != -1
-    ? '∪'
-    : (str.indexOf("IMPORT\/INTERSECTION") != -1
-      ? '∩'
-      : '-'
-    );
+  var start = str.indexOf("IMPORT\/") + "IMPORT\/".length;
+  var end = str.indexOf("%");
+  if (start == -1 || end == -1) return { symbol: '-', infix: true };
+  var operation = fromURI(str.substring(start, end));
+  switch (operation) {
+    case 'UNION': return { symbol: '∪', infix: true }; break;
+    case 'INTERSECTION': return { symbol: '∩', infix: true }; break;
+    case 'COMPLEMENT': return { symbol: "'", infix: false }; break;
+    default: return { symbol: '<' + operation + '>', infix: true }; break;
+  }
 }
 
 function fromURIImport(str, op) {
+  if (str.indexOf("%") != -1) return op.infix ? op.symbol + '(' + fromURI(str) + ')' : '(' + fromURI(str) + ')' + op.symbol;
   var uris = str.split('$').map(uri => fromURI(uri)).filter(uri => uri != '');
-  return uris.join(' ' + op + ' ');
+  if (uris.length <= 1) return op.symbol + ' ' + uris[0];
+  else return uris.join(' ' + op.symbol + ' ');
 }
 
 function fromURIFresh(str) {
@@ -171,6 +177,10 @@ function fromURIFresh(str) {
         break;
       case 'ObjectSomeValuesFrom':
         beutySymbol = '∃';
+        infix = false;
+        break;
+      case 'ObjectAllValuesFrom':
+        beutySymbol = '∀';
         infix = false;
         break;
     }
@@ -228,8 +238,9 @@ function removeSpaces(str) {
 
 function getURIFragment(uri) {
   var separator = '/';
-  if (uri.indexOf('#') != -1) separator = '#';
-  var fragment
+  if (uri.indexOf('%') != -1) separator = '%';
+  else if (uri.indexOf('#') != -1) separator = '#';
+  var fragment;
   if (separator == '/') {
     fragment = uri.split(separator);
     fragment = fragment[fragment.length - 1];

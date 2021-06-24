@@ -26,7 +26,8 @@ export class AppComponent implements AfterViewChecked {
   ngOnInit() {
     iziToast.settings({
       position: 'topCenter',
-      maxWidth: '30%'
+      maxWidth: '30%',
+      timeout: false
     });
 
     this.initDarkMode();

@@ -283,7 +283,7 @@ export class EditorComponent implements OnInit {
       this.diagramService.editDiagram(diagram).subscribe(
         res => {
           if (!translateError) {
-            iziToast.success({ message: '<b>Diagram saved successfully.</b>' });
+            iziToast.success({ message: '<b>Diagram saved successfully.</b>', timeout: 2000 });
           } else {
             iziToast.warning({
               message: '<b>Diagram saved successfully.</b><br>' +
@@ -306,7 +306,7 @@ export class EditorComponent implements OnInit {
       this.diagram.name = this.diagramName.value;
       this.diagramService.editDiagram(this.diagram).subscribe(
         res => {
-          iziToast.success({ message: '<b>Diagram renamed successfully.</b>' });
+          iziToast.success({ message: '<b>Diagram renamed successfully.</b>', timeout: 2000 });
           this.editor.tools.file.updateActualFile({ parent: 'crowd-tools-rename-modal' });
           this.resetDiagramForm();
         },
@@ -331,7 +331,7 @@ export class EditorComponent implements OnInit {
         this.diagramService.addDiagram(diagram).subscribe(
           res => {
             if (!translateError) {
-              iziToast.success({ message: '<b>Diagram saved successfully.</b>' });
+              iziToast.success({ message: '<b>Diagram saved successfully.</b>', timeout: 2000 });
             } else {
               iziToast.warning({
                 message: '<b>Diagram saved successfully.</b><br>' +
@@ -354,7 +354,7 @@ export class EditorComponent implements OnInit {
   deleteDiagram(): void {
     this.diagramService.deleteDiagram(this.diagram).subscribe(
       data => {
-        iziToast.success({ message: '<b>Diagram deleted successfully.</b>' });
+        iziToast.success({ message: '<b>Diagram deleted successfully.</b>', timeout: 2000 });
         if (this.diagram._id == this.editor?.config?.actualFile?._id) {
           this.editor.config.actualFile = null;
           this.editor.tools.file.updateActualFile({ parent: false });
@@ -422,7 +422,7 @@ export class EditorComponent implements OnInit {
         };
         this.namespaceService.addNamespace(this.namespace).subscribe(
           res => {
-            iziToast.success({ message: '<b>Namespace saved successfully.</b>' });
+            iziToast.success({ message: '<b>Namespace saved successfully.</b>', timeout: 2000 });
             this.getNamespaces();
             this.resetNamespaceForm();
             $('#crowd-tools-namespace-modal').modal('hide');
@@ -436,7 +436,7 @@ export class EditorComponent implements OnInit {
         this.namespace.file = this.namespaceFile.value;
         this.namespaceService.editNamespace(this.namespace).subscribe(
           res => {
-            iziToast.success({ message: '<b>Namespace saved successfully.</b>' });
+            iziToast.success({ message: '<b>Namespace saved successfully.</b>', timeout: 2000 });
             this.getNamespaces();
             this.resetNamespaceForm();
             $('#crowd-tools-namespace-modal').modal('hide');
@@ -452,7 +452,7 @@ export class EditorComponent implements OnInit {
   deleteNamespace(): void {
     this.namespaceService.deleteNamespace(this.namespace).subscribe(
       data => {
-        iziToast.success({ message: '<b>Namespace deleted successfully.</b>' });
+        iziToast.success({ message: '<b>Namespace deleted successfully.</b>', timeout: 2000 });
 
         this.getNamespaces();
         this.resetNamespaceForm();
