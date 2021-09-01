@@ -205,7 +205,8 @@ function combineElements(elements) {
 function hasSymbol(str) {
   return str.indexOf("ObjectIntersectionOf") != -1 ||
     str.indexOf("ObjectSomeValuesFrom") != -1 ||
-    str.indexOf("ObjectUnionOf") != -1;
+    str.indexOf("ObjectUnionOf") != -1 ||
+    str.indexOf("ObjectAllValuesFrom") != -1;
 }
 
 function capitalize(str) {

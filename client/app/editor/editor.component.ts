@@ -117,7 +117,7 @@ export class EditorComponent implements OnInit {
     const availableConceptualModels = {
       uml: CrowdEditorUml,
       eer: CrowdEditorEer,
-      orm: CrowdEditorOrm,
+      orm2: CrowdEditorOrm,
       kf: { name: 'kf', export: true },
       owl: { name: 'owl', import: false }
     }
@@ -125,7 +125,7 @@ export class EditorComponent implements OnInit {
     const paletteSizes = {
       uml: { width: 120, height: 100, columns: 1 },
       eer: { width: 110, height: 80, columns: 2 },
-      orm: { width: 120, height: 70, columns: 1 },
+      orm2: { width: 120, height: 70, columns: 1 },
     }
 
     cytoscape.use(cola);

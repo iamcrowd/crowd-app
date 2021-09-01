@@ -12,6 +12,22 @@
   max-width: 100%;
 }
 
+.crowd-new-title img {
+  width: 50px;
+}
+
+::ng-deep .bootstrap-dark .light-logo {
+  display: none;
+}
+
+::ng-deep .dark-logo {
+  display: none;
+}
+
+::ng-deep .bootstrap-dark .dark-logo {
+  display: unset;
+}
+
 .navbar-collapse .nav-item-collapsed {
   display: none;
 }
