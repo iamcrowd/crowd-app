@@ -834,9 +834,7 @@ CrowdEditor.prototype.initTools = function () {
                   <div class="form-group col-6"> \
                     <label class="" for="">Encoding</label> \
                     <select class=" form-control custom-select my-1 mr-sm-2" id="crowd-tools-export-options-encoding-' + self.id + '"> \
-                      <option value="owl2-alcin">OWL2 - ALCIN</option> \
                       <option value="owl2-alcqi">OWL2 - ALCQI</option> \
-                      <option value="owllink-alcin">OLWLink - ALCIN</option> \
                       <option value="owllink-alcqi">OLWLink - ALCQI</option> \
                     </select> \
                   </div>\
@@ -1840,7 +1838,6 @@ CrowdEditor.prototype.initTools = function () {
                   <label for="">Encoding</label> \
                   <select class="form-control custom-select my-1 mr-sm-2" id="crowd-tools-reasoning-options-encoding-' + self.id + '"> \
                     <option>ALCQI</option> \
-                    <option>ALCIN</option> \
                   </select> \
                 </div> \
                 <div class="form-group form-check"> \
