@@ -10,6 +10,7 @@ CrowdMetamodel.prototype.request = function (req) {
   req.to = req.to == 'kf' ? 'meta' : req.to;
 
   if (!req.format) req.format = 'owl2-alcqi';
+  if (!req.syntax) req.syntax = 'rdfxml';
 
   console.log('MetamodelAPI: requesting ' + self.config.url + req.from + 'to' + req.to, req.data);
 

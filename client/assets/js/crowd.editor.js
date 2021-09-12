@@ -764,6 +764,9 @@ CrowdEditor.prototype.initTools = function () {
       self.tools.export._owlExport = function () {
         var encoding = $('#crowd-tools-export-options-encoding-' + self.id + ' option:selected').val();
         var syntax = $('#crowd-tools-export-options-syntax-' + self.id + ' option:selected').val();
+        if (encoding == "owllink-alcqi") $('#crowd-tools-export-options-syntax-menu-' + self.id).hide();
+        else $('#crowd-tools-export-options-syntax-menu-' + self.id).show();
+
         $('#crowd-tools-export-options-encoding-' + self.id).prop("disabled", true);
         $('#crowd-tools-export-options-syntax-' + self.id).prop("disabled", true);
         $('#crowd-tools-export-loading-' + self.id).show();
@@ -838,7 +841,7 @@ CrowdEditor.prototype.initTools = function () {
                       <option value="owllink-alcqi">OLWLink - ALCQI</option> \
                     </select> \
                   </div>\
-                  <div class="form-group col-6"> \
+                  <div class="form-group col-6" id="crowd-tools-export-options-syntax-menu-' + self.id + '"> \
                     <label class="" for="">Syntax</label> \
                     <select class=" form-control custom-select my-1 mr-sm-2" id="crowd-tools-export-options-syntax-' + self.id + '"> \
                       <option value="rdfxml">RDF/XML</option> \
@@ -916,9 +919,13 @@ CrowdEditor.prototype.initTools = function () {
       //event handler when click download exported schema
       $('#crowd-tools-export-schema-' + self.id).on('click', function () {
         var model = $(this).attr('data-model');
+        var encoding = $('#crowd-tools-export-options-encoding-' + self.id + ' option:selected').val();
+        var syntax = $('#crowd-tools-export-options-syntax-' + self.id + ' option:selected').val();
 
         self.tools.export.exportTo({
           model: model,
+          format: encoding,
+          syntax: syntax,
           success: function (schema) {
             $("<a />", {
               "download": model + "-schema." + (model == 'owl' ? 'owl' : "json"),
