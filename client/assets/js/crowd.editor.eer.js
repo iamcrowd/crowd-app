@@ -986,7 +986,7 @@ var CrowdEditorEer = {
       case 'derivedAttribute':
       case 'connector':
         if (crowd.inspector.model.attributes.type != 'connector' || (!crowd.inspector.model.attributes.inherit && !crowd.inspector.model.attributes.attribute))
-          crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
+          crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'uri'});
         break;
     }
 

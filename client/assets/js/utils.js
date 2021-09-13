@@ -251,6 +251,19 @@ function getURIFragment(uri) {
   return fragment;
 }
 
+function getURINamespace(uri) {
+  var separator = '/';
+  if (uri.indexOf('%') != -1) separator = '%';
+  else if (uri.indexOf('#') != -1) separator = '#';
+  var namespace;
+  if (separator == '/') {
+    namespace = uri.substring(0, uri.lastIndexOf(separator) + 1);
+  } else {
+    namespace = uri.substring(0, uri.indexOf(separator) + 1);
+  }
+  return namespace;
+}
+
 function escapeXML(xml) {
   return xml.replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')

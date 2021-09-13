@@ -176,6 +176,7 @@ export class EditorComponent implements OnInit {
           }
         }
       },
+      defaultNamespace: "http://crowd.fi.uncoma.edu.ar#",
       ngComponent: this,
       ngRouter: this.router,
       ngFiles: {
@@ -374,13 +375,16 @@ export class EditorComponent implements OnInit {
     this.setEvent = null;
   }
 
-  getNamespaces(): void {
+  getNamespaces(modal: boolean = true, callback = null): void {
     this.namespaceService.getNamespaces().subscribe(
       data => {
         this.namespaces = data;
 
-        $('#crowd-tools-namespaces-modal').modal();
-        setTimeout(() => $('[data-toggle="tooltip"]').tooltip({ html: true }));
+        if (modal) $('#crowd-tools-namespaces-modal').modal();
+        setTimeout(() => {
+          $('[data-toggle="tooltip"]').tooltip({ html: true });
+          if (callback) callback();
+        });
       },
       error => console.log(error)
     );

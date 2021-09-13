@@ -1767,7 +1767,7 @@ CrowdEditor.prototype.initTools = function () {
           $('#' + self.config.ngFiles.namespaces.modal).modal('show'); //not used
         }
         if (self.config?.ngFiles?.namespaces?.get) {
-          self.config.ngComponent[self.config.ngFiles.namespaces.get]();
+          self.config.ngComponent[self.config.ngFiles.namespaces.get](true);
         }
 
         $(".tooltip").tooltip('hide');
@@ -3223,6 +3223,38 @@ CrowdEditor.prototype.initInspector = function () {
           </div> \
         </span>');
         break;
+      case 'uri':
+        dom = $('<span class="row"> \
+            <div class="col"> \
+              <div class="form-group"> \
+                ' + (attribute.label ? '<label>' + attribute.label + '</label>' : '') + ' \
+                <select class="custom-select custom-select-sm" id="crowd-inspector-content-namespace-' + attribute.elementID + '-' + self.id + '" \
+                placeholder="Namespace"> \
+                </select> \
+                <' + (attribute.input == 'textarea' ? 'textarea rows="' + (attribute.inputRows ? attribute.inputRows : 3) + '"' : 'input type="text"') + ' \
+                placeholder="Fragment" class="form-control" id="crowd-inspector-content-fragment-' + attribute.elementID + '-' + self.id + '" /> \
+              </div> \
+            </div> \
+          </span>');
+        if (attribute.values) {
+          attribute.values.forEach(function (value) {
+            $(dom).find('select').append(
+              '<option value="' + value.value + '">' + value.label + '</option>'
+            );
+          });
+        } else {
+          console.log("namespaces", self.config.ngComponent.namespaces);
+          $(dom).find('select').append(
+            '<option value="' + self.config.defaultNamespace + '" title="' + self.config.defaultNamespace + '" selected>crowd</option>'
+          );
+          self.config.ngComponent.namespaces.forEach(function (namespace) {
+            $(dom).find('select').append(
+              '<option value="' + namespace.url + '" title="' + namespace.url + '">' + namespace.prefix + '</option>'
+            );
+          });
+          self.inspector._setAttribute(attribute);
+        }
+        break;
       case 'text': default:
         dom = $('<span class="row"> \
           <div class="col"> \
@@ -3312,7 +3344,6 @@ CrowdEditor.prototype.initInspector = function () {
       case 'multiple':
         $('#crowd-inspector-content-' + attribute.elementID + '-' + propertyValue + '-' + self.id).prop("checked", true);
         break;
-
       case 'alert':
         if (propertyValue.title && propertyValue.contents) {
           propertyValue =
@@ -3349,6 +3380,26 @@ CrowdEditor.prototype.initInspector = function () {
           });
         }
         break;
+      case 'uri':
+
+        namespace = propertyValue && propertyValue != "" ? getURINamespace(propertyValue) : getURINamespace(attribute.default);
+        fragment = propertyValue && propertyValue != "" ? getURIFragment(propertyValue) : getURIFragment(attribute.default);
+        foundedNamespace = namespace == self.config.defaultNamespace || self.config.ngComponent.namespaces.find(ns => ns.url == namespace) != null;
+
+        console.log("namespaces/namespace/founded", self.config.ngComponent.namespaces, namespace, fragment, foundedNamespace);
+
+        if (!foundedNamespace) {
+          $('#crowd-inspector-content-namespace-' + attribute.elementID + '-' + self.id).append(
+            '<option value="' + namespace + '" title="' + namespace + '">' + namespace + '</option>'
+          );
+        }
+
+        $('#crowd-inspector-content-fragment-' + attribute.elementID + '-' + self.id).prop('disabled', !foundedNamespace);
+        $('#crowd-inspector-content-namespace-' + attribute.elementID + '-' + self.id).prop('disabled', !foundedNamespace);
+
+        $('#crowd-inspector-content-namespace-' + attribute.elementID + '-' + self.id).val(namespace);
+        $('#crowd-inspector-content-fragment-' + attribute.elementID + '-' + self.id).val(fragment);
+        break;
       case 'text': default:
         $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id).val(propertyValue);
         //restrict space characters on text field
@@ -3371,7 +3422,9 @@ CrowdEditor.prototype.initInspector = function () {
     attribute = $.extend({}, attribute);
     //event when change the correspondent/s input/s to the attribute sended
     $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id +
-      ',[name="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '"]').on('keyup change', function () {
+      ',[name="crowd-inspector-content-' + attribute.elementID + '-' + self.id + '"]' +
+      ',#crowd-inspector-content-fragment-' + attribute.elementID + '-' + self.id +
+      ',#crowd-inspector-content-namespace-' + attribute.elementID + '-' + self.id).on('keyup change', function () {
         var newPropertyValue;
 
         //get the dom input value according to the attribute type
@@ -3384,6 +3437,10 @@ CrowdEditor.prototype.initInspector = function () {
             break;
           case 'select':
             newPropertyValue = $('#crowd-inspector-content-' + attribute.elementID + '-' + self.id + ' option:selected').val();
+            break;
+          case 'uri':
+            newPropertyValue = $('#crowd-inspector-content-namespace-' + attribute.elementID + '-' + self.id + ' option:selected').val() +
+              $('#crowd-inspector-content-fragment-' + attribute.elementID + '-' + self.id).val();
             break;
           case 'text': default:
             newPropertyValue = $(this).val();
@@ -3426,7 +3483,9 @@ CrowdEditor.prototype.initInspector = function () {
       self.inspector.clearAttributes();
 
       //call initialization of inspector for the specific conceptual model
-      self.config.conceptualModel.initInspector(self);
+      self.config.ngComponent[self.config.ngFiles.namespaces.get](false, () => {
+        self.config.conceptualModel.initInspector(self);
+      });
 
       if (self.inspector.lastFocus && $("#" + self.inspector.lastFocus.elem)[0]) {
         //set focus on last element if it exist

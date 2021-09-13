@@ -1140,7 +1140,8 @@ var CrowdEditorUml = {
       case 'association':
       case 'aggregation':
       case 'composition':
-        crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
+        // crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
+        crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'uri', input: 'textarea', inputRows: 1 });
         break;
     }
 
@@ -1164,7 +1165,8 @@ var CrowdEditorUml = {
           template: {
             type: 'object',
             parameters: [
-              { property: 'name', type: 'text', input: 'textarea', inputRows: 2, placeholder: 'Attribute' },
+              // { property: 'name', type: 'text', input: 'textarea', inputRows: 2, placeholder: 'Attribute' },
+              { property: 'name', type: 'uri', input: 'textarea', inputRows: 1 },
               {
                 property: 'datatype', type: 'select',
                 values: [
@@ -1194,7 +1196,7 @@ var CrowdEditorUml = {
         crowd.inspector.addAttribute({
           label: 'Methods', property: 'properties/methods', type: 'list',
           default: 'http://crowd.fi.uncoma.edu.ar#method',
-          template: { type: 'text', input: 'textarea', inputRows: 2, placeholder: 'Method' }
+          template: { type: 'uri', input: 'textarea', inputRows: 1 }
         });
         break;
     }
@@ -1274,8 +1276,8 @@ var CrowdEditorUml = {
         crowd.inspector.addAttribute({
           label: 'Roles', property: 'roles', type: 'object',
           parameters: [
-            { label: 'Source', property: 'source', type: 'text', input: 'textarea', inputRows: 2, placeholder: 'Source Role' },
-            { label: 'Target', property: 'target', type: 'text', input: 'textarea', inputRows: 2, placeholder: 'Target Role' }
+            { label: 'Source', property: 'source', type: 'uri', input: 'textarea', inputRows: 1 },
+            { label: 'Target', property: 'target', type: 'uri', input: 'textarea', inputRows: 1 }
           ]
         });
         // crowd.inspector.addAttribute({ label: 'Cardinality Source', property: 'cardinality/source', type: 'text' });

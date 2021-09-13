@@ -1480,14 +1480,14 @@ var CrowdEditorOrm = {
       case 'value':
       case 'roleUnary':
       case 'roleBinary':
-        crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'text', input: 'textarea' });
+        crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'uri' });
         break;
     }
 
     //add ref uri to entity ref mode
     switch (crowd.inspector.model.attributes.type) {
       case 'entityReferenceMode':
-        crowd.inspector.addAttribute({ label: 'Reference URI', property: 'refUri', type: 'text', input: 'textarea', placeholder: 'http://crowd.fi.uncoma.edu.ar#ref-entity' });
+        crowd.inspector.addAttribute({ label: 'Reference URI', property: 'refUri', type: 'uri', default: 'http://crowd.fi.uncoma.edu.ar#ref-entity' });
         break;
     }
 
@@ -1575,8 +1575,8 @@ var CrowdEditorOrm = {
         crowd.inspector.addAttribute({
           label: 'Roles', property: 'roles', type: 'object',
           parameters: [
-            { label: 'Left', property: 'left', type: 'text', input: 'textarea', inputRows: 2, placeholder: 'Left' },
-            { label: 'Right', property: 'right', type: 'text', input: 'textarea', inputRows: 2, placeholder: 'Right' }
+            { label: 'Left', property: 'left', type: 'uri' },
+            { label: 'Right', property: 'right', type: 'uri' }
           ]
         });
         break;
