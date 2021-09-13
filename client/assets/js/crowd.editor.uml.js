@@ -1197,6 +1197,7 @@ var CrowdEditorUml = {
           label: 'Methods', property: 'properties/methods', type: 'list',
           default: 'http://crowd.fi.uncoma.edu.ar#method',
           template: { type: 'uri', input: 'textarea', inputRows: 1 }
+          // template: { type: 'text', input: 'textarea', inputRows: 1 }
         });
         break;
     }

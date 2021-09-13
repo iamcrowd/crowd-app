@@ -3458,44 +3458,45 @@ CrowdEditor.prototype.initInspector = function () {
   }
 
   self.inspector.loadContent = function () {
-    if (self.inspector.model) {
-      //get focused element and their caret position
-      if ($(document.activeElement).prop('tagName') == 'TEXTAREA' ||
-        ($(document.activeElement).prop('tagName') == 'INPUT' && $(document.activeElement).prop('type') == 'text')) {
-        self.inspector.lastFocus = {
-          elem: $(document.activeElement).attr('id'),
-          caret: {
-            start: document.activeElement.selectionStart,
-            end: document.activeElement.selectionEnd
-          }
-        };
-      }
+    self.config.ngComponent[self.config.ngFiles.namespaces.get](false, () => {
+      if (self.inspector.model) {
+        //get focused element and their caret position
+        if ($(document.activeElement).prop('tagName') == 'TEXTAREA' ||
+          ($(document.activeElement).prop('tagName') == 'INPUT' && $(document.activeElement).prop('type') == 'text')) {
+          self.inspector.lastFocus = {
+            elem: $(document.activeElement).attr('id'),
+            caret: {
+              start: document.activeElement.selectionStart,
+              end: document.activeElement.selectionEnd
+            }
+          };
+        }
 
-      //toggle the content on
-      self.inspector.toggleContent(true);
+        //toggle the content on
+        self.inspector.toggleContent(true);
 
-      //make the title with the name of the element or link
-      $('#crowd-inspector-' + self.id + ' .crowd-inspector-title').html(
-        self.inspector.model.attributes.label ? self.inspector.model.attributes.label : formatString(self.inspector.model.attributes.type)
-      );
+        //make the title with the name of the element or link
+        $('#crowd-inspector-' + self.id + ' .crowd-inspector-title').html(
+          self.inspector.model.attributes.label ? self.inspector.model.attributes.label : formatString(self.inspector.model.attributes.type)
+        );
 
-      //clear attributes of the lastest model
-      self.inspector.clearAttributes();
+        //clear attributes of the lastest model
+        self.inspector.clearAttributes();
 
-      //call initialization of inspector for the specific conceptual model
-      self.config.ngComponent[self.config.ngFiles.namespaces.get](false, () => {
+        //call initialization of inspector for the specific conceptual model
+
         self.config.conceptualModel.initInspector(self);
-      });
 
-      if (self.inspector.lastFocus && $("#" + self.inspector.lastFocus.elem)[0]) {
-        //set focus on last element if it exist
-        $("#" + self.inspector.lastFocus.elem).focus();
-        //set caret in the last position
-        setSelectionRange($("#" + self.inspector.lastFocus.elem)[0], self.inspector.lastFocus.caret.start, self.inspector.lastFocus.caret.end);
-        //reset last focus
-        self.inspector.lastFocus = null;
+        if (self.inspector.lastFocus && $("#" + self.inspector.lastFocus.elem)[0]) {
+          //set focus on last element if it exist
+          $("#" + self.inspector.lastFocus.elem).focus();
+          //set caret in the last position
+          setSelectionRange($("#" + self.inspector.lastFocus.elem)[0], self.inspector.lastFocus.caret.start, self.inspector.lastFocus.caret.end);
+          //reset last focus
+          self.inspector.lastFocus = null;
+        }
       }
-    }
+    });
   }
 
   //append dom element that shows an empty message on the inspector
