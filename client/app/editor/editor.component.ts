@@ -386,7 +386,10 @@ export class EditorComponent implements OnInit {
           if (callback) callback();
         });
       },
-      error => console.log(error)
+      error => {
+        console.log(error);
+        if (callback) callback(error);
+      }
     );
   }
 

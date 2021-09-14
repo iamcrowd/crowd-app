@@ -3458,7 +3458,7 @@ CrowdEditor.prototype.initInspector = function () {
   }
 
   self.inspector.loadContent = function () {
-    self.config.ngComponent[self.config.ngFiles.namespaces.get](false, () => {
+    self.config.ngComponent[self.config.ngFiles.namespaces.get](false, (error) => {
       if (self.inspector.model) {
         //get focused element and their caret position
         if ($(document.activeElement).prop('tagName') == 'TEXTAREA' ||
