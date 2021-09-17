@@ -61,11 +61,16 @@ or
 
 > npm install npm@latest -g
 
-NODE JS
+NODE JS (with n)
 
-install n
+if you never install n
 
 > npm cache clean -f
+
 > npm install -g n
+
+Now install node
+
 > n stable      * install latest stable  version of node
-> n                 * here we can choose the version of node
+
+> n             * here we can choose the version of node
