@@ -1,5 +1,5 @@
 var CrowdEditorOrm = {
-  name: 'orm',
+  name: 'orm2',
   initPalette: function (crowd) {
     //colors for palette elements
     crowd.palette.colors = {

@@ -9,6 +9,10 @@ CrowdMetamodel.prototype.request = function (req) {
   req.from = req.from == 'kf' ? 'meta' : req.from;
   req.to = req.to == 'kf' ? 'meta' : req.to;
 
+  //map orm2 to orm
+  req.from = req.from == 'orm2' ? 'orm' : req.from;
+  req.to = req.to == 'orm2' ? 'orm' : req.to;
+
   if (!req.format) req.format = 'owl2-alcqi';
   if (!req.syntax) req.syntax = 'rdfxml';
 
