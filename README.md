@@ -53,7 +53,7 @@ To get more help on the `angular-cli` use `ng --help` or go check out the [Angul
 
 ## Update npm and nodejs
 
-###NPM 
+NPM 
 
 > npm install -g npm@[version]
 
@@ -61,7 +61,7 @@ or
 
 > npm install npm@latest -g
 
-###NODE JS
+NODE JS
 
 install n
 
