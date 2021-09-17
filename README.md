@@ -50,3 +50,27 @@ Run `npm run lintscss` to execute the frontend SCSS linting via [SASS-Lint](http
 
 ## Further help
 To get more help on the `angular-cli` use `ng --help` or go check out the [Angular-CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+
+## Update npm and nodejs
+
+NPM 
+
+> npm install -g npm@[version]
+
+or
+
+> npm install npm@latest -g
+
+NODE JS (with n)
+
+if you never install n
+
+> npm cache clean -f
+
+> npm install -g n
+
+Now install node
+
+> n stable      * install latest stable  version of node
+
+> n             * here we can choose the version of node
