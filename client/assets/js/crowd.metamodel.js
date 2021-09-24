@@ -5,6 +5,17 @@ var CrowdMetamodel = function (config) {
 CrowdMetamodel.prototype.request = function (req) {
   var self = this;
 
+  //for change the url to call differents endpoints
+  var url = self.config.url;
+  switch (req.to) {
+    case 'verbalization':
+      url = self.config.verbalizationUrl;
+      break;
+    case 'owl':
+      url = self.config.owlUrl;
+      break;
+  }
+
   //map kf to meta
   req.from = req.from == 'kf' ? 'meta' : req.from;
   req.to = req.to == 'kf' ? 'meta' : req.to;
@@ -13,22 +24,27 @@ CrowdMetamodel.prototype.request = function (req) {
   req.from = req.from == 'orm2' ? 'orm' : req.from;
   req.to = req.to == 'orm2' ? 'orm' : req.to;
 
+  //map verbalization parameters
+  req.to = req.to == 'verbalization' ? req.verbalization + req.language : req.to;
+
   if (!req.format) req.format = 'owl2-alcqi';
   if (!req.syntax) req.syntax = 'rdfxml';
+  if (!req.verbalization) req.verbalization = 'cnl';
+  if (!req.language) req.language = 'en';
 
-  console.log('MetamodelAPI: requesting ' + self.config.url + req.from + 'to' + req.to, req.data);
+  console.log('MetamodelAPI: requesting ' + url + req.from + 'to' + req.to, req.data);
 
   if (req.to == 'owl') {
     return $.ajax({
       type: "POST",
-      url: self.config.owlUrl,
+      url: url,
       data: {
         json: JSON.stringify(req.data),
         format: req.format,
         syntax: req.syntax
       },
       success: function (res) {
-        console.log('MetamodelAPI: response to ' + self.config.url + req.from + 'to' + req.to, res);
+        console.log('MetamodelAPI: response to ' + url + req.from + 'to' + req.to, res);
         if (req.success) req.success(res);
       },
       error: function (error) {
@@ -37,16 +53,17 @@ CrowdMetamodel.prototype.request = function (req) {
         if (req.error) req.error(error);
       }
     });
-  } else {
+  }
+  else {
     return $.ajax({
       type: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      url: self.config.url + req.from + 'to' + req.to,
+      url: url + req.from + 'to' + req.to,
       data: JSON.stringify(req.data),
       success: function (res) {
-        console.log('MetamodelAPI: response to ' + self.config.url + req.from + 'to' + req.to, res);
+        console.log('MetamodelAPI: response to ' + url + req.from + 'to' + req.to, res);
         if (req.success) req.success(res);
       },
       error: function (error) {

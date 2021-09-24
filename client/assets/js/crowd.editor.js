@@ -739,6 +739,8 @@ CrowdEditor.prototype.initTools = function () {
                   data: response,
                   format: options?.format,
                   syntax: options?.syntax,
+                  verbalization: options?.verbalization,
+                  language: options?.language,
                   success: function (response) {
                     if (options?.success) options.success(response);
                     if (options?.finally) options.finally(response);
@@ -786,6 +788,29 @@ CrowdEditor.prototype.initTools = function () {
         });
       }
 
+      self.tools.export._verbalizationExport = function () {
+        var verbalization = $('#crowd-tools-export-options-verbalization-' + self.id + ' option:selected').val();
+        var language = $('#crowd-tools-export-options-language-' + self.id + ' option:selected').val();
+
+        $('#crowd-tools-export-options-verbalization-' + self.id).prop("disabled", true);
+        $('#crowd-tools-export-options-language-' + self.id).prop("disabled", true);
+        $('#crowd-tools-export-loading-' + self.id).show();
+        self.tools.export.exportTo({
+          model: 'verbalization',
+          verbalization: verbalization,
+          language: language,
+          success: function (schema) {
+            $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(schema.CNLen.join("\n"));
+          },
+          finally: function () {
+            $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
+            $('#crowd-tools-export-options-verbalization-' + self.id).prop("disabled", false);
+            $('#crowd-tools-export-options-language-' + self.id).prop("disabled", false);
+            $('#crowd-tools-export-loading-' + self.id).hide();
+          }
+        });
+      }
+
       //append dom for export tool
       // $('#crowd-tools-row-' + self.id).append(
       //   '<div class="form-group"> \
@@ -810,9 +835,10 @@ CrowdEditor.prototype.initTools = function () {
       //draw a button for each conceptual model and put the name on data attribute
       $.each(self.config.availableConceptualModels, function (conceptualModelName, conceptualModel) {
         if (conceptualModel.export == null || conceptualModel.export) {
+          var title = conceptualModel.title ? conceptualModel.title : conceptualModelName.toUpperCase();
           $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').append(
             '<li><button class="dropdown-item" data-model="' + conceptualModelName + '" name="crowd-tools-export-check-schema-' + self.id + '">' +
-            '<i class="fa fa-fw fa-long-arrow-right"></i> ' + conceptualModelName.toUpperCase() + '</button></li>'
+            '<i class="fa fa-fw fa-long-arrow-right"></i> ' + title + '</button></li>'
           );
         }
       });
@@ -854,6 +880,24 @@ CrowdEditor.prototype.initTools = function () {
                   </div>\
                 </div> \
               </div> \
+              <div id="crowd-tools-export-verbalization-options-' + self.id + '" style="display: none"> \
+                <div class="row"> \
+                  <div class="form-group col-6"> \
+                    <label class="" for="">Verbalization</label> \
+                    <select class=" form-control custom-select my-1 mr-sm-2" id="crowd-tools-export-options-verbalization-' + self.id + '"> \
+                      <option value="cnl">CNL</option> \
+                      <option value="nlg" disabled>NLG</option> \
+                    </select> \
+                  </div>\
+                  <div class="form-group col-6" id="crowd-tools-export-options-language-menu-' + self.id + '"> \
+                    <label class="" for="">Language</label> \
+                    <select class=" form-control custom-select my-1 mr-sm-2" id="crowd-tools-export-options-language-' + self.id + '"> \
+                      <option value="en">English</option> \
+                      <option value="sp" disabled>Spanish</option> \
+                    </select> \
+                  </div>\
+                </div> \
+              </div> \
               <pre id="crowd-tools-export-check-schema-modal-pre-' + self.id + '" \
               style="overflow: hidden; overflow-wrap: break-word; white-space: pre-wrap;"></pre> \
               </div> \
@@ -877,6 +921,11 @@ CrowdEditor.prototype.initTools = function () {
         self.tools.export._owlExport();
       });
 
+      //event on select option of verbalization and lanaguage on verbalization options
+      $('#crowd-tools-export-options-verbalization-' + self.id + ', #crowd-tools-export-options-lanaguage-' + self.id).change(function () {
+        self.tools.export._verbalizationExport();
+      });
+
       //event handler when click export check schema
       $('[name="crowd-tools-export-check-schema-' + self.id + '"]').on('click', function (event) {
         var btn = this;
@@ -885,9 +934,22 @@ CrowdEditor.prototype.initTools = function () {
         var model = $(this).attr('data-model');
         $('#crowd-tools-export-schema-' + self.id).attr('data-model', model);
 
-        if (model != 'owl') {
-          $('#crowd-tools-export-owl-options-' + self.id).hide();
+        $('#crowd-tools-export-owl-options-' + self.id).hide();
+        $('#crowd-tools-export-verbalization-options-' + self.id).hide();
 
+        if (model == 'owl') {
+          $('#crowd-tools-export-owl-options-' + self.id).show();
+          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export OWL');
+          $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
+          self.tools.export._owlExport();
+        }
+        else if (model == 'verbalization') {
+          $('#crowd-tools-export-verbalization-options-' + self.id).show();
+          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export CNL/NLG');
+          $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
+          self.tools.export._verbalizationExport();
+        }
+        else {
           var originalBtn = $(btn).html();
           $(btn).html(originalBtn + ' <i class="loading fa fa-circle-o-notch fa-spin"></i>');
 
@@ -904,11 +966,6 @@ CrowdEditor.prototype.initTools = function () {
               $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
             }
           });
-        } else {
-          $('#crowd-tools-export-owl-options-' + self.id).show();
-          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export ' + model.toUpperCase() + ' Schema');
-          $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
-          self.tools.export._owlExport();
         }
 
         $(".tooltip").tooltip('hide');
@@ -921,15 +978,37 @@ CrowdEditor.prototype.initTools = function () {
         var model = $(this).attr('data-model');
         var encoding = $('#crowd-tools-export-options-encoding-' + self.id + ' option:selected').val();
         var syntax = $('#crowd-tools-export-options-syntax-' + self.id + ' option:selected').val();
+        var verbalization = $('#crowd-tools-export-options-verbalization-' + self.id + ' option:selected').val();
+        var language = $('#crowd-tools-export-options-language-' + self.id + ' option:selected').val();
 
         self.tools.export.exportTo({
           model: model,
           format: encoding,
           syntax: syntax,
+          verbalization: verbalization,
+          language: language,
           success: function (schema) {
+            var format = 'json';
+            var encoding = 'json';
+            var data;
+            switch (model) {
+              case 'owl':
+                format = 'owl';
+                encoding = 'xml';
+                data = formatXML(schema);
+                break;
+              case 'verbalization':
+                format = 'txt';
+                encoding = 'txt';
+                data = schema.CNLen.join("\n");
+                break;
+              default:
+                data = JSON.stringify(schema, null, 4);
+                break;
+            }
             $("<a />", {
-              "download": model + "-schema." + (model == 'owl' ? 'owl' : "json"),
-              "href": "data:application/" + (model == 'owl' ? 'xml' : 'json') + ";charset=utf-8," + encodeURIComponent((model == 'owl' ? formatXML(schema) : JSON.stringify(schema, null, 4))),
+              "download": model + "-schema." + format,
+              "href": "data:application/" + encoding + ";charset=utf-8," + encodeURIComponent(data),
             }).appendTo("body")
               .click(function () {
                 $(this).remove()
