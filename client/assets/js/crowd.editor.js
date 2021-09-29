@@ -409,7 +409,7 @@ CrowdEditor.prototype.initTools = function () {
       if (self.config.actualFile) {
         self.config.actualFile.content = self.toJSONSchema();
         self.config.actualFile.model = self.config.conceptualModel.name;
-        self.toBase64(function (preview) {
+        self.toBase64({ miniature: true }, function (preview) {
           self.config.actualFile.preview = preview;
           self.tools.export.exportTo({
             model: 'kf',
@@ -429,7 +429,7 @@ CrowdEditor.prototype.initTools = function () {
         var newFile = {};
         newFile.content = self.toJSONSchema();
         newFile.model = self.config.conceptualModel.name;
-        self.toBase64(function (preview) {
+        self.toBase64({ miniature: true }, function (preview) {
           newFile.preview = preview;
           self.tools.export.exportTo({
             model: 'kf',
@@ -590,7 +590,7 @@ CrowdEditor.prototype.initTools = function () {
         if (self.config.ngFiles) {
           if (self.config.ngFiles.save) {
             if (self.config.ngFiles.save.modal) {
-              self.toBase64(function (preview) {
+              self.toBase64({ miniature: true }, function (preview) {
                 self.config.ngComponent.preview = preview;
               });
               $('#' + self.config.ngFiles.save.modal).modal('show');
@@ -763,7 +763,7 @@ CrowdEditor.prototype.initTools = function () {
         }
       }
 
-      self.tools.export._owlExport = function () {
+      self.tools.export._owlExport = function (download) {
         var encoding = $('#crowd-tools-export-options-encoding-' + self.id + ' option:selected').val();
         var syntax = $('#crowd-tools-export-options-syntax-' + self.id + ' option:selected').val();
         if (encoding == "owllink-alcqi") $('#crowd-tools-export-options-syntax-menu-' + self.id).hide();
@@ -778,6 +778,15 @@ CrowdEditor.prototype.initTools = function () {
           syntax: syntax,
           success: function (schema) {
             $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(escapeXML(formatXML(schema)));
+
+            if (download)
+              self.tools.export._download({
+                name: "owl-schema",
+                format: "owl",
+                type: "application/xml",
+                encoding: "charset=utf-8",
+                data: formatXML(schema)
+              });
           },
           finally: function () {
             $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
@@ -788,7 +797,7 @@ CrowdEditor.prototype.initTools = function () {
         });
       }
 
-      self.tools.export._verbalizationExport = function () {
+      self.tools.export._verbalizationExport = function (download) {
         var verbalization = $('#crowd-tools-export-options-verbalization-' + self.id + ' option:selected').val();
         var language = $('#crowd-tools-export-options-language-' + self.id + ' option:selected').val();
 
@@ -801,6 +810,15 @@ CrowdEditor.prototype.initTools = function () {
           language: language,
           success: function (schema) {
             $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body pre').html(schema.CNLen.join("\n"));
+
+            if (download)
+              self.tools.export._download({
+                name: "verbalization-schema",
+                format: "txt",
+                type: "application/txt",
+                encoding: "charset=utf-8",
+                data: schema.CNLen.join("\n")
+              });
           },
           finally: function () {
             $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
@@ -809,6 +827,60 @@ CrowdEditor.prototype.initTools = function () {
             $('#crowd-tools-export-loading-' + self.id).hide();
           }
         });
+      }
+
+      self.tools.export._imageExport = function (download) {
+        var format = $('#crowd-tools-export-options-format-' + self.id + ' option:selected').val();
+        var useZoom = $('#crowd-tools-export-options-use-zoom-' + self.id).is(":checked");
+        var useGrid = format == "pdf" ? false : $('#crowd-tools-export-options-use-grid-' + self.id).is(":checked");
+        var onlyContent = $('#crowd-tools-export-options-only-content-' + self.id).is(":checked");
+        if (format == "pdf") $('#crowd-tools-export-options-use-grid-menu-' + self.id).hide();
+        else $('#crowd-tools-export-options-use-grid-menu-' + self.id).show();
+
+        $('#crowd-tools-export-options-use-zoom-' + self.id).prop("disabled", true);
+        $('#crowd-tools-export-options-use-grid-' + self.id).prop("disabled", true);
+        $('#crowd-tools-export-options-only-content-' + self.id).prop("disabled", true);
+        $('#crowd-tools-export-options-format-' + self.id).prop("disabled", true);
+        $('#crowd-tools-export-loading-' + self.id).show();
+        self.toBase64({ format: format, useZoom: useZoom, useGrid: useGrid, onlyContent: onlyContent }, function (image) {
+          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-body img').attr('src', image);
+
+          $('[aria-labelledby="crowd-tools-export-dropdown-' + self.id + '"]').dropdown('hide');
+          $('#crowd-tools-export-options-use-zoom-' + self.id).prop("disabled", false);
+          $('#crowd-tools-export-options-use-grid-' + self.id).prop("disabled", false);
+          $('#crowd-tools-export-options-only-content-' + self.id).prop("disabled", false);
+          $('#crowd-tools-export-options-format-' + self.id).prop("disabled", false);
+          $('#crowd-tools-export-loading-' + self.id).hide();
+
+          if (download) {
+            // var hrefImage = format == 'application/pdf' ? image.replace('image/png', 'application/pdf') : image;
+            self.tools.export._download({ name: "image", format: format, href: image, onlyContent: onlyContent });
+          }
+        });
+      }
+
+      self.tools.export._download = function (options) {
+        if (options.format == "pdf") {
+          var svg = $("#crowd-workspace-paper-" + self.id + " svg");
+          var content = self.workspace.paper.getContentBBox();
+          var pdfSettings = {
+            name: "image",
+            pageWidth: options.onlyContent ? content.width + self.workspace.paperPadding * 2 : svg.width(),
+            pageHeight: options.onlyContent ? content.height + self.workspace.paperPadding * 2 : svg.height(),
+            x: options.onlyContent ? -(content.x - self.workspace.paperPadding) : 0,
+            y: options.onlyContent ? -(content.y - self.workspace.paperPadding) : 0,
+            width: svg.width(),
+            height: svg.height()
+          };
+          SVGtoPDFDownload(svg[0], pdfSettings);
+        } else {
+          $("<a />", {
+            "download": options.name + (options.format ? "." + options.format : ""),
+            "href": (options.href ? options.href : "data:" + options.type + ";" + options.encoding + "," + encodeURIComponent(options.data))
+          }).appendTo("body").click(function () {
+            $(this).remove()
+          })[0].click();
+        }
       }
 
       //append dom for export tool
@@ -898,8 +970,40 @@ CrowdEditor.prototype.initTools = function () {
                   </div>\
                 </div> \
               </div> \
+              <div id="crowd-tools-export-image-options-' + self.id + '" style="display: none"> \
+                <div class="row"> \
+                  <div class="form-group col-6"> \
+                    <label class="" for="">Format</label> \
+                    <select class=" form-control custom-select my-1 mr-sm-2" id="crowd-tools-export-options-format-' + self.id + '"> \
+                      <option value="jpeg">JPG</option> \
+                      <option value="png">PNG</option> \
+                      <option value="pdf">PDF</option> \
+                    </select> \
+                  </div>\
+                  <div class="form-group col-3"> \
+                    <div class="form-group form-check"> \
+                      <input type="checkbox" class="form-check-input" id="crowd-tools-export-options-use-zoom-' + self.id + '"> \
+                      <label class="form-check-label" for="crowd-tools-export-options-use-zoom-' + self.id + '">Use Zoom</label> \
+                    </div>\
+                    <div class="form-group form-check" id="crowd-tools-export-options-use-grid-menu-' + self.id + '"> \
+                      <input type="checkbox" class="form-check-input" id="crowd-tools-export-options-use-grid-' + self.id + '"> \
+                      <label class="form-check-label" for="crowd-tools-export-options-use-grid-' + self.id + '">Use Grid</label> \
+                    </div>\
+                  </div> \
+                  <div class="form-group col-3"> \
+                    <div class="form-group form-check"> \
+                      <input type="checkbox" class="form-check-input" id="crowd-tools-export-options-only-content-' + self.id + '" checked> \
+                      <label class="form-check-label" for="crowd-tools-export-options-only-content-' + self.id + '">Only Content</label> \
+                    </div>\
+                  </div> \
+                </div>\
+              </div> \
               <pre id="crowd-tools-export-check-schema-modal-pre-' + self.id + '" \
               style="overflow: hidden; overflow-wrap: break-word; white-space: pre-wrap;"></pre> \
+              <div style="width: 100%; text-align: center;">\
+                <img id="crowd-tools-export-check-schema-modal-img-' + self.id + '" \
+              style="max-width: 100%;" \> \
+              </div> \
               </div> \
               <div class="modal-footer"> \
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
@@ -921,10 +1025,18 @@ CrowdEditor.prototype.initTools = function () {
         self.tools.export._owlExport();
       });
 
-      //event on select option of verbalization and lanaguage on verbalization options
+      //event on select option of verbalization and language on verbalization options
       $('#crowd-tools-export-options-verbalization-' + self.id + ', #crowd-tools-export-options-lanaguage-' + self.id).change(function () {
         self.tools.export._verbalizationExport();
       });
+
+      //event on select option of use zoom and use grid on image options
+      $('#crowd-tools-export-options-use-zoom-' + self.id +
+        ', #crowd-tools-export-options-use-grid-' + self.id +
+        ', #crowd-tools-export-options-only-content-' + self.id +
+        ', #crowd-tools-export-options-format-' + self.id).change(function () {
+          self.tools.export._imageExport();
+        });
 
       //event handler when click export check schema
       $('[name="crowd-tools-export-check-schema-' + self.id + '"]').on('click', function (event) {
@@ -932,22 +1044,37 @@ CrowdEditor.prototype.initTools = function () {
         event.stopPropagation();
 
         var model = $(this).attr('data-model');
+        var modelObj = self.config.availableConceptualModels[model];
+
         $('#crowd-tools-export-schema-' + self.id).attr('data-model', model);
 
+        $('#crowd-tools-export-check-schema-modal-pre-' + self.id).show();
+        $('#crowd-tools-export-check-schema-modal-pre-' + self.id).html("");
+        $('#crowd-tools-export-check-schema-modal-img-' + self.id).hide();
+        $('#crowd-tools-export-check-schema-modal-img-' + self.id).attr("src", "");
         $('#crowd-tools-export-owl-options-' + self.id).hide();
         $('#crowd-tools-export-verbalization-options-' + self.id).hide();
+        $('#crowd-tools-export-image-options-' + self.id).hide();
 
         if (model == 'owl') {
           $('#crowd-tools-export-owl-options-' + self.id).show();
-          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export OWL');
+          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export ' + modelObj.title);
           $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
           self.tools.export._owlExport();
         }
         else if (model == 'verbalization') {
           $('#crowd-tools-export-verbalization-options-' + self.id).show();
-          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export CNL/NLG');
+          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export ' + modelObj.title);
           $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
           self.tools.export._verbalizationExport();
+        }
+        else if (model == 'image') {
+          $('#crowd-tools-export-check-schema-modal-pre-' + self.id).hide();
+          $('#crowd-tools-export-check-schema-modal-img-' + self.id).show();
+          $('#crowd-tools-export-image-options-' + self.id).show();
+          $('#crowd-tools-export-check-schema-modal-' + self.id + ' .modal-title').html('<i class="fa fa-fw fa-download"></i> Export ' + modelObj.title);
+          $('#crowd-tools-export-check-schema-modal-' + self.id).modal('show');
+          self.tools.export._imageExport();
         }
         else {
           var originalBtn = $(btn).html();
@@ -976,45 +1103,32 @@ CrowdEditor.prototype.initTools = function () {
       //event handler when click download exported schema
       $('#crowd-tools-export-schema-' + self.id).on('click', function () {
         var model = $(this).attr('data-model');
-        var encoding = $('#crowd-tools-export-options-encoding-' + self.id + ' option:selected').val();
-        var syntax = $('#crowd-tools-export-options-syntax-' + self.id + ' option:selected').val();
-        var verbalization = $('#crowd-tools-export-options-verbalization-' + self.id + ' option:selected').val();
-        var language = $('#crowd-tools-export-options-language-' + self.id + ' option:selected').val();
 
-        self.tools.export.exportTo({
-          model: model,
-          format: encoding,
-          syntax: syntax,
-          verbalization: verbalization,
-          language: language,
-          success: function (schema) {
-            var format = 'json';
-            var encoding = 'json';
-            var data;
-            switch (model) {
-              case 'owl':
-                format = 'owl';
-                encoding = 'xml';
-                data = formatXML(schema);
-                break;
-              case 'verbalization':
-                format = 'txt';
-                encoding = 'txt';
-                data = schema.CNLen.join("\n");
-                break;
-              default:
-                data = JSON.stringify(schema, null, 4);
-                break;
-            }
-            $("<a />", {
-              "download": model + "-schema." + format,
-              "href": "data:application/" + encoding + ";charset=utf-8," + encodeURIComponent(data),
-            }).appendTo("body")
-              .click(function () {
-                $(this).remove()
-              })[0].click();
-          }
-        });
+        switch (model) {
+          case 'owl':
+            self.tools.export._owlExport(true);
+            break;
+          case 'verbalization':
+            self.tools.export._verbalizationExport(true);
+            break;
+          case 'image':
+            self.tools.export._imageExport(true);
+            break;
+          default:
+            self.tools.export.exportTo({
+              model: model,
+              success: function (schema) {
+                self.tools.export._download({
+                  name: model + "-schema",
+                  format: "json",
+                  type: "application/json",
+                  encoding: "charset=utf-8",
+                  data: JSON.stringify(schema, null, 4)
+                });
+              }
+            });
+            break;
+        }
       });
     }
     self.tools.export.init();
@@ -2197,6 +2311,18 @@ CrowdEditor.prototype.initTools = function () {
 
   //zoom tool
   self.tools.zoom.init = function () {
+    //function to set zoom and adjust controllers
+    self.tools.zoom.set = function (value) {
+      //set new zoom value
+      self.workspace.zoom = value;
+
+      //fit paper with the new zoom setted
+      self.workspace.fitPaper();
+
+      //change zoom label percentage
+      $('#crowd-tools-zoom-label-' + self.id).html((value * 100) + "%");
+    }
+
     //append dom for zoom tool
     $('#crowd-tools-row-' + self.id).append(
       '<div class="form-group"> \
@@ -2209,20 +2335,25 @@ CrowdEditor.prototype.initTools = function () {
     //event handler when change zoom
     //updates zoom label and change scale of the workspace paper
     $('#crowd-tools-zoom-input-' + self.id).on('input', function () {
-      //set new zoom value
-      self.workspace.zoom = this.value / 100;
-
-      //fit paper with the new zoom setted
-      self.workspace.fitPaper();
-
-      //change zoom label percentage
-      $('#crowd-tools-zoom-label-' + self.id).html(this.value + "%");
+      self.tools.zoom.set(this.value / 100);
     });
   }
   self.tools.zoom.init();
 
   //grid size tool
   self.tools.gridSize.init = function () {
+    //function to set grid size and adjust controllers
+    self.tools.gridSize.set = function (value) {
+      //set new grid size value
+      self.workspace.gridSize = value;
+
+      //set grid size of paper
+      self.workspace.paper.setGridSize(value);
+
+      //change grid size label value
+      $('#crowd-tools-grid-size-label-' + self.id).html(value);
+    }
+
     //append dom for grid size tool
     $('#crowd-tools-row-' + self.id).append(
       '<div class="form-group"> \
@@ -2235,8 +2366,7 @@ CrowdEditor.prototype.initTools = function () {
     //event handler when change grid size
     //updates grid size label and change grid size of the workspace paper
     $('#crowd-tools-grid-size-input-' + self.id).on('input', function () {
-      $('#crowd-tools-grid-size-label-' + self.id).html(this.value);
-      self.workspace.paper.setGridSize(this.value);
+      self.tools.gridSize.set(this.value);
     });
   }
   self.tools.gridSize.init();
@@ -2277,8 +2407,10 @@ CrowdEditor.prototype.initWorkspace = function () {
     width: parseFloat(getCSS('width', 'crowd-workspace-paper')),
     height: parseFloat(getCSS('height', 'crowd-workspace-paper')),
   };
-  //the zoom of paper is initialy 100%
+  //the zoom of paper is initially 100%
   self.workspace.zoom = 1;
+  //the grid size is initially 10
+  self.workspace.gridSize = 10;
   //the paper padding is setted to avoid element tools to be outside paper when they are close to edge
   self.workspace.paperPadding = 40;
 
@@ -2298,7 +2430,7 @@ CrowdEditor.prototype.initWorkspace = function () {
     height: self.workspace.paperSize.height,//$('#crowd-workspace-' + self.id).height(),
     // origin: { x: self.workspace.paperPadding, y: self.workspace.paperPadding },
     model: self.workspace.graph,
-    gridSize: 10,
+    gridSize: self.workspace.gridSize,
     background: {
       color: $('#crowd-workspace-' + self.id).css("background-color")
     },
@@ -3922,12 +4054,47 @@ CrowdEditor.prototype.fromReasoning = function (schema, reasoning) {
   self.config.conceptualModel.fromReasoning(self, schema, reasoning);
 }
 
-CrowdEditor.prototype.toBase64 = function (callback) {
+CrowdEditor.prototype.toBase64 = function (options, callback) {
   var self = this;
 
-  html2canvas($('#crowd-map-paper-' + self.id)[0]).then(function (canvas) {
-    callback(canvas.toDataURL("image/png"));
-  });
+  if (!options) options = {};
+  if (!options.format) options.format = "png";
+
+  var canvasContainer = options.miniature ? '#crowd-map-paper-' + self.id : '#crowd-workspace-paper-' + self.id
+
+  if (options.miniature) {
+    html2canvas($(canvasContainer)[0]).then(function (canvas) {
+      callback(canvas.toDataURL("image/png"));
+    });
+  } else {
+    var previousValues = {};
+    if (!options.miniature) {
+      previousValues.zoom = self.workspace.zoom;
+      previousValues.gridSize = self.workspace.gridSize;
+
+      if (!options.useZoom) self.tools.zoom.set(1);
+      if (!options.useGrid) self.tools.gridSize.set(1);
+      $(canvasContainer).css({ boxShadow: 'none' });
+
+      self.workspace.paper.hideTools();
+      self.inspector.hideInformation();
+    }
+
+    html2canvas($(canvasContainer)[0]).then(function (canvas) {
+      options.format = "image/" + (options.format != 'pdf' ? options.format : 'jpeg');
+      if (options.onlyContent) {
+        var content = self.workspace.paper.getContentBBox();
+        canvas = cropCanvas(canvas,
+          content.x - self.workspace.paperPadding, content.y - self.workspace.paperPadding,
+          content.width + self.workspace.paperPadding * 2, content.height + self.workspace.paperPadding * 2);
+      }
+      callback(canvas.toDataURL(options.format));
+
+      self.tools.zoom.set(previousValues.zoom);
+      self.tools.gridSize.set(previousValues.gridSize);
+      $(canvasContainer).css({ boxShadow: getCSS('box-shadow', 'crowd-workspace-paper') });
+    });
+  }
 }
 
 CrowdEditor.prototype.hasChanges = function () {

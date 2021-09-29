@@ -103,6 +103,31 @@ function getBrowser() {
   return sBrowser;
 }
 
+function SVGtoPDFDownload(svg, options) {
+  let doc = new PDFDocument({ compress: false, size: [options.pageWidth || 612, options.pageHeight || 792], margin: 0 });
+  SVGtoPDF(doc, svg, options.x || 0, options.y || 0, { width: options.width, height: options.height, assumePt: true });
+  let stream = doc.pipe(blobStream());
+  stream.on('finish', () => {
+    let blob = stream.toBlob('application/pdf');
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = options.name + ".pdf";
+    link.click();
+  });
+  doc.end();
+}
+
+function cropCanvas(sourceCanvas, left, top, width, height) {
+  let destCanvas = document.createElement('canvas');
+  destCanvas.width = width;
+  destCanvas.height = height;
+  destCanvas.getContext("2d").drawImage(
+    sourceCanvas,
+    left, top, width, height,  // source rect with content to crop
+    0, 0, width, height);      // newCanvas, same size as source rect
+  return destCanvas;
+}
+
 function isURI(str) {
   return str.indexOf('http://') == 0;
 }
