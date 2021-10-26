@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  metamodelUrl: 'http://crowd.fi.uncoma.edu.ar:3334/',
-  metamodelVerbalizationUrl: 'http://crowd.fi.uncoma.edu.ar:3333/',
+  metamodelUrl: 'http://crowd-cpre.fi.uncoma.edu.ar/',
+  metamodelVerbalizationUrl: 'http://crowd-test.fi.uncoma.edu.ar/',
   metamodelOwlUrl: 'http://crowd.fi.uncoma.edu.ar/crowd2/reasoning/translate/metamodel2owl.php',
   reasoningUrl: 'http://crowd.fi.uncoma.edu.ar/crowd2/reasoning/querying/metamodelsat.php'
 };
