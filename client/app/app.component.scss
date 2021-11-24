@@ -49,3 +49,17 @@
 .navbar-collapse.collapsing .nav-item-uncollapsed {
   display: none;
 }
+
+::ng-deep pre {
+  background-color: #afabab;
+  border-radius: 10px;
+}
+
+::ng-deep .CodeMirror pre > * {
+  text-indent: 0px;
+}
+
+::ng-deep .CodeMirror-wrap pre.CodeMirror-line,
+::ng-deep .CodeMirror-wrap pre.CodeMirror-line-like {
+  word-break: break-all !important;
+}

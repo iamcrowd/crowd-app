@@ -70,35 +70,47 @@ body {
   background: #7a7a7a;
 }
 
-.bootstrap-dark::-webkit-scrollbar-track {
-  background: #212529;
-}
-
-.bootstrap-dark::-webkit-scrollbar-thumb {
-  background: #1b1b1b;
-  border-radius: 10px;
-}
-
-.bootstrap-dark::-webkit-scrollbar-thumb:hover {
-  background: #181818;
-}
-
-/* custom scrollbar for modals*/
+.bootstrap-dark ::-webkit-scrollbar-track,
+.bootstrap-dark::-webkit-scrollbar-track,
 .bootstrap-dark .modal-body::-webkit-scrollbar-track {
   background: #212529;
 }
 
+.bootstrap-dark ::-webkit-scrollbar-thumb,
+.bootstrap-dark::-webkit-scrollbar-thumb,
 .bootstrap-dark .modal-body::-webkit-scrollbar-thumb {
   background: #1b1b1b;
   border-radius: 10px;
 }
 
+.bootstrap-dark ::-webkit-scrollbar-thumb:hover,
+.bootstrap-dark::-webkit-scrollbar-thumb:hover,
 .bootstrap-dark .modal-body::-webkit-scrollbar-thumb:hover {
   background: #181818;
 }
 
+.bootstrap-dark ::-webkit-resizer {
+  background-color: #1b1b1b;
+}
+
+button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Importing Bootstrap SCSS file. */
 @import "~bootstrap/scss/bootstrap";
+
+/* Importing HeliPopper CSS files (for tooltips and popovers) */
+@import "~tippy.js/dist/tippy.css";
+@import "~tippy.js/themes/translucent.css";
+@import "~tippy.js/animations/scale.css";
+
+/* Importing CodeMirror CSS files */
+@import '~codemirror/lib/codemirror';
+@import '~codemirror/theme/duotone-light';
+@import '~codemirror/theme/duotone-dark';
+@import '~codemirror/addon/fold/foldgutter';
 
 .input-group {
   margin-bottom: 15px;

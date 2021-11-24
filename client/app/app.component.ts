@@ -5,6 +5,8 @@ import { LoginComponent } from './login/login.component';
 import { Router, NavigationEnd } from '@angular/router';
 import { RegisterComponent } from './register/register.component';
 import { CookieService } from 'ngx-cookie-service';
+import { DarkmodeService } from './services/darkmode.service';
+import * as CodeMirror from 'codemirror';
 
 declare var iziToast;
 declare var $;
@@ -18,6 +20,7 @@ export class AppComponent implements AfterViewChecked {
   constructor(
     public router: Router,
     public auth: AuthService,
+    public darkmodeService: DarkmodeService,
     private changeDetector: ChangeDetectorRef,
     private modalService: NgbModal,
     private cookieService: CookieService
@@ -30,7 +33,17 @@ export class AppComponent implements AfterViewChecked {
       timeout: false
     });
 
-    this.initDarkMode();
+    this.darkmodeService.initDarkMode();
+
+    CodeMirror.defineInitHook(function (editor) {
+      var charWidth = editor.defaultCharWidth(), basePadding = 4;
+      editor.on("renderLine", function (cm, line, elt) {
+        var off = CodeMirror.countColumn(line.text, null, cm.getOption("tabSize")) * charWidth;
+        elt.style.textIndent = "-" + off + "px";
+        elt.style.paddingLeft = (basePadding + off) + "px";
+      });
+      editor.refresh();
+    });
   }
 
   ngAfterViewChecked(): void {
@@ -72,18 +85,5 @@ export class AppComponent implements AfterViewChecked {
 
   isActive(url: string): boolean {
     return this.router.isActive(url, false);
-  }
-
-  initDarkMode() {
-    // var darkmode = this.cookieService.get('crowd-darkmode') == 'true';
-    var darkmode = localStorage.getItem('crowd-darkmode') == 'true';
-    if (!darkmode) $('body').removeClass('bootstrap-dark');
-    else $('body').addClass('bootstrap-dark');
-  }
-
-  toggleDarkMode() {
-    $('body').toggleClass('bootstrap-dark');
-    // this.cookieService.set('crowd-darkmode', $('body').hasClass('bootstrap-dark'), 365);
-    localStorage.setItem('crowd-darkmode', $('body').hasClass('bootstrap-dark'));
   }
 }

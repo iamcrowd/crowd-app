@@ -14,12 +14,14 @@ import { AdminComponent } from './admin/admin.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { EditorComponent } from './editor/editor.component';
 import { LeaveGuardEditor } from './services/leave-guard-editor.service';
+import { ApiComponent } from './api/api.component';
 
 const routes: Routes = [
   { path: '', component: AboutComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'login', component: LoginComponent },
   { path: 'logout', component: LogoutComponent },
+  { path: 'api', component: ApiComponent },
   { path: 'account', component: AccountComponent, canActivate: [AuthGuardLogin] },
   { path: 'admin', component: AdminComponent, canActivate: [AuthGuardAdmin] },
   { path: 'notfound', component: NotFoundComponent },

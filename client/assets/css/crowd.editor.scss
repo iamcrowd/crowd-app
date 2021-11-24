@@ -61,6 +61,10 @@ $alt-accent-dark: #262a2e;
 }
 
 .crowd-container-side-toggle:hover {
+  background-color: $alt-accent !important;
+}
+
+.bootstrap-dark .crowd-container-side-toggle:hover {
   background-color: $alt-accent-dark !important;
 }
 

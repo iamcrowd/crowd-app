@@ -28,30 +28,36 @@
           </div>
         </li>
         <li class="nav-item">
+          <a class="nav-link" routerLink="/api" routerLinkActive="active">
+            <i class="fa fa-fw fa-sitemap"></i> API
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" routerLink="/admin" routerLinkActive="active" *ngIf="auth.loggedIn && auth.isAdmin">
             <i class="fa fa-fw fa-users"></i> Users
           </a>
         </li>
       </ul>
       <ul class="navbar-nav navbar-right">
-        <li class="nav-item nav-item-uncollapsed" data-toggle="tooltip" data-original-title="Report Bugs" data-placement="bottom">
-          <a class="nav-link" href="https://bitbucket.org/gilia/crowd-app/issues?status=new&status=open" target="blank">
+        <li class="nav-item nav-item-uncollapsed" data-toggle="tooltip" data-original-title="Report Bugs"
+          data-placement="bottom">
+          <a class="nav-link" href="https://github.com/iamcrowd/crowd-app/issues" target="blank">
             <i class="fa fa-fw fa-lg fa-bug"></i>
           </a>
         </li>
         <li class="nav-item nav-item-collapsed">
-          <a class="nav-link" href="https://bitbucket.org/gilia/crowd-app/issues?status=new&status=open" target="blank">
+          <a class="nav-link" href="https://github.com/iamcrowd/crowd-app/issues" target="blank">
             <i class="fa fa-fw fa-bug"></i> Report Bugs
           </a>
         </li>
         <li class="nav-item nav-item-uncollapsed" data-toggle="tooltip" data-original-title="Toggle Dark/Light Mode"
           data-placement="bottom">
-          <a class="nav-link" [routerLink]="" (click)="toggleDarkMode()">
+          <a class="nav-link" [routerLink]="" (click)="darkmodeService.toggleDarkMode()">
             <i class="fa fa-fw fa-lg fa-sun-o"></i>
           </a>
         </li>
         <li class="nav-item nav-item-collapsed">
-          <a class="nav-link" [routerLink]="" (click)="toggleDarkMode()">
+          <a class="nav-link" [routerLink]="" (click)="darkmodeService.toggleDarkMode()">
             <i class="fa fa-fw fa-sun-o"></i> Toggle Dark/Light Mode
           </a>
         </li>

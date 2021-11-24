@@ -28,6 +28,8 @@ declare var CrowdReasoning;
 })
 export class EditorComponent implements OnInit {
 
+  //diagram/json get from state
+  state: any;
   //reference to editor object
   editor: any;
   //actual conceptual model for the editor palette
@@ -99,6 +101,7 @@ export class EditorComponent implements OnInit {
       this.conceptualModel = params.conceptualModel;
       this.ngOnInit();
     });
+    this.state = this.router.getCurrentNavigation().extras.state;
   }
 
   @HostListener('window:beforeunload', ['$event'])
@@ -222,10 +225,26 @@ export class EditorComponent implements OnInit {
       namespaceDescription: this.namespaceDescription,
       namespaceFile: this.namespaceFile
     });
+
+    if (this.state) this.loadState();
+    if (localStorage.getItem('crowd-temporal-diagram') != "" && localStorage.getItem('crowd-temporal-diagram') != null) {
+      console.log(localStorage.getItem('crowd-temporal-diagram'));
+      let temporal = JSON.parse(localStorage.getItem('crowd-temporal-diagram'));
+      console.log(temporal);
+      localStorage.removeItem('crowd-temporal-diagram');
+      setTimeout(() => {
+        temporal.diagram.hasPositions = false;
+        this.editor.tools.import.importFrom({ model: temporal.model, schema: temporal.diagram });
+      }, 1);
+    }
   }
 
   hasChanges(): boolean {
     return this.editor.hasChanges();
+  }
+
+  loadState(): void {
+    this.editor.tools.import.importFrom({ model: this.state.model, schema: this.state.diagram });
   }
 
   getDiagrams(): void {

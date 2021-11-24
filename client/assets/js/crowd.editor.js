@@ -2003,7 +2003,7 @@ CrowdEditor.prototype.initTools = function () {
         '<li> \
           <span class="d-block" data-toggle="tooltip" data-placement="right" title="Call Reasoner"> \
             <button class="dropdown-item" id="crowd-tools-reasoning-input-' + self.id + '"> \
-            <i class="fa fa-fw fa-flask"></i> Reasoning</button> \
+            <i class="fa fa-fw fa-lightbulb-o"></i> Reasoning</button> \
           </span> \
         </li>'
       );
@@ -2011,7 +2011,7 @@ CrowdEditor.prototype.initTools = function () {
       //   '<div class="form-group"> \
       //     <button class="btn btn-warning iconify" id="crowd-tools-reasoning-input-' + self.id + '" type="button" \
       //     data-toggle="tooltip" data-original-title="Call Reasoner" data-placement="bottom"> \
-      //     <i class="fa fa-flask"></i> Reasoning</button> \
+      //     <i class="fa fa-lightbulb-o"></i> Reasoning</button> \
       //   </div>'
       // );
 
@@ -2021,7 +2021,7 @@ CrowdEditor.prototype.initTools = function () {
           <div class="modal-dialog modal-dialog-scrollable modal-sm"> \
             <div class="modal-content"> \
               <div class="modal-header"> \
-                <h5 class="modal-title"><i class="fa fa-fw fa-flask"></i> Reasoning</h5> \
+                <h5 class="modal-title"><i class="fa fa-fw fa-lightbulb-o"></i> Reasoning</h5> \
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
                   <span aria-hidden="true">&times;</span> \
                 </button> \

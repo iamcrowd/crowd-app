@@ -53,6 +53,35 @@ CrowdMetamodel.prototype.request = function (req) {
         if (req.error) req.error(error);
       }
     });
+  } else if (req.from == 'owl') {
+    var formData = new FormData();
+    formData.append('input', req.input);
+    formData.append('ontologyUri', req.ontologyUri);
+    formData.append('ontologyString', req.ontologyString);
+    if (req.ontologiesFiles?.length) {
+      for (var i = 0; i < req.ontologiesFiles.length; i++) {
+        formData.append('ontologiesFiles', req.ontologiesFiles[i]);
+      }
+    }
+    formData.append('reasoning', req.reasoning);
+    return $.ajax({
+      type: "POST",
+      url: url + req.from + 'to' + req.to,
+      enctype: 'multipart/form-data',
+      processData: false,
+      contentType: false,
+      cache: false,
+      data: formData,
+      success: function (res) {
+        console.log('MetamodelAPI: response to ' + url + req.from + 'to' + req.to, res);
+        if (req.success) req.success(res);
+      },
+      error: function (error) {
+        console.log('MetamodelAPI: error', error);
+        if (!req.hideError) self.config.error(error);
+        if (req.error) req.error(error);
+      }
+    });
   }
   else {
     return $.ajax({
