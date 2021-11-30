@@ -35,6 +35,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { EditorComponent } from './editor/editor.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ApiComponent } from './api/api.component';
+import { VarDirective } from './directives/var.directive';
 
 @NgModule({
   declarations: [
@@ -47,7 +48,8 @@ import { ApiComponent } from './api/api.component';
     AdminComponent,
     NotFoundComponent,
     EditorComponent,
-    ApiComponent
+    ApiComponent,
+    VarDirective
   ],
   imports: [
     AppRoutingModule,

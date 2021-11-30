@@ -112,10 +112,8 @@ $alt-accent-dark: #262a2e;
 
 .secondary-side-menu {
   background-color: $alt-accent !important;
-  flex-basis: 20%;
-  min-width: max-content !important;
-  width: 20rem;
   height: 100%;
+  transition: max-width 1s;
 }
 
 ::ng-deep .bootstrap-dark .secondary-side-menu {
@@ -124,6 +122,7 @@ $alt-accent-dark: #262a2e;
 
 .central-menu {
   background-color: $alt-primary !important;
+  height: 100%;
 }
 
 ::ng-deep .bootstrap-dark .central-menu {
@@ -267,11 +266,13 @@ $alt-accent-dark: #262a2e;
   height: 100%;
   width: 25rem;
   background-color: $alt-accent;
-  transition: flex-basis 1s;
+  transition: max-width 1s;
 }
 
 .tab-pane-metrics .metrics-container {
   padding: 0.5rem;
+  min-width: 13rem;
+  max-width: 13rem;
 }
 
 ::ng-deep .bootstrap-dark .tab-pane-metrics {
@@ -287,18 +288,45 @@ $alt-accent-dark: #262a2e;
   width: 100%;
 }
 
-.tab-pane-entry {
+.tab-pane-input {
   position: relative;
   height: 100%;
   padding: 0.5rem;
+  height: 100%;
+}
+
+@media (max-width: 1440px) {
+  .tab-pane-input {
+    height: 100%;
+    transition: height 1s;
+  }
+
+  .tab-pane-input.maximize-output {
+    height: 3rem;
+  }
+
+  .tab-pane-input-content.maximize-output {
+    display: none;
+  }
 }
 
 .tab-pane-output {
   position: relative;
   padding: 0.5rem;
   background-color: $primary;
-  transition: height 1s;
   min-height: 3.25rem;
+  height: 100%;
+}
+
+@media (max-width: 1440px) {
+  .tab-pane-output {
+    height: 3rem;
+    transition: height 1s;
+  }
+
+  .tab-pane-output.show-output {
+    height: 100%;
+  }
 }
 
 ::ng-deep .bootstrap-dark .tab-pane-output {
@@ -325,6 +353,12 @@ $alt-accent-dark: #262a2e;
 .tab-pane-send {
   padding-top: 0.5rem;
   text-align: right;
+}
+
+@media (max-width: 1440px) {
+  .tab-pane-send.maximize-output {
+    display: none;
+  }
 }
 
 .call-type {
@@ -360,7 +394,13 @@ $alt-accent-dark: #262a2e;
   flex-direction: row;
 }
 
-.collapse-buttons button {
+.collapse-buttons > span {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+}
+
+.collapse-buttons button:not(.raw) {
   background-color: $alt-accent;
   margin: 0;
   border-radius: 0;
@@ -368,29 +408,45 @@ $alt-accent-dark: #262a2e;
   flex-grow: 1;
 }
 
-.collapse-buttons button:first-child {
+.collapse-buttons.alt button:not(.raw) {
+  background-color: $accent;
+}
+
+.collapse-buttons button:not(.raw):first-child {
   border-radius: 0.5rem 0 0 0;
 }
 
-.collapse-buttons button:last-child {
+.collapse-buttons button:not(.raw):last-child {
   border-radius: 0 0.5rem 0 0;
 }
 
-.collapse-buttons button.active {
+.collapse-buttons button.active:not(.raw) {
   background-color: $alt-primary;
   opacity: 1 !important;
 }
 
-.collapse-buttons button:hover {
+.collapse-buttons.alt button.active:not(.raw) {
+  background-color: $primary;
+}
+
+.collapse-buttons button:not(.raw):hover {
   opacity: 1;
 }
 
-::ng-deep .bootstrap-dark .collapse-buttons button {
+::ng-deep .bootstrap-dark .collapse-buttons button:not(.raw) {
   background-color: $alt-accent-dark !important;
 }
 
-::ng-deep .bootstrap-dark .collapse-buttons button.active {
+::ng-deep .bootstrap-dark .collapse-buttons button.active:not(.raw) {
   background-color: $alt-primary-dark !important;
+}
+
+::ng-deep .bootstrap-dark .collapse-buttons.alt button:not(.raw) {
+  background-color: $accent-dark !important;
+}
+
+::ng-deep .bootstrap-dark .collapse-buttons.alt button.active:not(.raw) {
+  background-color: $primary-dark !important;
 }
 
 .collapse-container {
@@ -399,8 +455,28 @@ $alt-accent-dark: #262a2e;
   padding: 0.75rem !important;
 }
 
+.collapse-container.alt {
+  background-color: $primary;
+}
+
+.collapse-container.adjusted-height {
+  height: calc(100% - 2rem) !important;
+}
+
+// .collapse-container span {
+//   display: none;
+// }
+
+// .collapse-container span.active {
+//   display: unset;
+// }
+
 ::ng-deep .bootstrap-dark .collapse-container {
   background-color: $alt-primary-dark !important;
+}
+
+::ng-deep .bootstrap-dark .collapse-container.alt {
+  background-color: $primary-dark !important;
 }
 
 .owltometa-files-drop {
@@ -426,8 +502,8 @@ $alt-accent-dark: #262a2e;
 }
 
 .owltometa-files-table thead th {
-  position: sticky;
-  top: -1px;
+  // position: sticky;
+  // top: -1px;
   background-color: $primary;
 }
 
@@ -449,4 +525,26 @@ $alt-accent-dark: #262a2e;
 
 .valid-drag {
   opacity: 1;
+}
+
+.flex-responsive {
+  flex-direction: row;
+}
+
+@media (max-width: 1440px) {
+  .flex-responsive {
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 1440px) {
+  .hide-xl {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1440px) {
+  .hide-sm {
+    display: none !important;
+  }
 }

@@ -107,10 +107,10 @@ button:focus {
 @import "~tippy.js/animations/scale.css";
 
 /* Importing CodeMirror CSS files */
-@import '~codemirror/lib/codemirror';
-@import '~codemirror/theme/duotone-light';
-@import '~codemirror/theme/duotone-dark';
-@import '~codemirror/addon/fold/foldgutter';
+@import "~codemirror/lib/codemirror";
+@import "~codemirror/theme/duotone-light";
+@import "~codemirror/theme/duotone-dark";
+@import "~codemirror/addon/fold/foldgutter";
 
 .input-group {
   margin-bottom: 15px;
@@ -409,4 +409,28 @@ button:focus {
 //navbar custom color on lighttheme
 .crowd-navbar {
   background-color: #fbfbfb !important;
+}
+
+.overflow-y-auto {
+  overflow-y: auto !important;
+}
+
+.overflow-x-auto {
+  overflow-x: auto !important;
+}
+
+.overflow-y-hidden {
+  overflow-y: hidden !important;
+}
+
+.overflow-x-hidden {
+  overflow-x: hidden !important;
+}
+
+.min-w-max-c {
+  min-width: max-content !important;
+}
+
+.max-w-max-c {
+  max-width: max-content !important;
 }

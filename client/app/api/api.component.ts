@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { DarkmodeService } from '../services/darkmode.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -24,9 +24,11 @@ export class ApiComponent implements OnInit {
     public darkmodeService: DarkmodeService
   ) {
     this.JSON = JSON;
+    this.Object = Object;
   }
 
   public JSON: any;
+  public Object: any;
   public selectedAPI: string = 'metamodel';
   public selectedTab: number = 0;
 
@@ -517,10 +519,8 @@ export class ApiComponent implements OnInit {
           method: 'umltometa',
           description: 'Translate an UML to KF metamodel.',
           type: 'POST',
-          response: { name: 'javascript', json: true },
           example: this.examples.uml,
           serialize: ['data'],
-          openIn: ['uml', 'uml'],
           parameters: {
             from: 'uml',
             to: 'kf'
@@ -531,10 +531,8 @@ export class ApiComponent implements OnInit {
           description: 'Translate an EER to KF metamodel.',
           type: 'POST',
           method: 'eertometa',
-          response: { name: 'javascript', json: true },
           example: this.examples.eer,
           serialize: ['data'],
-          openIn: ['eer', 'eer'],
           parameters: {
             from: 'eer',
             to: 'kf'
@@ -545,10 +543,8 @@ export class ApiComponent implements OnInit {
           description: 'Translate an ORM2 to KF metamodel.',
           type: 'POST',
           method: 'ormtometa',
-          response: { name: 'javascript', json: true },
           example: this.examples.orm,
           serialize: ['data'],
-          openIn: ['orm', 'orm'],
           parameters: {
             from: 'orm2',
             to: 'kf'
@@ -559,10 +555,8 @@ export class ApiComponent implements OnInit {
           description: 'Translate an KF metamodel to UML.',
           type: 'POST',
           method: 'metatouml',
-          response: { name: 'javascript', json: true },
           example: this.examples.kf,
           serialize: ['data'],
-          openIn: ['uml', 'uml'],
           parameters: {
             from: 'kf',
             to: 'uml'
@@ -573,10 +567,8 @@ export class ApiComponent implements OnInit {
           description: 'Translate an KF metamodel to EER.',
           type: 'POST',
           method: 'metatoeer',
-          response: { name: 'javascript', json: true },
           example: this.examples.kf,
           serialize: ['data'],
-          openIn: ['eer', 'eer'],
           parameters: {
             from: 'kf',
             to: 'eer'
@@ -587,10 +579,8 @@ export class ApiComponent implements OnInit {
           description: 'Translate an KF metamodel to ORM2.',
           type: 'POST',
           method: 'metatorm',
-          response: { name: 'javascript', json: true },
           example: this.examples.kf,
           serialize: ['data'],
-          openIn: ['orm', 'orm'],
           parameters: {
             from: 'kf',
             to: 'orm2'
@@ -601,10 +591,8 @@ export class ApiComponent implements OnInit {
           description: 'Translate an KF metamodel to OWL.',
           url: environment.metamodelOwlUrl,
           type: 'POST',
-          response: 'xml',
           example: this.examples.kf,
           serialize: ['data'],
-          openIn: ['uml', null],
           parameters: {
             from: 'kf',
             to: 'owl',
@@ -624,19 +612,14 @@ export class ApiComponent implements OnInit {
           name: 'Reasoning',
           description: 'Reasoning on a KF metamodel.',
           type: 'POST',
-          response: { name: 'javascript', json: true },
           example: this.examples.kfReasoning,
           serialize: ['kf'],
-          openIn: ['uml', 'uml'],
-          openInOutput: 'KF',
           parameters: {
             from: 'kf',
             to: 'kf',
             reasoner: 'Racer',
             strategy: 'alcqi',
-            cards: false,
-            outputTab: 'KF',
-            raw: false
+            cards: false
           }
         }
       ]
@@ -654,12 +637,9 @@ export class ApiComponent implements OnInit {
           url: environment.metamodelVerbalizationUrl,
           method: 'owltometa',
           type: 'POST',
-          response: { name: 'javascript', json: true },
           example: this.examples.owl,
           trim: ['ontologyString'],
           bypass: ['ontologiesFiles'],
-          openIn: [null, 'uml'],
-          openInOutput: 'kf',
           parameters: {
             from: 'owl',
             to: 'kf',
@@ -667,9 +647,7 @@ export class ApiComponent implements OnInit {
             input: 'string',
             ontologyUri: '',
             ontologyString: '',
-            ontologiesFiles: [],
-            outputTab: 'kf',
-            raw: false
+            ontologiesFiles: []
           }
         }
       ]
@@ -682,20 +660,12 @@ export class ApiComponent implements OnInit {
     this.newTab();
   }
 
-  setAPI(api: string): void {
-    this.selectedAPI = api;
-  }
-
-  setTab(tab: number): void {
-    console.log("Tab selected: " + tab);
-    this.selectedTab = tab;
-  }
-
   setEndpoint(endpoint: number): void {
     this.tabs[this.selectedTab].api = this.selectedAPI;
     this.tabs[this.selectedTab].endpoint = endpoint;
     this.tabs[this.selectedTab].output = null;
     this.tabs[this.selectedTab].showOutput = false;
+    this.tabs[this.selectedTab].maximizeOutput = false;
     this.tabs[this.selectedTab].showMetrics = false;
     this.tabs[this.selectedTab].parameters = JSON.parse(JSON.stringify(this.apis[this.selectedAPI].endpoints[endpoint].parameters));
     this.tabs[this.selectedTab].parameters.data = '';
@@ -714,7 +684,7 @@ export class ApiComponent implements OnInit {
         endpoint: 0
       });
     }
-    this.setTab(this.tabs.length - 1);
+    this.selectedTab = this.tabs.length - 1;
   }
 
   removeTab(tab: number): void {
@@ -727,14 +697,6 @@ export class ApiComponent implements OnInit {
         this.selectedTab--;
       }
     }
-  }
-
-  toggleOutput(tab: number): void {
-    this.tabs[tab].showOutput = !this.tabs[tab].showOutput;
-  }
-
-  toggleMetrics(tab: number): void {
-    this.tabs[tab].showMetrics = !this.tabs[tab].showMetrics;
   }
 
   send(tab: number): void {
@@ -758,6 +720,8 @@ export class ApiComponent implements OnInit {
         success: (response) => {
           this.tabs[tab].output = response;
           this.tabs[tab].showOutput = true;
+          this.tabs[tab].parameters.outputTab = this.apis[this.tabs[tab].api].endpoints[this.tabs[tab].endpoint].parameters.outputTab;
+          this.calculateMetrics(tab);
           if (response.metrics) {
             this.tabs[tab].showMetrics = true;
           }
@@ -776,37 +740,55 @@ export class ApiComponent implements OnInit {
     }
   }
 
-  viewJSON(tab: number): void {
+  calculateMetrics(tab: number): void {
+    if (this.tabs[tab].output.success != null) {
+      this.tabs[tab].parameters.outputTab = 'success';
+      this.tabs[tab].output.metrics = {};
+      Object.entries(this.tabs[tab].output.success).forEach(([fileKey, file]) => {
+        Object.entries(file['metrics']).forEach(([metricKey, metric]) => {
+          if (this.tabs[tab].output.metrics[metricKey] != null) {
+            this.tabs[tab].output.metrics[metricKey].total += metric;
+            this.tabs[tab].output.metrics[metricKey].avg += metric;
+            this.tabs[tab].output.metrics[metricKey].min = Math.min(this.tabs[tab].output.metrics[metricKey].min, metric as number);
+            this.tabs[tab].output.metrics[metricKey].max = Math.max(this.tabs[tab].output.metrics[metricKey].max, metric as number);
+          } else {
+            this.tabs[tab].output.metrics[metricKey] = { total: metric, avg: metric, min: metric, max: metric };
+          }
+        });
+      });
+      //calculate average for each metric
+      Object.entries(this.tabs[tab].output.metrics).forEach(([metricKey, metric]) => {
+        this.tabs[tab].output.metrics[metricKey].avg /= Object.entries(this.tabs[tab].output.success).length;
+      });
+    }
   }
 
-  loadExample(tab: number, parameter: string, serialize: boolean = true, value?: string): void {
-    console.log(tab, parameter, serialize);
-    this.tabs[tab].parameters[parameter] = serialize
-      ? JSON.stringify(this.apis[this.tabs[tab].api].endpoints[this.tabs[tab].endpoint].example, null, '\t')
-      : (value
-        ? value
-        : this.apis[this.tabs[tab].api].endpoints[this.tabs[tab].endpoint].example);
+  roundMetric(metric: number, decimals: number = 3): number {
+    return metric % 1 != 0 ? Number(metric.toFixed(decimals)) : metric;
   }
 
-  openInEditor(editorModel: string, model: string, tab: number, value: string, serialize: boolean = true, output: boolean = false): void {
-    localStorage.setItem('crowd-temporal-diagram',
-      JSON.stringify({
-        model: model, diagram: (serialize
-          ? (output && this.apis[this.tabs[tab].api].endpoints[this.tabs[tab].endpoint].openInOutput
-            ? JSON.parse(value)[this.apis[this.tabs[tab].api].endpoints[this.tabs[tab].endpoint].openInOutput]
-            : JSON.parse(value))
-          : (output && this.apis[this.tabs[tab].api].endpoints[this.tabs[tab].endpoint].openInOutput
-            ? value[this.apis[this.tabs[tab].api].endpoints[this.tabs[tab].endpoint].openInOutput]
-            : value))
+  openInEditor(editorModel: string, sourceModel: string, diagram: string, serialize: boolean): void {
+    try {
+      editorModel = editorModel == 'kf' ? 'uml' : editorModel;
+      localStorage.setItem('crowd-temporal-diagram', JSON.stringify({
+        model: sourceModel,
+        diagram: serialize ? JSON.parse(diagram) : diagram
       }));
-    // this.router.navigateByUrl('/editor/' + editorModel);
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree(['/editor/' + editorModel])
-    );
-    window.open(url, '_blank');
+      const url = this.router.serializeUrl(this.router.createUrlTree(['/editor/' + editorModel]));
+      window.open(url, '_blank');
+    } catch (e) {
+      iziToast.error({
+        title: 'Error',
+        message: 'There was an error when trying to open the diagram in the editor.<br>' + e,
+      });
+    }
   }
 
   fromInfix(string: string): string {
     return capitalizeOnlyFirstLetter(infixCapsReplace(string));
+  }
+
+  adding(obj1: any, obj2: any): any {
+    return { ...obj1, ...obj2 };
   }
 }
