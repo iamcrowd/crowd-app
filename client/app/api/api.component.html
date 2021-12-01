@@ -301,7 +301,7 @@
   <ngx-codemirror *ngIf="!outputMode && !listMode" [(ngModel)]="container[parameter]" [preserveScrollPosition]="true"
     [options]="{
     theme: 'duotone-' + (this.darkmodeService.isDarkMode() ? 'dark' : 'light'),
-    mode: !languageMode ? { name: 'javascript', json: true } : languageMode,
+    mode: !languageMode ? { name: 'javascript', jsonld: true } : languageMode,
     lineNumbers: true,
     lineWrapping: true,
     foldGutter: true,
@@ -314,7 +314,7 @@
     [ngModel]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
     [preserveScrollPosition]="true" [options]="{
     theme: 'duotone-' + (this.darkmodeService.isDarkMode() ? 'dark' : 'light'),
-    mode: !languageMode ? { name: 'javascript', json: true } : languageMode,
+    mode: !languageMode ? { name: 'javascript', jsonld: true } : languageMode,
     lineNumbers: false,
     lineWrapping: true,
     foldGutter: true,
