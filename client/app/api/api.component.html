@@ -149,7 +149,7 @@
                       <span *ngIf="tab.output.success == null">
                         <ng-container [ngTemplateOutlet]="outputTabs" [ngTemplateOutletContext]="{
                           container: tab.output,
-                          list: ['unsupported'],
+                          list: ['supported', 'unsupported'],
                           open: {
                             'kf': {
                               editorModel: apis[tab.api].endpoints[tab.endpoint].parameters.to,
@@ -187,7 +187,7 @@
                               },
                               subtab: {
                                 '*': {
-                                  list: ['unsupported'],
+                                  list: ['supported', 'unsupported'],
                                   open: {
                                     'kf': {
                                       editorModel: apis[tab.api].endpoints[tab.endpoint].parameters.to,
