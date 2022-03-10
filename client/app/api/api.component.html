@@ -102,8 +102,8 @@
                   (click)="tab.maximizeOutput = !tab.maximizeOutput">
                   <i class="fa fa-fw fa-chevron-{{tab.maximizeOutput ? 'down' : 'up'}}"></i>
                 </button>
-                <button *ngIf="tab.output && !tab.maximizeOutput"
-                  class="toggle-menu-btn btn float-right hide-xl" (click)="tab.showOutput = !tab.showOutput">
+                <button *ngIf="tab.output && !tab.maximizeOutput" class="toggle-menu-btn btn float-right hide-xl"
+                  (click)="tab.showOutput = !tab.showOutput">
                   <i class="fa fa-fw fa-chevron-{{tab.showOutput ? 'down' : 'up'}}"></i>
                 </button>
                 <i class="fa fa-fw fa-spinner fa-pulse fa-2x float-right" *ngIf="tab.loadingOutput"></i>
@@ -323,8 +323,17 @@
     matchBrackets: true,
     readOnly: true
   }"></ngx-codemirror>
-  <div *ngIf="listMode" class="overflow-y-auto overflow-x-hidden text-break" style="height: calc(100% - 2.5rem);">
-    <ul>
+  <div *ngIf="listMode" class="overflow-y-auto overflow-x-hidden text-break pr-2" style="height: calc(100% - 2.5rem);">
+    <div *ngIf="Object.keys(container[parameter]).length == 0"
+      class="text-center d-flex flex-row align-items-center justify-content-center w-100 h-75">
+      <div style="width: 5rem;">
+        <i class="fa fa-envelope-open-o fa-5x"></i>
+      </div>
+      <div style="width: 10rem;">
+        There is no data to display here.
+      </div>
+    </div>
+    <ul *ngIf="container[parameter]">
       <li *ngFor="let item of container[parameter] | keyvalue">{{item.value}}</li>
     </ul>
   </div>
