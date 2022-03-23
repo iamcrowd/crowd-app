@@ -643,7 +643,7 @@ export class ApiComponent implements OnInit {
           parameters: {
             from: 'owl',
             to: 'kf',
-            reasoning: true,
+            reasoner: '',
             input: 'string',
             ontologyUri: '',
             ontologyString: '',

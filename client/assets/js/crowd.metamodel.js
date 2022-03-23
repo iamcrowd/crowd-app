@@ -63,7 +63,7 @@ CrowdMetamodel.prototype.request = function (req) {
         formData.append('ontologiesFiles', req.ontologiesFiles[i]);
       }
     }
-    formData.append('reasoning', req.reasoning);
+    formData.append('reasoner', req.reasoner);
     return $.ajax({
       type: "POST",
       url: url + req.from + 'to' + req.to,

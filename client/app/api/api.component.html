@@ -500,12 +500,20 @@
 <ng-template #owltometa let-tab='tab'>
   <div class="d-flex flex-column h-100 w-100">
     <div class="row flex-shrink-0" style="padding-bottom: 0.5rem;">
-      <div class="col">
-        <div class="custom-control custom-switch">
+      <div class="col-6">
+        <!-- <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input" [(ngModel)]="tab.parameters.reasoning"
             id="reasoning-switch">
           <label class="custom-control-label" for="reasoning-switch">Reasoning</label>
-        </div>
+        </div> -->
+        <label>Reasoner</label>
+        <select class="form-control custom-select my-1 mr-sm-2" [(ngModel)]="tab.parameters.reasoner">
+          <option value="">No reasoning</option>
+          <option value="jfact">JFact</option>
+          <option value="pellet">Pellet</option>
+          <option value="Racer">Racer</option>
+          <option value="konclude">Konclude</option>
+        </select>
       </div>
     </div>
     <div class="row flex-shrink-0 m-0 overflow-auto">
