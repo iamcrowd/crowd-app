@@ -645,6 +645,7 @@ export class ApiComponent implements OnInit {
             to: 'kf',
             reasoner: '',
             input: 'string',
+            filtering: true,
             ontologyUri: '',
             ontologyString: '',
             ontologiesFiles: []

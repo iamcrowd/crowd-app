@@ -515,6 +515,22 @@
           <option value="konclude">Konclude</option>
         </select>
       </div>
+      <div class="col-6">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" [(ngModel)]="tab.parameters.filtering"
+            id="filtering-switch">
+          <label class="custom-control-label" for="filtering-switch">Filtering</label>
+          <i class="btn btn-sm fa fa-fw fa-info-circle" [tippy]="filtering_info" placement="right"></i>
+        </div>
+        <ng-template #filtering_info>
+          This will remove implicit axioms from the ontology.<br>
+          <span class="text-muted">Specifically:<br>
+            - subclass(atom, top)<br>
+            - subclass(bottom, atom)<br>
+            - disjoint(bottom, atom)
+          </span>
+        </ng-template>
+      </div>
     </div>
     <div class="row flex-shrink-0 m-0 overflow-auto">
       <div class="col collapse-buttons p-0">

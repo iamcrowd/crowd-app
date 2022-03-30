@@ -64,6 +64,7 @@ CrowdMetamodel.prototype.request = function (req) {
       }
     }
     formData.append('reasoner', req.reasoner);
+    formData.append('filtering', req.filtering);
     return $.ajax({
       type: "POST",
       url: url + req.from + 'to' + req.to,
