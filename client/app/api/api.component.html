@@ -246,7 +246,7 @@
               </div>
             </div>
           </div>
-          <div class="tab-pane-metrics d-flex flex-row" [style.max-width]="tab.showMetrics ? '14.5rem' : '1.5rem'">
+          <div class="tab-pane-metrics d-flex flex-row" [style.max-width]="tab.showMetrics ? '20rem' : '1.5rem'">
             <div class="d-flex align-items-center flex-shrink-0" style="width: 1.5rem;">
               <button class="toggle-menu-btn toggle-menu-btn-large btn p-0 w-100 h-100"
                 (click)="tab.showMetrics = !tab.showMetrics">
@@ -259,15 +259,43 @@
                 No metrics available.
               </div>
               <div *ngIf="tab.output?.metrics" class="metrics-list overflow-y-auto">
-                <div *ngFor="let metric of tab.output.metrics | keyvalue" class="metric">
-                  <label class="font-weight-bold key">{{fromInfix(metric.key)}}</label><br />
-                  <label style="padding-left: 1rem;" *ngIf='tab.output.success == null'>{{metric.value}}</label>
-                  <label style="padding-left: 1rem;" *ngIf='tab.output.success != null'>
-                    <b>T:</b> {{roundMetric(metric.value.total)}}, <b>A:</b> {{roundMetric(metric.value.avg)}},
-                    <b>m:</b>
-                    {{roundMetric(metric.value.min)}}, <b>M:</b> {{roundMetric(metric.value.max)}}
-                  </label>
-                </div>
+                <ngb-accordion #metricsAccordion="ngbAccordion" animation="true">
+                  <ngb-panel *ngFor="let metricGroup of tab.output.metrics | keyvalue" cardClass="metric-group">
+                    <ng-template ngbPanelHeader>
+                      <button ngbPanelToggle class="btn w-100 h-100">{{fromInfix(metricGroup.key)}}</button>
+                    </ng-template>
+                    <ng-template ngbPanelContent>
+                      <div *ngFor="let metric of metricGroup.value | keyvalue" class="metric">
+                        <label class="font-weight-bold key">{{fromInfix(metric.key)}}</label><br />
+                        <label style="padding-left: 1rem;" *ngIf='tab.output.success == null'>
+                          <span
+                            class="badge badge-{{metric.value != 0 ? 'primary': 'secondary'}}">{{metric.value}}</span>
+                        </label>
+                        <label style="padding-left: 1rem;" *ngIf='tab.output.success != null'>
+                          <span class="badge badge-{{metric.value.total != 0 ? 'info': 'secondary'}}">
+                            <b style="font-variant: small-caps;">tot</b>&nbsp;<span
+                              class="badge badge-pill badge-light">{{roundMetric(metric.value.total)}}</span>
+                          </span>&nbsp;
+                          <span
+                            class="badge badge-{{metric.value.avg != 0 || metric.value.total != 0  ? 'warning': 'secondary'}}">
+                            <b style="font-variant: small-caps;">avg</b>&nbsp;<span
+                              class="badge badge-pill badge-light">{{roundMetric(metric.value.avg)}}</span>
+                          </span>&nbsp;
+                          <span
+                            class="badge badge-{{metric.value.min != 0 || metric.value.total != 0  ? 'success': 'secondary'}}">
+                            <b style="font-variant: small-caps;">min</b>&nbsp;<span
+                              class="badge badge-pill badge-light">{{roundMetric(metric.value.min)}}</span>
+                          </span>&nbsp;
+                          <span
+                            class="badge badge-{{metric.value.max != 0 || metric.value.total != 0  ? 'danger': 'secondary'}}">
+                            <b style="font-variant: small-caps;">max</b>&nbsp;<span
+                              class="badge badge-pill badge-light">{{roundMetric(metric.value.max)}}</span>
+                          </span>
+                        </label>
+                      </div>
+                    </ng-template>
+                  </ngb-panel>
+                </ngb-accordion>
               </div>
             </div>
           </div>

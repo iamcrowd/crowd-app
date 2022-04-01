@@ -4,6 +4,7 @@ import { DarkmodeService } from '../services/darkmode.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CodemirrorComponent } from '@ctrl/ngx-codemirror';
 import * as CodeMirror from 'codemirror';
+import { NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
 
 declare var iziToast;
 
@@ -26,6 +27,8 @@ export class ApiComponent implements OnInit {
     this.JSON = JSON;
     this.Object = Object;
   }
+
+  @ViewChild('metricsAccordion') metricsAccordion: NgbAccordion;
 
   public JSON: any;
   public Object: any;
@@ -746,22 +749,31 @@ export class ApiComponent implements OnInit {
       this.tabs[tab].parameters.outputTab = 'success';
       this.tabs[tab].output.metrics = {};
       Object.entries(this.tabs[tab].output.success).forEach(([fileKey, file]) => {
-        Object.entries(file['metrics']).forEach(([metricKey, metric]) => {
-          if (this.tabs[tab].output.metrics[metricKey] != null) {
-            this.tabs[tab].output.metrics[metricKey].total += metric;
-            this.tabs[tab].output.metrics[metricKey].avg += metric;
-            this.tabs[tab].output.metrics[metricKey].min = Math.min(this.tabs[tab].output.metrics[metricKey].min, metric as number);
-            this.tabs[tab].output.metrics[metricKey].max = Math.max(this.tabs[tab].output.metrics[metricKey].max, metric as number);
-          } else {
-            this.tabs[tab].output.metrics[metricKey] = { total: metric, avg: metric, min: metric, max: metric };
-          }
+        Object.entries(file['metrics']).forEach(([metricGroupKey, metricGroup]) => {
+          if (this.tabs[tab].output.metrics[metricGroupKey] == null)
+            this.tabs[tab].output.metrics[metricGroupKey] = {};
+          Object.entries(metricGroup).forEach(([metricKey, metric]) => {
+            if (this.tabs[tab].output.metrics[metricGroupKey][metricKey] != null) {
+              this.tabs[tab].output.metrics[metricGroupKey][metricKey].total += metric;
+              this.tabs[tab].output.metrics[metricGroupKey][metricKey].avg += metric;
+              this.tabs[tab].output.metrics[metricGroupKey][metricKey].min = Math.min(this.tabs[tab].output.metrics[metricGroupKey][metricKey].min, metric as number);
+              this.tabs[tab].output.metrics[metricGroupKey][metricKey].max = Math.max(this.tabs[tab].output.metrics[metricGroupKey][metricKey].max, metric as number);
+            } else {
+              this.tabs[tab].output.metrics[metricGroupKey][metricKey] = { total: metric, avg: metric, min: metric, max: metric };
+            }
+          });
         });
       });
       //calculate average for each metric
-      Object.entries(this.tabs[tab].output.metrics).forEach(([metricKey, metric]) => {
-        this.tabs[tab].output.metrics[metricKey].avg /= Object.entries(this.tabs[tab].output.success).length;
+      Object.entries(this.tabs[tab].output.metrics).forEach(([metricGroupKey, metricGroup]) => {
+        Object.entries(metricGroup).forEach(([metricKey, metric]) => {
+          this.tabs[tab].output.metrics[metricGroupKey][metricKey].avg /= Object.entries(this.tabs[tab].output.success).length;
+        });
       });
     }
+    setTimeout(() => {
+      this.metricsAccordion.expandAll();
+    });
   }
 
   roundMetric(metric: number, decimals: number = 3): number {

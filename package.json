@@ -38,7 +38,7 @@
     "@ctrl/ngx-codemirror": "^4.1.1",
     "@forevolve/bootstrap-dark": "^1.0.0-alpha.1091",
     "@fortawesome/fontawesome-free": "^5.14.0",
-    "@ng-bootstrap/ng-bootstrap": "^7.0.0",
+    "@ng-bootstrap/ng-bootstrap": "^8.0.0",
     "@ngneat/helipopper": "^4.2.0",
     "@ngneat/overview": "^1.0.0",
     "angular-emojis": "^1.0.0",
