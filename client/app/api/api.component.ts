@@ -29,6 +29,7 @@ export class ApiComponent implements OnInit {
   }
 
   @ViewChild('metricsAccordion') metricsAccordion: NgbAccordion;
+  @ViewChild('listAccordion') listAccordion: NgbAccordion;
 
   public JSON: any;
   public Object: any;
@@ -772,7 +773,8 @@ export class ApiComponent implements OnInit {
       });
     }
     setTimeout(() => {
-      this.metricsAccordion.expandAll();
+      this.metricsAccordion?.expandAll();
+      this.listAccordion?.expandAll();
     });
   }
 
@@ -795,6 +797,27 @@ export class ApiComponent implements OnInit {
         message: 'There was an error when trying to open the diagram in the editor.<br>' + e,
       });
     }
+  }
+
+  getCategories(items: any) {
+    let categories = [];
+    Object.values(items).forEach(item => {
+      let category = this.getCategory(item.toString());
+      if (!categories.includes(category)) categories.push(category);
+    });
+    return categories;
+  }
+
+  getCategory(item: string) {
+    return item.substring(0, item.indexOf('('));
+  }
+
+  getItemsByCategory(items: any, category: string) {
+    let itemsByCategory = [];
+    Object.values(items).forEach(item => {
+      if (this.getCategory(item.toString()) == category) itemsByCategory.push(item);
+    });
+    return itemsByCategory;
   }
 
   fromInfix(string: string): string {

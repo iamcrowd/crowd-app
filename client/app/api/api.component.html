@@ -149,7 +149,7 @@
                       <span *ngIf="tab.output.success == null">
                         <ng-container [ngTemplateOutlet]="outputTabs" [ngTemplateOutletContext]="{
                           container: tab.output,
-                          list: ['supported', 'unsupported'],
+                          listCategorized: ['supported', 'unsupported'],
                           open: {
                             'kf': {
                               editorModel: apis[tab.api].endpoints[tab.endpoint].parameters.to,
@@ -260,7 +260,7 @@
               </div>
               <div *ngIf="tab.output?.metrics" class="metrics-list overflow-y-auto">
                 <ngb-accordion #metricsAccordion="ngbAccordion" animation="true">
-                  <ngb-panel *ngFor="let metricGroup of tab.output.metrics | keyvalue" cardClass="metric-group">
+                  <ngb-panel *ngFor="let metricGroup of tab.output.metrics | keyvalue" cardClass="accordion-button">
                     <ng-template ngbPanelHeader>
                       <button ngbPanelToggle class="btn w-100 h-100">{{fromInfix(metricGroup.key)}}</button>
                     </ng-template>
@@ -307,27 +307,34 @@
 
 <!--generic code editor for use in both input and output templates-->
 <ng-template #codeEditor let-container='container' let-parameter='parameter' let-label='label'
-  let-languageMode='languageMode' let-outputMode='outputMode' let-listMode='listMode' let-serialize='serialize'
-  let-example='example' let-open='open' let-fullHeight='fullHeight' let-raw='raw'>
-  <button *ngIf="raw" class="btn btn-secondary btn-sm float-left mr-2" (click)="raw.raw = !raw.raw"
-    tippy="Toggle raw data view">
-    <i class="fa fa-fw fa-file-code-o"></i>
-  </button>
-  <label>{{label}}</label>&nbsp;
-  <button *ngIf="example && !outputMode" class="example-btn btn btn-sm btn-warning font-weight-bold"
-    (click)="container[parameter] = example">EXAMPLE</button>
-  <button class="btn btn-secondary btn-sm float-right" ngxClipboard
-    [cbContent]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
-    tippy="Copy to Clipboard">
-    <i class="fa fa-fw fa-clipboard"></i>
-  </button>
-  <button class="btn btn-secondary btn-sm float-right" *ngIf="open"
-    (click)="openInEditor(open.editorModel, open.sourceModel, open.parameter ? container[parameter][open.parameter] : container[parameter], open.serialize)"
-    tippy="Open in Editor" style="margin-right: 0.5rem;">
-    <i class="fa fa-fw fa-th"></i>
-  </button>
-  <ngx-codemirror *ngIf="!outputMode && !listMode" [(ngModel)]="container[parameter]" [preserveScrollPosition]="true"
-    [options]="{
+  let-languageMode='languageMode' let-outputMode='outputMode' let-listMode='listMode'
+  let-listModeCategorized="listModeCategorized" let-serialize='serialize' let-example='example' let-open='open'
+  let-fullHeight='fullHeight' let-raw='raw'>
+  <span *ngVar="{ categoriesMode: listModeCategorized } as settings">
+    <button *ngIf="raw" class="btn btn-secondary btn-sm float-left mr-2" (click)="raw.raw = !raw.raw"
+      tippy="Toggle raw data view">
+      <i class="fa fa-fw fa-file-code-o"></i>
+    </button>
+    <label>{{label}}</label>&nbsp;
+    <button *ngIf="example && !outputMode" class="example-btn btn btn-sm btn-warning font-weight-bold"
+      (click)="container[parameter] = example">EXAMPLE</button>
+    <button class="btn btn-secondary btn-sm float-right" ngxClipboard
+      [cbContent]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
+      tippy="Copy to Clipboard">
+      <i class="fa fa-fw fa-clipboard"></i>
+    </button>
+    <button class="btn btn-secondary btn-sm float-right" *ngIf="listMode"
+      (click)="settings.categoriesMode = !settings.categoriesMode" tippy="Categorized Mode"
+      style="margin-right: 0.5rem;">
+      <i class="fa fa-fw fa-list"></i>
+    </button>
+    <button class="btn btn-secondary btn-sm float-right" *ngIf="open"
+      (click)="openInEditor(open.editorModel, open.sourceModel, open.parameter ? container[parameter][open.parameter] : container[parameter], open.serialize)"
+      tippy="Open in Editor" style="margin-right: 0.5rem;">
+      <i class="fa fa-fw fa-th"></i>
+    </button>
+    <ngx-codemirror *ngIf="!outputMode && !listMode" [(ngModel)]="container[parameter]" [preserveScrollPosition]="true"
+      [options]="{
     theme: 'duotone-' + (this.darkmodeService.isDarkMode() ? 'dark' : 'light'),
     mode: !languageMode ? { name: 'javascript', jsonld: true } : languageMode,
     lineNumbers: true,
@@ -338,9 +345,9 @@
     matchBrackets: true,
     readOnly: false
   }"></ngx-codemirror>
-  <ngx-codemirror *ngIf="outputMode && !listMode" [class.codemirror-full-height]="fullHeight"
-    [ngModel]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
-    [preserveScrollPosition]="true" [options]="{
+    <ngx-codemirror *ngIf="outputMode && !listMode" [class.codemirror-full-height]="fullHeight"
+      [ngModel]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
+      [preserveScrollPosition]="true" [options]="{
     theme: 'duotone-' + (this.darkmodeService.isDarkMode() ? 'dark' : 'light'),
     mode: !languageMode ? { name: 'javascript', jsonld: true } : languageMode,
     lineNumbers: false,
@@ -351,20 +358,37 @@
     matchBrackets: true,
     readOnly: true
   }"></ngx-codemirror>
-  <div *ngIf="listMode" class="overflow-y-auto overflow-x-hidden text-break pr-2" style="height: calc(100% - 2.5rem);">
-    <div *ngIf="Object.keys(container[parameter]).length == 0"
-      class="text-center d-flex flex-row align-items-center justify-content-center w-100 h-75">
-      <div style="width: 5rem;">
-        <i class="fa fa-envelope-open-o fa-5x"></i>
+    <div *ngIf="listMode" class="overflow-y-auto overflow-x-hidden text-break pr-2"
+      style="height: calc(100% - 2.5rem);">
+      <div *ngIf="Object.keys(container[parameter]).length == 0"
+        class="text-center d-flex flex-row align-items-center justify-content-center w-100 h-75">
+        <div style="width: 5rem;">
+          <i class="fa fa-envelope-open-o fa-5x"></i>
+        </div>
+        <div style="width: 10rem;">
+          There is no data to display here.
+        </div>
       </div>
-      <div style="width: 10rem;">
-        There is no data to display here.
+      <div *ngIf="container[parameter]">
+        <ul *ngIf="!settings.categoriesMode">
+          <li *ngFor="let item of container[parameter] | keyvalue">{{item.value}}</li>
+        </ul>
+        <ngb-accordion *ngIf="settings.categoriesMode" #listAccordion="ngbAccordion" animation="true">
+          <ngb-panel *ngFor="let category of getCategories(container[parameter])" cardClass="accordion-button">
+            <ng-template ngbPanelHeader>
+              <button ngbPanelToggle class="btn w-100 h-100">{{category}}</button>
+            </ng-template>
+            <ng-template ngbPanelContent>
+              <ul>
+                <li *ngFor="let item of getItemsByCategory(container[parameter], category) | keyvalue">{{item.value}}
+                </li>
+              </ul>
+            </ng-template>
+          </ngb-panel>
+        </ngb-accordion>
       </div>
     </div>
-    <ul *ngIf="container[parameter]">
-      <li *ngFor="let item of container[parameter] | keyvalue">{{item.value}}</li>
-    </ul>
-  </div>
+  </span>
 </ng-template>
 
 <!--generic code editor configuration for use in input templates-->
@@ -401,7 +425,8 @@
 
 <!--generic template for divide output json in tabs-->
 <ng-template #outputTabs let-container='container' let-open='open' let-subtab='subtab' let-raw='raw' let-list='list'
-  let-rawTemplate='rawTemplate' let-rawParameter='rawParameter' let-adjustedHeight='adjustedHeight' let-alt='alt'>
+  let-listCategorized='listCategorized' let-rawTemplate='rawTemplate' let-rawParameter='rawParameter'
+  let-adjustedHeight='adjustedHeight' let-alt='alt'>
   <span *ngVar="{ opened: Object.keys(container)[0], raw: false } as settings">
     <span *ngIf="settings.raw">
       <ng-container [ngTemplateOutlet]="raw.template ? raw.template : codeEditor"
@@ -430,7 +455,8 @@
               parameter: tab.key,
               label: '‎',
               outputMode: true,
-              listMode: list && list.includes(tab.key),
+              listMode: (list && list.includes(tab.key)) || (listCategorized && listCategorized.includes(tab.key)),
+              listModeCategorized: listCategorized && listCategorized.includes(tab.key),
               serialize: true,
               open: open && open[tab.key] ? {
                 editorModel: open[tab.key].editorModel,
@@ -442,6 +468,7 @@
               [ngTemplateOutletContext]="{
               container: container[tab.key],
               list: subtab[tab.key] ? subtab[tab.key].list : subtab['*'].list,
+              listCategorized: subtab[tab.key] ? subtab[tab.key].listCategorized : subtab['*'].listCategorized,
               open: subtab[tab.key] ? subtab[tab.key].open : subtab['*'].open,
               raw: subtab[tab.key] ? subtab[tab.key].raw : Object.assign(subtab['*'].raw, { parameter: tab.key }),
               subtab: subtab[tab.key] ? subtab[tab.key].subtab : subtab['*'].subtab,
