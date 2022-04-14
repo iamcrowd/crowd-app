@@ -1,10 +1,10 @@
-import { AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { DarkmodeService } from '../services/darkmode.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CodemirrorComponent } from '@ctrl/ngx-codemirror';
-import * as CodeMirror from 'codemirror';
 import { NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
+import { FileSaverService } from 'ngx-filesaver';
+import * as moment from 'moment';
 
 declare var iziToast;
 
@@ -22,7 +22,8 @@ export class ApiComponent implements OnInit {
 
   constructor(
     private router: Router,
-    public darkmodeService: DarkmodeService
+    public darkmodeService: DarkmodeService,
+    private fileSaverService: FileSaverService
   ) {
     this.JSON = JSON;
     this.Object = Object;
@@ -650,6 +651,7 @@ export class ApiComponent implements OnInit {
             reasoner: '',
             input: 'string',
             filtering: true,
+            timeout: 60000,
             ontologyUri: '',
             ontologyString: '',
             ontologiesFiles: []
@@ -661,8 +663,19 @@ export class ApiComponent implements OnInit {
 
   public tabs = [];
 
+  @HostListener('window:beforeunload', ['$event'])
+  doSomething($event) {
+    if (this.hasChanges()) {
+      $event.returnValue = 'Are you sure you want to leave page? You may lost actual proccess';
+    }
+  }
+
   ngOnInit(): void {
     this.newTab();
+  }
+
+  hasChanges(): boolean {
+    return this.tabs[this.selectedTab].multiActual != null;
   }
 
   setEndpoint(endpoint: number): void {
@@ -721,6 +734,16 @@ export class ApiComponent implements OnInit {
 
       this.tabs[tab].loadingOutput = true;
 
+      this.tabs[tab].multiTotalFiles = null;
+      this.tabs[tab].multiSucceded = {};
+      this.tabs[tab].multiFailed = {};
+      this.tabs[tab].multiActual = null;
+      this.tabs[tab].multiActualTime = 0;
+      this.tabs[tab].multiTotalTime = 0;
+
+      this.tabs[tab].output = null;
+      this.tabs[tab].showMetrics = false;
+
       this.apis[this.tabs[tab].api].service.request({
         success: (response) => {
           this.tabs[tab].output = response;
@@ -735,6 +758,8 @@ export class ApiComponent implements OnInit {
         error: (error) => {
           this.tabs[tab].loadingOutput = false;
         },
+        apiComponent: this,
+        tab: tab,
         ...serializedParameters
       });
     } catch (e) {
@@ -826,5 +851,24 @@ export class ApiComponent implements OnInit {
 
   adding(obj1: any, obj2: any): any {
     return { ...obj1, ...obj2 };
+  }
+
+  getMultiProcessed(tab: number): number {
+    return Object.keys(this.tabs[tab].multiSucceded).length + Object.keys(this.tabs[tab].multiFailed).length;
+  }
+
+  getMultiProgress(tab: number): number {
+    return this.getMultiProcessed(tab) * 100 / this.tabs[tab].multiTotalFiles;
+  }
+
+  downloadFile(name: string, type: string, content: string) {
+    this.fileSaverService.save(
+      new Blob([content], { type: this.fileSaverService.genType(type) }),
+      name + '.' + type
+    );
+  }
+
+  formatTime(milisecs: number): string {
+    return milisecs < 1000 * 60 * 60 ? moment.utc(milisecs).format('mm:ss') : moment.utc(milisecs).format('HH:mm:ss');
   }
 }

@@ -1,6 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Component, Injectable } from '@angular/core';
 import { CanDeactivate } from '@angular/router';
-import { EditorComponent } from '../editor/editor.component';
 import { Subject } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LeaveGuardWarningComponent } from '../shared/leave-guard-warning/leave-guard-warning.component';
@@ -8,14 +7,14 @@ import { LeaveGuardWarningComponent } from '../shared/leave-guard-warning/leave-
 declare var $
 
 @Injectable()
-export class LeaveGuardEditor implements CanDeactivate<EditorComponent> {
+export class LeaveGuard implements CanDeactivate<Component> {
 
   constructor(
     private modalService: NgbModal
   ) { }
 
-  canDeactivate(editor: EditorComponent) {
-    if (editor.hasChanges()) {
+  canDeactivate(component: Component) {
+    if (component["hasChanges"] == null || component["hasChanges"]()) {
       const subject = new Subject<boolean>();
 
       const modal = this.modalService.open(LeaveGuardWarningComponent);

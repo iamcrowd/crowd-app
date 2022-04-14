@@ -58,33 +58,84 @@ CrowdMetamodel.prototype.request = function (req) {
     formData.append('input', req.input);
     formData.append('ontologyUri', req.ontologyUri);
     formData.append('ontologyString', req.ontologyString);
-    if (req.ontologiesFiles?.length) {
-      for (var i = 0; i < req.ontologiesFiles.length; i++) {
-        formData.append('ontologiesFiles', req.ontologiesFiles[i]);
-      }
-    }
     formData.append('reasoner', req.reasoner);
     formData.append('filtering', req.filtering);
-    return $.ajax({
-      type: "POST",
-      url: url + req.from + 'to' + req.to,
-      enctype: 'multipart/form-data',
-      processData: false,
-      contentType: false,
-      cache: false,
-      data: formData,
-      success: function (res) {
-        console.log('MetamodelAPI: response to ' + url + req.from + 'to' + req.to, res);
-        if (req.success) req.success(res);
-      },
-      error: function (error) {
-        console.log('MetamodelAPI: error', error);
-        if (!req.hideError) self.config.error(error);
-        if (req.error) req.error(error);
+    if (req.input == 'files' && req.ontologiesFiles?.length > 1 && req.apiComponent && req.tab != null) {
+      req.apiComponent.tabs[req.tab].multiTotalFiles = req.ontologiesFiles.length;
+      req.apiComponent.tabs[req.tab].showOutput = true;
+
+      req.apiComponent.tabs[req.tab].multiTimeInterval = setInterval(function () {
+        req.apiComponent.tabs[req.tab].multiTotalTime += 1000;
+        if (req.apiComponent.tabs[req.tab].multiActualTime >= 1000) req.apiComponent.tabs[req.tab].multiActualTime -= 1000;
+      }, 1000);
+      req.apiComponent.tabs[req.tab].multiTotalTime = 0;
+
+      //call recursively each file of the req.ontologiesFiles array
+      function requestFile(index) {
+        formData.set('ontologiesFiles', req.ontologiesFiles[index]);
+        req.apiComponent.tabs[req.tab].multiActual = req.ontologiesFiles[index].name;
+        req.apiComponent.tabs[req.tab].multiActualTime = req.timeout;
+
+        $.ajax({
+          type: "POST",
+          url: url + req.from + 'to' + req.to,
+          enctype: 'multipart/form-data',
+          processData: false,
+          contentType: false,
+          cache: false,
+          data: formData,
+          timeout: req.timeout ? req.timeout : 60000, //default timeout is 60s
+          success: function (res) {
+            console.log('MetamodelAPI: response to ' + url + req.from + 'to' + req.to, 'File: ' + req.ontologiesFiles[index].name, res);
+            if (req.apiComponent.tabs[req.tab].multiSucceded)
+              req.apiComponent.tabs[req.tab].multiSucceded[req.ontologiesFiles[index].name] = res;
+          },
+          error: function (error) {
+            console.log('MetamodelAPI: error', 'File: ' + req.ontologiesFiles[index].name, error);
+            if (req.apiComponent.tabs[req.tab].multiFailed)
+              req.apiComponent.tabs[req.tab].multiFailed[req.ontologiesFiles[index].name] = { message: error.responseJSON?.message, stackTrace: error.responseJSON?.stackTrace };
+          },
+          complete: function () {
+            if (index < req.ontologiesFiles.length - 1) {
+              requestFile(index + 1);
+            } else {
+              if (req.apiComponent.tabs[req.tab].multiSucceded && req.apiComponent.tabs[req.tab].multiFailed) {
+                clearInterval(req.apiComponent.tabs[req.tab].multiTimeInterval);
+                var res = { success: req.apiComponent.tabs[req.tab].multiSucceded, failed: req.apiComponent.tabs[req.tab].multiFailed };
+                req.apiComponent.tabs[req.tab].multiActual = null;
+                req.success(res);
+              }
+            }
+          }
+        });
       }
-    });
-  }
-  else {
+
+      //start recursive call
+      requestFile(0);
+    } else {
+      if (req.ontologiesFiles?.length)
+        formData.append('ontologiesFiles', req.ontologiesFiles[0]);
+
+      return $.ajax({
+        type: "POST",
+        url: url + req.from + 'to' + req.to,
+        enctype: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        cache: false,
+        data: formData,
+        success: function (res) {
+          console.log('MetamodelAPI: response to ' + url + req.from + 'to' + req.to, res);
+          if (req.success) req.success(res);
+        },
+        error: function (error) {
+          console.log('MetamodelAPI: error', error);
+          if (!req.hideError) self.config.error(error);
+          if (req.error) req.error(error);
+        }
+      });
+    }
+  } else {
     return $.ajax({
       type: "POST",
       headers: {
