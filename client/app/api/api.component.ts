@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { DarkmodeService } from '../services/darkmode.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
 import { FileSaverService } from 'ngx-filesaver';
 import * as moment from 'moment';
@@ -493,6 +493,12 @@ export class ApiComponent implements OnInit {
             (error.responseJSON != null
               ? error.responseJSON.error + "<br>" + error.responseJSON.message
               : error.responseText),
+          buttons: [
+            ['<button class="btn"><i class="fa fa-fw fa-download"></i></button>', (instance, toast) => {
+              if (error.responseJSON?.stackTrace)
+                this.downloadFile('exception', 'txt', error.responseJSON.stackTrace);
+            }, false],
+          ]
         });
       }
     }),
@@ -824,7 +830,7 @@ export class ApiComponent implements OnInit {
     }
   }
 
-  getCategories(items: any) {
+  getCategories(items: any): any {
     let categories = [];
     Object.values(items).forEach(item => {
       let category = this.getCategory(item.toString());
@@ -833,11 +839,11 @@ export class ApiComponent implements OnInit {
     return categories;
   }
 
-  getCategory(item: string) {
+  getCategory(item: string): string {
     return item.substring(0, item.indexOf('('));
   }
 
-  getItemsByCategory(items: any, category: string) {
+  getItemsByCategory(items: any, category: string): any {
     let itemsByCategory = [];
     Object.values(items).forEach(item => {
       if (this.getCategory(item.toString()) == category) itemsByCategory.push(item);
@@ -861,7 +867,7 @@ export class ApiComponent implements OnInit {
     return this.getMultiProcessed(tab) * 100 / this.tabs[tab].multiTotalFiles;
   }
 
-  downloadFile(name: string, type: string, content: string) {
+  downloadFile(name: string, type: string, content: string): void {
     this.fileSaverService.save(
       new Blob([content], { type: this.fileSaverService.genType(type) }),
       name + '.' + type
@@ -870,5 +876,23 @@ export class ApiComponent implements OnInit {
 
   formatTime(milisecs: number): string {
     return milisecs < 1000 * 60 * 60 ? moment.utc(milisecs).format('mm:ss') : moment.utc(milisecs).format('HH:mm:ss');
+  }
+
+  loadOutput(tab: number): void {
+    var reader: FileReader = new FileReader();
+
+    reader.onloadend = (e) => {
+      this.tabs[tab].output = JSON.parse(reader.result.toString());
+
+      setTimeout(() => {
+        this.tabs[tab].showOutput = true;
+        this.tabs[tab].showMetrics = true;
+        this.tabs[tab].outputFile = null;
+        this.metricsAccordion?.expandAll();
+        this.listAccordion?.expandAll();
+      });
+    }
+
+    reader.readAsText(this.tabs[tab].outputFile);
   }
 }
