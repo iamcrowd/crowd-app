@@ -875,7 +875,10 @@ export class ApiComponent implements OnInit {
   }
 
   formatTime(milisecs: number): string {
-    return milisecs < 1000 * 60 * 60 ? moment.utc(milisecs).format('mm:ss') : moment.utc(milisecs).format('HH:mm:ss');
+    let format = milisecs < 1000 * 60 * 60 ? 'mm:ss' : 'HH:mm:ss';
+    let formated = moment.utc(milisecs).format(format);
+
+    return formated == 'Invalid date' ? '-' : formated;
   }
 
   loadOutput(tab: number): void {
