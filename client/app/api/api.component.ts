@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
 import { FileSaverService } from 'ngx-filesaver';
 import * as moment from 'moment';
+import * as XLSX from 'xlsx';
 
 declare var iziToast;
 
@@ -872,6 +873,44 @@ export class ApiComponent implements OnInit {
       new Blob([content], { type: this.fileSaverService.genType(type) }),
       name + '.' + type
     );
+  }
+
+  exportExcel(name: string, content: any): void {
+    let filesMetrics = [];
+    Object.keys(content.success).forEach(fileKey => {
+      let fileMetrics = { file: fileKey };
+      Object.keys(content.success[fileKey].metrics).forEach(metricGroupKey => {
+        Object.keys(content.success[fileKey].metrics[metricGroupKey]).forEach(metricKey => {
+          fileMetrics[metricGroupKey + ': ' + metricKey] = content.success[fileKey].metrics[metricGroupKey][metricKey];
+        });
+      });
+      filesMetrics.push(fileMetrics);
+    });
+
+    let total = { file: 'Total' };
+    let avg = { file: 'Average' };
+    let min = { file: 'Mininum' };
+    let max = { file: 'Maximum' };
+    Object.keys(content.metrics).forEach(metricGroupKey => {
+      Object.keys(content.metrics[metricGroupKey]).forEach(metricKey => {
+        total[metricGroupKey + ': ' + metricKey] = content.metrics[metricGroupKey][metricKey].total;
+        avg[metricGroupKey + ': ' + metricKey] = content.metrics[metricGroupKey][metricKey].avg;
+        min[metricGroupKey + ': ' + metricKey] = content.metrics[metricGroupKey][metricKey].min;
+        max[metricGroupKey + ': ' + metricKey] = content.metrics[metricGroupKey][metricKey].max;
+      });
+    });
+    filesMetrics.push(total);
+    filesMetrics.push(avg);
+    filesMetrics.push(min);
+    filesMetrics.push(max);
+
+    /* generate worksheet and workbook */
+    const worksheet = XLSX.utils.json_to_sheet(filesMetrics);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Metrics");
+
+    /* create an XLSX file and try to save file .xlsx */
+    XLSX.writeFile(workbook, name + ".xlsx");
   }
 
   formatTime(milisecs: number): string {
