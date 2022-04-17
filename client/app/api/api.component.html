@@ -103,8 +103,8 @@
                   <div>
                     <span class="float-right" tippy="Load Output Log">
                       <button ngfSelect class="btn btn-secondary btn-sm" selectable="1" [(file)]="tab.outputFile"
-                        accept=".json" [disabled]="tab.loadingOutput"
-                        (fileChange)="loadOutput(index); tab.showOutput = true">
+                        accept=".json, .txt" [disabled]="tab.loadingOutput"
+                        (fileChange)="loadOutput(index)">
                         <i class="fa fa-fw fa-upload"></i>
                       </button>
                     </span>
