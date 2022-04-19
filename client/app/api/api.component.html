@@ -82,7 +82,8 @@
                     </ng-container>
                   </span>
                   <span *ngIf="tab.api == 'test' && tab.endpoint == 0">
-                    <ng-container [ngTemplateOutlet]="owltometa" [ngTemplateOutletContext]="{ tab: tab, tabIndex: index }">
+                    <ng-container [ngTemplateOutlet]="owltometa"
+                      [ngTemplateOutletContext]="{ tab: tab, tabIndex: index }">
                     </ng-container>
                   </span>
                   <span
@@ -703,7 +704,8 @@
               <i class="fa fa-fw fa-trash"></i>
             </button>
             <button ngfSelect class="btn btn-sm btn-secondary float-right mr-1" selectable="1" [(file)]="tab.inputFile"
-              accept=".json, .txt" [disabled]="tab.loadingOutput" (fileChange)="loadInputUris(tabIndex)" tippy="Load URIs from File">
+              accept=".json, .txt" [disabled]="tab.loadingOutput" (fileChange)="loadInputUris(tabIndex)"
+              tippy="Load URIs from File">
               <i class="fa fa-fw fa-upload"></i>
             </button>
           </h3>
@@ -726,8 +728,8 @@
                 </td>
                 <td class="text-right" nowrap>
                   <button type="button" class="btn btn-sm btn-danger btn-xs"
-                    (click)="tab.parameters.ontologiesUris.splice(i, 1)" tippy="Remove" [disabled]="tab.loadingOutput"
-                    [disabled]="tab.parameters.ontologiesUris.length <= 1">
+                    (click)="tab.parameters.ontologiesUris.splice(i, 1)" tippy="Remove"
+                    [disabled]="tab.loadingOutput || tab.parameters.ontologiesUris.length <= 1">
                     <i class="fa fa-fw fa-times"></i>
                   </button>
                 </td>
