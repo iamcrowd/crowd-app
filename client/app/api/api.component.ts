@@ -466,19 +466,19 @@ export class ApiComponent implements OnInit {
     },
     owl: "<rdf:RDF\n    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n    xmlns=\"http://crowd.fi.uncoma.edu.ar/kb1#\"\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\">\n  <owl:Ontology rdf:about=\"http://crowd.fi.uncoma.edu.ar/kb1#\"/>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#empleado\">\n    <rdfs:subClassOf>\n      <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#persona\"/>\n    </rdfs:subClassOf>\n  </owl:Class>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#empresa\"/>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#independiente\">\n    <rdfs:subClassOf rdf:resource=\"http://crowd.fi.uncoma.edu.ar#persona\"/>\n  </owl:Class>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#trabaja\">\n    <rdfs:subClassOf>\n      <owl:Restriction>\n        <owl:someValuesFrom rdf:resource=\"http://crowd.fi.uncoma.edu.ar#empresa\"/>\n        <owl:onProperty>\n          <owl:ObjectProperty rdf:about=\"http://crowd.fi.uncoma.edu.ar#role-b-1\"/>\n        </owl:onProperty>\n      </owl:Restriction>\n    </rdfs:subClassOf>\n    <rdfs:subClassOf>\n      <owl:Restriction>\n        <owl:someValuesFrom rdf:resource=\"http://crowd.fi.uncoma.edu.ar#empleado\"/>\n        <owl:onProperty>\n          <owl:ObjectProperty rdf:about=\"http://crowd.fi.uncoma.edu.ar#role-a-1\"/>\n        </owl:onProperty>\n      </owl:Restriction>\n    </rdfs:subClassOf>\n  </owl:Class>\n</rdf:RDF>\n",
     uris: [
-      { emoji: "🍕", url: "https://protege.stanford.edu/ontologies/pizza/pizza.owl" },
-      { emoji: "🧑‍🤝‍🧑", url: "http://owl.man.ac.uk/2006/07/sssw/people.owl" },
-      { emoji: "📷", url: "http://protege.stanford.edu/ontologies/camera.owl" },
-      { emoji: "🐨", url: "http://protege.stanford.edu/ontologies/koala.owl" },
-      { emoji: "🧳", url: "http://protege.stanford.edu/ontologies/travel.owl" },
-      { emoji: "🍷", url: "http://www.w3.org/TR/owl-guide/wine.rdf" },
-      { emoji: "🌎", url: "http://www.opengis.net/ont/geosparql#" },
-      { emoji: "🌀", url: "http://vocab.deri.ie/void.rdf" },
-      { emoji: "🐟", url: "http://www.w3.org/ns/ssn/" },
-      { emoji: "🐠", url: "http://www.w3.org/ns/sosa/" },
-      { emoji: "📖", url: "http://purl.org/spar/fabio.xml" },
-      { emoji: "⏱️", url: "http://www.w3.org/2006/time#" },
-      { emoji: "👥", url: "http://xmlns.com/foaf/0.1/" }
+      { emoji: "🍕", url: "https://protege.stanford.edu/ontologies/pizza/pizza.owl", prefix: 'pizza' },
+      { emoji: "🧑‍🤝‍🧑", url: "http://owl.man.ac.uk/2006/07/sssw/people.owl", prefix: 'people' },
+      { emoji: "📷", url: "http://protege.stanford.edu/ontologies/camera.owl", prefix: 'camera' },
+      { emoji: "🐨", url: "http://protege.stanford.edu/ontologies/koala.owl", prefix: 'koala' },
+      { emoji: "🧳", url: "http://protege.stanford.edu/ontologies/travel.owl", prefix: 'travel' },
+      { emoji: "🍷", url: "http://www.w3.org/TR/owl-guide/wine.rdf", prefix: 'wine' },
+      { emoji: "🌎", url: "http://www.opengis.net/ont/geosparql#", prefix: 'geosparql' },
+      { emoji: "🌀", url: "http://vocab.deri.ie/void.rdf", prefix: 'void' },
+      { emoji: "🐟", url: "http://www.w3.org/ns/ssn/", prefix: 'ssn' },
+      { emoji: "🐠", url: "http://www.w3.org/ns/sosa/", prefix: 'sosa' },
+      { emoji: "📖", url: "http://purl.org/spar/fabio.xml", prefix: 'fabio' },
+      { emoji: "⏱️", url: "http://www.w3.org/2006/time#", prefix: 'time' },
+      { emoji: "👥", url: "http://xmlns.com/foaf/0.1/", prefix: 'foaf' }
     ]
   }
 
@@ -651,7 +651,7 @@ export class ApiComponent implements OnInit {
           type: 'POST',
           example: this.examples.owl,
           trim: ['ontologyString'],
-          bypass: ['ontologiesFiles'],
+          bypass: ['ontologiesFiles', 'ontologiesUris'],
           parameters: {
             from: 'owl',
             to: 'kf',
@@ -659,8 +659,8 @@ export class ApiComponent implements OnInit {
             input: 'string',
             filtering: true,
             timeout: 60000,
-            ontologyUri: '',
             ontologyString: '',
+            ontologiesUris: [{ url: '', prefix: '' }],
             ontologiesFiles: []
           }
         }
@@ -770,6 +770,10 @@ export class ApiComponent implements OnInit {
         ...serializedParameters
       });
     } catch (e) {
+      this.tabs[tab].loadingOutput = false;
+
+      console.log(e);
+
       iziToast.error({
         title: 'Error',
         message: 'There was an error when trying to parse the parameters.<br>' + e,

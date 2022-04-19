@@ -103,8 +103,7 @@
                   <div>
                     <span class="float-right" tippy="Load Output Log">
                       <button ngfSelect class="btn btn-secondary btn-sm" selectable="1" [(file)]="tab.outputFile"
-                        accept=".json, .txt" [disabled]="tab.loadingOutput"
-                        (fileChange)="loadOutput(index)">
+                        accept=".json, .txt" [disabled]="tab.loadingOutput" (fileChange)="loadOutput(index)">
                         <i class="fa fa-fw fa-upload"></i>
                       </button>
                     </span>
@@ -659,17 +658,12 @@
         </ng-template>
         <div class="row">
           <div class="col mr-sm-2 my-1 pr-0">
-            <input type="text" class="form-control" [(ngModel)]="tab.parameters.timeout" placeholder="60000"
-              [disabled]="tab.parameters.input != 'files'">
+            <input type="text" class="form-control" [(ngModel)]="tab.parameters.timeout" placeholder="60000">
           </div>
           <label class="col mr-sm-2 my-2 p-0">
             Timeout&nbsp;
-            <i class="btn btn-sm fa fa-fw fa-info-circle" [tippy]="timeout_info" placement="right"></i>
-            <ng-template #timeout_info>
-              It's the time limit of each query in miliseconds (ms), if it's set to 0 there is no
-              limit.<br>
-              <span class="text-muted">(Only available for multiple files mode)</span>
-            </ng-template>
+            <i class="btn btn-sm fa fa-fw fa-info-circle" tippy="It's the time limit of each query in miliseconds (ms), if it's set to 0 there is no
+            limit." placement="right"></i>
           </label>
         </div>
       </div>
@@ -680,8 +674,8 @@
           (click)="tab.parameters.input = 'string'">String</button>
         <button class="btn" [class.active]="tab.parameters.input == 'uri'"
           (click)="tab.parameters.input = 'uri'">URI</button>
-        <button class="btn" [class.active]="tab.parameters.input == 'files'"
-          (click)="tab.parameters.input = 'files'">Files</button>
+        <button class="btn" [class.active]="tab.parameters.input == 'file'"
+          (click)="tab.parameters.input = 'file'">Files</button>
       </div>
     </div>
     <div class="flex-grow-1 h-100 collapse-container overflow-y-auto overflow-x-hidden">
@@ -696,27 +690,59 @@
         }"></ng-container>
       </span>
       <span *ngIf="tab.parameters.input == 'uri'">
-        <div class="col-xl-6">
-          <label>URI</label>
-          <input class="form-control" [(ngModel)]="tab.parameters.ontologyUri"
-            placeholder="http://www.w3.org/2006/time#" />
+        <div class="col-12">
+          <h3>{{ tab.parameters.ontologiesUris.length }} URIs <button type="button"
+              class="btn btn-sm btn-success btn-xs"
+              (click)="tab.parameters.ontologiesUris.push({ url: '', prefix: '' })" tippy="Add"
+              [disabled]="tab.loadingOutput">
+              <i class="fa fa-fw fa-plus"></i>
+            </button>
+            <button class="btn btn-sm btn-danger float-right" (click)="tab.parameters.ontologiesUris = ['']"
+              tippy="Clear All" [disabled]="tab.loadingOutput">
+              <i class="fa fa-fw fa-trash"></i>
+            </button>
+          </h3>
+          <table class="table owltometa-files-table">
+            <tbody>
+              <tr class="owltometa-file-row" *ngFor="let item of tab.parameters.ontologiesUris; let i=index">
+                <td *ngVar="{ hasPrefix: item.prefix != null && item.prefix != ''} as uriSettings">
+                  <input class="form-control" [(ngModel)]="item.url" placeholder="Ex: http://www.w3.org/2006/time#" />
+                  <div class="form-group row m-1">
+                    <span class="col-10 row" *ngIf="uriSettings.hasPrefix">
+                      <label class="col-4 text-right">Prefix: </label>
+                      <input class="col-8 form-control form-control-sm" [(ngModel)]="item.prefix" placeholder="Ex: time" />
+                    </span>
+                    <label class="text-muted m-1"
+                      (click)="uriSettings.hasPrefix = !uriSettings.hasPrefix; item.prefix = ''">
+                      {{ uriSettings.hasPrefix ? "(hide)": "+prefix"}}
+                    </label>
+                  </div>
+                </td>
+                <td class="text-right" nowrap>
+                  <button type="button" class="btn btn-sm btn-danger btn-xs"
+                    (click)="tab.parameters.ontologiesUris.splice(i, 1)" tippy="Remove" [disabled]="tab.loadingOutput">
+                    <i class="fa fa-fw fa-times"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         <div class="col" style="padding-top: 0.75rem;">
           <label>Examples</label>
           <div>
             <div class="card-deck">
-              <div *ngFor="let uri of examples.uris" class="btn card bg-warning text-white text-center p-2 mr-0"
-                style="width: 4rem; min-width: 4rem; max-width: 4rem; margin-bottom: 1rem;"
-                (click)="tab.parameters.ontologyUri = uri.url" [tippy]="uri.url" [maxWidth]="'none'">
-                <blockquote class="blockquote mb-0">
-                  {{uri.emoji}}
-                </blockquote>
-              </div>
+              <button *ngFor="let uri of examples.uris" class="btn card bg-warning text-white text-center mr-0"
+                style="width: 3.5rem; min-width: 3.5rem; max-width: 3.5rem; margin-bottom: 1rem; font-size: 20px;"
+                (click)="tab.parameters.ontologiesUris.push({ url: uri.url, prefix: uri.prefix })" [tippy]="uri.url"
+                [maxWidth]="'none'" [disabled]="tab.loadingOutput">
+                <div class="w-100">{{uri.emoji}}</div>
+              </button>
             </div>
           </div>
         </div>
       </span>
-      <span *ngIf="tab.parameters.input == 'files'">
+      <span *ngIf="tab.parameters.input == 'file'">
         <div ngfDrop class="btn owltometa-files-drop mb-2" selectable="1" multiple="1"
           [(files)]="tab.parameters.ontologiesFiles" [(dragFiles)]="dragFiles" [(invalidDrag)]="invalidDrag"
           [ngClass]="{ 'valid-drag': dragFiles, 'invalid-drag': invalidDrag }" [capturePaste]="true"
@@ -740,7 +766,7 @@
             <tbody>
               <tr class="owltometa-file-row"
                 *ngFor="let item of tab.parameters.ontologiesFiles | orderBy: ['name']; let i=index">
-                <td>
+                <td style="word-break: break-all;">
                   <div *ngIf="['image/gif','image/png','image/jpeg'].includes(item.type)">
                     <div class="previewIcon" [ngfBackground]="item"></div>
                   </div>
@@ -776,7 +802,7 @@
     </thead>
     <tbody>
       <tr class="owltometa-file-row" *ngFor="let file of failedFiles | keyvalue">
-        <td>
+        <td style="word-break: break-all;">
           <strong>{{ file.key }}</strong>
         </td>
         <td class="text-right" nowrap>
@@ -806,7 +832,7 @@
     </thead>
     <tbody>
       <tr class="owltometa-file-row" *ngFor="let file of succededFiles | keyvalue">
-        <td>
+        <td style="word-break: break-all;">
           <strong>{{ file.key }}</strong>
         </td>
         <td class="text-right" nowrap>
