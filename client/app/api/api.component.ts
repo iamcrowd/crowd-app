@@ -6,6 +6,7 @@ import { NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
 import { FileSaverService } from 'ngx-filesaver';
 import * as moment from 'moment';
 import * as XLSX from 'xlsx';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 declare var iziToast;
 
@@ -24,7 +25,8 @@ export class ApiComponent implements OnInit {
   constructor(
     private router: Router,
     public darkmodeService: DarkmodeService,
-    private fileSaverService: FileSaverService
+    private fileSaverService: FileSaverService,
+    private http: HttpClient
   ) {
     this.JSON = JSON;
     this.Object = Object;
@@ -466,19 +468,19 @@ export class ApiComponent implements OnInit {
     },
     owl: "<rdf:RDF\n    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n    xmlns=\"http://crowd.fi.uncoma.edu.ar/kb1#\"\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\">\n  <owl:Ontology rdf:about=\"http://crowd.fi.uncoma.edu.ar/kb1#\"/>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#empleado\">\n    <rdfs:subClassOf>\n      <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#persona\"/>\n    </rdfs:subClassOf>\n  </owl:Class>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#empresa\"/>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#independiente\">\n    <rdfs:subClassOf rdf:resource=\"http://crowd.fi.uncoma.edu.ar#persona\"/>\n  </owl:Class>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#trabaja\">\n    <rdfs:subClassOf>\n      <owl:Restriction>\n        <owl:someValuesFrom rdf:resource=\"http://crowd.fi.uncoma.edu.ar#empresa\"/>\n        <owl:onProperty>\n          <owl:ObjectProperty rdf:about=\"http://crowd.fi.uncoma.edu.ar#role-b-1\"/>\n        </owl:onProperty>\n      </owl:Restriction>\n    </rdfs:subClassOf>\n    <rdfs:subClassOf>\n      <owl:Restriction>\n        <owl:someValuesFrom rdf:resource=\"http://crowd.fi.uncoma.edu.ar#empleado\"/>\n        <owl:onProperty>\n          <owl:ObjectProperty rdf:about=\"http://crowd.fi.uncoma.edu.ar#role-a-1\"/>\n        </owl:onProperty>\n      </owl:Restriction>\n    </rdfs:subClassOf>\n  </owl:Class>\n</rdf:RDF>\n",
     uris: [
-      { emoji: "🍕", url: "https://protege.stanford.edu/ontologies/pizza/pizza.owl", prefix: 'pizza' },
-      { emoji: "🧑‍🤝‍🧑", url: "http://owl.man.ac.uk/2006/07/sssw/people.owl", prefix: 'people' },
-      { emoji: "📷", url: "http://protege.stanford.edu/ontologies/camera.owl", prefix: 'camera' },
-      { emoji: "🐨", url: "http://protege.stanford.edu/ontologies/koala.owl", prefix: 'koala' },
-      { emoji: "🧳", url: "http://protege.stanford.edu/ontologies/travel.owl", prefix: 'travel' },
-      { emoji: "🍷", url: "http://www.w3.org/TR/owl-guide/wine.rdf", prefix: 'wine' },
-      { emoji: "🌎", url: "http://www.opengis.net/ont/geosparql#", prefix: 'geosparql' },
-      { emoji: "🌀", url: "http://vocab.deri.ie/void.rdf", prefix: 'void' },
-      { emoji: "🐟", url: "http://www.w3.org/ns/ssn/", prefix: 'ssn' },
-      { emoji: "🐠", url: "http://www.w3.org/ns/sosa/", prefix: 'sosa' },
-      { emoji: "📖", url: "http://purl.org/spar/fabio.xml", prefix: 'fabio' },
-      { emoji: "⏱️", url: "http://www.w3.org/2006/time#", prefix: 'time' },
-      { emoji: "👥", url: "http://xmlns.com/foaf/0.1/", prefix: 'foaf' }
+      { emoji: "🍕", uri: "https://protege.stanford.edu/ontologies/pizza/pizza.owl", prefix: 'pizza' },
+      { emoji: "🧑‍🤝‍🧑", uri: "http://owl.man.ac.uk/2006/07/sssw/people.owl", prefix: 'people' },
+      { emoji: "📷", uri: "http://protege.stanford.edu/ontologies/camera.owl", prefix: 'camera' },
+      { emoji: "🐨", uri: "http://protege.stanford.edu/ontologies/koala.owl", prefix: 'koala' },
+      { emoji: "🧳", uri: "http://protege.stanford.edu/ontologies/travel.owl", prefix: 'travel' },
+      { emoji: "🍷", uri: "http://www.w3.org/TR/owl-guide/wine.rdf", prefix: 'wine' },
+      { emoji: "🌎", uri: "http://www.opengis.net/ont/geosparql#", prefix: 'geosparql' },
+      { emoji: "🌀", uri: "http://vocab.deri.ie/void.rdf", prefix: 'void' },
+      { emoji: "🐟", uri: "http://www.w3.org/ns/ssn/", prefix: 'ssn' },
+      { emoji: "🐠", uri: "http://www.w3.org/ns/sosa/", prefix: 'sosa' },
+      { emoji: "📖", uri: "http://purl.org/spar/fabio.xml", prefix: 'fabio' },
+      { emoji: "⏱️", uri: "http://www.w3.org/2006/time#", prefix: 'time' },
+      { emoji: "👥", uri: "http://xmlns.com/foaf/0.1/", prefix: 'foaf' }
     ]
   }
 
@@ -660,7 +662,7 @@ export class ApiComponent implements OnInit {
             filtering: true,
             timeout: 60000,
             ontologyString: '',
-            ontologiesUris: [{ url: '', prefix: '' }],
+            ontologiesUris: [{ uri: '', prefix: '' }],
             ontologiesFiles: []
           }
         }
@@ -882,7 +884,7 @@ export class ApiComponent implements OnInit {
   exportExcel(name: string, content: any): void {
     let filesMetrics = [];
     Object.keys(content.success).forEach(fileKey => {
-      let fileMetrics = { file: fileKey };
+      let fileMetrics = { ontology: fileKey };
       Object.keys(content.success[fileKey].metrics).forEach(metricGroupKey => {
         Object.keys(content.success[fileKey].metrics[metricGroupKey]).forEach(metricKey => {
           fileMetrics[metricGroupKey + ': ' + metricKey] = content.success[fileKey].metrics[metricGroupKey][metricKey];
@@ -891,10 +893,10 @@ export class ApiComponent implements OnInit {
       filesMetrics.push(fileMetrics);
     });
 
-    let total = { file: 'Total' };
-    let avg = { file: 'Average' };
-    let min = { file: 'Mininum' };
-    let max = { file: 'Maximum' };
+    let total = { ontology: 'Total' };
+    let avg = { ontology: 'Average' };
+    let min = { ontology: 'Mininum' };
+    let max = { ontology: 'Maximum' };
     Object.keys(content.metrics).forEach(metricGroupKey => {
       Object.keys(content.metrics[metricGroupKey]).forEach(metricKey => {
         total[metricGroupKey + ': ' + metricKey] = content.metrics[metricGroupKey][metricKey].total;
@@ -940,5 +942,41 @@ export class ApiComponent implements OnInit {
     }
 
     reader.readAsText(this.tabs[tab].outputFile);
+  }
+
+  loadInputUris(tab: number): void {
+    var reader: FileReader = new FileReader();
+
+    reader.onloadend = (e) => {
+      this.tabs[tab].parameters.ontologiesUris = JSON.parse(reader.result.toString());
+
+      setTimeout(() => {
+        this.tabs[tab].inputFile = null;
+      });
+    }
+
+    reader.readAsText(this.tabs[tab].inputFile);
+  }
+
+  loadLOVExample() {
+    const headerDict = {
+      'Access-Control-Allow-Origin': '*'
+    }
+
+    const requestOptions = {
+      headers: new HttpHeaders(headerDict),
+    };
+
+    this.http.get('https://lov.linkeddata.es/dataset/lov/api/v2/vocabulary/list', requestOptions).subscribe(
+      (data: any) => {
+        console.log(data);
+      },
+      (error: any) => {
+        console.log(error);
+        iziToast.error({
+          title: 'Error',
+          message: 'There was an error when trying to get LOV ontologies.<br>' + error.message,
+        });
+      });
   }
 }

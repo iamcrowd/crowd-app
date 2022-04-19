@@ -82,7 +82,7 @@
                     </ng-container>
                   </span>
                   <span *ngIf="tab.api == 'test' && tab.endpoint == 0">
-                    <ng-container [ngTemplateOutlet]="owltometa" [ngTemplateOutletContext]="{ tab: tab }">
+                    <ng-container [ngTemplateOutlet]="owltometa" [ngTemplateOutletContext]="{ tab: tab, tabIndex: index }">
                     </ng-container>
                   </span>
                   <span
@@ -623,7 +623,7 @@
 </ng-template>
 
 <!--input template for owl to meta-->
-<ng-template #owltometa let-tab='tab'>
+<ng-template #owltometa let-tab='tab' let-tabIndex="tabIndex">
   <div class="d-flex flex-column h-100 w-100">
     <div class="row flex-shrink-0" style="padding-bottom: 0.5rem;">
       <div class="col-6">
@@ -693,24 +693,30 @@
         <div class="col-12">
           <h3>{{ tab.parameters.ontologiesUris.length }} URIs <button type="button"
               class="btn btn-sm btn-success btn-xs"
-              (click)="tab.parameters.ontologiesUris.push({ url: '', prefix: '' })" tippy="Add"
+              (click)="tab.parameters.ontologiesUris.push({ uri: '', prefix: '' })" tippy="Add"
               [disabled]="tab.loadingOutput">
               <i class="fa fa-fw fa-plus"></i>
             </button>
-            <button class="btn btn-sm btn-danger float-right" (click)="tab.parameters.ontologiesUris = ['']"
-              tippy="Clear All" [disabled]="tab.loadingOutput">
+            <button class="btn btn-sm btn-danger float-right"
+              (click)="tab.parameters.ontologiesUris = [{ uri: '', prefix: '' }]" tippy="Clear All"
+              [disabled]="tab.loadingOutput">
               <i class="fa fa-fw fa-trash"></i>
+            </button>
+            <button ngfSelect class="btn btn-sm btn-secondary float-right mr-1" selectable="1" [(file)]="tab.inputFile"
+              accept=".json, .txt" [disabled]="tab.loadingOutput" (fileChange)="loadInputUris(tabIndex)" tippy="Load URIs from File">
+              <i class="fa fa-fw fa-upload"></i>
             </button>
           </h3>
           <table class="table owltometa-files-table">
             <tbody>
               <tr class="owltometa-file-row" *ngFor="let item of tab.parameters.ontologiesUris; let i=index">
                 <td *ngVar="{ hasPrefix: item.prefix != null && item.prefix != ''} as uriSettings">
-                  <input class="form-control" [(ngModel)]="item.url" placeholder="Ex: http://www.w3.org/2006/time#" />
+                  <input class="form-control" [(ngModel)]="item.uri" placeholder="Ex: http://www.w3.org/2006/time#" />
                   <div class="form-group row m-1">
                     <span class="col-10 row" *ngIf="uriSettings.hasPrefix">
                       <label class="col-4 text-right">Prefix: </label>
-                      <input class="col-8 form-control form-control-sm" [(ngModel)]="item.prefix" placeholder="Ex: time" />
+                      <input class="col-8 form-control form-control-sm" [(ngModel)]="item.prefix"
+                        placeholder="Ex: time" />
                     </span>
                     <label class="text-muted m-1"
                       (click)="uriSettings.hasPrefix = !uriSettings.hasPrefix; item.prefix = ''">
@@ -720,7 +726,8 @@
                 </td>
                 <td class="text-right" nowrap>
                   <button type="button" class="btn btn-sm btn-danger btn-xs"
-                    (click)="tab.parameters.ontologiesUris.splice(i, 1)" tippy="Remove" [disabled]="tab.loadingOutput">
+                    (click)="tab.parameters.ontologiesUris.splice(i, 1)" tippy="Remove" [disabled]="tab.loadingOutput"
+                    [disabled]="tab.parameters.ontologiesUris.length <= 1">
                     <i class="fa fa-fw fa-times"></i>
                   </button>
                 </td>
@@ -734,9 +741,15 @@
             <div class="card-deck">
               <button *ngFor="let uri of examples.uris" class="btn card bg-warning text-white text-center mr-0"
                 style="width: 3.5rem; min-width: 3.5rem; max-width: 3.5rem; margin-bottom: 1rem; font-size: 20px;"
-                (click)="tab.parameters.ontologiesUris.push({ url: uri.url, prefix: uri.prefix })" [tippy]="uri.url"
+                (click)="tab.parameters.ontologiesUris.push({ uri: uri.uri, prefix: uri.prefix })" [tippy]="uri.uri"
                 [maxWidth]="'none'" [disabled]="tab.loadingOutput">
                 <div class="w-100">{{uri.emoji}}</div>
+              </button>
+              <button class="btn card bg-warning text-white text-center mr-0"
+                style="width: 3.5rem; min-width: 3.5rem; max-width: 3.5rem; margin-bottom: 1rem; font-size: 20px;"
+                (click)="loadLOVExample()" tippy="Linked Open Vocabularies (LOV)" [maxWidth]="'none'"
+                [disabled]="tab.loadingOutput">
+                <div class="w-100"><img class="w-100" src="../../assets/images/lov.png" /></div>
               </button>
             </div>
           </div>

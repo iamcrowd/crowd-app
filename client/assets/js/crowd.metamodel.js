@@ -78,7 +78,7 @@ CrowdMetamodel.prototype.request = function (req) {
       if (req.input == 'string') {
         return "ontology" + index;
       } else if (req.input == 'uri') {
-        return ontology.prefix ? ontology.prefix : ontology.url;
+        return ontology.prefix ? ontology.prefix : ontology.uri;
       } else if (req.input == 'file') {
         return ontology.name;
       }
@@ -88,7 +88,7 @@ CrowdMetamodel.prototype.request = function (req) {
       if (req.input == 'string' || req.input == 'file') {
         return ontology;
       } else if (req.input == 'uri') {
-        return ontology.url;
+        return ontology.uri;
       }
     }
 
