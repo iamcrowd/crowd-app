@@ -134,6 +134,10 @@
                       <i class="fa fa-fw fa-chevron-{{tab.showOutput ? 'down' : 'up'}}"></i>
                     </button>
                     <i class="fa fa-fw fa-spinner fa-pulse fa-2x float-right" *ngIf="tab.loadingOutput"></i>
+                    <span *ngIf="tab.loadingOutput && !tab.multiTotalFiles && tab.parameters.timeout != null" class="text-muted float-right mr-2">
+                      <i class="fa fa-fw fa-clock-o"></i>&nbsp;
+                      {{formatTime(tab.multiActualTime)}}
+                    </span>
                     <h3>Output</h3>
                   </div>
                   <div *ngIf="tab.output && tab.showOutput" style="height: calc(100% - 5rem);">

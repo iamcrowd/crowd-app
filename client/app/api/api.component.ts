@@ -491,13 +491,15 @@ export class ApiComponent implements OnInit {
       owlUrl: environment.metamodelOwlUrl,
       error: (error) => {
         iziToast.error({
-          title: 'Error',
-          message: 'There was an error when trying to call Metamodel API<br>' +
+          title: 'Error' + (error.responseJSON != null ? ' (' + error.responseJSON.error + ')' : ''),
+          message: '<i>There was an error when trying to call Metamodel API.</i><br><br><b>' +
             (error.responseJSON != null
-              ? error.responseJSON.error + "<br>" + error.responseJSON.message
-              : error.responseText),
+              ? error.responseJSON.message
+              : (error.responseText != null
+                ? error.responseText
+                : error.statusText)) + '</b>',
           buttons: [
-            ['<button class="btn"><i class="fa fa-fw fa-download"></i></button>', (instance, toast) => {
+            ['<button class="btn" title="Download full stack trace"><i class="fa fa-fw fa-download"></i></button>', (instance, toast) => {
               if (error.responseJSON?.stackTrace)
                 this.downloadFile('exception', 'txt', error.responseJSON.stackTrace);
             }, false],
@@ -509,11 +511,19 @@ export class ApiComponent implements OnInit {
       url: environment.reasoningUrl,
       error: (error) => {
         iziToast.error({
-          title: 'Error',
-          message: 'There was an error when trying to call Reasoning API<br>' +
+          title: 'Error' + (error.responseJSON != null ? ' (' + error.responseJSON.error + ')' : ''),
+          message: '<i>There was an error when trying to call Reasoning API.</i><b><br><br>' +
             (error.responseJSON != null
-              ? error.responseJSON.error + "<br>" + error.responseJSON.message
-              : error.responseText),
+              ? error.responseJSON.message
+              : (error.responseText != null
+                ? error.responseText
+                : error.statusText)) + '</b>',
+          buttons: [
+            ['<button class="btn" title="Download full stack trace"><i class="fa fa-fw fa-download"></i></button>', (instance, toast) => {
+              if (error.responseJSON?.stackTrace)
+                this.downloadFile('exception', 'txt', error.responseJSON.stackTrace);
+            }, false],
+          ]
         });
       }
     })
@@ -778,7 +788,7 @@ export class ApiComponent implements OnInit {
 
       iziToast.error({
         title: 'Error',
-        message: 'There was an error when trying to parse the parameters.<br>' + e,
+        message: '<i>There was an error when trying to parse the parameters.</i><br><br><b>' + e + '</b>',
       });
     }
   }
@@ -832,7 +842,7 @@ export class ApiComponent implements OnInit {
     } catch (e) {
       iziToast.error({
         title: 'Error',
-        message: 'There was an error when trying to open the diagram in the editor.<br>' + e,
+        message: '<i>There was an error when trying to open the diagram in the editor.</i><br><br><b>' + e + '</b>',
       });
     }
   }
@@ -975,7 +985,7 @@ export class ApiComponent implements OnInit {
         console.log(error);
         iziToast.error({
           title: 'Error',
-          message: 'There was an error when trying to get LOV ontologies.<br>' + error.message,
+          message: '<i>There was an error when trying to get LOV ontologies.</i><br><br><b>' + error.message + '</b>',
         });
       });
   }

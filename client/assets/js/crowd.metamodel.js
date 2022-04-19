@@ -99,13 +99,13 @@ CrowdMetamodel.prototype.request = function (req) {
     if (isMulti) {
       req.apiComponent.tabs[req.tab].multiTotalFiles = ontologies.length;
       req.apiComponent.tabs[req.tab].showOutput = true;
-
-      req.apiComponent.tabs[req.tab].multiTimeInterval = setInterval(function () {
-        req.apiComponent.tabs[req.tab].multiTotalTime += 1000;
-        if (req.apiComponent.tabs[req.tab].multiActualTime >= 1000) req.apiComponent.tabs[req.tab].multiActualTime -= 1000;
-      }, 1000);
       req.apiComponent.tabs[req.tab].multiTotalTime = 0;
     }
+
+    req.apiComponent.tabs[req.tab].multiTimeInterval = setInterval(function () {
+      if (isMulti) req.apiComponent.tabs[req.tab].multiTotalTime += 1000;
+      if (req.apiComponent.tabs[req.tab].multiActualTime >= 1000) req.apiComponent.tabs[req.tab].multiActualTime -= 1000;
+    }, 1000);
 
     //it make a request for each ontology (recursivelly) or for a single one
     function request(index) {
@@ -115,8 +115,9 @@ CrowdMetamodel.prototype.request = function (req) {
       //if it's multiple, set feedback parameters for actual processed ontology and timeout
       if (isMulti) {
         req.apiComponent.tabs[req.tab].multiActual = getOntologyName(ontologies[index], index);
-        req.apiComponent.tabs[req.tab].multiActualTime = req.timeout;
       }
+
+      req.apiComponent.tabs[req.tab].multiActualTime = req.timeout;
 
       $.ajax({
         type: "POST",
@@ -166,6 +167,8 @@ CrowdMetamodel.prototype.request = function (req) {
                 req.success(res);
               }
             }
+          } else {
+            clearInterval(req.apiComponent.tabs[req.tab].multiTimeInterval);
           }
         }
       });
