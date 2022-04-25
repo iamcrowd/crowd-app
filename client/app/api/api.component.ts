@@ -1,4 +1,5 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { DarkmodeService } from '../services/darkmode.service';
 import { Router } from '@angular/router';
@@ -6,7 +7,7 @@ import { NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
 import { FileSaverService } from 'ngx-filesaver';
 import * as moment from 'moment';
 import * as XLSX from 'xlsx';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import * as JSZip from 'jszip';
 
 declare var iziToast;
 
@@ -884,14 +885,32 @@ export class ApiComponent implements OnInit {
     return this.getMultiProcessed(tab) * 100 / this.tabs[tab].multiTotalFiles;
   }
 
-  downloadFile(name: string, type: string, content: string): void {
+  downloadFile(name: string, type: string, content: string, serialize: boolean = false): void {
     this.fileSaverService.save(
-      new Blob([content], { type: this.fileSaverService.genType(type) }),
+      new Blob([serialize ? JSON.stringify(content, null, '\t') : content], { type: this.fileSaverService.genType(type) }),
       name + '.' + type
     );
   }
 
-  exportExcel(name: string, content: any): void {
+  downloadFiles(name: string, content: any, tab: number): void {
+    this.tabs[tab].downloadingFiles = true;
+
+    let zip: JSZip = new JSZip();
+
+    Object.entries(content.success).forEach(([fileName, fileContent]) => {
+      zip.file((fileName.indexOf('\/') > -1 ? fileName.replace(/\//g, '-') : fileName) + '.json', JSON.stringify(fileContent['kf'], null, '\t'));
+    });
+
+    zip.generateAsync({ type: "blob" }).then((zipContent) => {
+      this.fileSaverService.save(zipContent, name + '.zip');
+    }).finally(() => {
+      delete this.tabs[tab].downloadingFiles;
+    });
+  }
+
+  exportExcel(name: string, content: any, tab: number): void {
+    this.tabs[tab].exportingExcel = true;
+
     let filesMetrics = [];
     Object.keys(content.success).forEach(fileKey => {
       let fileMetrics = { ontology: fileKey };
@@ -927,6 +946,8 @@ export class ApiComponent implements OnInit {
 
     /* create an XLSX file and try to save file .xlsx */
     XLSX.writeFile(workbook, name + ".xlsx");
+
+    delete this.tabs[tab].exportingExcel;
   }
 
   formatTime(milisecs: number): string {

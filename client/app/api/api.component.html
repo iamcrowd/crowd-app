@@ -116,14 +116,24 @@
                       </button>
                     </span>
                     <span class="float-right mr-1" [tippy]="excel_export_info">
-                      <button class="btn btn-secondary btn-sm" (click)="exportExcel('export.' + tab.api, tab.output)"
-                        [disabled]="tab.output?.success == null">
-                        <i class="fa fa-fw fa-file-excel-o"></i>
+                      <button class="btn btn-secondary btn-sm" (click)="exportExcel('export.' + tab.api, tab.output, index)"
+                        [disabled]="tab.output?.success == null || tab.exportingExcel">
+                        <i class="fa fa-fw fa-{{tab.exportingExcel ? 'spinner fa-pulse': 'file-excel-o'}}"></i>
                       </button>
                     </span>
                     <ng-template #excel_export_info>
                       Export Excel<br>
-                      <span class="text-muted">(Only for multifile metrics)</span>
+                      <span class="text-muted">(Only for multifile)</span>
+                    </ng-template>
+                    <span class="float-right mr-1" [tippy]="kf_export_info">
+                      <button class="btn btn-secondary btn-sm" (click)="downloadFiles('files.' + tab.api, tab.output, index)"
+                        [disabled]="tab.output?.success == null || tab.downloadingFiles">
+                        <i class="fa fa-fw fa-{{tab.downloadingFiles ? 'spinner fa-pulse': 'download'}}"></i>
+                      </button>
+                    </span>
+                    <ng-template #kf_export_info>
+                      Download Files<br>
+                      <span class="text-muted">(Only for multifile)</span>
                     </ng-template>
                     <button *ngIf="tab.output && tab.showOutput" class="toggle-menu-btn btn float-right hide-xl"
                       (click)="tab.maximizeOutput = !tab.maximizeOutput">
@@ -401,6 +411,11 @@
       (click)="openInEditor(open.editorModel, open.sourceModel, open.parameter ? container[parameter][open.parameter] : container[parameter], open.serialize)"
       tippy="Open in Editor" style="margin-right: 0.5rem;">
       <i class="fa fa-fw fa-th"></i>
+    </button>
+    <button class="btn btn-secondary btn-sm float-right" *ngIf="open"
+      (click)="downloadFile(open.sourceModel, 'json', open.parameter ? container[parameter][open.parameter] : container[parameter], !open.serialize)"
+      tippy="Download File" style="margin-right: 0.5rem;">
+      <i class="fa fa-fw fa-download"></i>
     </button>
     <ngx-codemirror *ngIf="!outputMode && !listMode" [(ngModel)]="container[parameter]" [preserveScrollPosition]="true"
       [options]="{
