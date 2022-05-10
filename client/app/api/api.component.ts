@@ -885,6 +885,30 @@ export class ApiComponent implements OnInit {
     return this.getMultiProcessed(tab) * 100 / this.tabs[tab].multiTotalFiles;
   }
 
+  downloadSuccessUris(tab: number): void {
+    this.tabs[tab].downloadingSucessUris = true;
+
+    let successUris = this.tabs[tab].parameters.ontologiesUris.filter((uri) => {
+      return this.tabs[tab].output.success[uri.prefix ? uri.prefix : uri.uri] != null;
+    });
+
+    this.downloadFile('success.uris', 'json', successUris, true);
+
+    delete this.tabs[tab].downloadingSucessUris;
+  }
+
+  downloadFailedUris(tab: number): void {
+    this.tabs[tab].downloadingFailedUris = true;
+
+    let failedUris = this.tabs[tab].parameters.ontologiesUris.filter((uri) => {
+      return this.tabs[tab].output.failed[uri.prefix ? uri.prefix : uri.uri] != null;
+    });
+
+    this.downloadFile('failed.uris', 'json', failedUris, true);
+
+    delete this.tabs[tab].downloadingFailedUris;
+  }
+
   downloadFile(name: string, type: string, content: string, serialize: boolean = false): void {
     this.fileSaverService.save(
       new Blob([serialize ? JSON.stringify(content, null, '\t') : content], { type: this.fileSaverService.genType(type) }),

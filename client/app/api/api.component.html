@@ -116,7 +116,8 @@
                       </button>
                     </span>
                     <span class="float-right mr-1" [tippy]="excel_export_info">
-                      <button class="btn btn-secondary btn-sm" (click)="exportExcel('export.' + tab.api, tab.output, index)"
+                      <button class="btn btn-secondary btn-sm"
+                        (click)="exportExcel('export.' + tab.api, tab.output, index)"
                         [disabled]="tab.output?.success == null || tab.exportingExcel">
                         <i class="fa fa-fw fa-{{tab.exportingExcel ? 'spinner fa-pulse': 'file-excel-o'}}"></i>
                       </button>
@@ -126,7 +127,8 @@
                       <span class="text-muted">(Only for multifile)</span>
                     </ng-template>
                     <span class="float-right mr-1" [tippy]="kf_export_info">
-                      <button class="btn btn-secondary btn-sm" (click)="downloadFiles('files.' + tab.api, tab.output, index)"
+                      <button class="btn btn-secondary btn-sm"
+                        (click)="downloadFiles('files.' + tab.api, tab.output, index)"
                         [disabled]="tab.output?.success == null || tab.downloadingFiles">
                         <i class="fa fa-fw fa-{{tab.downloadingFiles ? 'spinner fa-pulse': 'download'}}"></i>
                       </button>
@@ -144,7 +146,8 @@
                       <i class="fa fa-fw fa-chevron-{{tab.showOutput ? 'down' : 'up'}}"></i>
                     </button>
                     <i class="fa fa-fw fa-spinner fa-pulse fa-2x float-right" *ngIf="tab.loadingOutput"></i>
-                    <span *ngIf="tab.loadingOutput && !tab.multiTotalFiles && tab.parameters.timeout != null" class="text-muted float-right mr-2">
+                    <span *ngIf="tab.loadingOutput && !tab.multiTotalFiles && tab.parameters.timeout != null"
+                      class="text-muted float-right mr-2">
                       <i class="fa fa-fw fa-clock-o"></i>&nbsp;
                       {{formatTime(tab.multiActualTime)}}
                     </span>
@@ -711,23 +714,53 @@
       </span>
       <span *ngIf="tab.parameters.input == 'uri'">
         <div class="col-12">
-          <h3>{{ tab.parameters.ontologiesUris.length }} URIs <button type="button"
-              class="btn btn-sm btn-success btn-xs"
-              (click)="tab.parameters.ontologiesUris.push({ uri: '', prefix: '' })" tippy="Add"
-              [disabled]="tab.loadingOutput">
-              <i class="fa fa-fw fa-plus"></i>
-            </button>
-            <button class="btn btn-sm btn-danger float-right"
-              (click)="tab.parameters.ontologiesUris = [{ uri: '', prefix: '' }]" tippy="Clear All"
-              [disabled]="tab.loadingOutput">
-              <i class="fa fa-fw fa-trash"></i>
-            </button>
-            <button ngfSelect class="btn btn-sm btn-secondary float-right mr-1" selectable="1" [(file)]="tab.inputFile"
-              accept=".json, .txt" [disabled]="tab.loadingOutput" (fileChange)="loadInputUris(tabIndex)"
-              tippy="Load URIs from File">
-              <i class="fa fa-fw fa-upload"></i>
-            </button>
-          </h3>
+          <div class="row">
+            <h3 class="col flex-grow-0 min-w-max-c">{{ tab.parameters.ontologiesUris.length }} URIs</h3>
+            <div class="col">
+              <button type="button" class="btn btn-sm btn-success btn-xs"
+                (click)="tab.parameters.ontologiesUris.push({ uri: '', prefix: '' })" tippy="Add"
+                [disabled]="tab.loadingOutput">
+                <i class="fa fa-fw fa-plus"></i>
+              </button>
+              <button class="btn btn-sm btn-danger float-right"
+                (click)="tab.parameters.ontologiesUris = [{ uri: '', prefix: '' }]" tippy="Clear All"
+                [disabled]="tab.loadingOutput">
+                <i class="fa fa-fw fa-trash"></i>
+              </button>
+              <button ngfSelect class="btn btn-sm btn-secondary float-right mr-1" selectable="1"
+                [(file)]="tab.inputFile" accept=".json, .txt" [disabled]="tab.loadingOutput"
+                (fileChange)="loadInputUris(tabIndex)" tippy="Load URIs from File">
+                <i class="fa fa-fw fa-upload"></i>
+              </button>
+              <button class="btn btn-sm btn-secondary float-right mr-1" [disabled]="tab.loadingOutput"
+                (click)="downloadFile('current.uris', 'json', tab.parameters?.ontologiesUris, true)"
+                tippy="Download Current URIs">
+                <i class="fa fa-fw fa-download"></i>
+              </button>
+              <ng-template #success_uris_export_info>
+                Download Success URIs <br>
+                <span class="text-muted">(Loaded URIs and Output URIs are needed)</span>
+              </ng-template>
+              <span class="float-right mr-1" [tippy]="success_uris_export_info">
+                <button class="btn btn-sm btn-success"
+                  [disabled]="tab.loadingOutput || tab.downloadingSucessUris || tab.parameters?.ontologiesUris?.length <= 0 || tab.output?.success?.length <= 0"
+                  (click)="downloadSuccessUris(tabIndex)">
+                  <i class="fa fa-fw fa-{{tab.downloadingSucessUris ? 'spinner fa-pulse': 'download'}}"></i>
+                </button>
+              </span>
+              <ng-template #failed_uris_export_info>
+                Download Failed URIs <br>
+                <span class="text-muted">(Loaded URIs and Output URIs are needed)</span>
+              </ng-template>
+              <span class="float-right mr-1" [tippy]="failed_uris_export_info">
+                <button class="btn btn-sm btn-danger"
+                  [disabled]="tab.loadingOutput || tab.downloadingFailedUris || tab.parameters?.ontologiesUris?.length <= 0 || tab.output?.failed?.length <= 0"
+                  (click)="downloadFailedUris(tabIndex)">
+                  <i class="fa fa-fw fa-{{tab.downloadingFailedUris ? 'spinner fa-pulse': 'download'}}"></i>
+                </button>
+              </span>
+            </div>
+          </div>
           <table class="table owltometa-files-table">
             <tbody>
               <tr class="owltometa-file-row" *ngFor="let item of tab.parameters.ontologiesUris; let i=index">
