@@ -717,26 +717,30 @@
           <div class="row">
             <h3 class="col flex-grow-0 min-w-max-c">{{ tab.parameters.ontologiesUris.length }} URIs</h3>
             <div class="col">
-              <button type="button" class="btn btn-sm btn-success btn-xs"
-                (click)="tab.parameters.ontologiesUris.push({ uri: '', prefix: '' })" tippy="Add"
-                [disabled]="tab.loadingOutput">
-                <i class="fa fa-fw fa-plus"></i>
-              </button>
-              <button class="btn btn-sm btn-danger float-right"
-                (click)="tab.parameters.ontologiesUris = [{ uri: '', prefix: '' }]" tippy="Clear All"
-                [disabled]="tab.loadingOutput">
-                <i class="fa fa-fw fa-trash"></i>
-              </button>
-              <button ngfSelect class="btn btn-sm btn-secondary float-right mr-1" selectable="1"
-                [(file)]="tab.inputFile" accept=".json, .txt" [disabled]="tab.loadingOutput"
-                (fileChange)="loadInputUris(tabIndex)" tippy="Load URIs from File">
-                <i class="fa fa-fw fa-upload"></i>
-              </button>
-              <button class="btn btn-sm btn-secondary float-right mr-1" [disabled]="tab.loadingOutput"
-                (click)="downloadFile('current.uris', 'json', tab.parameters?.ontologiesUris, true)"
-                tippy="Download Current URIs">
-                <i class="fa fa-fw fa-download"></i>
-              </button>
+              <span tippy="Add">
+                <button type="button" class="btn btn-sm btn-success btn-xs"
+                  (click)="tab.parameters.ontologiesUris.push({ uri: '', prefix: '' })" [disabled]="tab.loadingOutput">
+                  <i class="fa fa-fw fa-plus"></i>
+                </button>
+              </span>
+              <span class="float-right" tippy="Clear All">
+                <button class="btn btn-sm btn-danger"
+                  (click)="tab.parameters.ontologiesUris = [{ uri: '', prefix: '' }]" [disabled]="tab.loadingOutput">
+                  <i class="fa fa-fw fa-trash"></i>
+                </button>
+              </span>
+              <span class="float-right mr-1" tippy="Load URIs from File">
+                <button ngfSelect class="btn btn-sm btn-secondary" selectable="1" [(file)]="tab.inputFile"
+                  accept=".json, .txt" [disabled]="tab.loadingOutput" (fileChange)="loadInputUris(tabIndex)">
+                  <i class="fa fa-fw fa-upload"></i>
+                </button>
+              </span>
+              <span class="float-right mr-1" tippy="Download Current URIs">
+                <button class="btn btn-sm btn-secondary " [disabled]="tab.loadingOutput"
+                  (click)="downloadFile('current.uris', 'json', tab.parameters?.ontologiesUris, true)">
+                  <i class="fa fa-fw fa-download"></i>
+                </button>
+              </span>
               <ng-template #success_uris_export_info>
                 Download Success URIs <br>
                 <span class="text-muted">(Loaded URIs and Output URIs are needed)</span>
@@ -779,11 +783,13 @@
                   </div>
                 </td>
                 <td class="text-right" nowrap>
-                  <button type="button" class="btn btn-sm btn-danger btn-xs"
-                    (click)="tab.parameters.ontologiesUris.splice(i, 1)" tippy="Remove"
-                    [disabled]="tab.loadingOutput || tab.parameters.ontologiesUris.length <= 1">
-                    <i class="fa fa-fw fa-times"></i>
-                  </button>
+                  <span tippy="Remove">
+                    <button type="button" class="btn btn-sm btn-danger btn-xs"
+                      (click)="tab.parameters.ontologiesUris.splice(i, 1)"
+                      [disabled]="tab.loadingOutput || tab.parameters.ontologiesUris.length <= 1">
+                      <i class="fa fa-fw fa-times"></i>
+                    </button>
+                  </span>
                 </td>
               </tr>
             </tbody>
@@ -793,18 +799,21 @@
           <label>Examples</label>
           <div>
             <div class="card-deck">
-              <button *ngFor="let uri of examples.uris" class="btn card bg-warning text-white text-center mr-0"
-                style="width: 3.5rem; min-width: 3.5rem; max-width: 3.5rem; margin-bottom: 1rem; font-size: 20px;"
-                (click)="tab.parameters.ontologiesUris.push({ uri: uri.uri, prefix: uri.prefix })" [tippy]="uri.uri"
-                [maxWidth]="'none'" [disabled]="tab.loadingOutput">
-                <div class="w-100">{{uri.emoji}}</div>
-              </button>
-              <button class="btn card bg-warning text-white text-center mr-0"
-                style="width: 3.5rem; min-width: 3.5rem; max-width: 3.5rem; margin-bottom: 1rem; font-size: 20px;"
-                (click)="loadLOVExample()" tippy="Linked Open Vocabularies (LOV)" [maxWidth]="'none'"
-                [disabled]="tab.loadingOutput">
-                <div class="w-100"><img class="w-100" src="../../assets/images/lov.png" /></div>
-              </button>
+              <span *ngFor="let uri of examples.uris" class="mr-0" [tippy]="uri.uri">
+                <button class="btn card bg-warning text-white text-center"
+                  style="width: 3.5rem; min-width: 3.5rem; max-width: 3.5rem; margin-bottom: 1rem; font-size: 20px;"
+                  (click)="tab.parameters.ontologiesUris.push({ uri: uri.uri, prefix: uri.prefix })" [maxWidth]="'none'"
+                  [disabled]="tab.loadingOutput">
+                  <div class="w-100">{{uri.emoji}}</div>
+                </button>
+              </span>
+              <span class="mr-0" tippy="Linked Open Vocabularies (LOV)">
+                <button class="btn card bg-warning text-white text-center"
+                  style="width: 3.5rem; min-width: 3.5rem; max-width: 3.5rem; margin-bottom: 1rem; font-size: 20px;"
+                  (click)="loadLOVExample()" [maxWidth]="'none'" [disabled]="tab.loadingOutput">
+                  <div class="w-100"><img class="w-100" src="../../assets/images/lov.png" /></div>
+                </button>
+              </span>
             </div>
           </div>
         </div>
@@ -816,11 +825,17 @@
           accept=".owl, .ttl, .rdf" [fileDropDisabled]="tab.loadingOutput">
           Select/Drop your OWL/RDF/TTL files here
         </div>
-        <h3>{{ tab.parameters.ontologiesFiles.length }} Files <button class="btn btn-sm btn-danger"
-            (click)="tab.parameters.ontologiesFiles = []" tippy="Clear All" [disabled]="tab.loadingOutput">
-            <i class="fa fa-fw fa-trash"></i>
-          </button>
-        </h3>
+        <div class="row">
+          <h3 class="col flex-grow-0 min-w-max-c">{{ tab.parameters.ontologiesFiles.length }} Files</h3>
+          <div class="col">
+            <span>
+              <button class="btn btn-sm btn-danger" (click)="tab.parameters.ontologiesFiles = []" tippy="Clear All"
+                [disabled]="tab.loadingOutput">
+                <i class="fa fa-fw fa-trash"></i>
+              </button>
+            </span>
+          </div>
+        </div>
         <div>
           <table class="table owltometa-files-table">
             <thead>
@@ -891,7 +906,7 @@
   <table class="table owltometa-files-table">
     <thead>
       <tr>
-        <th><span class="text-success">Succeded
+        <th><span class="text-success">Success
             ({{Object.keys(succededFiles).length}})</span>
         </th>
         <th style="width: 5rem;"></th>
