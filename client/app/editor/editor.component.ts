@@ -16,6 +16,7 @@ declare var $;
 
 declare var CrowdEditor;
 declare var CrowdEditorEer;
+declare var CrowdEditorErvt;
 declare var CrowdEditorUml;
 declare var CrowdEditorOrm;
 declare var CrowdMetamodel;
@@ -120,6 +121,7 @@ export class EditorComponent implements OnInit {
     const availableConceptualModels = {
       uml: CrowdEditorUml,
       eer: CrowdEditorEer,
+      ervt: CrowdEditorErvt,
       orm2: CrowdEditorOrm,
       kf: { name: 'kf', export: true },
       owl: { name: 'owl', title: 'OWL', import: false },
@@ -130,6 +132,7 @@ export class EditorComponent implements OnInit {
     const paletteSizes = {
       uml: { width: 120, height: 100, columns: 1 },
       eer: { width: 110, height: 80, columns: 2 },
+      ervt: { width: 110, height: 80, columns: 2 },
       orm2: { width: 120, height: 70, columns: 1 },
     }
 
