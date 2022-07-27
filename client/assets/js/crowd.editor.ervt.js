@@ -33,6 +33,8 @@ var CrowdEditorErvt = {
     //add joint eer entity to palette elements
     crowd.palette.elements.entity = new joint.shapes.erd.Entity({
       parentType: 'entity',
+      temporal: false,
+      temporalType: 'temporalEntity',
       type: 'entity',
       name: 'Entity',
       uri: 'http://crowd.fi.uncoma.edu.ar#entity',
@@ -139,7 +141,9 @@ var CrowdEditorErvt = {
 
     crowd.palette.elements.temporalEntity = new joint.shapes.ervt.TemporalEntity({
       parentType: 'entity',
-      type: 'temporalEntity',
+      temporal: true,
+      temporalType: 'temporalEntity',
+      type: 'entity',
       name: 'Temporal\nEntity',
       uri: 'http://crowd.fi.uncoma.edu.ar#temporal-entity',
       refUri: ''
@@ -215,7 +219,9 @@ var CrowdEditorErvt = {
 
     crowd.palette.elements.snapshotEntity = new joint.shapes.ervt.SnapshotEntity({
       parentType: 'entity',
-      type: 'temporalEntity',
+      temporal: true,
+      temporalType: 'snapshotEntity',
+      type: 'entity',
       name: 'Temporal\nEntity',
       uri: 'http://crowd.fi.uncoma.edu.ar#temporal-entity',
       refUri: ''
@@ -224,6 +230,8 @@ var CrowdEditorErvt = {
     //add joint eer weak entity to palette elements
     crowd.palette.elements.weakEntity = new joint.shapes.erd.Entity({
       parentType: 'entity',
+      temporal: false,
+      temporalType: 'temporalEntity',
       type: 'weakEntity',
       name: 'Weak\nEntity',
       uri: 'http://crowd.fi.uncoma.edu.ar#weak-entity',
@@ -252,6 +260,8 @@ var CrowdEditorErvt = {
     //add joint eer relationship to palette elements
     crowd.palette.elements.relationship = new joint.shapes.erd.Relationship({
       parentType: 'relationship',
+      temporal: false,
+      temporalType: 'temporalRelationship',
       type: 'relationship',
       name: 'Relationship',
       uri: 'http://crowd.fi.uncoma.edu.ar#relationship',
@@ -344,7 +354,9 @@ var CrowdEditorErvt = {
     //add joint ervt temporal relationship to palette elements
     crowd.palette.elements.temporalRelationship = new joint.shapes.ervt.TemporalRelationship({
       parentType: 'relationship',
-      type: 'temporalRelationship',
+      temporal: true,
+      temporalType: 'temporalRelationship',
+      type: 'relationship',
       name: 'Temporal\nRelationship',
       uri: 'http://crowd.fi.uncoma.edu.ar#temporal-relationship',
       refUri: ''
@@ -381,7 +393,7 @@ var CrowdEditorErvt = {
             fill: crowd.palette.colors.temporalMark
           },
           temporalText: {
-            text: 'T',
+            text: 'S',
             textVerticalAnchor: 'middle',
             textAnchor: 'middle',
             refWidth: '20%',
@@ -418,7 +430,9 @@ var CrowdEditorErvt = {
     //add joint ervt snapshot relationship to palette elements
     crowd.palette.elements.snapshotRelationship = new joint.shapes.ervt.SnapshotRelationship({
       parentType: 'relationship',
-      type: 'snapshotRelationship',
+      temporal: true,
+      temporalType: 'snapshotRelationship',
+      type: 'relationship',
       name: 'Snapshot\nRelationship',
       uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-relationship',
       refUri: ''
@@ -427,6 +441,8 @@ var CrowdEditorErvt = {
     //add joint eer weak relationship to palette elements
     crowd.palette.elements.weakRelationship = new joint.shapes.erd.Relationship({
       parentType: 'relationship',
+      temporal: false,
+      temporalType: 'temporalRelationship',
       type: 'weakRelationship',
       name: 'Weak\nRelationship',
       uri: 'http://crowd.fi.uncoma.edu.ar#weak-relationship',
@@ -455,7 +471,9 @@ var CrowdEditorErvt = {
     //add joint eer attribute to palette elements
     crowd.palette.elements.attribute = new joint.shapes.erd.Attribute({
       parentType: 'attribute',
+      temporal: false,
       type: 'attribute',
+      temporalType: 'temporalAttribute',
       name: 'Attribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#attribute',
       datatype: 'string',
@@ -480,7 +498,9 @@ var CrowdEditorErvt = {
     joint.dia.Element.define('ervt.TemporalAttribute',
     {
       parentType: 'attribute',
-      type: 'temporalAttribute',
+      temporal: true,
+      type: 'attribute',
+      temporalType: 'temporalAttribute',
       name: 'Temporal\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#temporal-attribute',
       datatype: 'string',
@@ -551,7 +571,9 @@ var CrowdEditorErvt = {
 
     crowd.palette.elements.temporalAttribute = new joint.shapes.ervt.TemporalAttribute({
       parentType: 'attribute',
-      type: 'temporalAttribute',
+      temporal: true,
+      type: 'attribute',
+      temporalType: 'temporalAttribute',
       name: 'Temporal\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#temporal-attribute',
       refUri: ''
@@ -561,7 +583,9 @@ var CrowdEditorErvt = {
     joint.dia.Element.define('ervt.SnapshotAttribute',
     {
       parentType: 'attribute',
-      type: 'snapshotAttribute',
+      temporal: true,
+      type: 'attribute',
+      temporalType: 'snapshotAttribute',
       name: 'Snapshot\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-attribute',
       datatype: 'string',
@@ -632,7 +656,9 @@ var CrowdEditorErvt = {
 
     crowd.palette.elements.snapshotAttribute = new joint.shapes.ervt.SnapshotAttribute({
       parentType: 'attribute',
-      type: 'snapshotAttribute',
+      temporal: true,
+      type: 'attribute',
+      temporalType: 'snapshotAttribute',
       name: 'Snapshot\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-attribute',
       refUri: ''
@@ -641,7 +667,9 @@ var CrowdEditorErvt = {
     //add joint eer key attribute to palette elements
     crowd.palette.elements.keyAttribute = new joint.shapes.erd.Attribute({
       parentType: 'attribute',
+      temporal: false,
       type: 'keyAttribute',
+      temporalType: 'temporalAttribute',
       name: 'Key\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#key-attribute',
       datatype: 'string',
@@ -666,7 +694,9 @@ var CrowdEditorErvt = {
     joint.dia.Element.define('ervt.TemporalKeyAttribute',
     {
       parentType: 'attribute',
-      type: 'temporalKeyAttribute',
+      temporal: true,
+      type: 'attribute',
+      temporalType: 'temporalKeyAttribute',
       name: 'Temporal\nKey\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#temporal-key-attribute',
       datatype: 'string',
@@ -737,7 +767,9 @@ var CrowdEditorErvt = {
 
     crowd.palette.elements.temporalKeyAttribute = new joint.shapes.ervt.TemporalKeyAttribute({
       parentType: 'attribute',
-      type: 'temporalKeyAttribute',
+      temporal: true,
+      type: 'attribute',
+      temporalType: 'temporalKeyAttribute',
       name: 'Temporal\nKey\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#temporal-attribute',
       refUri: ''
@@ -747,7 +779,9 @@ var CrowdEditorErvt = {
     joint.dia.Element.define('ervt.SnapshotKeyAttribute',
     {
       parentType: 'attribute',
-      type: 'snapshotKeyAttribute',
+      temporal: true,
+      type: 'attribute',
+      temporalType: 'snapshotKeyAttribute',
       name: 'Snapshot\nKey\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-key-attribute',
       datatype: 'string',
@@ -818,7 +852,9 @@ var CrowdEditorErvt = {
 
     crowd.palette.elements.snapshotKeyAttribute = new joint.shapes.ervt.SnapshotKeyAttribute({
       parentType: 'attribute',
-      type: 'snapshotKeyAttribute',
+      temporal: true,
+      type: 'attribute',
+      temporalType: 'snapshotKeyAttribute',
       name: 'Snapshot\nKey\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-attribute',
       refUri: ''
@@ -827,7 +863,9 @@ var CrowdEditorErvt = {
     //add joint eer weak key attribute to palette elements
     crowd.palette.elements.weakKeyAttribute = new joint.shapes.erd.Attribute({
       parentType: 'attribute',
+      temporal: false,
       type: 'weakKeyAttribute',
+      temporalType: 'temporalAttribute',
       name: 'Weak Key\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#weak-key-attribute',
       datatype: 'string',
@@ -851,7 +889,9 @@ var CrowdEditorErvt = {
     //add joint eer multivalued attribute to palette elements
     crowd.palette.elements.multivaluedAttribute = new joint.shapes.erd.Attribute({
       parentType: 'attribute',
+      temporal: false,
       type: 'multivaluedAttribute',
+      temporalType: 'temporalAttribute',
       name: 'Multivalued\nAttribute',
       uri: 'http://crowd.fi.uncoma.edu.ar#multivalued-attribute',
       datatype: 'string',
@@ -1493,10 +1533,15 @@ var CrowdEditorErvt = {
   },
   initChangeAttributesEvents: function (crowd) {
     //event when the elements type change (types are: entity, weakEntity, attribute, etc)
-    crowd.workspace.graph.on('change:type', function (element, newType) {
+    crowd.workspace.graph.on('change:temporal change:type change:temporalType', function (element, newType) {
       // console.log('change:type', { element, newType });
 
       if (element.isElement()) {
+        if (element.attributes.temporal) {
+          newType = element.attributes.temporalType;
+        } else {
+          newType = element.attributes.type;
+        }
         //replace element attributes and markup with the palette default component of the newtype
         element.attributes.attrs = $.extend(true, {}, crowd.palette.elements[newType].attributes.attrs);
         element.markup = crowd.palette.elements[newType].markup;
@@ -1554,7 +1599,6 @@ var CrowdEditorErvt = {
         //redraw the link with the new text
         linkView.render();
       } else if (element.isElement() && element.prop('type') == 'inheritance') {
-        console.log('element.attributes', element.attributes);
         var subtypesText = { overlaped: 'o', disjoint: 'd', union: 'U' };
         element.attr('text/text', subtypesText[newSubtype]);
       }
@@ -1793,36 +1837,30 @@ var CrowdEditorErvt = {
         break;
     }
 
-    //add name attribute to content if it is of the correct type
-    // switch (crowd.inspector.model.attributes.type) {
-    //   case 'entity':
-    //   case 'weakEntity':
-    //   case 'relationship':
-    //   case 'weakRelationship':
-    //   case 'attribute':
-    //   case 'multivaluedAttribute':
-    //   case 'keyAttribute':
-    //   case 'weakKeyAttribute':
-    //   case 'derivedAttribute':
-    //     crowd.inspector.addAttribute({ label: 'Name', property: 'name', type: 'text', input: 'textarea' });
-    //     break;
-    // }
-
     //add is weak attribute for entities
     switch (crowd.inspector.model.attributes.type) {
       case 'entity':
       case 'weakEntity':
       case 'temporalEntity':
       case 'snapshotEntity':
-        crowd.inspector.addAttribute({
-          label: 'Type', property: 'type', type: 'multiple',
-          values: [
-            { label: 'Normal', value: 'entity' },
-            { label: 'Weak', value: 'weakEntity' },
-            { label: 'Temporal', value: 'temporalEntity' },
-            { label: 'Snapshot', value: 'snapshotEntity' },
-          ]
-        });
+        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false }});
+        if (crowd.inspector.model.attributes.temporal) {
+          crowd.inspector.addAttribute({
+            label: 'Type', property: 'temporalType', type: 'multiple',
+            values: [
+              { label: 'Temporal', value: 'temporalEntity' },
+              { label: 'Snapshot', value: 'snapshotEntity' },
+            ]
+          });
+        } else {
+          crowd.inspector.addAttribute({
+            label: 'Type', property: 'type', type: 'multiple',
+            values: [
+              { label: 'Normal', value: 'entity' },
+              { label: 'Weak', value: 'weakEntity' },
+            ]
+          });
+        }
         break;
     }
 
@@ -1832,15 +1870,24 @@ var CrowdEditorErvt = {
       case 'temporalRelationship':
       case 'snapshotRelationship':
       case 'weakRelationship':
-        crowd.inspector.addAttribute({
-          label: 'Type', property: 'type', type: 'multiple',
-          values: [
-            { label: 'Normal', value: 'relationship' },
-            { label: 'Weak', value: 'weakRelationship' },
-            { label: 'Temporal', value: 'temporalRelationship' },
-            { label: 'Snapshot', value: 'snapshotRelationship' },
-          ]
-        });
+        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false }});
+        if (crowd.inspector.model.attributes.temporal) {
+          crowd.inspector.addAttribute({
+            label: 'Type', property: 'temporalType', type: 'multiple',
+            values: [
+              { label: 'Temporal', value: 'temporalRelationship' },
+              { label: 'Snapshot', value: 'snapshotRelationship' },
+            ]
+          });
+        } else {
+          crowd.inspector.addAttribute({
+            label: 'Type', property: 'type', type: 'multiple',
+            values: [
+              { label: 'Normal', value: 'relationship' },
+              { label: 'Weak', value: 'weakRelationship' },
+            ]
+          });
+        }
         break;
     }
 
@@ -1855,20 +1902,29 @@ var CrowdEditorErvt = {
       case 'snapshotKeyAttribute':
       case 'weakKeyAttribute':
       case 'derivedAttribute':
-        crowd.inspector.addAttribute({
-          label: 'Type', property: 'type', type: 'multiple',
-          values: [
-            { label: 'Normal', value: 'attribute' },
-            { label: 'Temporal', value: 'temporalAttribute' },
-            { label: 'Snapshot', value: 'snapshotAttribute' },
-            { label: 'Key', value: 'keyAttribute' },
-            { label: 'Temporal Key', value: 'temporalKeyAttribute' },
-            { label: 'Key Snapshot', value: 'snapshotKeyAttribute' },
-            { label: 'Weak Key', value: 'weakKeyAttribute' },
-            { label: 'Multivalued', value: 'multivaluedAttribute' },
-            { label: 'Derived', value: 'derivedAttribute' }
-          ]
-        });
+        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false }});
+        if (crowd.inspector.model.attributes.temporal) {
+          crowd.inspector.addAttribute({
+            label: 'Type', property: 'temporalType', type: 'multiple',
+            values: [
+              { label: 'Temporal', value: 'temporalAttribute' },
+              { label: 'Snapshot', value: 'snapshotAttribute' },
+              { label: 'Temporal Key', value: 'temporalKeyAttribute' },
+              { label: 'Key Snapshot', value: 'snapshotKeyAttribute' },
+            ]
+          });
+        } else {
+          crowd.inspector.addAttribute({
+            label: 'Type', property: 'type', type: 'multiple',
+            values: [
+              { label: 'Normal', value: 'attribute' },
+              { label: 'Key', value: 'keyAttribute' },
+              { label: 'Weak Key', value: 'weakKeyAttribute' },
+              { label: 'Multivalued', value: 'multivaluedAttribute' },
+              { label: 'Derived', value: 'derivedAttribute' }
+            ]
+          });
+        }
         crowd.inspector.addAttribute({
           label: 'Datatype', property: 'datatype', type: 'select',
           values: [
