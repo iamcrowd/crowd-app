@@ -151,6 +151,7 @@ var CrowdEditorErvt = {
 
     joint.dia.Element.define('ervt.SnapshotEntity',
       {
+        addToPalette: false,
         size: {
           width: 90,
           height: 40
@@ -364,6 +365,7 @@ var CrowdEditorErvt = {
 
     joint.dia.Element.define('ervt.SnapshotRelationship',
       {
+        addToPalette: false,
         size: {
           width: 90,
           height: 40
@@ -583,6 +585,7 @@ var CrowdEditorErvt = {
     joint.dia.Element.define('ervt.SnapshotAttribute',
     {
       parentType: 'attribute',
+      addToPalette: false,
       temporal: true,
       type: 'attribute',
       temporalType: 'snapshotAttribute',
@@ -779,6 +782,7 @@ var CrowdEditorErvt = {
     joint.dia.Element.define('ervt.SnapshotKeyAttribute',
     {
       parentType: 'attribute',
+      addToPalette: false,
       temporal: true,
       type: 'attribute',
       temporalType: 'snapshotKeyAttribute',
@@ -1588,7 +1592,7 @@ var CrowdEditorErvt = {
     //event when the element subtype change
     crowd.workspace.graph.on('change:subtype', function (element, newSubtype) {
       // console.log('change:subtype', { element, newSubtype });
-      
+
       if (element.isLink() && element.attributes.type == "temporalConnector") {
         var subtypesText = { tex: 'TEX', dev: 'DEV', dex: 'DEX-', pex: 'PEX' };
         element.attributes.labels[0].attrs.text.text = subtypesText[newSubtype]

@@ -232,8 +232,10 @@ CrowdEditor.prototype.initPalette = function () {
       y: (Math.floor(position / self.config.palette.grid.columns) * self.config.palette.grid.height) +
         (self.config.palette.grid.height - self.palette.elements[element].attributes.size.height) / 2
     };
-    self.palette.graph.addCell(self.palette.elements[element]);
-    position++;
+    if (self.palette.elements[element].attributes.addToPalette != false) {
+      self.palette.graph.addCell(self.palette.elements[element]);
+      position++;
+    }
   }
 
   //event for drag and drop from palette to workspace
