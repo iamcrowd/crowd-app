@@ -498,78 +498,78 @@ var CrowdEditorErvt = {
 
     //add joint eer temporal attribute to palette elements
     joint.dia.Element.define('ervt.TemporalAttribute',
-    {
-      parentType: 'attribute',
-      temporal: true,
-      type: 'attribute',
-      temporalType: 'temporalAttribute',
-      name: 'Temporal\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#temporal-attribute',
-      datatype: 'string',
-      attrs: {
-        label: {
-          text: 'Temporal\nAttribute',
-          textVerticalAnchor: 'middle',
-          textAnchor: 'middle',
-          refX: '50%',
-          refY: '50%',
-          fill: '#000000',
-          class: 'crowd-element-text xs temporal-attribute'
+      {
+        parentType: 'attribute',
+        temporal: true,
+        type: 'attribute',
+        temporalType: 'temporalAttribute',
+        name: 'Temporal\nAttribute',
+        uri: 'http://crowd.fi.uncoma.edu.ar#temporal-attribute',
+        datatype: 'string',
+        attrs: {
+          label: {
+            text: 'Temporal\nAttribute',
+            textVerticalAnchor: 'middle',
+            textAnchor: 'middle',
+            refX: '50%',
+            refY: '50%',
+            fill: '#000000',
+            class: 'crowd-element-text xs temporal-attribute'
+          },
+          body: {
+            cx: 35,
+            cy: 20,
+            rx: 35,
+            ry: 20,
+            strokeWidth: 2,
+            fill: crowd.palette.colors.temporalAttribute,
+            stroke: crowd.palette.colors.attributeStroke
+          },
+          temporalMark: {
+            refWidth: '20%',
+            refHeight: '45%',
+            strokeWidth: 1,
+            refX: '80%',
+            stroke: crowd.palette.colors.temporalMarkStroke,
+            fill: crowd.palette.colors.temporalMark
+          },
+          temporalText: {
+            text: 'T',
+            textVerticalAnchor: 'middle',
+            textAnchor: 'middle',
+            refWidth: '20%',
+            refHeight: '45%',
+            refX: '90%',
+            refY: '24%',
+            fill: '#000000',
+            class: 'crowd-element-text'
+          }
         },
-        body: {
-          cx: 35,
-          cy: 20,
-          rx: 35,
-          ry: 20,
-          strokeWidth: 2,
-          fill: crowd.palette.colors.temporalAttribute,
-          stroke: crowd.palette.colors.attributeStroke
-        },
-        temporalMark: {
-          refWidth: '20%',
-          refHeight: '45%',
-          strokeWidth: 1,
-          refX: '80%',
-          stroke: crowd.palette.colors.temporalMarkStroke,
-          fill: crowd.palette.colors.temporalMark
-        },
-        temporalText: {
-          text: 'T',
-          textVerticalAnchor: 'middle',
-          textAnchor: 'middle',
-          refWidth: '20%',
-          refHeight: '45%',
-          refX: '90%',
-          refY: '24%',
-          fill: '#000000',
-          class: 'crowd-element-text'
+        size: {
+          width: 70,
+          height: 40
         }
       },
-      size: {
-        width: 70,
-        height: 40
-      }
-    },
-    {
-      markup: [
-        {
-          tagName: 'ellipse',
-          selector: 'body',
-        },
-        {
-          tagName: 'text',
-          selector: 'label'
-        },
-        {
-          tagName: 'rect',
-          selector: 'temporalMark',
-        },
-        {
-          tagName: 'text',
-          selector: 'temporalText'
-        }
-      ]
-    });
+      {
+        markup: [
+          {
+            tagName: 'ellipse',
+            selector: 'body',
+          },
+          {
+            tagName: 'text',
+            selector: 'label'
+          },
+          {
+            tagName: 'rect',
+            selector: 'temporalMark',
+          },
+          {
+            tagName: 'text',
+            selector: 'temporalText'
+          }
+        ]
+      });
 
     crowd.palette.elements.temporalAttribute = new joint.shapes.ervt.TemporalAttribute({
       parentType: 'attribute',
@@ -583,79 +583,79 @@ var CrowdEditorErvt = {
 
     //add joint eer snapshot attribute to palette elements
     joint.dia.Element.define('ervt.SnapshotAttribute',
-    {
-      parentType: 'attribute',
-      addToPalette: false,
-      temporal: true,
-      type: 'attribute',
-      temporalType: 'snapshotAttribute',
-      name: 'Snapshot\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-attribute',
-      datatype: 'string',
-      attrs: {
-        label: {
-          text: 'Snapshot\nAttribute',
-          textVerticalAnchor: 'middle',
-          textAnchor: 'middle',
-          refX: '50%',
-          refY: '50%',
-          fill: '#000000',
-          class: 'crowd-element-text xs snapshot-attribute'
+      {
+        parentType: 'attribute',
+        addToPalette: false,
+        temporal: true,
+        type: 'attribute',
+        temporalType: 'snapshotAttribute',
+        name: 'Snapshot\nAttribute',
+        uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-attribute',
+        datatype: 'string',
+        attrs: {
+          label: {
+            text: 'Snapshot\nAttribute',
+            textVerticalAnchor: 'middle',
+            textAnchor: 'middle',
+            refX: '50%',
+            refY: '50%',
+            fill: '#000000',
+            class: 'crowd-element-text xs snapshot-attribute'
+          },
+          body: {
+            cx: 35,
+            cy: 20,
+            rx: 35,
+            ry: 20,
+            strokeWidth: 2,
+            fill: crowd.palette.colors.snapshotAttribute,
+            stroke: crowd.palette.colors.attributeStroke
+          },
+          temporalMark: {
+            refWidth: '20%',
+            refHeight: '45%',
+            strokeWidth: 1,
+            refX: '80%',
+            stroke: crowd.palette.colors.temporalMarkStroke,
+            fill: crowd.palette.colors.temporalMark
+          },
+          temporalText: {
+            text: 'S',
+            textVerticalAnchor: 'middle',
+            textAnchor: 'middle',
+            refWidth: '20%',
+            refHeight: '45%',
+            refX: '90%',
+            refY: '24%',
+            fill: '#000000',
+            class: 'crowd-element-text'
+          }
         },
-        body: {
-          cx: 35,
-          cy: 20,
-          rx: 35,
-          ry: 20,
-          strokeWidth: 2,
-          fill: crowd.palette.colors.snapshotAttribute,
-          stroke: crowd.palette.colors.attributeStroke
-        },
-        temporalMark: {
-          refWidth: '20%',
-          refHeight: '45%',
-          strokeWidth: 1,
-          refX: '80%',
-          stroke: crowd.palette.colors.temporalMarkStroke,
-          fill: crowd.palette.colors.temporalMark
-        },
-        temporalText: {
-          text: 'S',
-          textVerticalAnchor: 'middle',
-          textAnchor: 'middle',
-          refWidth: '20%',
-          refHeight: '45%',
-          refX: '90%',
-          refY: '24%',
-          fill: '#000000',
-          class: 'crowd-element-text'
+        size: {
+          width: 70,
+          height: 40
         }
       },
-      size: {
-        width: 70,
-        height: 40
-      }
-    },
-    {
-      markup: [
-        {
-          tagName: 'ellipse',
-          selector: 'body',
-        },
-        {
-          tagName: 'text',
-          selector: 'label'
-        },
-        {
-          tagName: 'rect',
-          selector: 'temporalMark',
-        },
-        {
-          tagName: 'text',
-          selector: 'temporalText'
-        }
-      ]
-    });
+      {
+        markup: [
+          {
+            tagName: 'ellipse',
+            selector: 'body',
+          },
+          {
+            tagName: 'text',
+            selector: 'label'
+          },
+          {
+            tagName: 'rect',
+            selector: 'temporalMark',
+          },
+          {
+            tagName: 'text',
+            selector: 'temporalText'
+          }
+        ]
+      });
 
     crowd.palette.elements.snapshotAttribute = new joint.shapes.ervt.SnapshotAttribute({
       parentType: 'attribute',
@@ -695,78 +695,78 @@ var CrowdEditorErvt = {
 
     //add joint eer temporal key attribute to palette elements
     joint.dia.Element.define('ervt.TemporalKeyAttribute',
-    {
-      parentType: 'attribute',
-      temporal: true,
-      type: 'attribute',
-      temporalType: 'temporalKeyAttribute',
-      name: 'Temporal\nKey\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#temporal-key-attribute',
-      datatype: 'string',
-      attrs: {
-        label: {
-          text: 'Temporal\nKey\nAttribute',
-          textVerticalAnchor: 'middle',
-          textAnchor: 'middle',
-          refX: '50%',
-          refY: '50%',
-          fill: '#000000',
-          class: 'crowd-element-text xs key-attribute'
+      {
+        parentType: 'attribute',
+        temporal: true,
+        type: 'attribute',
+        temporalType: 'temporalKeyAttribute',
+        name: 'Temporal\nKey\nAttribute',
+        uri: 'http://crowd.fi.uncoma.edu.ar#temporal-key-attribute',
+        datatype: 'string',
+        attrs: {
+          label: {
+            text: 'Temporal\nKey\nAttribute',
+            textVerticalAnchor: 'middle',
+            textAnchor: 'middle',
+            refX: '50%',
+            refY: '50%',
+            fill: '#000000',
+            class: 'crowd-element-text xs key-attribute'
+          },
+          body: {
+            cx: 35,
+            cy: 20,
+            rx: 35,
+            ry: 20,
+            strokeWidth: 2,
+            fill: crowd.palette.colors.temporalKeyAttribute,
+            stroke: crowd.palette.colors.keyAttributeStroke
+          },
+          temporalMark: {
+            refWidth: '20%',
+            refHeight: '45%',
+            strokeWidth: 1,
+            refX: '80%',
+            stroke: crowd.palette.colors.temporalMarkStroke,
+            fill: crowd.palette.colors.temporalMark
+          },
+          temporalText: {
+            text: 'T',
+            textVerticalAnchor: 'middle',
+            textAnchor: 'middle',
+            refWidth: '20%',
+            refHeight: '45%',
+            refX: '90%',
+            refY: '24%',
+            fill: '#000000',
+            class: 'crowd-element-text'
+          }
         },
-        body: {
-          cx: 35,
-          cy: 20,
-          rx: 35,
-          ry: 20,
-          strokeWidth: 2,
-          fill: crowd.palette.colors.temporalKeyAttribute,
-          stroke: crowd.palette.colors.keyAttributeStroke
-        },
-        temporalMark: {
-          refWidth: '20%',
-          refHeight: '45%',
-          strokeWidth: 1,
-          refX: '80%',
-          stroke: crowd.palette.colors.temporalMarkStroke,
-          fill: crowd.palette.colors.temporalMark
-        },
-        temporalText: {
-          text: 'T',
-          textVerticalAnchor: 'middle',
-          textAnchor: 'middle',
-          refWidth: '20%',
-          refHeight: '45%',
-          refX: '90%',
-          refY: '24%',
-          fill: '#000000',
-          class: 'crowd-element-text'
+        size: {
+          width: 70,
+          height: 40
         }
       },
-      size: {
-        width: 70,
-        height: 40
-      }
-    },
-    {
-      markup: [
-        {
-          tagName: 'ellipse',
-          selector: 'body',
-        },
-        {
-          tagName: 'text',
-          selector: 'label'
-        },
-        {
-          tagName: 'rect',
-          selector: 'temporalMark',
-        },
-        {
-          tagName: 'text',
-          selector: 'temporalText'
-        }
-      ]
-    });
+      {
+        markup: [
+          {
+            tagName: 'ellipse',
+            selector: 'body',
+          },
+          {
+            tagName: 'text',
+            selector: 'label'
+          },
+          {
+            tagName: 'rect',
+            selector: 'temporalMark',
+          },
+          {
+            tagName: 'text',
+            selector: 'temporalText'
+          }
+        ]
+      });
 
     crowd.palette.elements.temporalKeyAttribute = new joint.shapes.ervt.TemporalKeyAttribute({
       parentType: 'attribute',
@@ -780,79 +780,79 @@ var CrowdEditorErvt = {
 
     //add joint eer snapshot key attribute to palette elements
     joint.dia.Element.define('ervt.SnapshotKeyAttribute',
-    {
-      parentType: 'attribute',
-      addToPalette: false,
-      temporal: true,
-      type: 'attribute',
-      temporalType: 'snapshotKeyAttribute',
-      name: 'Snapshot\nKey\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-key-attribute',
-      datatype: 'string',
-      attrs: {
-        label: {
-          text: 'Snapshot\nKey\nAttribute',
-          textVerticalAnchor: 'middle',
-          textAnchor: 'middle',
-          refX: '50%',
-          refY: '50%',
-          fill: '#000000',
-          class: 'crowd-element-text xs key-attribute'
+      {
+        parentType: 'attribute',
+        addToPalette: false,
+        temporal: true,
+        type: 'attribute',
+        temporalType: 'snapshotKeyAttribute',
+        name: 'Snapshot\nKey\nAttribute',
+        uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-key-attribute',
+        datatype: 'string',
+        attrs: {
+          label: {
+            text: 'Snapshot\nKey\nAttribute',
+            textVerticalAnchor: 'middle',
+            textAnchor: 'middle',
+            refX: '50%',
+            refY: '50%',
+            fill: '#000000',
+            class: 'crowd-element-text xs key-attribute'
+          },
+          body: {
+            cx: 35,
+            cy: 20,
+            rx: 35,
+            ry: 20,
+            strokeWidth: 2,
+            fill: crowd.palette.colors.snapshotKeyAttribute,
+            stroke: crowd.palette.colors.keyAttributeStroke
+          },
+          temporalMark: {
+            refWidth: '20%',
+            refHeight: '45%',
+            strokeWidth: 1,
+            refX: '80%',
+            stroke: crowd.palette.colors.temporalMarkStroke,
+            fill: crowd.palette.colors.temporalMark
+          },
+          temporalText: {
+            text: 'S',
+            textVerticalAnchor: 'middle',
+            textAnchor: 'middle',
+            refWidth: '20%',
+            refHeight: '45%',
+            refX: '90%',
+            refY: '24%',
+            fill: '#000000',
+            class: 'crowd-element-text'
+          }
         },
-        body: {
-          cx: 35,
-          cy: 20,
-          rx: 35,
-          ry: 20,
-          strokeWidth: 2,
-          fill: crowd.palette.colors.snapshotKeyAttribute,
-          stroke: crowd.palette.colors.keyAttributeStroke
-        },
-        temporalMark: {
-          refWidth: '20%',
-          refHeight: '45%',
-          strokeWidth: 1,
-          refX: '80%',
-          stroke: crowd.palette.colors.temporalMarkStroke,
-          fill: crowd.palette.colors.temporalMark
-        },
-        temporalText: {
-          text: 'S',
-          textVerticalAnchor: 'middle',
-          textAnchor: 'middle',
-          refWidth: '20%',
-          refHeight: '45%',
-          refX: '90%',
-          refY: '24%',
-          fill: '#000000',
-          class: 'crowd-element-text'
+        size: {
+          width: 70,
+          height: 40
         }
       },
-      size: {
-        width: 70,
-        height: 40
-      }
-    },
-    {
-      markup: [
-        {
-          tagName: 'ellipse',
-          selector: 'body',
-        },
-        {
-          tagName: 'text',
-          selector: 'label'
-        },
-        {
-          tagName: 'rect',
-          selector: 'temporalMark',
-        },
-        {
-          tagName: 'text',
-          selector: 'temporalText'
-        }
-      ]
-    });
+      {
+        markup: [
+          {
+            tagName: 'ellipse',
+            selector: 'body',
+          },
+          {
+            tagName: 'text',
+            selector: 'label'
+          },
+          {
+            tagName: 'rect',
+            selector: 'temporalMark',
+          },
+          {
+            tagName: 'text',
+            selector: 'temporalText'
+          }
+        ]
+      });
 
     crowd.palette.elements.snapshotKeyAttribute = new joint.shapes.ervt.SnapshotKeyAttribute({
       parentType: 'attribute',
@@ -1015,7 +1015,7 @@ var CrowdEditorErvt = {
       attrs: {
         line: {
           stroke: 'black',
-          strokeDasharray:"4",
+          strokeDasharray: "4",
           strokeWidth: 2,
           sourceMarker: {},
           targetMarker: {
@@ -1307,7 +1307,7 @@ var CrowdEditorErvt = {
     var linkTool = function (config) {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkTool({
-        offset: { x: 10, y: -15},
+        offset: { x: 10, y: -15 },
         link: {
           type: 'connector',
           props: {
@@ -1325,7 +1325,7 @@ var CrowdEditorErvt = {
       return crowd.workspace.tools.elements.linkTool({
         // x: 100%,
         // y: ,
-        offset: { x: 25, y: 0},
+        offset: { x: 25, y: 0 },
         link: {
           type: 'temporal',
         },
@@ -1837,7 +1837,7 @@ var CrowdEditorErvt = {
       case 'derivedAttribute':
       case 'connector':
         if (crowd.inspector.model.attributes.type != 'connector' || (!crowd.inspector.model.attributes.inherit && !crowd.inspector.model.attributes.attribute))
-          crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'uri'});
+          crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'uri' });
         break;
     }
 
@@ -1847,7 +1847,7 @@ var CrowdEditorErvt = {
       case 'weakEntity':
       case 'temporalEntity':
       case 'snapshotEntity':
-        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false }});
+        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false } });
         if (crowd.inspector.model.attributes.temporal) {
           crowd.inspector.addAttribute({
             label: 'Type', property: 'temporalType', type: 'multiple',
@@ -1874,7 +1874,7 @@ var CrowdEditorErvt = {
       case 'temporalRelationship':
       case 'snapshotRelationship':
       case 'weakRelationship':
-        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false }});
+        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false } });
         if (crowd.inspector.model.attributes.temporal) {
           crowd.inspector.addAttribute({
             label: 'Type', property: 'temporalType', type: 'multiple',
@@ -1906,7 +1906,7 @@ var CrowdEditorErvt = {
       case 'snapshotKeyAttribute':
       case 'weakKeyAttribute':
       case 'derivedAttribute':
-        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false }});
+        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false } });
         if (crowd.inspector.model.attributes.temporal) {
           crowd.inspector.addAttribute({
             label: 'Type', property: 'temporalType', type: 'multiple',
