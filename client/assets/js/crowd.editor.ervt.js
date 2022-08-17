@@ -698,7 +698,7 @@ var CrowdEditorErvt = {
       {
         parentType: 'attribute',
         temporal: true,
-        type: 'attribute',
+        type: 'keyAttribute',
         temporalType: 'temporalKeyAttribute',
         name: 'Temporal\nKey\nAttribute',
         uri: 'http://crowd.fi.uncoma.edu.ar#temporal-key-attribute',
@@ -771,10 +771,10 @@ var CrowdEditorErvt = {
     crowd.palette.elements.temporalKeyAttribute = new joint.shapes.ervt.TemporalKeyAttribute({
       parentType: 'attribute',
       temporal: true,
-      type: 'attribute',
+      type: 'keyAttribute',
       temporalType: 'temporalKeyAttribute',
       name: 'Temporal\nKey\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#temporal-attribute',
+      uri: 'http://crowd.fi.uncoma.edu.ar#temporal-key-attribute',
       refUri: ''
     });
 
@@ -784,7 +784,7 @@ var CrowdEditorErvt = {
         parentType: 'attribute',
         addToPalette: false,
         temporal: true,
-        type: 'attribute',
+        type: 'keyAttribute',
         temporalType: 'snapshotKeyAttribute',
         name: 'Snapshot\nKey\nAttribute',
         uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-key-attribute',
@@ -857,10 +857,10 @@ var CrowdEditorErvt = {
     crowd.palette.elements.snapshotKeyAttribute = new joint.shapes.ervt.SnapshotKeyAttribute({
       parentType: 'attribute',
       temporal: true,
-      type: 'attribute',
+      type: 'keyAttribute',
       temporalType: 'snapshotKeyAttribute',
       name: 'Snapshot\nKey\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-attribute',
+      uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-key-attribute',
       refUri: ''
     });
 
@@ -2067,23 +2067,33 @@ var CrowdEditorErvt = {
     crowd.workspace.graph.getElements().forEach(function (element) {
       switch (element.attributes.parentType) {
         case 'entity':
+          if (element.attributes.temporal) {
+            timestamp = element.attributes.temporalType == 'temporalEntity' ? 'temporal' : 'snapshot'
+          } else {
+            timestamp = ""
+          }
           jsonSchema.entities.push({
             id: element.cid,
             uri: element.attributes.uri,
             name: element.attributes.uri,
             isWeak: element.attributes.type == 'weakEntity',
-            isTemporal: element.attributes.type == 'temporalEntity',
-            isSnapshot: element.attributes.type == 'snapshotEntity',
+            timestamp: timestamp,
             position: element.attributes.position,
             size: element.attributes.size,
           });
           break;
         case 'attribute':
+          if (element.attributes.temporal) {
+            timestamp = element.attributes.temporalType == 'temporalAttribute' || element.attributes.temporalType == 'temporalKeyAttribute' ? 'temporal' : 'snapshot'
+          } else {
+            timestamp = ""
+          }
           jsonSchema.attributes.push({
             id: element.cid,
             uri: element.attributes.uri,
             name: element.attributes.uri,
             type: attributeTypeMap[element.attributes.type],
+            timestamp: timestamp,
             datatype: datatypeMap(element.attributes.datatype),
             position: element.attributes.position,
             size: element.attributes.size,
@@ -2116,6 +2126,11 @@ var CrowdEditorErvt = {
           jsonSchema.links.push(attributeLink);
           break;
         case 'relationship':
+          if (element.attributes.temporal) {
+            timestamp = element.attributes.temporalType == 'temporalRelationship' ? 'temporal' : 'snapshot'
+          } else {
+            timestamp = ""
+          }
           jsonSchema.relationships.push({
             id: element.cid,
             uri: element.attributes.uri,
@@ -2192,7 +2207,7 @@ var CrowdEditorErvt = {
           break;
       }
     });
-
+    console.log("jsonSchema", jsonSchema);
     return jsonSchema;
   },
   fromJSONSchema: function (crowd, schema) {
