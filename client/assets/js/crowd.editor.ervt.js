@@ -2073,12 +2073,12 @@ var CrowdEditorErvt = {
             timestamp = ""
           }
           jsonSchema.entities.push({
-            id: element.cid,
-            uri: element.attributes.uri,
             name: element.attributes.uri,
-            // isWeak: element.attributes.type == 'weakEntity',
+            id: element.cid,
             timestamp: timestamp,
             position: element.attributes.position,
+            uri: element.attributes.uri,
+            // isWeak: element.attributes.type == 'weakEntity',
             size: element.attributes.size,
           });
           break;
@@ -2089,20 +2089,20 @@ var CrowdEditorErvt = {
             timestamp = ""
           }
           jsonSchema.attributes.push({
-            id: element.cid,
-            uri: element.attributes.uri,
             name: element.attributes.uri,
             type: attributeTypeMap[element.attributes.type],
-            timestamp: timestamp,
             datatype: datatypeMap(element.attributes.datatype),
+            id: element.cid,
+            timestamp: timestamp,
             position: element.attributes.position,
+            uri: element.attributes.uri,
             size: element.attributes.size,
           });
           //create the link for this attribute
           var attributeLink = {
             id: element.cid,
             // uri: element.attributes.uri,
-            name: element.attributes.uri,
+            name: element.cid,
             entity: null,
             attribute: element.attributes.uri,
             type: 'attribute'
@@ -2132,23 +2132,24 @@ var CrowdEditorErvt = {
             timestamp = ""
           }
           jsonSchema.relationships.push({
-            id: element.cid,
-            uri: element.attributes.uri,
             name: element.attributes.uri,
-            // isWeak: element.attributes.type == 'weakRelationship',
+            id: element.cid,
+            timestamp: timestamp,
             position: element.attributes.position,
+            uri: element.attributes.uri,
+            // isWeak: element.attributes.type == 'weakRelationship',
             size: element.attributes.size
           });
           //create the link for this relationship
           var relationshipLink = {
-            id: element.cid,
-            uri: element.attributes.uri,
             name: element.attributes.uri,
-            // isWeak: element.attributes.type == 'weakRelationship',
+            id: element.cid,
             entities: [],
             cardinality: [],
             roles: [],
             type: 'relationship',
+            uri: element.attributes.uri,
+            // isWeak: element.attributes.type == 'weakRelationship',
             position: element.attributes.position,
             size: element.attributes.size
           }
@@ -2173,10 +2174,10 @@ var CrowdEditorErvt = {
             name: element.cid,
             parent: null,
             entities: [],
+            type: 'isa',
             constraint: [
               inheritanceSubtypeMap[element.attributes.subtype]
             ],
-            type: 'isa',
             position: element.attributes.position,
             size: element.attributes.size
           }
