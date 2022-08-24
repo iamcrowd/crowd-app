@@ -4,13 +4,13 @@ var CrowdEditorErvt = {
     //colors for palette elements
     crowd.palette.colors = {
       entity: getCSS('color', 'crowd-entity-color'),
-      weakEntity: getCSS('color', 'crowd-weak-entity-color'),
+      // weakEntity: getCSS('color', 'crowd-weak-entity-color'),
       temporalEntity: getCSS('color', 'crowd-temporal-entity-color'),
       snapshotEntity: getCSS('color', 'crowd-snapshot-entity-color'),
       relationship: getCSS('color', 'crowd-relationship-color'),
       temporalRelationship: getCSS('color', 'crowd-temporal-relationship-color'),
       snapshotRelationship: getCSS('color', 'crowd-snapshot-relationship-color'),
-      weakRelationship: getCSS('color', 'crowd-weak-relationship-color'),
+      // weakRelationship: getCSS('color', 'crowd-weak-relationship-color'),
       attribute: getCSS('color', 'crowd-attribute-color'),
       temporalAttribute: getCSS('color', 'crowd-temporal-attribute-color'),
       snapshotAttribute: getCSS('color', 'crowd-snapshot-attribute-color'),
@@ -18,7 +18,7 @@ var CrowdEditorErvt = {
       keyAttribute: getCSS('color', 'crowd-key-attribute-color'),
       temporalKeyAttribute: getCSS('color', 'crowd-temporal-key-attribute-color'),
       snapshotKeyAttribute: getCSS('color', 'crowd-snapshot-key-attribute-color'),
-      weakKeyAttribute: getCSS('color', 'crowd-weak-key-attribute-color'),
+      // weakKeyAttribute: getCSS('color', 'crowd-weak-key-attribute-color'),
       inheritance: getCSS('color', 'crowd-inheritance-color'),
       temporalMark: getCSS('color', 'crowd-temporal-mark-color'),
       derivedAttribute: getCSS('color', 'crowd-derived-attribute-color'),
@@ -229,34 +229,34 @@ var CrowdEditorErvt = {
     });
 
     //add joint eer weak entity to palette elements
-    crowd.palette.elements.weakEntity = new joint.shapes.erd.Entity({
-      parentType: 'entity',
-      temporal: false,
-      temporalType: 'temporalEntity',
-      type: 'weakEntity',
-      name: 'Weak\nEntity',
-      uri: 'http://crowd.fi.uncoma.edu.ar#weak-entity',
-      attrs: {
-        text: {
-          text: 'Weak\nEntity',
-          fill: '#000000',
-          class: 'crowd-element-text'
-        },
-        '.outer': {
-          fill: 'none',
-          stroke: crowd.palette.colors.entityStroke,
-        },
-        '.inner': {
-          fill: crowd.palette.colors.weakEntity,
-          stroke: crowd.palette.colors.entityStroke,
-          display: 'auto'
-        }
-      },
-      size: {
-        width: 90,
-        height: 40
-      }
-    });
+    // crowd.palette.elements.weakEntity = new joint.shapes.erd.Entity({
+    //   parentType: 'entity',
+    //   temporal: false,
+    //   temporalType: 'temporalEntity',
+    //   type: 'weakEntity',
+    //   name: 'Weak\nEntity',
+    //   uri: 'http://crowd.fi.uncoma.edu.ar#weak-entity',
+    //   attrs: {
+    //     text: {
+    //       text: 'Weak\nEntity',
+    //       fill: '#000000',
+    //       class: 'crowd-element-text'
+    //     },
+    //     '.outer': {
+    //       fill: 'none',
+    //       stroke: crowd.palette.colors.entityStroke,
+    //     },
+    //     '.inner': {
+    //       fill: crowd.palette.colors.weakEntity,
+    //       stroke: crowd.palette.colors.entityStroke,
+    //       display: 'auto'
+    //     }
+    //   },
+    //   size: {
+    //     width: 90,
+    //     height: 40
+    //   }
+    // });
 
     //add joint eer relationship to palette elements
     crowd.palette.elements.relationship = new joint.shapes.erd.Relationship({
@@ -441,34 +441,34 @@ var CrowdEditorErvt = {
     });
 
     //add joint eer weak relationship to palette elements
-    crowd.palette.elements.weakRelationship = new joint.shapes.erd.Relationship({
-      parentType: 'relationship',
-      temporal: false,
-      temporalType: 'temporalRelationship',
-      type: 'weakRelationship',
-      name: 'Weak\nRelationship',
-      uri: 'http://crowd.fi.uncoma.edu.ar#weak-relationship',
-      attrs: {
-        text: {
-          text: 'Weak\nRelationship',
-          fill: '#000000',
-          class: 'crowd-element-text s'
-        },
-        '.outer': {
-          fill: 'none',
-          stroke: crowd.palette.colors.relationshipStroke
-        },
-        '.inner': {
-          fill: crowd.palette.colors.weakRelationship,
-          stroke: crowd.palette.colors.relationshipStroke,
-          display: 'auto'
-        }
-      },
-      size: {
-        width: 90,
-        height: 60
-      }
-    });
+    // crowd.palette.elements.weakRelationship = new joint.shapes.erd.Relationship({
+    //   parentType: 'relationship',
+    //   temporal: false,
+    //   temporalType: 'temporalRelationship',
+    //   type: 'weakRelationship',
+    //   name: 'Weak\nRelationship',
+    //   uri: 'http://crowd.fi.uncoma.edu.ar#weak-relationship',
+    //   attrs: {
+    //     text: {
+    //       text: 'Weak\nRelationship',
+    //       fill: '#000000',
+    //       class: 'crowd-element-text s'
+    //     },
+    //     '.outer': {
+    //       fill: 'none',
+    //       stroke: crowd.palette.colors.relationshipStroke
+    //     },
+    //     '.inner': {
+    //       fill: crowd.palette.colors.weakRelationship,
+    //       stroke: crowd.palette.colors.relationshipStroke,
+    //       display: 'auto'
+    //     }
+    //   },
+    //   size: {
+    //     width: 90,
+    //     height: 60
+    //   }
+    // });
 
     //add joint eer attribute to palette elements
     crowd.palette.elements.attribute = new joint.shapes.erd.Attribute({
@@ -865,61 +865,61 @@ var CrowdEditorErvt = {
     });
 
     //add joint eer weak key attribute to palette elements
-    crowd.palette.elements.weakKeyAttribute = new joint.shapes.erd.Attribute({
-      parentType: 'attribute',
-      temporal: false,
-      type: 'weakKeyAttribute',
-      temporalType: 'temporalAttribute',
-      name: 'Weak Key\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#weak-key-attribute',
-      datatype: 'string',
-      attrs: {
-        text: {
-          fill: '#000000',
-          text: 'Weak Key\nAttribute',
-          class: 'crowd-element-text xs weak-key-attribute'
-        },
-        '.outer': {
-          fill: crowd.palette.colors.weakKeyAttribute,
-          stroke: crowd.palette.colors.keyAttributeStroke,
-        }
-      },
-      size: {
-        width: 70,
-        height: 40
-      }
-    });
+    // crowd.palette.elements.weakKeyAttribute = new joint.shapes.erd.Attribute({
+    //   parentType: 'attribute',
+    //   temporal: false,
+    //   type: 'weakKeyAttribute',
+    //   temporalType: 'temporalAttribute',
+    //   name: 'Weak Key\nAttribute',
+    //   uri: 'http://crowd.fi.uncoma.edu.ar#weak-key-attribute',
+    //   datatype: 'string',
+    //   attrs: {
+    //     text: {
+    //       fill: '#000000',
+    //       text: 'Weak Key\nAttribute',
+    //       class: 'crowd-element-text xs weak-key-attribute'
+    //     },
+    //     '.outer': {
+    //       fill: crowd.palette.colors.weakKeyAttribute,
+    //       stroke: crowd.palette.colors.keyAttributeStroke,
+    //     }
+    //   },
+    //   size: {
+    //     width: 70,
+    //     height: 40
+    //   }
+    // });
 
     //add joint eer multivalued attribute to palette elements
-    crowd.palette.elements.multivaluedAttribute = new joint.shapes.erd.Attribute({
-      parentType: 'attribute',
-      temporal: false,
-      type: 'multivaluedAttribute',
-      temporalType: 'temporalAttribute',
-      name: 'Multivalued\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#multivalued-attribute',
-      datatype: 'string',
-      attrs: {
-        text: {
-          fill: '#000000',
-          text: 'Multivalued\nAttribute',
-          class: 'crowd-element-text xs'
-        },
-        '.outer': {
-          fill: 'none',
-          stroke: crowd.palette.colors.attributeStroke
-        },
-        '.inner': {
-          fill: crowd.palette.colors.multivaluedAttribute,
-          stroke: crowd.palette.colors.attributeStroke,
-          display: 'auto'
-        }
-      },
-      size: {
-        width: 70,
-        height: 40
-      }
-    });
+    // crowd.palette.elements.multivaluedAttribute = new joint.shapes.erd.Attribute({
+    //   parentType: 'attribute',
+    //   temporal: false,
+    //   type: 'multivaluedAttribute',
+    //   temporalType: 'temporalAttribute',
+    //   name: 'Multivalued\nAttribute',
+    //   uri: 'http://crowd.fi.uncoma.edu.ar#multivalued-attribute',
+    //   datatype: 'string',
+    //   attrs: {
+    //     text: {
+    //       fill: '#000000',
+    //       text: 'Multivalued\nAttribute',
+    //       class: 'crowd-element-text xs'
+    //     },
+    //     '.outer': {
+    //       fill: 'none',
+    //       stroke: crowd.palette.colors.attributeStroke
+    //     },
+    //     '.inner': {
+    //       fill: crowd.palette.colors.multivaluedAttribute,
+    //       stroke: crowd.palette.colors.attributeStroke,
+    //       display: 'auto'
+    //     }
+    //   },
+    //   size: {
+    //     width: 70,
+    //     height: 40
+    //   }
+    // });
 
     //add joint eer inheritance to palette elements
     crowd.palette.elements.inheritance = new joint.shapes.erd.Attribute({
@@ -946,34 +946,34 @@ var CrowdEditorErvt = {
     });
 
     //add joint eer derived attribute to palette elements
-    crowd.palette.elements.derivedAttribute = new joint.shapes.erd.Attribute({
-      parentType: 'attribute',
-      type: 'derivedAttribute',
-      name: 'Derived\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#derived-attribute',
-      datatype: 'string',
-      attrs: {
-        text: {
-          fill: '#000000',
-          text: 'Derived\nAttribute',
-          class: 'crowd-element-text xs'
-        },
-        '.outer': {
-          fill: 'none',
-          stroke: crowd.palette.colors.attributeStroke,
-          'stroke-dasharray': '3'
-        },
-        '.inner': {
-          fill: crowd.palette.colors.derivedAttribute,
-          stroke: crowd.palette.colors.attributeStroke,
-          display: 'auto'
-        }
-      },
-      size: {
-        width: 70,
-        height: 40
-      }
-    });
+    // crowd.palette.elements.derivedAttribute = new joint.shapes.erd.Attribute({
+    //   parentType: 'attribute',
+    //   type: 'derivedAttribute',
+    //   name: 'Derived\nAttribute',
+    //   uri: 'http://crowd.fi.uncoma.edu.ar#derived-attribute',
+    //   datatype: 'string',
+    //   attrs: {
+    //     text: {
+    //       fill: '#000000',
+    //       text: 'Derived\nAttribute',
+    //       class: 'crowd-element-text xs'
+    //     },
+    //     '.outer': {
+    //       fill: 'none',
+    //       stroke: crowd.palette.colors.attributeStroke,
+    //       'stroke-dasharray': '3'
+    //     },
+    //     '.inner': {
+    //       fill: crowd.palette.colors.derivedAttribute,
+    //       stroke: crowd.palette.colors.attributeStroke,
+    //       display: 'auto'
+    //     }
+    //   },
+    //   size: {
+    //     width: 70,
+    //     height: 40
+    //   }
+    // });
 
     //add joint eer connector to palette links
     crowd.palette.links.connector = new joint.shapes.standard.Link({
@@ -1105,34 +1105,34 @@ var CrowdEditorErvt = {
     };
 
     //link tool for weak entities
-    var linkWeakEntityTool = function (config) {
-      config = config ? config : {};
-      return crowd.workspace.tools.elements.linkElementTool({
-        elementType: crowd.palette.elements.weakEntity,
-        x: config.position?.x ? config.position?.x : '0%',
-        y: config.position?.y ? config.position?.y : '50%',
-        offset: {
-          x: config.offset?.x ? config.offset?.x : -25,
-          y: config.offset?.y ? config.offset?.y : 10
-        },
-        markup: crowd.workspace.tools.elements.markup({
-          icon: 'share',
-          // background: crowd.palette.colors.weakEntity,
-          tooltip: {
-            title: 'Click and drag to make a <b class="crowd-bold-color">weak entity</b> and connect with it',
-            placement: "left"
-          }
-        }),
-        link: {
-          type: config.total ? 'total' : 'connector',
-          props: {
-            cardinality: config.cardinality ? config.cardinality : '0..1',
-            inherit: config.inherit ? config.inherit : false,
-            inheritChild: config.inheritChild ? config.inheritChild : false
-          }
-        }
-      });
-    };
+    // var linkWeakEntityTool = function (config) {
+    //   config = config ? config : {};
+    //   return crowd.workspace.tools.elements.linkElementTool({
+    //     elementType: crowd.palette.elements.weakEntity,
+    //     x: config.position?.x ? config.position?.x : '0%',
+    //     y: config.position?.y ? config.position?.y : '50%',
+    //     offset: {
+    //       x: config.offset?.x ? config.offset?.x : -25,
+    //       y: config.offset?.y ? config.offset?.y : 10
+    //     },
+    //     markup: crowd.workspace.tools.elements.markup({
+    //       icon: 'share',
+    //       // background: crowd.palette.colors.weakEntity,
+    //       tooltip: {
+    //         title: 'Click and drag to make a <b class="crowd-bold-color">weak entity</b> and connect with it',
+    //         placement: "left"
+    //       }
+    //     }),
+    //     link: {
+    //       type: config.total ? 'total' : 'connector',
+    //       props: {
+    //         cardinality: config.cardinality ? config.cardinality : '0..1',
+    //         inherit: config.inherit ? config.inherit : false,
+    //         inheritChild: config.inheritChild ? config.inheritChild : false
+    //       }
+    //     }
+    //   });
+    // };
 
     //link tool for relationships
     var linkRelationshipTool = function (config) {
@@ -1165,34 +1165,34 @@ var CrowdEditorErvt = {
     };
 
     //link tool for weak relationships
-    var linkWeakRelationshipTool = function (config) {
-      config = config ? config : {};
-      return crowd.workspace.tools.elements.linkElementTool({
-        elementType: crowd.palette.elements.weakRelationship,
-        x: config.position?.x ? config.position?.x : '0%',
-        y: config.position?.y ? config.position?.y : '50%',
-        offset: {
-          x: config.offset?.x ? config.offset?.x : -25,
-          y: config.offset?.y ? config.offset?.y : 10
-        },
-        markup: crowd.workspace.tools.elements.markup({
-          icon: 'share',
-          // background: crowd.palette.colors.weakRelationship,
-          tooltip: {
-            title: 'Click and drag to make a <b class="crowd-bold-color">weak relationship</b> and connect with it',
-            placement: "left"
-          }
-        }),
-        link: {
-          type: config.total ? 'total' : 'connector',
-          props: {
-            cardinality: config.cardinality ? config.cardinality : '0..1',
-            inherit: config.inherit ? config.inherit : false,
-            inheritChild: config.inheritChild ? config.inheritChild : false
-          }
-        }
-      })
-    };
+    // var linkWeakRelationshipTool = function (config) {
+    //   config = config ? config : {};
+    //   return crowd.workspace.tools.elements.linkElementTool({
+    //     elementType: crowd.palette.elements.weakRelationship,
+    //     x: config.position?.x ? config.position?.x : '0%',
+    //     y: config.position?.y ? config.position?.y : '50%',
+    //     offset: {
+    //       x: config.offset?.x ? config.offset?.x : -25,
+    //       y: config.offset?.y ? config.offset?.y : 10
+    //     },
+    //     markup: crowd.workspace.tools.elements.markup({
+    //       icon: 'share',
+    //       // background: crowd.palette.colors.weakRelationship,
+    //       tooltip: {
+    //         title: 'Click and drag to make a <b class="crowd-bold-color">weak relationship</b> and connect with it',
+    //         placement: "left"
+    //       }
+    //     }),
+    //     link: {
+    //       type: config.total ? 'total' : 'connector',
+    //       props: {
+    //         cardinality: config.cardinality ? config.cardinality : '0..1',
+    //         inherit: config.inherit ? config.inherit : false,
+    //         inheritChild: config.inheritChild ? config.inheritChild : false
+    //       }
+    //     }
+    //   })
+    // };
 
     //link tool for attributes
     var linkAttributeTool = crowd.workspace.tools.elements.linkElementTool({
@@ -1216,25 +1216,25 @@ var CrowdEditorErvt = {
     });
 
     //link tool for multivalued attributes
-    var linkMultivaluedAttributeTool = crowd.workspace.tools.elements.linkElementTool({
-      elementType: crowd.palette.elements.multivaluedAttribute,
-      x: '50%', y: '100%', offset: { x: -25, y: 35 },
-      markup: crowd.workspace.tools.elements.markup({
-        icon: 'share',
-        // background: crowd.palette.colors.multivaluedAttribute,
-        tooltip: {
-          title: 'Click and drag to make a <b class="crowd-bold-color">multivalued attribute</b> and connect with it',
-          placement: "bottom"
-        }
-      }),
-      link: {
-        type: 'connector',
-        props: {
-          cardinality: '1..1',
-          attribute: true
-        }
-      }
-    });
+    // var linkMultivaluedAttributeTool = crowd.workspace.tools.elements.linkElementTool({
+    //   elementType: crowd.palette.elements.multivaluedAttribute,
+    //   x: '50%', y: '100%', offset: { x: -25, y: 35 },
+    //   markup: crowd.workspace.tools.elements.markup({
+    //     icon: 'share',
+    //     // background: crowd.palette.colors.multivaluedAttribute,
+    //     tooltip: {
+    //       title: 'Click and drag to make a <b class="crowd-bold-color">multivalued attribute</b> and connect with it',
+    //       placement: "bottom"
+    //     }
+    //   }),
+    //   link: {
+    //     type: 'connector',
+    //     props: {
+    //       cardinality: '1..1',
+    //       attribute: true
+    //     }
+    //   }
+    // });
 
     //link tool for key attributes
     var linkKeyAttributeTool = crowd.workspace.tools.elements.linkElementTool({
@@ -1258,25 +1258,25 @@ var CrowdEditorErvt = {
     });
 
     //link tool for weak key attributes
-    var linkWeakKeyAttributeTool = crowd.workspace.tools.elements.linkElementTool({
-      elementType: crowd.palette.elements.weakKeyAttribute,
-      x: '50%', offset: { x: 25, y: -15 },
-      markup: crowd.workspace.tools.elements.markup({
-        icon: 'share',
-        // background: crowd.palette.colors.weakKeyAttribute,
-        tooltip: {
-          title: 'Click and drag to make a <b class="crowd-bold-color">weak key attribute</b> and connect with it',
-          placement: "top"
-        }
-      }),
-      link: {
-        type: 'connector',
-        props: {
-          cardinality: '1..1',
-          attribute: true
-        }
-      }
-    });
+    // var linkWeakKeyAttributeTool = crowd.workspace.tools.elements.linkElementTool({
+    //   elementType: crowd.palette.elements.weakKeyAttribute,
+    //   x: '50%', offset: { x: 25, y: -15 },
+    //   markup: crowd.workspace.tools.elements.markup({
+    //     icon: 'share',
+    //     // background: crowd.palette.colors.weakKeyAttribute,
+    //     tooltip: {
+    //       title: 'Click and drag to make a <b class="crowd-bold-color">weak key attribute</b> and connect with it',
+    //       placement: "top"
+    //     }
+    //   }),
+    //   link: {
+    //     type: 'connector',
+    //     props: {
+    //       cardinality: '1..1',
+    //       attribute: true
+    //     }
+    //   }
+    // });
 
     //link tool for inheritance
     var linkInheritanceTool = function (config) {
@@ -1342,26 +1342,26 @@ var CrowdEditorErvt = {
         linkAttributeTool,
         linkKeyAttributeTool,
         linkRelationshipTool(),
-        linkWeakRelationshipTool({ cardinality: '0..1' }),
-        linkMultivaluedAttributeTool,
+        // linkWeakRelationshipTool({ cardinality: '0..1' }),
+        // linkMultivaluedAttributeTool,
         linkInheritanceTool()
       ])
     });
 
     //create tools view for weak entities
-    crowd.workspace.tools.elements.elementsToolsView['weakEntity'] = new joint.dia.ToolsView({
-      name: 'weak-entity-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool(),
-        temporalLinkTool(),
-        linkAttributeTool,
-        linkWeakKeyAttributeTool,
-        linkRelationshipTool(),
-        linkWeakRelationshipTool({ total: true }),
-        linkMultivaluedAttributeTool,
-        linkInheritanceTool()
-      ])
-    });
+    // crowd.workspace.tools.elements.elementsToolsView['weakEntity'] = new joint.dia.ToolsView({
+    //   name: 'weak-entity-tools',
+    //   tools: crowd.workspace.tools.elements.basicTools.concat([
+    //     linkTool(),
+    //     temporalLinkTool(),
+    //     linkAttributeTool,
+    //     linkWeakKeyAttributeTool,
+    //     linkRelationshipTool(),
+    //     linkWeakRelationshipTool({ total: true }),
+    //     linkMultivaluedAttributeTool,
+    //     linkInheritanceTool()
+    //   ])
+    // });
 
     //create tools view for temporal entities
     crowd.workspace.tools.elements.elementsToolsView['temporalEntity'] = new joint.dia.ToolsView({
@@ -1372,8 +1372,8 @@ var CrowdEditorErvt = {
         linkAttributeTool,
         linkKeyAttributeTool,
         linkRelationshipTool(),
-        linkWeakRelationshipTool({ cardinality: '0..1' }),
-        linkMultivaluedAttributeTool,
+        // linkWeakRelationshipTool({ cardinality: '0..1' }),
+        // linkMultivaluedAttributeTool,
         linkInheritanceTool()
       ])
     });
@@ -1387,8 +1387,8 @@ var CrowdEditorErvt = {
         linkAttributeTool,
         linkKeyAttributeTool,
         linkRelationshipTool(),
-        linkWeakRelationshipTool({ cardinality: '0..1' }),
-        linkMultivaluedAttributeTool,
+        // linkWeakRelationshipTool({ cardinality: '0..1' }),
+        // linkMultivaluedAttributeTool,
         linkInheritanceTool()
       ])
     });
@@ -1401,7 +1401,7 @@ var CrowdEditorErvt = {
         linkAttributeTool,
         linkKeyAttributeTool,
         linkEntityTool(),
-        linkWeakEntityTool(),
+        // linkWeakEntityTool(),
         linkInheritanceTool()
       ])
     });
@@ -1414,7 +1414,7 @@ var CrowdEditorErvt = {
         linkAttributeTool,
         linkKeyAttributeTool,
         linkEntityTool(),
-        linkWeakEntityTool(),
+        // linkWeakEntityTool(),
         linkInheritanceTool()
       ])
     });
@@ -1427,23 +1427,23 @@ var CrowdEditorErvt = {
         linkAttributeTool,
         linkKeyAttributeTool,
         linkEntityTool(),
-        linkWeakEntityTool(),
+        // linkWeakEntityTool(),
         linkInheritanceTool()
       ])
     });
 
     //create tools view for weak relationship
-    crowd.workspace.tools.elements.elementsToolsView['weakRelationship'] = new joint.dia.ToolsView({
-      name: 'weak-relationship-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool(),
-        linkAttributeTool,
-        linkWeakKeyAttributeTool,
-        linkEntityTool({ cardinality: '0..1' }),
-        linkWeakEntityTool({ total: true, cardinality: '0..*' }),
-        linkInheritanceTool()
-      ])
-    });
+    // crowd.workspace.tools.elements.elementsToolsView['weakRelationship'] = new joint.dia.ToolsView({
+    //   name: 'weak-relationship-tools',
+    //   tools: crowd.workspace.tools.elements.basicTools.concat([
+    //     linkTool(),
+    //     linkAttributeTool,
+    //     linkWeakKeyAttributeTool,
+    //     linkEntityTool({ cardinality: '0..1' }),
+    //     linkWeakEntityTool({ total: true, cardinality: '0..*' }),
+    //     linkInheritanceTool()
+    //   ])
+    // });
 
     //create tools view for attribute
     crowd.workspace.tools.elements.elementsToolsView['attribute'] = new joint.dia.ToolsView({
@@ -1497,28 +1497,28 @@ var CrowdEditorErvt = {
     });
 
     //create tools view for weak key attribute
-    crowd.workspace.tools.elements.elementsToolsView['weakKeyAttribute'] = new joint.dia.ToolsView({
-      name: 'weak-key-attribute-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '0..1' })
-      ])
-    });
+    // crowd.workspace.tools.elements.elementsToolsView['weakKeyAttribute'] = new joint.dia.ToolsView({
+    //   name: 'weak-key-attribute-tools',
+    //   tools: crowd.workspace.tools.elements.basicTools.concat([
+    //     linkTool({ cardinality: '0..1' })
+    //   ])
+    // });
 
     //create tools view for multivalued attribute
-    crowd.workspace.tools.elements.elementsToolsView['multivaluedAttribute'] = new joint.dia.ToolsView({
-      name: 'multivalued-attribute-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '0..1' })
-      ])
-    });
+    // crowd.workspace.tools.elements.elementsToolsView['multivaluedAttribute'] = new joint.dia.ToolsView({
+    //   name: 'multivalued-attribute-tools',
+    //   tools: crowd.workspace.tools.elements.basicTools.concat([
+    //     linkTool({ cardinality: '0..1' })
+    //   ])
+    // });
 
     //create tools view for derived attribute
-    crowd.workspace.tools.elements.elementsToolsView['derivedAttribute'] = new joint.dia.ToolsView({
-      name: 'derived-attribute-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '0..1' })
-      ])
-    });
+    // crowd.workspace.tools.elements.elementsToolsView['derivedAttribute'] = new joint.dia.ToolsView({
+    //   name: 'derived-attribute-tools',
+    //   tools: crowd.workspace.tools.elements.basicTools.concat([
+    //     linkTool({ cardinality: '0..1' })
+    //   ])
+    // });
 
     //create tools view for inheritance
     crowd.workspace.tools.elements.elementsToolsView['inheritance'] = new joint.dia.ToolsView({
@@ -1526,9 +1526,9 @@ var CrowdEditorErvt = {
       tools: crowd.workspace.tools.elements.basicTools.concat([
         linkTool({ inherit: true, inheritChild: true }),
         linkEntityTool({ inherit: true, inheritChild: true, position: { y: '25%' }, offset: { y: -1 } }),
-        linkWeakEntityTool({ inherit: true, inheritChild: true, position: { y: '25%' }, offset: { y: -1 } }),
+        // linkWeakEntityTool({ inherit: true, inheritChild: true, position: { y: '25%' }, offset: { y: -1 } }),
         linkRelationshipTool({ inherit: true, inheritChild: true, position: { y: '75%' }, offset: { y: 20 } }),
-        linkWeakRelationshipTool({ inherit: true, inheritChild: true, position: { y: '75%' }, offset: { y: 20 } })
+        // linkWeakRelationshipTool({ inherit: true, inheritChild: true, position: { y: '75%' }, offset: { y: 20 } })
       ])
     });
   },
@@ -1818,23 +1818,23 @@ var CrowdEditorErvt = {
     //add uri attribute to content for all types
     switch (crowd.inspector.model.attributes.type) {
       case 'entity':
-      case 'weakEntity':
+      // case 'weakEntity':
       case 'temporalEntity':
       case 'snapshotEntity':
       case 'relationship':
       case 'temporalRelationship':
       case 'snapshotRelationship':
-      case 'weakRelationship':
+      // case 'weakRelationship':
       case 'attribute':
       case 'temporalAttribute':
       case 'temporalAttribute':
       case 'snapshotAttribute':
-      case 'multivaluedAttribute':
+      // case 'multivaluedAttribute':
       case 'keyAttribute':
       case 'temporalKeyAttribute':
       case 'snapshotKeyAttribute':
-      case 'weakKeyAttribute':
-      case 'derivedAttribute':
+      // case 'weakKeyAttribute':
+      // case 'derivedAttribute':
       case 'connector':
         if (crowd.inspector.model.attributes.type != 'connector' || (!crowd.inspector.model.attributes.inherit && !crowd.inspector.model.attributes.attribute))
           crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'uri' });
@@ -1844,7 +1844,7 @@ var CrowdEditorErvt = {
     //add is weak attribute for entities
     switch (crowd.inspector.model.attributes.type) {
       case 'entity':
-      case 'weakEntity':
+      // case 'weakEntity':
       case 'temporalEntity':
       case 'snapshotEntity':
         crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false } });
@@ -1856,14 +1856,14 @@ var CrowdEditorErvt = {
               { label: 'Snapshot', value: 'snapshotEntity' },
             ]
           });
-        } else {
-          crowd.inspector.addAttribute({
-            label: 'Type', property: 'type', type: 'multiple',
-            values: [
-              { label: 'Normal', value: 'entity' },
-              { label: 'Weak', value: 'weakEntity' },
-            ]
-          });
+        // } else {
+        //   crowd.inspector.addAttribute({
+        //     label: 'Type', property: 'type', type: 'multiple',
+        //     values: [
+        //       { label: 'Normal', value: 'entity' },
+        //       { label: 'Weak', value: 'weakEntity' },
+        //     ]
+        //   });
         }
         break;
     }
@@ -1873,7 +1873,7 @@ var CrowdEditorErvt = {
       case 'relationship':
       case 'temporalRelationship':
       case 'snapshotRelationship':
-      case 'weakRelationship':
+      // case 'weakRelationship':
         crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false } });
         if (crowd.inspector.model.attributes.temporal) {
           crowd.inspector.addAttribute({
@@ -1883,14 +1883,14 @@ var CrowdEditorErvt = {
               { label: 'Snapshot', value: 'snapshotRelationship' },
             ]
           });
-        } else {
-          crowd.inspector.addAttribute({
-            label: 'Type', property: 'type', type: 'multiple',
-            values: [
-              { label: 'Normal', value: 'relationship' },
-              { label: 'Weak', value: 'weakRelationship' },
-            ]
-          });
+        // } else {
+        //   crowd.inspector.addAttribute({
+        //     label: 'Type', property: 'type', type: 'multiple',
+        //     values: [
+        //       { label: 'Normal', value: 'relationship' },
+        //       { label: 'Weak', value: 'weakRelationship' },
+        //     ]
+        //   });
         }
         break;
     }
@@ -1900,12 +1900,12 @@ var CrowdEditorErvt = {
       case 'attribute':
       case 'temporalAttribute':
       case 'snapshotAttribute':
-      case 'multivaluedAttribute':
+      // case 'multivaluedAttribute':
       case 'keyAttribute':
       case 'temporalKeyAttribute':
       case 'snapshotKeyAttribute':
-      case 'weakKeyAttribute':
-      case 'derivedAttribute':
+      // case 'weakKeyAttribute':
+      // case 'derivedAttribute':
         crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false } });
         if (crowd.inspector.model.attributes.temporal) {
           crowd.inspector.addAttribute({
@@ -1923,9 +1923,9 @@ var CrowdEditorErvt = {
             values: [
               { label: 'Normal', value: 'attribute' },
               { label: 'Key', value: 'keyAttribute' },
-              { label: 'Weak Key', value: 'weakKeyAttribute' },
-              { label: 'Multivalued', value: 'multivaluedAttribute' },
-              { label: 'Derived', value: 'derivedAttribute' }
+              // { label: 'Weak Key', value: 'weakKeyAttribute' },
+              // { label: 'Multivalued', value: 'multivaluedAttribute' },
+              // { label: 'Derived', value: 'derivedAttribute' }
             ]
           });
         }
@@ -2031,9 +2031,9 @@ var CrowdEditorErvt = {
     var attributeTypeMap = {
       'attribute': 'normal',
       'keyAttribute': 'key',
-      'weakKeyAttribute': 'normal',
-      'multivaluedAttribute': 'normal',
-      'derivedAttribute': 'normal',
+      // 'weakKeyAttribute': 'normal',
+      // 'multivaluedAttribute': 'normal',
+      // 'derivedAttribute': 'normal',
     }
 
     //mapping of datatypes to the requested format of schema
@@ -2076,7 +2076,7 @@ var CrowdEditorErvt = {
             id: element.cid,
             uri: element.attributes.uri,
             name: element.attributes.uri,
-            isWeak: element.attributes.type == 'weakEntity',
+            // isWeak: element.attributes.type == 'weakEntity',
             timestamp: timestamp,
             position: element.attributes.position,
             size: element.attributes.size,
@@ -2135,7 +2135,7 @@ var CrowdEditorErvt = {
             id: element.cid,
             uri: element.attributes.uri,
             name: element.attributes.uri,
-            isWeak: element.attributes.type == 'weakRelationship',
+            // isWeak: element.attributes.type == 'weakRelationship',
             position: element.attributes.position,
             size: element.attributes.size
           });
@@ -2144,7 +2144,7 @@ var CrowdEditorErvt = {
             id: element.cid,
             uri: element.attributes.uri,
             name: element.attributes.uri,
-            isWeak: element.attributes.type == 'weakRelationship',
+            // isWeak: element.attributes.type == 'weakRelationship',
             entities: [],
             cardinality: [],
             roles: [],
