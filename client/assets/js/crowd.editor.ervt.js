@@ -87,7 +87,7 @@ var CrowdEditorErvt = {
             stroke: crowd.palette.colors.entityStroke,
             fill: crowd.palette.colors.temporalEntity
           },
-          label: {
+          text: {
             text: 'Temporal\nEntity',
             textVerticalAnchor: 'middle',
             textAnchor: 'middle',
@@ -125,7 +125,7 @@ var CrowdEditorErvt = {
           },
           {
             tagName: 'text',
-            selector: 'label'
+            selector: 'text'
           },
           {
             tagName: 'rect',
@@ -166,7 +166,7 @@ var CrowdEditorErvt = {
             stroke: crowd.palette.colors.entityStroke,
             fill: crowd.palette.colors.snapshotEntity
           },
-          label: {
+          text: {
             text: 'Snapshot\nEntity',
             textVerticalAnchor: 'middle',
             textAnchor: 'middle',
@@ -204,7 +204,7 @@ var CrowdEditorErvt = {
           },
           {
             tagName: 'text',
-            selector: 'label'
+            selector: 'text'
           },
           {
             tagName: 'rect',
@@ -300,7 +300,7 @@ var CrowdEditorErvt = {
             stroke: crowd.palette.colors.relationshipStroke,
             fill: crowd.palette.colors.temporalRelationship
           },
-          label: {
+          text: {
             text: 'Temporal\nRelationship',
             textVerticalAnchor: 'middle',
             textAnchor: 'middle',
@@ -338,7 +338,7 @@ var CrowdEditorErvt = {
           },
           {
             tagName: 'text',
-            selector: 'label'
+            selector: 'text'
           },
           {
             tagName: 'rect',
@@ -377,7 +377,7 @@ var CrowdEditorErvt = {
             stroke: crowd.palette.colors.relationshipStroke,
             fill: crowd.palette.colors.snapshotRelationship
           },
-          label: {
+          text: {
             text: 'Snapshot\nRelationship',
             textVerticalAnchor: 'middle',
             textAnchor: 'middle',
@@ -415,7 +415,7 @@ var CrowdEditorErvt = {
           },
           {
             tagName: 'text',
-            selector: 'label'
+            selector: 'text'
           },
           {
             tagName: 'rect',
@@ -507,7 +507,7 @@ var CrowdEditorErvt = {
         uri: 'http://crowd.fi.uncoma.edu.ar#temporal-attribute',
         datatype: 'string',
         attrs: {
-          label: {
+          text: {
             text: 'Temporal\nAttribute',
             textVerticalAnchor: 'middle',
             textAnchor: 'middle',
@@ -558,7 +558,7 @@ var CrowdEditorErvt = {
           },
           {
             tagName: 'text',
-            selector: 'label'
+            selector: 'text'
           },
           {
             tagName: 'rect',
@@ -593,7 +593,7 @@ var CrowdEditorErvt = {
         uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-attribute',
         datatype: 'string',
         attrs: {
-          label: {
+          text: {
             text: 'Snapshot\nAttribute',
             textVerticalAnchor: 'middle',
             textAnchor: 'middle',
@@ -644,7 +644,7 @@ var CrowdEditorErvt = {
           },
           {
             tagName: 'text',
-            selector: 'label'
+            selector: 'text'
           },
           {
             tagName: 'rect',
@@ -704,7 +704,7 @@ var CrowdEditorErvt = {
         uri: 'http://crowd.fi.uncoma.edu.ar#temporal-key-attribute',
         datatype: 'string',
         attrs: {
-          label: {
+          text: {
             text: 'Temporal\nKey\nAttribute',
             textVerticalAnchor: 'middle',
             textAnchor: 'middle',
@@ -755,7 +755,7 @@ var CrowdEditorErvt = {
           },
           {
             tagName: 'text',
-            selector: 'label'
+            selector: 'text'
           },
           {
             tagName: 'rect',
@@ -790,7 +790,7 @@ var CrowdEditorErvt = {
         uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-key-attribute',
         datatype: 'string',
         attrs: {
-          label: {
+          text: {
             text: 'Snapshot\nKey\nAttribute',
             textVerticalAnchor: 'middle',
             textAnchor: 'middle',
@@ -841,7 +841,7 @@ var CrowdEditorErvt = {
           },
           {
             tagName: 'text',
-            selector: 'label'
+            selector: 'text'
           },
           {
             tagName: 'rect',
