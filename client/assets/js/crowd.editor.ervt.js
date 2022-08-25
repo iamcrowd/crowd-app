@@ -2063,6 +2063,8 @@ var CrowdEditorErvt = {
       // 'union': 'union'
     }
 
+    var temporalLinkTypeMap = { tex: 'tex', dev: 'dev', dex: 'dex-', pex: 'pex' };
+
     //iterates each element and add it to the correspondent collection
     crowd.workspace.graph.getElements().forEach(function (element) {
       switch (element.attributes.parentType) {
@@ -2080,6 +2082,27 @@ var CrowdEditorErvt = {
             uri: element.attributes.uri,
             // isWeak: element.attributes.type == 'weakEntity',
             size: element.attributes.size,
+          });
+          //search for temporal links connected to the entity
+          crowd.workspace.graph.getConnectedLinks(element).filter(function (link) {
+            return link.attributes.type == 'temporalConnector'
+          }).forEach(function (link) {
+            var connectedEntity = link.attributes.source.id == element.id
+              ? link.getTargetElement() : null
+            if (connectedEntity) {
+              if (connectedEntity.attributes.parentType == 'entity') {
+                //create the temporal link for this entity
+                jsonSchema.links.push({
+                  name: link.cid,
+                  id: link.cid,
+                  entities: [
+                    element.attributes.uri,
+                    connectedEntity.attributes.uri
+                  ],
+                  type: temporalLinkTypeMap[link.attributes.subtype],
+                });
+              }
+            }
           });
           break;
         case 'attribute':
