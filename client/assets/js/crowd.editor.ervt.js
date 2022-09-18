@@ -2100,6 +2100,7 @@ var CrowdEditorErvt = {
                     connectedEntity.attributes.uri
                   ],
                   type: temporalLinkTypeMap[link.attributes.subtype],
+                  vertices: link.attributes.vertices,
                 });
               }
             }
@@ -2145,6 +2146,7 @@ var CrowdEditorErvt = {
               // attributeLink.uri = link.attributes.uri;
               // attributeLink.name = link.attributes.uri;
             }
+            attributeLink.vertices = link.attributes.vertices;
           });
           jsonSchema.links.push(attributeLink);
           break;
@@ -2174,7 +2176,8 @@ var CrowdEditorErvt = {
             uri: element.attributes.uri,
             // isWeak: element.attributes.type == 'weakRelationship',
             position: element.attributes.position,
-            size: element.attributes.size
+            size: element.attributes.size,
+            vertices: []
           }
           //search for links connected to the relationship for add entities to relationship link
           crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
@@ -2188,6 +2191,7 @@ var CrowdEditorErvt = {
               relationshipLink.roles.push(link.attributes.uri);
               relationshipLink.cardinality.push(cardinalityMap(link.attributes.cardinality, link.attributes.total));
             }
+            relationshipLink.vertices.push(link.attributes.vertices);
           });
           jsonSchema.links.push(relationshipLink);
           break;
@@ -2202,7 +2206,8 @@ var CrowdEditorErvt = {
               inheritanceSubtypeMap[element.attributes.subtype]
             ],
             position: element.attributes.position,
-            size: element.attributes.size
+            size: element.attributes.size,
+            vertices: []
           }
           //search for links connected to the inheritance for add entities to inheritance link
           crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
@@ -2226,6 +2231,7 @@ var CrowdEditorErvt = {
                 }
               }
             }
+            inheritanceLink.vertices.push(link.attributes.vertices);
           });
           jsonSchema.links.push(inheritanceLink);
           break;
@@ -2355,6 +2361,7 @@ var CrowdEditorErvt = {
                 crowd.workspace.graph.addCell(linksObj[link.roles[index]]);
                 linksObj[link.roles[index]].prop('uri', link.roles[index]);
                 linksObj[link.roles[index]].prop('cardinality', cardinalityMap(link?.cardinality[index]));
+                linksObj[link.roles[index]].prop('vertices', link.vertices[index]);
               });
               break;
           }
@@ -2392,6 +2399,7 @@ var CrowdEditorErvt = {
               linksObj[parentLinkName].prop('uri', parentLinkName);
               linksObj[parentLinkName].prop('inherit', true);
               linksObj[parentLinkName].prop('total', link.constraint?.find((value) => value == 'union') != null);
+              linksObj[parentLinkName].prop('vertices', link.vertices[0]);
 
               link.entities.forEach(function (connectedEntity, index) {
                 var linkName = link.entities[index] + '-' + fromURI(inheritanceName);
@@ -2402,6 +2410,7 @@ var CrowdEditorErvt = {
                 linksObj[linkName].prop('uri', linkName);
                 linksObj[linkName].prop('inherit', true);
                 linksObj[linkName].prop('inheritChild', true);
+                linksObj[linkName].prop('vertices', link.vertices[index+1]);
               });
 
               //position inheritance circle if it has not previous position
@@ -2427,6 +2436,7 @@ var CrowdEditorErvt = {
               crowd.workspace.graph.addCell(linksObj[link.uri]);
               linksObj[link.uri].prop('cardinality', '1..1');
               linksObj[link.uri].prop('attribute', true);
+              linksObj[link.uri].prop('vertices', link.vertices);
               break;
           }
         });
@@ -2437,12 +2447,12 @@ var CrowdEditorErvt = {
             case 'dex-':
             case 'tex':
             case 'pex':
-              console.log("temporalLink", link)
               linksObj[link.id] = crowd.palette.links.temporal.clone();
               linksObj[link.id].source(entitiesObj[link.entities[0]]);
               linksObj[link.id].target(entitiesObj[link.entities[1]]);
               crowd.workspace.graph.addCell(linksObj[link.id]);
               linksObj[link.id].prop('subtype', temporalLinkTypeMap[link.type]);
+              linksObj[link.id].prop('vertices', link.vertices);
               break;
           }
         });
