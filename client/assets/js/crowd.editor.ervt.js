@@ -2235,7 +2235,7 @@ var CrowdEditorErvt = {
     return jsonSchema;
   },
   fromJSONSchema: function (crowd, schema) {
-    console.log('loadEER', schema);
+    console.log('loadERvt', schema);
 
     var entitiesObj = {};
     var relationshipsObj = {};
@@ -2243,9 +2243,25 @@ var CrowdEditorErvt = {
     var inheritancesObj = {};
     var linksObj = {};
 
+    var entityTypeMap = {
+      '': 'entity',
+      'temporal': 'temporalEntity',
+      'snapshot': 'snapshotEntity',
+    }
+
     var attributeTypeMap = {
       'normal': 'attribute',
       'key': 'keyAttribute',
+      'normaltemporal': 'temporalAttribute',
+      'normalsnapshot': 'snapshotAttribute',
+      'keytemporal': 'temporalKeyAttribute',
+      'keysnapshot': 'snapshotKeyAttribute',
+    }
+
+    var relationshipTypeMap = {
+      '': 'relationship',
+      'temporal': 'temporalRelationship',
+      'snapshot': 'snapshotRelationship',
     }
 
     //mapping of datatypes to the editor format
@@ -2271,11 +2287,13 @@ var CrowdEditorErvt = {
       // 'union': 'union'
     }
 
+    var temporalLinkTypeMap = { tex: 'tex', dev: 'dev', "dex-": 'dex', pex: 'pex' };
+
     if (schema) {
       //add each entity and their properties
       if (schema.entities) {
         schema.entities.forEach(function (entity) {
-          entitiesObj[entity.name] = crowd.palette.elements[entity.isWeak ? 'weakEntity' : 'entity'].clone();
+          entitiesObj[entity.name] = crowd.palette.elements[entityTypeMap[entity.timestamp]].clone();
           crowd.workspace.graph.addCell(entitiesObj[entity.name]);
           $.each(entity, function (attribute, value) {
             switch (attribute) {
@@ -2293,7 +2311,8 @@ var CrowdEditorErvt = {
       //add each attribute and their properties
       if (schema.attributes) {
         schema.attributes.forEach(function (attribute) {
-          attributesObj[attribute.name] = crowd.palette.elements[attributeTypeMap[attribute.type]].clone();
+          attributeType = attributeTypeMap[attribute.type+attribute.timestamp]
+          attributesObj[attribute.name] = crowd.palette.elements[attributeType].clone();
           crowd.workspace.graph.addCell(attributesObj[attribute.name]);
           $.each(attribute, function (attr, value) {
             switch (attr) {
@@ -2316,7 +2335,8 @@ var CrowdEditorErvt = {
         schema.links.forEach(function (link) {
           switch (link.type) {
             case 'relationship':
-              relationshipsObj[link.name] = crowd.palette.elements[link.isWeak ? 'weakRelationship' : 'relationship'].clone();
+              relationship = schema.relationships.find(element => element.name === link.name);
+              relationshipsObj[link.name] = crowd.palette.elements[relationshipTypeMap[relationship.timestamp]].clone();
               crowd.workspace.graph.addCell(relationshipsObj[link.name]);
               $.each(link, function (attribute, value) {
                 switch (attribute) {
@@ -2374,7 +2394,6 @@ var CrowdEditorErvt = {
               linksObj[parentLinkName].prop('total', link.constraint?.find((value) => value == 'union') != null);
 
               link.entities.forEach(function (connectedEntity, index) {
-                console.log(connectedEntity);
                 var linkName = link.entities[index] + '-' + fromURI(inheritanceName);
                 linksObj[linkName] = crowd.palette.links.connector.clone();
                 linksObj[linkName].source(inheritancesObj[inheritanceName]);
@@ -2408,6 +2427,22 @@ var CrowdEditorErvt = {
               crowd.workspace.graph.addCell(linksObj[link.uri]);
               linksObj[link.uri].prop('cardinality', '1..1');
               linksObj[link.uri].prop('attribute', true);
+              break;
+          }
+        });
+
+        schema.links.forEach(function (link) {
+          switch (link.type) {
+            case 'dev':
+            case 'dex-':
+            case 'tex':
+            case 'pex':
+              console.log("temporalLink", link)
+              linksObj[link.id] = crowd.palette.links.temporal.clone();
+              linksObj[link.id].source(entitiesObj[link.entities[0]]);
+              linksObj[link.id].target(entitiesObj[link.entities[1]]);
+              crowd.workspace.graph.addCell(linksObj[link.id]);
+              linksObj[link.id].prop('subtype', temporalLinkTypeMap[link.type]);
               break;
           }
         });
