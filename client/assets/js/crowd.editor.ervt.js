@@ -2101,6 +2101,8 @@ var CrowdEditorErvt = {
                   ],
                   type: temporalLinkTypeMap[link.attributes.subtype],
                   vertices: link.attributes.vertices,
+                  sourcePoint: {"anchor": link.source().anchor},
+                  targetPoint: {"anchor": link.target().anchor},
                 });
               }
             }
@@ -2147,6 +2149,8 @@ var CrowdEditorErvt = {
               // attributeLink.name = link.attributes.uri;
             }
             attributeLink.vertices = link.attributes.vertices;
+            attributeLink.sourcePoint = {"anchor": link.source().anchor};
+            attributeLink.targetPoint = {"anchor": link.target().anchor};
           });
           jsonSchema.links.push(attributeLink);
           break;
@@ -2177,7 +2181,9 @@ var CrowdEditorErvt = {
             // isWeak: element.attributes.type == 'weakRelationship',
             position: element.attributes.position,
             size: element.attributes.size,
-            vertices: []
+            vertices: [],
+            sourcePoint: [],
+            targetPoint: [],
           }
           //search for links connected to the relationship for add entities to relationship link
           crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
@@ -2192,6 +2198,8 @@ var CrowdEditorErvt = {
               relationshipLink.cardinality.push(cardinalityMap(link.attributes.cardinality, link.attributes.total));
             }
             relationshipLink.vertices.push(link.attributes.vertices);
+            relationshipLink.sourcePoint.push({"anchor": link.source().anchor});
+            relationshipLink.targetPoint.push({"anchor": link.target().anchor});
           });
           jsonSchema.links.push(relationshipLink);
           break;
@@ -2207,7 +2215,9 @@ var CrowdEditorErvt = {
             ],
             position: element.attributes.position,
             size: element.attributes.size,
-            vertices: []
+            vertices: [],
+            sourcePoint: [],
+            targetPoint: [],
           }
           //search for links connected to the inheritance for add entities to inheritance link
           crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
@@ -2225,13 +2235,18 @@ var CrowdEditorErvt = {
                   if (link.attributes.total) {
                     inheritanceLink.constraint.push('union');
                   }
+                  inheritanceLink.vertices.unshift(link.attributes.vertices);
+                  inheritanceLink.sourcePoint.unshift({"anchor": link.source().anchor});
+                  inheritanceLink.targetPoint.unshift({"anchor": link.target().anchor});
                 }
                 else {
                   inheritanceLink.entities.push(connectedEntity.attributes.uri);
+                  inheritanceLink.vertices.push(link.attributes.vertices);
+                  inheritanceLink.sourcePoint.push({"anchor": link.source().anchor});
+                  inheritanceLink.targetPoint.push({"anchor": link.target().anchor});
                 }
               }
             }
-            inheritanceLink.vertices.push(link.attributes.vertices);
           });
           jsonSchema.links.push(inheritanceLink);
           break;
@@ -2356,8 +2371,8 @@ var CrowdEditorErvt = {
               });
               link.entities.forEach(function (connectedEntity, index) {
                 linksObj[link.roles[index]] = crowd.palette.links[totalMap(link?.cardinality[index]) ? 'total' : 'connector'].clone();
-                linksObj[link.roles[index]].source(relationshipsObj[link.name]);
-                linksObj[link.roles[index]].target(entitiesObj[link.entities[index]]);
+                linksObj[link.roles[index]].source(relationshipsObj[link.name], link.sourcePoint[index]);
+                linksObj[link.roles[index]].target(entitiesObj[link.entities[index]], link.targetPoint[index]);
                 crowd.workspace.graph.addCell(linksObj[link.roles[index]]);
                 linksObj[link.roles[index]].prop('uri', link.roles[index]);
                 linksObj[link.roles[index]].prop('cardinality', cardinalityMap(link?.cardinality[index]));
@@ -2393,8 +2408,8 @@ var CrowdEditorErvt = {
 
               var parentLinkName = link.parent + '-' + fromURI(inheritanceName);
               linksObj[parentLinkName] = crowd.palette.links[link.constraint?.find((value) => value == 'union') != null ? 'total' : 'connector'].clone();
-              linksObj[parentLinkName].source(inheritancesObj[inheritanceName]);
-              linksObj[parentLinkName].target(entitiesObj[link.parent] ? entitiesObj[link.parent] : relationshipsObj[link.parent]);
+              linksObj[parentLinkName].source(inheritancesObj[inheritanceName], link.sourcePoint[0]);
+              linksObj[parentLinkName].target(entitiesObj[link.parent] ? entitiesObj[link.parent] : relationshipsObj[link.parent], link.targetPoint[0]);
               crowd.workspace.graph.addCell(linksObj[parentLinkName]);
               linksObj[parentLinkName].prop('uri', parentLinkName);
               linksObj[parentLinkName].prop('inherit', true);
@@ -2404,8 +2419,8 @@ var CrowdEditorErvt = {
               link.entities.forEach(function (connectedEntity, index) {
                 var linkName = link.entities[index] + '-' + fromURI(inheritanceName);
                 linksObj[linkName] = crowd.palette.links.connector.clone();
-                linksObj[linkName].source(inheritancesObj[inheritanceName]);
-                linksObj[linkName].target(entitiesObj[connectedEntity] ? entitiesObj[connectedEntity] : relationshipsObj[connectedEntity]);
+                linksObj[linkName].source(inheritancesObj[inheritanceName], link.sourcePoint[index+1]);
+                linksObj[linkName].target(entitiesObj[connectedEntity] ? entitiesObj[connectedEntity] : relationshipsObj[connectedEntity], link.targetPoint[index+1]);
                 crowd.workspace.graph.addCell(linksObj[linkName]);
                 linksObj[linkName].prop('uri', linkName);
                 linksObj[linkName].prop('inherit', true);
@@ -2431,8 +2446,8 @@ var CrowdEditorErvt = {
           switch (link.type) {
             case 'attribute':
               linksObj[link.uri] = crowd.palette.links.connector.clone();
-              linksObj[link.uri].source(attributesObj[link.attribute]);
-              linksObj[link.uri].target(link.entity ? entitiesObj[link.entity] : relationshipsObj[link.relationship]);
+              linksObj[link.uri].source(attributesObj[link.attribute], link.sourcePoint);
+              linksObj[link.uri].target(link.entity ? entitiesObj[link.entity] : relationshipsObj[link.relationship], link.targetPoint);
               crowd.workspace.graph.addCell(linksObj[link.uri]);
               linksObj[link.uri].prop('cardinality', '1..1');
               linksObj[link.uri].prop('attribute', true);
@@ -2448,8 +2463,8 @@ var CrowdEditorErvt = {
             case 'tex':
             case 'pex':
               linksObj[link.id] = crowd.palette.links.temporal.clone();
-              linksObj[link.id].source(entitiesObj[link.entities[0]]);
-              linksObj[link.id].target(entitiesObj[link.entities[1]]);
+              linksObj[link.id].source(entitiesObj[link.entities[0]], link.sourcePoint);
+              linksObj[link.id].target(entitiesObj[link.entities[1]], link.targetPoint);
               crowd.workspace.graph.addCell(linksObj[link.id]);
               linksObj[link.id].prop('subtype', temporalLinkTypeMap[link.type]);
               linksObj[link.id].prop('vertices', link.vertices);
