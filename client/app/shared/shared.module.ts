@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ToastComponent } from './toast/toast.component';
 import { LoadingComponent } from './loading/loading.component';
 import { LeaveGuardWarningComponent } from './leave-guard-warning/leave-guard-warning.component';
+import { OrderByPipe } from './pipes/order-by.pipe';
 
 @NgModule({
   imports: [
@@ -22,12 +23,15 @@ import { LeaveGuardWarningComponent } from './leave-guard-warning/leave-guard-wa
     HttpClientModule,
     // Shared Components
     ToastComponent,
-    LoadingComponent
+    LoadingComponent,
+    // Shared Pipes
+    OrderByPipe
   ],
   declarations: [
     ToastComponent,
     LoadingComponent,
-    LeaveGuardWarningComponent
+    LeaveGuardWarningComponent,
+    OrderByPipe
   ],
   providers: [
     ToastComponent

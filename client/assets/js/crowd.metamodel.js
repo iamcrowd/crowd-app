@@ -55,35 +55,128 @@ CrowdMetamodel.prototype.request = function (req) {
     });
   } else if (req.from == 'owl') {
     var formData = new FormData();
+    //define general parameters
     formData.append('input', req.input);
-    formData.append('ontologyUri', req.ontologyUri);
-    formData.append('ontologyString', req.ontologyString);
-    if (req.ontologiesFiles?.length) {
-      for (var i = 0; i < req.ontologiesFiles.length; i++) {
-        formData.append('ontologiesFiles', req.ontologiesFiles[i]);
+    formData.append('reasoner', req.reasoner);
+    formData.append('filtering', req.filtering);
+
+    //define set of ontologies by input type
+    var ontologies = [];
+    switch (req.input) {
+      case 'string':
+        ontologies = [req.ontologyString];
+        break;
+      case 'uri':
+        ontologies = req.ontologiesUris;
+        break;
+      case 'file':
+        ontologies = req.ontologiesFiles;
+        break;
+    }
+
+    function getOntologyName(ontology, index) {
+      if (req.input == 'string') {
+        return "ontology" + index;
+      } else if (req.input == 'uri') {
+        return ontology.prefix ? ontology.prefix : ontology.uri;
+      } else if (req.input == 'file') {
+        return ontology.name;
       }
     }
-    formData.append('reasoning', req.reasoning);
-    return $.ajax({
-      type: "POST",
-      url: url + req.from + 'to' + req.to,
-      enctype: 'multipart/form-data',
-      processData: false,
-      contentType: false,
-      cache: false,
-      data: formData,
-      success: function (res) {
-        console.log('MetamodelAPI: response to ' + url + req.from + 'to' + req.to, res);
-        if (req.success) req.success(res);
-      },
-      error: function (error) {
-        console.log('MetamodelAPI: error', error);
-        if (!req.hideError) self.config.error(error);
-        if (req.error) req.error(error);
+
+    function getOntologyValue(ontology) {
+      if (req.input == 'string' || req.input == 'file') {
+        return ontology;
+      } else if (req.input == 'uri') {
+        return ontology.uri;
       }
-    });
-  }
-  else {
+    }
+
+    //determine if request is for single or multiples ontologies
+    var isMulti = ontologies.length > 1;
+
+    //set feedback parameters for saw progress at the client
+    if (isMulti) {
+      req.apiComponent.tabs[req.tab].multiTotalFiles = ontologies.length;
+      req.apiComponent.tabs[req.tab].showOutput = true;
+      req.apiComponent.tabs[req.tab].multiTotalTime = 0;
+    }
+
+    req.apiComponent.tabs[req.tab].multiTimeInterval = setInterval(function () {
+      if (isMulti) req.apiComponent.tabs[req.tab].multiTotalTime += 1000;
+      if (req.apiComponent.tabs[req.tab].multiActualTime >= 1000) req.apiComponent.tabs[req.tab].multiActualTime -= 1000;
+    }, 1000);
+
+    //it make a request for each ontology (recursivelly) or for a single one
+    function request(index) {
+      //set the actual ontology to be sended
+      formData.set('ontologies', getOntologyValue(ontologies[index]));
+
+      //if it's multiple, set feedback parameters for actual processed ontology and timeout
+      if (isMulti) {
+        req.apiComponent.tabs[req.tab].multiActual = getOntologyName(ontologies[index], index);
+      }
+
+      req.apiComponent.tabs[req.tab].multiActualTime = req.timeout;
+
+      $.ajax({
+        type: "POST",
+        url: url + req.from + 'to' + req.to,
+        enctype: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        cache: false,
+        data: formData,
+        timeout: req.timeout ? req.timeout : 60000, //default timeout is 60s
+        success: function (res) {
+          console.log('MetamodelAPI: response to ' + url + req.from + 'to' + req.to, 'Ontology: ' + getOntologyName(ontologies[index], index), res);
+          //when is multiple, add response to succeded array
+          //if single, return response using "success" callback
+          if (isMulti) {
+            if (req.apiComponent.tabs[req.tab].multiSucceded)
+              req.apiComponent.tabs[req.tab].multiSucceded[getOntologyName(ontologies[index], index)] = res;
+          } else {
+            if (req.success) req.success(res);
+          }
+        },
+        error: function (error) {
+          console.log('MetamodelAPI: error', 'Ontology: ' + getOntologyName(ontologies[index], index), error);
+          //when is multiple, add error to failed array
+          //if single, return error using "error" callback and showing error message (if it is enabled)
+          if (isMulti) {
+            if (req.apiComponent.tabs[req.tab].multiFailed)
+              req.apiComponent.tabs[req.tab].multiFailed[getOntologyName(ontologies[index], index)] =
+                { message: error.responseJSON?.message, stackTrace: error.responseJSON?.stackTrace };
+          } else {
+            if (!req.hideError) self.config.error(error);
+            if (req.error) req.error(error);
+          }
+        },
+        complete: function () {
+          //this is only for multiple,
+          //when is the last ontology, it clears intervals and return response on the "success" callback with all succeded and failed ontologies
+          //if it's not the last ontology, it makes a recursivelly request for the next ontology
+          if (isMulti) {
+            if (index < ontologies.length - 1) {
+              request(index + 1);
+            } else {
+              if (req.apiComponent.tabs[req.tab].multiSucceded && req.apiComponent.tabs[req.tab].multiFailed) {
+                clearInterval(req.apiComponent.tabs[req.tab].multiTimeInterval);
+                var res = { success: req.apiComponent.tabs[req.tab].multiSucceded, failed: req.apiComponent.tabs[req.tab].multiFailed };
+                req.apiComponent.tabs[req.tab].multiActual = null;
+                req.success(res);
+              }
+            }
+          } else {
+            clearInterval(req.apiComponent.tabs[req.tab].multiTimeInterval);
+          }
+        }
+      });
+    }
+
+    //start request (it can be single or recursivelly multiple)
+    request(0);
+  } else {
     return $.ajax({
       type: "POST",
       headers: {

@@ -10,6 +10,7 @@ import { ClipboardModule } from 'ngx-clipboard';
 import { BrowserModule } from '@angular/platform-browser';
 import { TippyModule, tooltipVariation, popperVariation } from '@ngneat/helipopper';
 import { ngfModule, ngf } from "angular-file"
+import { FileSaverModule } from 'ngx-filesaver';
 // Services
 import { UserService } from './services/user.service';
 import { DiagramService } from './services/diagram.service';
@@ -17,10 +18,9 @@ import { NamespaceService } from './services/namespace.service';
 import { AuthService } from './services/auth.service';
 import { AuthGuardLogin } from './services/auth-guard-login.service';
 import { AuthGuardAdmin } from './services/auth-guard-admin.service';
-import { LeaveGuardEditor } from './services/leave-guard-editor.service';
+import { LeaveGuard } from './services/leave-guard.service';
 import { DarkmodeService } from './services/darkmode.service';
 import { CookieService } from 'ngx-cookie-service';
-
 import { HttpInterceptorService } from './services/http-interceptor.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 // Components
@@ -85,7 +85,8 @@ import { VarDirective } from './directives/var.directive';
         },
       }
     }),
-    ngfModule
+    ngfModule,
+    FileSaverModule
   ],
   exports: [
     ClipboardModule
@@ -94,7 +95,7 @@ import { VarDirective } from './directives/var.directive';
     AuthService,
     AuthGuardLogin,
     AuthGuardAdmin,
-    LeaveGuardEditor,
+    LeaveGuard,
     UserService,
     DiagramService,
     NamespaceService,

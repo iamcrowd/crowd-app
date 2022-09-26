@@ -367,6 +367,7 @@ CrowdEditor.prototype.initTools = function () {
   self.tools.viewScrollbar = {};
   self.tools.collapseClasses = {};
   self.tools.toggleRolesAssoc = {};
+  self.tools.filterImplicitTerms = {};
 
   self.tools.tools = {};
   self.tools.namespaces = {};
@@ -1916,6 +1917,62 @@ CrowdEditor.prototype.initTools = function () {
       });
     }
     self.tools.toggleRolesAssoc.init();
+
+    //filter implicit terms tool
+    self.tools.filterImplicitTerms.init = function () {
+      self.tools.filterImplicitTerms.filtered = true;
+
+      self.tools.filterImplicitTerms.updateFilter = function () {
+        console.log('filter implicit terms');
+        self.workspace.graph.getElements().forEach(function (element) {
+          if (element.prop('uri') == 'http://www.w3.org/2002/07/owl#Thing' || element.prop('uri') == 'http://www.w3.org/2002/07/owl#Nothing') {
+            element.attr('./display', self.tools.filterImplicitTerms.filtered ? 'none' : true);
+            self.workspace.graph.getConnectedLinks(element).forEach(function (link) {
+              link.attr('./display', self.tools.filterImplicitTerms.filtered ? 'none' : true);
+              self.workspace.graph.getConnectedLinks(link).forEach(function (subLink) {
+                subLink.attr('./display', self.tools.filterImplicitTerms.filtered ? 'none' : true);
+              });
+            });
+          }
+        });
+
+        setTimeout(() => {
+          self.workspace.fitPaper();
+          self.workspace.paper.hideTools();
+          self.inspector.hideInformation();
+        });
+      }
+
+      self.workspace.graph.on('add remove', function () {
+        setTimeout(() => {
+          self.tools.filterImplicitTerms.updateFilter();
+        });
+      });
+
+      //append dom for filter implicit terms tool
+      $('[aria-labelledby="crowd-tools-view-dropdown-' + self.id + '"]').append(
+        '<li class="dropdown-divider"></li> \
+        <li> \
+          <span class="d-block" data-toggle="tooltip" data-placement="right" \
+          title="Filter implicit terms like owl:Thing and owl:Nothing from ontology"> \
+            <button class="dropdown-item" id="crowd-tools-filter-implicit-terms-input-' + self.id + '"> \
+            <i id="crowd-tools-filter-implicit-terms-icon-' + self.id + '" class="fa fa-fw fa-toggle-on"></i> Filter Implicit Terms</button> \
+          </span> \
+        </li>'
+      );
+
+      //event handler when filter implicit terms
+      $('#crowd-tools-filter-implicit-terms-input-' + self.id).on('click', function () {
+        self.tools.filterImplicitTerms.filtered = !self.tools.filterImplicitTerms.filtered;
+        $('#crowd-tools-filter-implicit-terms-icon-' + self.id).removeClass(self.tools.filterImplicitTerms.filtered ? 'fa-toggle-off' : 'fa-toggle-on');
+        $('#crowd-tools-filter-implicit-terms-icon-' + self.id).addClass(self.tools.filterImplicitTerms.filtered ? 'fa-toggle-on' : 'fa-toggle-off');
+        self.tools.filterImplicitTerms.updateFilter();
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+    }
+    self.tools.filterImplicitTerms.init();
 
     //activate bootstrap nested dropdowns for view tools
     $('#crowd-tools-view-btn-' + self.id).bootnavbar({});

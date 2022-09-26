@@ -1,9 +1,13 @@
-import { AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { DarkmodeService } from '../services/darkmode.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CodemirrorComponent } from '@ctrl/ngx-codemirror';
-import * as CodeMirror from 'codemirror';
+import { Router } from '@angular/router';
+import { NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
+import { FileSaverService } from 'ngx-filesaver';
+import * as moment from 'moment';
+import * as XLSX from 'xlsx';
+import * as JSZip from 'jszip';
 
 declare var iziToast;
 
@@ -21,11 +25,16 @@ export class ApiComponent implements OnInit {
 
   constructor(
     private router: Router,
-    public darkmodeService: DarkmodeService
+    public darkmodeService: DarkmodeService,
+    private fileSaverService: FileSaverService,
+    private http: HttpClient
   ) {
     this.JSON = JSON;
     this.Object = Object;
   }
+
+  @ViewChild('metricsAccordion') metricsAccordion: NgbAccordion;
+  @ViewChild('listAccordion') listAccordion: NgbAccordion;
 
   public JSON: any;
   public Object: any;
@@ -460,19 +469,19 @@ export class ApiComponent implements OnInit {
     },
     owl: "<rdf:RDF\n    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n    xmlns=\"http://crowd.fi.uncoma.edu.ar/kb1#\"\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\">\n  <owl:Ontology rdf:about=\"http://crowd.fi.uncoma.edu.ar/kb1#\"/>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#empleado\">\n    <rdfs:subClassOf>\n      <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#persona\"/>\n    </rdfs:subClassOf>\n  </owl:Class>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#empresa\"/>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#independiente\">\n    <rdfs:subClassOf rdf:resource=\"http://crowd.fi.uncoma.edu.ar#persona\"/>\n  </owl:Class>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#trabaja\">\n    <rdfs:subClassOf>\n      <owl:Restriction>\n        <owl:someValuesFrom rdf:resource=\"http://crowd.fi.uncoma.edu.ar#empresa\"/>\n        <owl:onProperty>\n          <owl:ObjectProperty rdf:about=\"http://crowd.fi.uncoma.edu.ar#role-b-1\"/>\n        </owl:onProperty>\n      </owl:Restriction>\n    </rdfs:subClassOf>\n    <rdfs:subClassOf>\n      <owl:Restriction>\n        <owl:someValuesFrom rdf:resource=\"http://crowd.fi.uncoma.edu.ar#empleado\"/>\n        <owl:onProperty>\n          <owl:ObjectProperty rdf:about=\"http://crowd.fi.uncoma.edu.ar#role-a-1\"/>\n        </owl:onProperty>\n      </owl:Restriction>\n    </rdfs:subClassOf>\n  </owl:Class>\n</rdf:RDF>\n",
     uris: [
-      { emoji: "🍕", url: "https://protege.stanford.edu/ontologies/pizza/pizza.owl" },
-      { emoji: "🧑‍🤝‍🧑", url: "http://owl.man.ac.uk/2006/07/sssw/people.owl" },
-      { emoji: "📷", url: "http://protege.stanford.edu/ontologies/camera.owl" },
-      { emoji: "🐨", url: "http://protege.stanford.edu/ontologies/koala.owl" },
-      { emoji: "🧳", url: "http://protege.stanford.edu/ontologies/travel.owl" },
-      { emoji: "🍷", url: "http://www.w3.org/TR/owl-guide/wine.rdf" },
-      { emoji: "🌎", url: "http://www.opengis.net/ont/geosparql#" },
-      { emoji: "🌀", url: "http://vocab.deri.ie/void.rdf" },
-      { emoji: "🐟", url: "http://www.w3.org/ns/ssn/" },
-      { emoji: "🐠", url: "http://www.w3.org/ns/sosa/" },
-      { emoji: "📖", url: "http://purl.org/spar/fabio.xml" },
-      { emoji: "⏱️", url: "http://www.w3.org/2006/time#" },
-      { emoji: "👥", url: "http://xmlns.com/foaf/0.1/" }
+      { emoji: "🍕", uri: "https://protege.stanford.edu/ontologies/pizza/pizza.owl", prefix: 'pizza' },
+      { emoji: "🧑‍🤝‍🧑", uri: "http://owl.man.ac.uk/2006/07/sssw/people.owl", prefix: 'people' },
+      { emoji: "📷", uri: "http://protege.stanford.edu/ontologies/camera.owl", prefix: 'camera' },
+      { emoji: "🐨", uri: "http://protege.stanford.edu/ontologies/koala.owl", prefix: 'koala' },
+      { emoji: "🧳", uri: "http://protege.stanford.edu/ontologies/travel.owl", prefix: 'travel' },
+      { emoji: "🍷", uri: "http://www.w3.org/TR/owl-guide/wine.rdf", prefix: 'wine' },
+      { emoji: "🌎", uri: "http://www.opengis.net/ont/geosparql#", prefix: 'geosparql' },
+      { emoji: "🌀", uri: "http://vocab.deri.ie/void.rdf", prefix: 'void' },
+      { emoji: "🐟", uri: "http://www.w3.org/ns/ssn/", prefix: 'ssn' },
+      { emoji: "🐠", uri: "http://www.w3.org/ns/sosa/", prefix: 'sosa' },
+      { emoji: "📖", uri: "http://purl.org/spar/fabio.xml", prefix: 'fabio' },
+      { emoji: "⏱️", uri: "http://www.w3.org/2006/time#", prefix: 'time' },
+      { emoji: "👥", uri: "http://xmlns.com/foaf/0.1/", prefix: 'foaf' }
     ]
   }
 
@@ -483,11 +492,19 @@ export class ApiComponent implements OnInit {
       owlUrl: environment.metamodelOwlUrl,
       error: (error) => {
         iziToast.error({
-          title: 'Error',
-          message: 'There was an error when trying to call Metamodel API<br>' +
+          title: 'Error' + (error.responseJSON != null ? ' (' + error.responseJSON.error + ')' : ''),
+          message: '<i>There was an error when trying to call Metamodel API.</i><br><br><b>' +
             (error.responseJSON != null
-              ? error.responseJSON.error + "<br>" + error.responseJSON.message
-              : error.responseText),
+              ? error.responseJSON.message
+              : (error.responseText != null
+                ? error.responseText
+                : error.statusText)) + '</b>',
+          buttons: [
+            ['<button class="btn" title="Download full stack trace"><i class="fa fa-fw fa-download"></i></button>', (instance, toast) => {
+              if (error.responseJSON?.stackTrace)
+                this.downloadFile('exception', 'txt', error.responseJSON.stackTrace);
+            }, false],
+          ]
         });
       }
     }),
@@ -495,11 +512,19 @@ export class ApiComponent implements OnInit {
       url: environment.reasoningUrl,
       error: (error) => {
         iziToast.error({
-          title: 'Error',
-          message: 'There was an error when trying to call Reasoning API<br>' +
+          title: 'Error' + (error.responseJSON != null ? ' (' + error.responseJSON.error + ')' : ''),
+          message: '<i>There was an error when trying to call Reasoning API.</i><b><br><br>' +
             (error.responseJSON != null
-              ? error.responseJSON.error + "<br>" + error.responseJSON.message
-              : error.responseText),
+              ? error.responseJSON.message
+              : (error.responseText != null
+                ? error.responseText
+                : error.statusText)) + '</b>',
+          buttons: [
+            ['<button class="btn" title="Download full stack trace"><i class="fa fa-fw fa-download"></i></button>', (instance, toast) => {
+              if (error.responseJSON?.stackTrace)
+                this.downloadFile('exception', 'txt', error.responseJSON.stackTrace);
+            }, false],
+          ]
         });
       }
     })
@@ -639,14 +664,16 @@ export class ApiComponent implements OnInit {
           type: 'POST',
           example: this.examples.owl,
           trim: ['ontologyString'],
-          bypass: ['ontologiesFiles'],
+          bypass: ['ontologiesFiles', 'ontologiesUris'],
           parameters: {
             from: 'owl',
             to: 'kf',
-            reasoning: true,
+            reasoner: '',
             input: 'string',
-            ontologyUri: '',
+            filtering: true,
+            timeout: 60000,
             ontologyString: '',
+            ontologiesUris: [{ uri: '', prefix: '' }],
             ontologiesFiles: []
           }
         }
@@ -656,8 +683,19 @@ export class ApiComponent implements OnInit {
 
   public tabs = [];
 
+  @HostListener('window:beforeunload', ['$event'])
+  doSomething($event) {
+    if (this.hasChanges()) {
+      $event.returnValue = 'Are you sure you want to leave page? You may lost actual proccess';
+    }
+  }
+
   ngOnInit(): void {
     this.newTab();
+  }
+
+  hasChanges(): boolean {
+    return this.tabs[this.selectedTab].multiActual != null;
   }
 
   setEndpoint(endpoint: number): void {
@@ -716,6 +754,16 @@ export class ApiComponent implements OnInit {
 
       this.tabs[tab].loadingOutput = true;
 
+      this.tabs[tab].multiTotalFiles = null;
+      this.tabs[tab].multiSucceded = {};
+      this.tabs[tab].multiFailed = {};
+      this.tabs[tab].multiActual = null;
+      this.tabs[tab].multiActualTime = 0;
+      this.tabs[tab].multiTotalTime = 0;
+
+      this.tabs[tab].output = null;
+      this.tabs[tab].showMetrics = false;
+
       this.apis[this.tabs[tab].api].service.request({
         success: (response) => {
           this.tabs[tab].output = response;
@@ -730,12 +778,18 @@ export class ApiComponent implements OnInit {
         error: (error) => {
           this.tabs[tab].loadingOutput = false;
         },
+        apiComponent: this,
+        tab: tab,
         ...serializedParameters
       });
     } catch (e) {
+      this.tabs[tab].loadingOutput = false;
+
+      console.log(e);
+
       iziToast.error({
         title: 'Error',
-        message: 'There was an error when trying to parse the parameters.<br>' + e,
+        message: '<i>There was an error when trying to parse the parameters.</i><br><br><b>' + e + '</b>',
       });
     }
   }
@@ -745,22 +799,32 @@ export class ApiComponent implements OnInit {
       this.tabs[tab].parameters.outputTab = 'success';
       this.tabs[tab].output.metrics = {};
       Object.entries(this.tabs[tab].output.success).forEach(([fileKey, file]) => {
-        Object.entries(file['metrics']).forEach(([metricKey, metric]) => {
-          if (this.tabs[tab].output.metrics[metricKey] != null) {
-            this.tabs[tab].output.metrics[metricKey].total += metric;
-            this.tabs[tab].output.metrics[metricKey].avg += metric;
-            this.tabs[tab].output.metrics[metricKey].min = Math.min(this.tabs[tab].output.metrics[metricKey].min, metric as number);
-            this.tabs[tab].output.metrics[metricKey].max = Math.max(this.tabs[tab].output.metrics[metricKey].max, metric as number);
-          } else {
-            this.tabs[tab].output.metrics[metricKey] = { total: metric, avg: metric, min: metric, max: metric };
-          }
+        Object.entries(file['metrics']).forEach(([metricGroupKey, metricGroup]) => {
+          if (this.tabs[tab].output.metrics[metricGroupKey] == null)
+            this.tabs[tab].output.metrics[metricGroupKey] = {};
+          Object.entries(metricGroup).forEach(([metricKey, metric]) => {
+            if (this.tabs[tab].output.metrics[metricGroupKey][metricKey] != null) {
+              this.tabs[tab].output.metrics[metricGroupKey][metricKey].total += metric;
+              this.tabs[tab].output.metrics[metricGroupKey][metricKey].avg += metric;
+              this.tabs[tab].output.metrics[metricGroupKey][metricKey].min = Math.min(this.tabs[tab].output.metrics[metricGroupKey][metricKey].min, metric as number);
+              this.tabs[tab].output.metrics[metricGroupKey][metricKey].max = Math.max(this.tabs[tab].output.metrics[metricGroupKey][metricKey].max, metric as number);
+            } else {
+              this.tabs[tab].output.metrics[metricGroupKey][metricKey] = { total: metric, avg: metric, min: metric, max: metric };
+            }
+          });
         });
       });
       //calculate average for each metric
-      Object.entries(this.tabs[tab].output.metrics).forEach(([metricKey, metric]) => {
-        this.tabs[tab].output.metrics[metricKey].avg /= Object.entries(this.tabs[tab].output.success).length;
+      Object.entries(this.tabs[tab].output.metrics).forEach(([metricGroupKey, metricGroup]) => {
+        Object.entries(metricGroup).forEach(([metricKey, metric]) => {
+          this.tabs[tab].output.metrics[metricGroupKey][metricKey].avg /= Object.entries(this.tabs[tab].output.success).length;
+        });
       });
     }
+    setTimeout(() => {
+      this.metricsAccordion?.expandAll();
+      this.listAccordion?.expandAll();
+    });
   }
 
   roundMetric(metric: number, decimals: number = 3): number {
@@ -779,9 +843,30 @@ export class ApiComponent implements OnInit {
     } catch (e) {
       iziToast.error({
         title: 'Error',
-        message: 'There was an error when trying to open the diagram in the editor.<br>' + e,
+        message: '<i>There was an error when trying to open the diagram in the editor.</i><br><br><b>' + e + '</b>',
       });
     }
+  }
+
+  getCategories(items: any): any {
+    let categories = [];
+    Object.values(items).forEach(item => {
+      let category = this.getCategory(item.toString());
+      if (!categories.includes(category)) categories.push(category);
+    });
+    return categories;
+  }
+
+  getCategory(item: string): string {
+    return item.substring(0, item.indexOf('('));
+  }
+
+  getItemsByCategory(items: any, category: string): any {
+    let itemsByCategory = [];
+    Object.values(items).forEach(item => {
+      if (this.getCategory(item.toString()) == category) itemsByCategory.push(item);
+    });
+    return itemsByCategory;
   }
 
   fromInfix(string: string): string {
@@ -790,5 +875,163 @@ export class ApiComponent implements OnInit {
 
   adding(obj1: any, obj2: any): any {
     return { ...obj1, ...obj2 };
+  }
+
+  getMultiProcessed(tab: number): number {
+    return Object.keys(this.tabs[tab].multiSucceded).length + Object.keys(this.tabs[tab].multiFailed).length;
+  }
+
+  getMultiProgress(tab: number): number {
+    return this.getMultiProcessed(tab) * 100 / this.tabs[tab].multiTotalFiles;
+  }
+
+  downloadSuccessUris(tab: number): void {
+    this.tabs[tab].downloadingSucessUris = true;
+
+    let successUris = this.tabs[tab].parameters.ontologiesUris.filter((uri) => {
+      return this.tabs[tab].output.success[uri.prefix ? uri.prefix : uri.uri] != null;
+    });
+
+    this.downloadFile('success.uris', 'json', successUris, true);
+
+    delete this.tabs[tab].downloadingSucessUris;
+  }
+
+  downloadFailedUris(tab: number): void {
+    this.tabs[tab].downloadingFailedUris = true;
+
+    let failedUris = this.tabs[tab].parameters.ontologiesUris.filter((uri) => {
+      return this.tabs[tab].output.failed[uri.prefix ? uri.prefix : uri.uri] != null;
+    });
+
+    this.downloadFile('failed.uris', 'json', failedUris, true);
+
+    delete this.tabs[tab].downloadingFailedUris;
+  }
+
+  downloadFile(name: string, type: string, content: string, serialize: boolean = false): void {
+    this.fileSaverService.save(
+      new Blob([serialize ? JSON.stringify(content, null, '\t') : content], { type: this.fileSaverService.genType(type) }),
+      name + '.' + type
+    );
+  }
+
+  downloadFiles(name: string, content: any, tab: number): void {
+    this.tabs[tab].downloadingFiles = true;
+
+    let zip: JSZip = new JSZip();
+
+    Object.entries(content.success).forEach(([fileName, fileContent]) => {
+      zip.file((fileName.indexOf('\/') > -1 ? fileName.replace(/\//g, '-') : fileName) + '.json', JSON.stringify(fileContent['kf'], null, '\t'));
+    });
+
+    zip.generateAsync({ type: "blob" }).then((zipContent) => {
+      this.fileSaverService.save(zipContent, name + '.zip');
+    }).finally(() => {
+      delete this.tabs[tab].downloadingFiles;
+    });
+  }
+
+  exportExcel(name: string, content: any, tab: number): void {
+    this.tabs[tab].exportingExcel = true;
+
+    let filesMetrics = [];
+    Object.keys(content.success).forEach(fileKey => {
+      let fileMetrics = { ontology: fileKey };
+      Object.keys(content.success[fileKey].metrics).forEach(metricGroupKey => {
+        Object.keys(content.success[fileKey].metrics[metricGroupKey]).forEach(metricKey => {
+          fileMetrics[metricGroupKey + ': ' + metricKey] = content.success[fileKey].metrics[metricGroupKey][metricKey];
+        });
+      });
+      filesMetrics.push(fileMetrics);
+    });
+
+    let total = { ontology: 'Total' };
+    let avg = { ontology: 'Average' };
+    let min = { ontology: 'Mininum' };
+    let max = { ontology: 'Maximum' };
+    Object.keys(content.metrics).forEach(metricGroupKey => {
+      Object.keys(content.metrics[metricGroupKey]).forEach(metricKey => {
+        total[metricGroupKey + ': ' + metricKey] = content.metrics[metricGroupKey][metricKey].total;
+        avg[metricGroupKey + ': ' + metricKey] = content.metrics[metricGroupKey][metricKey].avg;
+        min[metricGroupKey + ': ' + metricKey] = content.metrics[metricGroupKey][metricKey].min;
+        max[metricGroupKey + ': ' + metricKey] = content.metrics[metricGroupKey][metricKey].max;
+      });
+    });
+    filesMetrics.push(total);
+    filesMetrics.push(avg);
+    filesMetrics.push(min);
+    filesMetrics.push(max);
+
+    /* generate worksheet and workbook */
+    const worksheet = XLSX.utils.json_to_sheet(filesMetrics);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Metrics");
+
+    /* create an XLSX file and try to save file .xlsx */
+    XLSX.writeFile(workbook, name + ".xlsx");
+
+    delete this.tabs[tab].exportingExcel;
+  }
+
+  formatTime(milisecs: number): string {
+    let format = milisecs < 1000 * 60 * 60 ? 'mm:ss' : 'HH:mm:ss';
+    let formated = moment.utc(milisecs).format(format);
+
+    return formated == 'Invalid date' ? '-' : formated;
+  }
+
+  loadOutput(tab: number): void {
+    var reader: FileReader = new FileReader();
+
+    reader.onloadend = (e) => {
+      this.tabs[tab].output = JSON.parse(reader.result.toString());
+
+      setTimeout(() => {
+        this.tabs[tab].showOutput = true;
+        this.tabs[tab].showMetrics = true;
+        this.tabs[tab].outputFile = null;
+        this.metricsAccordion?.expandAll();
+        this.listAccordion?.expandAll();
+      });
+    }
+
+    reader.readAsText(this.tabs[tab].outputFile);
+  }
+
+  loadInputUris(tab: number): void {
+    var reader: FileReader = new FileReader();
+
+    reader.onloadend = (e) => {
+      this.tabs[tab].parameters.ontologiesUris = JSON.parse(reader.result.toString());
+
+      setTimeout(() => {
+        this.tabs[tab].inputFile = null;
+      });
+    }
+
+    reader.readAsText(this.tabs[tab].inputFile);
+  }
+
+  loadLOVExample() {
+    const headerDict = {
+      'Access-Control-Allow-Origin': '*'
+    }
+
+    const requestOptions = {
+      headers: new HttpHeaders(headerDict),
+    };
+
+    this.http.get('https://lov.linkeddata.es/dataset/lov/api/v2/vocabulary/list', requestOptions).subscribe(
+      (data: any) => {
+        console.log(data);
+      },
+      (error: any) => {
+        console.log(error);
+        iziToast.error({
+          title: 'Error',
+          message: '<i>There was an error when trying to get LOV ontologies.</i><br><br><b>' + error.message + '</b>',
+        });
+      });
   }
 }
