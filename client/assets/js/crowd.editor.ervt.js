@@ -1856,14 +1856,14 @@ var CrowdEditorErvt = {
               { label: 'Snapshot', value: 'snapshotEntity' },
             ]
           });
-        // } else {
-        //   crowd.inspector.addAttribute({
-        //     label: 'Type', property: 'type', type: 'multiple',
-        //     values: [
-        //       { label: 'Normal', value: 'entity' },
-        //       { label: 'Weak', value: 'weakEntity' },
-        //     ]
-        //   });
+          // } else {
+          //   crowd.inspector.addAttribute({
+          //     label: 'Type', property: 'type', type: 'multiple',
+          //     values: [
+          //       { label: 'Normal', value: 'entity' },
+          //       { label: 'Weak', value: 'weakEntity' },
+          //     ]
+          //   });
         }
         break;
     }
@@ -1873,7 +1873,7 @@ var CrowdEditorErvt = {
       case 'relationship':
       case 'temporalRelationship':
       case 'snapshotRelationship':
-      // case 'weakRelationship':
+        // case 'weakRelationship':
         crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false } });
         if (crowd.inspector.model.attributes.temporal) {
           crowd.inspector.addAttribute({
@@ -1883,14 +1883,14 @@ var CrowdEditorErvt = {
               { label: 'Snapshot', value: 'snapshotRelationship' },
             ]
           });
-        // } else {
-        //   crowd.inspector.addAttribute({
-        //     label: 'Type', property: 'type', type: 'multiple',
-        //     values: [
-        //       { label: 'Normal', value: 'relationship' },
-        //       { label: 'Weak', value: 'weakRelationship' },
-        //     ]
-        //   });
+          // } else {
+          //   crowd.inspector.addAttribute({
+          //     label: 'Type', property: 'type', type: 'multiple',
+          //     values: [
+          //       { label: 'Normal', value: 'relationship' },
+          //       { label: 'Weak', value: 'weakRelationship' },
+          //     ]
+          //   });
         }
         break;
     }
@@ -1904,8 +1904,8 @@ var CrowdEditorErvt = {
       case 'keyAttribute':
       case 'temporalKeyAttribute':
       case 'snapshotKeyAttribute':
-      // case 'weakKeyAttribute':
-      // case 'derivedAttribute':
+        // case 'weakKeyAttribute':
+        // case 'derivedAttribute':
         crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false } });
         if (crowd.inspector.model.attributes.temporal) {
           crowd.inspector.addAttribute({
@@ -2101,8 +2101,8 @@ var CrowdEditorErvt = {
                   ],
                   type: temporalLinkTypeMap[link.attributes.subtype],
                   vertices: link.attributes.vertices,
-                  sourcePoint: {"anchor": link.source().anchor},
-                  targetPoint: {"anchor": link.target().anchor},
+                  sourcePoint: { "anchor": link.source().anchor },
+                  targetPoint: { "anchor": link.target().anchor },
                 });
               }
             }
@@ -2149,8 +2149,8 @@ var CrowdEditorErvt = {
               // attributeLink.name = link.attributes.uri;
             }
             attributeLink.vertices = link.attributes.vertices;
-            attributeLink.sourcePoint = {"anchor": link.source().anchor};
-            attributeLink.targetPoint = {"anchor": link.target().anchor};
+            attributeLink.sourcePoint = { "anchor": link.source().anchor };
+            attributeLink.targetPoint = { "anchor": link.target().anchor };
           });
           jsonSchema.links.push(attributeLink);
           break;
@@ -2198,8 +2198,8 @@ var CrowdEditorErvt = {
               relationshipLink.cardinality.push(cardinalityMap(link.attributes.cardinality, link.attributes.total));
             }
             relationshipLink.vertices.push(link.attributes.vertices);
-            relationshipLink.sourcePoint.push({"anchor": link.source().anchor});
-            relationshipLink.targetPoint.push({"anchor": link.target().anchor});
+            relationshipLink.sourcePoint.push({ "anchor": link.source().anchor });
+            relationshipLink.targetPoint.push({ "anchor": link.target().anchor });
           });
           jsonSchema.links.push(relationshipLink);
           break;
@@ -2236,14 +2236,14 @@ var CrowdEditorErvt = {
                     inheritanceLink.constraint.push('union');
                   }
                   inheritanceLink.vertices.unshift(link.attributes.vertices);
-                  inheritanceLink.sourcePoint.unshift({"anchor": link.source().anchor});
-                  inheritanceLink.targetPoint.unshift({"anchor": link.target().anchor});
+                  inheritanceLink.sourcePoint.unshift({ "anchor": link.source().anchor });
+                  inheritanceLink.targetPoint.unshift({ "anchor": link.target().anchor });
                 }
                 else {
                   inheritanceLink.entities.push(connectedEntity.attributes.uri);
                   inheritanceLink.vertices.push(link.attributes.vertices);
-                  inheritanceLink.sourcePoint.push({"anchor": link.source().anchor});
-                  inheritanceLink.targetPoint.push({"anchor": link.target().anchor});
+                  inheritanceLink.sourcePoint.push({ "anchor": link.source().anchor });
+                  inheritanceLink.targetPoint.push({ "anchor": link.target().anchor });
                 }
               }
             }
@@ -2332,7 +2332,7 @@ var CrowdEditorErvt = {
       //add each attribute and their properties
       if (schema.attributes) {
         schema.attributes.forEach(function (attribute) {
-          attributeType = attributeTypeMap[attribute.type+attribute.timestamp]
+          attributeType = attributeTypeMap[attribute.type + attribute.timestamp]
           attributesObj[attribute.name] = crowd.palette.elements[attributeType].clone();
           crowd.workspace.graph.addCell(attributesObj[attribute.name]);
           $.each(attribute, function (attr, value) {
@@ -2419,13 +2419,13 @@ var CrowdEditorErvt = {
               link.entities.forEach(function (connectedEntity, index) {
                 var linkName = link.entities[index] + '-' + fromURI(inheritanceName);
                 linksObj[linkName] = crowd.palette.links.connector.clone();
-                linksObj[linkName].source(inheritancesObj[inheritanceName], link.sourcePoint[index+1]);
-                linksObj[linkName].target(entitiesObj[connectedEntity] ? entitiesObj[connectedEntity] : relationshipsObj[connectedEntity], link.targetPoint[index+1]);
+                linksObj[linkName].source(inheritancesObj[inheritanceName], link.sourcePoint[index + 1]);
+                linksObj[linkName].target(entitiesObj[connectedEntity] ? entitiesObj[connectedEntity] : relationshipsObj[connectedEntity], link.targetPoint[index + 1]);
                 crowd.workspace.graph.addCell(linksObj[linkName]);
                 linksObj[linkName].prop('uri', linkName);
                 linksObj[linkName].prop('inherit', true);
                 linksObj[linkName].prop('inheritChild', true);
-                linksObj[linkName].prop('vertices', link.vertices[index+1]);
+                linksObj[linkName].prop('vertices', link.vertices[index + 1]);
               });
 
               //position inheritance circle if it has not previous position
