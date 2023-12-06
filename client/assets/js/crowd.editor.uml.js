@@ -1129,6 +1129,55 @@ var CrowdEditorUml = {
 
       crowd.inspector.loadContent();
     });
+
+    //mark or unmark the element or link when the repairing property changed
+    crowd.workspace.graph.on('change:repairing', function (cell, newRepairing) {
+      // console.log('change:repairing', { cell, newRepairing });
+      var forRemove = newRepairing?.contents?.find(function (content) { return content.value == 'remove' });
+      var forKeep = newRepairing?.contents?.find(function (content) { return content.value == 'keep' });
+      var forRestrict = newRepairing?.contents?.find(function (content) { return content.value == 'restrict' });
+      var color = forRemove != null
+        ? getCSS('color', 'crowd-repairing-remove-color')
+        : forKeep != null
+          ? getCSS('color', 'crowd-repairing-keep-color')
+          : getCSS('color', 'crowd-repairing-restrict-color');
+      var strokeWidth = 2;
+      if (cell.isElement()) {
+        if (cell.attributes.parentType == 'class') {
+          color = forRemove != null || forKeep != null || forRestrict != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke');
+          strokeWidth = forRemove != null || forKeep != null || forRestrict != null ? strokeWidth : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke-width');
+          cell.attr('.uml-class-name-rect/stroke', color);
+          cell.attr('.uml-class-name-rect/stroke-width', strokeWidth);
+          cell.attr('.uml-class-attrs-rect/stroke', color);
+          cell.attr('.uml-class-attrs-rect/stroke-width', strokeWidth);
+          cell.attr('.uml-class-methods-rect/stroke', color);
+          cell.attr('.uml-class-methods-rect/stroke-width', strokeWidth);
+        } else if (cell.attributes.parentType == 'inheritance') {
+          color = forRemove != null || forKeep != null || forRestrict != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke');
+          cell.attr('.outer/stroke', color);
+        }
+      } else if (cell.isLink()) {
+        color = forRemove != null || forKeep != null || forRestrict != null ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
+        cell.attr('line/stroke', color);
+      }
+
+      crowd.inspector.loadContent();
+    });
+
+    //mark element when is highlighted
+    crowd.workspace.graph.on('change:highlighted', function (cell, newHighlighted) {
+      if (cell.isElement()) {
+        if (cell.attributes.parentType == 'class') {
+          cell.attr('.uml-class-name-rect/stroke', newHighlighted ? getCSS('color', 'crowd-highlight-color') : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-name-rect/stroke'));
+          cell.attr('.uml-class-attrs-rect/stroke', newHighlighted ? getCSS('color', 'crowd-highlight-color') : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-attrs-rect/stroke'));
+          cell.attr('.uml-class-methods-rect/stroke', newHighlighted ? getCSS('color', 'crowd-highlight-color') : crowd.palette.elements[cell.attributes.type]?.attr('.uml-class-methods-rect/stroke'));
+        } else if (cell.attributes.parentType == 'inheritance') {
+          cell.attr('.outer/stroke', newHighlighted ? getCSS('color', 'crowd-highlight-color') : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke'));
+        }
+      } else if (cell.isLink()) {
+        cell.attr('line/stroke', newHighlighted ? getCSS('color', 'crowd-highlight-color') : crowd.palette.links[cell.attributes.type]?.attr('line/stroke'));
+      }
+    });
   },
   initInspector: function (crowd) {
     //add uri attribute to content for all types
@@ -1307,6 +1356,10 @@ var CrowdEditorUml = {
     //add the semantic alert message when there's a semantic error
     if (crowd.inspector.model.attributes.semantic && crowd.inspector.model.attributes.semantic.contents?.length)
       crowd.inspector.addAttribute({ property: 'semantic', type: 'alert', color: 'warning' });
+
+    //add the repairing alert message when there's a repairing selection
+    if (crowd.inspector.model.attributes.repairing && crowd.inspector.model.attributes.repairing.contents?.length)
+      crowd.inspector.addAttribute({ property: 'repairing', type: 'alert', color: 'warning' });
   },
   toJSONSchema: function (crowd) {
     //define basic structure of uml json according to schema
@@ -1785,6 +1838,9 @@ var CrowdEditorUml = {
   initReasoningValidator: function (crowd) {
     //todo
   },
+  initRepairingTools: function (crowd) {
+    //todo
+  },
   fromReasoning: function (crowd, schema, reasoning) {
     //use generic semantic import and mark of the editor
     //this is called after the reasoned schema is finished imported to the editor
@@ -1794,7 +1850,12 @@ var CrowdEditorUml = {
     });
     crowd.reasoning.importPositionedSchema(schema);
   },
-  fromRepair: function (crowd, schema, repair) {
+  fromRepairMark: function (crowd, repair, selectedAxioms) {
     //todo
+    crowd.repairing.genericRepairMark(repair, selectedAxioms);
+  },
+  fromRepairApply: function (crowd, repair, selectedAxioms) {
+    //todo
+    crowd.repairing.genericRepairApply();
   }
 }

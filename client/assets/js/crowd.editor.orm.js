@@ -2223,6 +2223,9 @@ var CrowdEditorOrm = {
   initReasoningValidator: function (crowd) {
     //todo
   },
+  initRepairingTools: function (crowd) {
+    //todo
+  },
   fromReasoning: function (crowd, schema, reasoning) {
     //use generic semantic import and mark of the editor
     //this is called after the reasoned schema is finished imported to the editor
@@ -2232,7 +2235,10 @@ var CrowdEditorOrm = {
     });
     crowd.reasoning.importPositionedSchema(schema);
   },
-  fromRepair: function (crowd, schema, repair) {
+  fromRepairMark: function (crowd, repair, selectedAxioms) {
+    //todo
+  },
+  fromRepairApply: function (crowd, repair, selectedAxioms) {
     //todo
   }
 }

@@ -636,6 +636,22 @@ $alt-accent-dark: #262a2e;
   color: rgb(255, 90, 0, 1);
 }
 
+.crowd-repairing-remove-color {
+  color: rgba(255, 0, 0, 1);
+}
+
+.crowd-repairing-keep-color {
+  color: rgba(42, 116, 32, 1);
+}
+
+.crowd-repairing-restrict-color {
+  color: rgba(255, 90, 0, 1);
+}
+
+.crowd-highlight-color {
+  color: rgb(204, 189, 53)
+}
+
 .tooltip {
   transition: opacity 0.5s !important;
 }

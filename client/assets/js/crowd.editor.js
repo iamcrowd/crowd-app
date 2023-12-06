@@ -39,14 +39,20 @@ CrowdEditor.prototype.init = function () {
   if (!self.config.conceptualModel.initReasoningValidator) {
     self.config.conceptualModel.initReasoningValidator = function () { console.warn("CrowdEditor conceptual model reasoning validator is not defined."); }
   }
+  if (!self.config.conceptualModel.initRepairingTools) {
+    self.config.conceptualModel.initRepairingTools = function () { console.warn("CrowdEditor conceptual model repairing tools are not defined."); }
+  }
   if (!self.config.conceptualModel.fromJSONSchema) {
     self.config.conceptualModel.fromJSONSchema = function () { console.warn("CrowdEditor conceptual model fromJSONSchema is not defined."); }
   }
   if (self.config.reasoningApi && !self.config.conceptualModel.fromReasoning) {
     self.config.conceptualModel.fromReasoning = function () { console.warn("CrowdEditor conceptual model fromReasoning is not defined and the Reasoning API is active."); }
   }
-  if (self.config.metamodelApi && !self.config.conceptualModel.fromRepair) {
-    self.config.conceptualModel.fromRepair = function () { console.warn("CrowdEditor conceptual model fromRepair is not defined and the Metamodel API is active."); }
+  if (self.config.metamodelApi && !self.config.conceptualModel.fromRepairMark) {
+    self.config.conceptualModel.fromRepairMark = function () { console.warn("CrowdEditor conceptual model fromRepairMark is not defined and the Metamodel API is active."); }
+  }
+  if (self.config.metamodelApi && !self.config.conceptualModel.fromRepairApply) {
+    self.config.conceptualModel.fromRepairApply = function () { console.warn("CrowdEditor conceptual model fromRepairApply is not defined and the Metamodel API is active."); }
   }
 
   $("#" + this.config.selector).html('');
@@ -2272,7 +2278,7 @@ CrowdEditor.prototype.initTools = function () {
               maxExplanations: options?.maxExplanations,
               timeout: options?.timeout,
               success: (res) => {
-                options?.success({ schema: schema, repair: res });
+                options?.success(res);
               },
               error: (error) => { if (options?.error) options?.error(error) }
             });
@@ -2301,9 +2307,10 @@ CrowdEditor.prototype.initTools = function () {
               console.log('axiom', axiom);
 
               axiomsRadios +=
-                '<div class="form-check"> \
+                '<div class="form-check" id="crowd-tools-repair-explanations-set-container-' + self.id + '-' + (index + 1) + '-' + (index2 + 1) + '"> \
                   <input class="form-check-input" type="radio" name="crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1) + '" \
-                  id="crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1) + '-' + (index2 + 1) + '" ' + (index2 == 0 ? 'checked' : '') + '> \
+                  id="crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1) + '-' + (index2 + 1) + '" ' + (index2 == 0 ? 'checked' : '') + ' \
+                  data-explanation="'+ key + '" data-axiom="' + key2 + '"> \
                   <label class="form-check-label" for="crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1) + '-' + (index2 + 1) + '"> \
                     ' + self.tools.repair.prettyAxiom(axiom) + ' \
                   </label> \
@@ -2312,7 +2319,8 @@ CrowdEditor.prototype.initTools = function () {
 
             //creates explanations set dom
             $('.crowd-tools-repair-explanations-sets').append(
-              '<div id="crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1) + '" class="crowd-tools-repair-explanations-set ' + (index == 0 ? 'selected' : '') + '"> \
+              '<div id="crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1) + '" \
+              class="crowd-tools-repair-explanations-set ' + (index == 0 ? 'selected' : '') + '"> \
                 <div> \
                   <h6>Explanation ' + (index + 1) + '</h6> \
                 </div> \
@@ -2324,12 +2332,59 @@ CrowdEditor.prototype.initTools = function () {
 
             //event handler when click explanations set
             //makes set selected
-            $('#crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1)).on('click', function () {
-              $('.crowd-tools-repair-explanations-set').removeClass('selected');
-              $(this).addClass('selected');
-            });
+            // $('#crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1)).on('click', function () {
+            //   $('.crowd-tools-repair-explanations-set').removeClass('selected');
+            //   $(this).addClass('selected');
+            // });
           });
+
+          //event handler when select a explanations set radio input in explanations window
+          $('input[name^="crowd-tools-repair-explanations-set-' + self.id + '-"]').on('change', function () {
+            //if propagate explanation is checked then check the same axiom in all explanations sets that has it
+            if ($('#crowd-tools-repair-explanations-propagate-' + self.id).is(':checked')) {
+              var selectedAxiom = options?.Explanations[$(this).attr('data-explanation')][$(this).attr('data-axiom')];
+              $('input[name^="crowd-tools-repair-explanations-set-' + self.id + '-"]').each(function () {
+                var axiom = options?.Explanations[$(this).attr('data-explanation')][$(this).attr('data-axiom')];
+                if (axiom == selectedAxiom) {
+                  $(this).prop('checked', true);
+                }
+              });
+            }
+
+            self.tools.repair.markExplanations();
+          });
+
+          //call repair mark interpretation for the specific conceptual model
+          //with the default selected axioms of each explanation
+          self.tools.repair.markExplanations();
+
+          //event on mouse over axiom container in explanations window
+          //highlight axiom in workspace
+          // $("#crowd-tools-repair-explanations-set-container-" + self.id).hover(function () {
+          //   //get axiom and explanation from radio input
+          //   let hoveredAxiom = {
+          //     explanation: $(this).find('input').attr('data-explanation'),
+          //     axiom: $(this).find('input').attr('data-axiom')
+          //   };
+
+          //   //highlight axiom in workspace
+          //   self.repairing.genericHighlightAxiom(options, hoveredAxiom);
+          // });
         }
+      }
+
+      self.tools.repair.markExplanations = function () {
+        //get all selected axioms in each explanations set
+        let selectedAxioms = [];
+        $('input[name^="crowd-tools-repair-explanations-set-' + self.id + '-"]:checked').each(function () {
+          selectedAxioms.push({
+            explanation: $(this).attr('data-explanation'),
+            axiom: $(this).attr('data-axiom')
+          });
+        });
+
+        //call repair mark interpretation for the specific conceptual model
+        self.fromRepairMark(self.tools.repair.response, selectedAxioms);
       }
 
       self.tools.repair.prettyAxiom = function (axiom) {
@@ -2390,6 +2445,12 @@ CrowdEditor.prototype.initTools = function () {
                         <option>Konclude</option> \
                       </select> \
                     </div> \
+                    <div class="form-group row"> \
+                      <label class="col-auto col-form-label">Max. Explanations</label> \
+                      <div class="col"> \
+                        <input type="text" value="5" class="form-control" id="crowd-tools-repair-options-maxexplain-' + self.id + '"> \
+                      </div> \
+                    </div> \
                   </div> \
                   <div class="modal-footer"> \
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
@@ -2407,7 +2468,11 @@ CrowdEditor.prototype.initTools = function () {
             <h5 class="text-center">Explanations</h5> \
           </div> \
           <div> \
-            Select one Explanation set and a Axiom to remove of that set to apply repair: \
+            Select one Axiom to be removed of each set: \
+            <div class="col ml-1"> \
+              <input type="checkbox" class="form-check-input" id="crowd-tools-repair-explanations-propagate-' + self.id + '" checked> \
+              <label class="form-check-label" for="crowd-tools-repair-explanations-propagate-' + self.id + '"><b>Propagate Selection</b></label> \
+            </div> \
             <div class="crowd-tools-repair-explanations-sets mt-2"> \
             </div> \
             <div class="text-center mt-2"> \
@@ -2483,14 +2548,14 @@ CrowdEditor.prototype.initTools = function () {
         self.tools.repair.callRepair({
           reasoner: $('#crowd-tools-repair-options-reasoner-' + self.id + ' option:selected').val(),
           entity: $('#crowd-tools-repair-options-concept-' + self.id + ' option:selected').val(),
-          maxExplanations: 5,
+          maxExplanations: $('#crowd-tools-repair-options-maxexplain-' + self.id).val() || 5,
           timeout: 120000,
           success: function (response) {
             //preserve repair response
             self.tools.repair.response = response;
 
             //call open explanations window
-            self.tools.repair.openExplanationsWindow(response.repair);
+            self.tools.repair.openExplanationsWindow(response);
 
             $('#crowd-tools-repair-options-modal-' + self.id).modal('hide');
 
@@ -2508,11 +2573,9 @@ CrowdEditor.prototype.initTools = function () {
       $('#crowd-tools-repair-explanations-cancel-' + self.id).on('click', function () {
         //hide explanations window
         $('.crowd-tools-repair-explanations-container').addClass('d-none');
-      });
 
-      //event handler when select a explanations set in explanations window
-      $('#crowd-tools-repair-explanations-set-' + self.id).on('click', function () {
-
+        //clear marks
+        self.repairing.clearMark();
       });
 
       //event handler when click apply button in explanations window
@@ -2520,13 +2583,17 @@ CrowdEditor.prototype.initTools = function () {
         //hide explanations window
         $('.crowd-tools-repair-explanations-container').addClass('d-none');
 
-        //get selected explanations set
-        let selectedMupsSet = $('.crowd-tools-repair-explanations-set.selected').attr('id');
-        //get selected axiom
-        let selectedAxiom = $('input[name="' + selectedMupsSet + '"]:checked').parent().text();
+        //get all selected axioms in each explanations set
+        let selectedAxioms = [];
+        $('input[name^="crowd-tools-repair-explanations-set-' + self.id + '-"]:checked').each(function () {
+          selectedAxioms.push({
+            explanation: $(this).attr('data-explanation'),
+            axiom: $(this).attr('data-axiom')
+          });
+        });
 
         //call repair interpretation for the specific conceptual model
-        self.fromRepair(selectedAxiom);
+        self.fromRepairApply(self.tools.repair.response, selectedAxioms);
       });
     }
     self.tools.repair.init();
@@ -4384,7 +4451,226 @@ CrowdEditor.prototype.initReasoningValidator = function () {
 }
 
 CrowdEditor.prototype.initRepairingTools = function () {
+  var self = this;
 
+  //initialize repairing tools objects
+  self.repairing = {};
+
+  //define function for return the specific type names from the conceptual model
+  //this function must be overloaded in the specific conceptual model
+  self.repairing.typeName = function (type) {
+    var specificType;
+    switch (type) {
+      case 'SubsumptionLink':
+        specificType = 'generalization';
+        break;
+      case 'SubsumptionElement':
+        specificType = 'inheritance';
+        break;
+      case 'DisjointObjectTypeElement':
+        specificType = 'inheritance';
+        break;
+    }
+    return specificType;
+  }
+
+  //define a function for remove disjoint of a cell, it needs to be implemented in the specific conceptual model
+  self.repairing.removeDisjoint = function (cell) {
+    cell.prop('subtype', 'overlaped');
+  }
+
+  //define functions to return type names of each
+
+  //clear repairing attribute of all cells
+  self.repairing.clearMark = function () {
+    self.workspace.graph.getCells().forEach(function (cell) {
+      cell.prop('repairing', { title: 'Repairing', contents: [] });
+    });
+  }
+
+  //generic method for put repairing attributes on cells with a repair response, a selected explanation and a selected axiom
+  self.repairing.genericRepairMark = function (repair, selectedAxioms) {
+    //call clear repairing marks
+    self.repairing.clearMark();
+
+    //mark all cells for the selected axioms as "remove" or "restrict" (for the disjoint constraints)
+    selectedAxioms.forEach(function (selectedAxiom) {
+      //get selected axiom mapped entity
+      var mappedEntity = repair['TBoxMap'][repair['Explanations'][selectedAxiom.explanation][selectedAxiom.axiom]];
+
+      self.repairing.findCellsByAxiom(repair, mappedEntity).forEach(function (cell) {
+        //if the cell is marked as "keep" then conserve their mark
+        //unless the axiom selected was a disjoint constraint then add the "restrict" mark
+        if (mappedEntity.split('@')[0] != 'DisjointObjectType') {
+          if (!cell.prop('repairing/contents')?.some(function (e) { return e.value == 'keep' })) {
+            cell.prop('repairing', { title: 'Repairing', contents: [] });
+            cell.prop('repairing/contents/' + cell.prop('repairing/contents').length, { value: 'remove', text: '<span class="crowd-repairing-remove-color"><b>It will be removed if Repair is applied.</b></span>' });
+          }
+        } else {
+          cell.prop('repairing', { title: 'Repairing', contents: [] });
+          cell.prop('repairing/contents/' + cell.prop('repairing/contents').length, { value: 'restrict', text: '<span class="crowd-repairing-restrict-color"><b>It will be kept if Repair is applied but the Disjoint restriction were removed.</b></span>' });
+        }
+        //send cell to front (for the case it's graphically overlapped with another one)
+        cell.toFront();
+      });
+    });
+
+    //for the rest of cells in the graph that are not marked as "remove" or "restrict" mark them as "keep"
+    self.workspace.graph.getCells().forEach(function (cell) {
+      if (!cell.prop('repairing/contents') || cell.prop('repairing/contents').length == 0) {
+        cell.prop('repairing/contents/' + cell.prop('repairing/contents').length, { value: 'keep', text: '<span class="crowd-repairing-keep-color"><b>It will be kept if Repair is applied.</b></span>' });
+      }
+    });
+  }
+
+  // method to find cell or cells associated to a axiom given from TBoxMap, and using KF and workspace graph
+  self.repairing.findCellsByAxiom = function (repair, mappedAxiom) {
+    //get entity type and name base on the mapped entity string (e.g. "Subsumption@c167_HWjZ")
+    var entityType = mappedAxiom.split('@')[0];
+    var entityName = mappedAxiom.split('@')[1];
+
+    //get entity from response kf based on type and name
+    var entity;
+    switch (entityType) {
+      case 'Subsumption':
+        entity = repair['KF']['Relationship']['Subsumption'].find(function (subsumption) {
+          return subsumption['name'] == entityName;
+        });
+        break;
+      case 'DisjointObjectType':
+        entity = repair['KF']['Constraints']['Disjointness constraints']['Disjoint object type'].find(function (disjointClasses) {
+          return disjointClasses['name'] == entityName;
+        });
+        break;
+    }
+
+    //get cells from graph based on entity type and entities associated
+    var cells = [];
+    switch (entityType) {
+      case 'Subsumption':
+        //find the link cell that is the subsumption link or the element that is the subsumption element with their two links
+        //use the kf entity child and parent uris to find the cells
+        var childCell = self.workspace.graph.getCells().find(function (cell) {
+          return cell.prop('uri') == entity['entity child'];
+        });
+        var parentCell = self.workspace.graph.getCells().find(function (cell) {
+          return cell.prop('uri') == entity['entity parent'];
+        });
+
+        cells[0] = self.workspace.graph.getConnectedLinks(childCell).find(function (link) {
+          return link.prop('source').id == childCell.id && link.prop('target').id == parentCell.id && link.prop('type') == self.repairing.typeName(entityType + "Link");
+        });
+
+        if (cells[0] == null) {
+          //if the link cell is not found then find the element cell that is the subsumption element with their two links
+          self.workspace.graph.getConnectedLinks(childCell).forEach(function (link) {
+            if (link.prop('type') == self.repairing.typeName(entityType + "Link")) {
+              var subsumptionElement = link.prop('source').id == childCell.id
+                ? self.workspace.graph.getCell(link.prop('target').id)
+                : self.workspace.graph.getCell(link.prop('source').id);
+
+              var connectedLinksSubsumptionElement = self.workspace.graph.getConnectedLinks(subsumptionElement);
+              connectedLinksSubsumptionElement.forEach(function (sublink) {
+                if (sublink.prop('type') == self.repairing.typeName(entityType + "Link")) {
+                  if ((sublink.prop('source').id == subsumptionElement.id && sublink.prop('target').id == parentCell.id)
+                    || (sublink.prop('target').id == subsumptionElement.id && sublink.prop('source').id == parentCell.id)) {
+                    // if the inheritance has more than two links, then it connects others entities too, so we need to only mark the child connector link
+                    if (connectedLinksSubsumptionElement.length <= 2) {
+                      cells[0] = link;
+                      cells[1] = subsumptionElement;
+                      cells[2] = sublink;
+                    } else {
+                      cells[0] = link;
+                    }
+                  }
+                }
+              });
+            }
+          });
+        }
+        break;
+      case 'DisjointObjectType':
+        //for each disjoint classes entities get the cell that is the disjoint element between them
+        var disjointEntitiesCells = [];
+        entity.entities.forEach(function (entity) {
+          disjointEntitiesCells.push(self.workspace.graph.getCells().find(function (cell) {
+            return cell.prop('uri') == entity;
+          }));
+        });
+
+        //for each disjoint element cell get the link that is the disjoint link between them
+        self.workspace.graph.getConnectedLinks(disjointEntitiesCells[0]).forEach(function (link) {
+          //check if the link connects with a disjoint element cell
+          var disjointElementCell = link.prop('source').id == disjointEntitiesCells[0].id
+            ? self.workspace.graph.getCell(link.prop('target').id)
+            : self.workspace.graph.getCell(link.prop('source').id);
+
+          if (disjointElementCell.prop('type') == self.repairing.typeName(entityType + "Element")) {
+            //check if the disjoint element cell is connected with the other entities
+            var disjointElementCellConnected = true;
+            for (var i = 1; i < disjointEntitiesCells.length; i++) {
+              var cellConnectionToDisjoint = self.workspace.graph.getConnectedLinks(disjointEntitiesCells[i]).find(function (link) {
+                return (link.prop('source').id == disjointEntitiesCells[i].id && link.prop('target').id == disjointElementCell.id)
+                  || (link.prop('target').id == disjointEntitiesCells[i].id && link.prop('source').id == disjointElementCell.id);
+              });
+              disjointElementCellConnected = disjointElementCellConnected && cellConnectionToDisjoint;
+              if (!disjointElementCellConnected) break;
+            }
+
+            if (disjointElementCellConnected) {
+              cells[1] = disjointElementCell;
+            }
+          }
+        });
+
+        break;
+    }
+
+    return cells;
+  }
+
+  //generic method for apply repairing on cells, using the marks on the cells
+  self.repairing.genericRepairApply = function () {
+    //get all cells that are marked as "remove" and remove them
+    self.workspace.graph.getCells().forEach(function (cell) {
+      if (cell.prop('repairing/contents')?.some(function (e) { return e.value == 'remove' })) {
+        cell.remove();
+      }
+    });
+
+    //get all cells that are marked as "restrict" and remove the disjoint constraint (based on the specific conceptual model)
+    self.workspace.graph.getCells().forEach(function (cell) {
+      if (cell.prop('repairing/contents')?.some(function (e) { return e.value == 'restrict' })) {
+        self.repairing.removeDisjoint(cell);
+      }
+    });
+
+    //clear marks
+    self.repairing.clearMark();
+  }
+
+  //generic method for highlight axiom cells when the mouse is over the axiom on the repairing panel
+  self.repairing.genericHighlightAxiom = function (repair, selectedAxiom) {
+    //remove highlighted to all highlighted cells
+    self.workspace.graph.getCells().forEach(function (cell) {
+      if (cell.prop('highlighted'))
+        cell.prop('highlighted', false);
+    });
+
+    //get selected axiom mapped entity
+    var mappedEntity = repair['TBoxMap'][repair['Explanations'][selectedAxiom.explanation][selectedAxiom.axiom]];
+
+    //get cells from graph based on entity type and entities associated
+    var cells = self.repairing.findCellsByAxiom(repair, mappedEntity);
+
+    //highlight cells
+    cells.forEach(function (cell) {
+      cell.prop('highlighted', true);
+    });
+  }
+
+  //call initialization of repairing tools for the specific conceptual model
+  self.config.conceptualModel.initRepairingTools(self);
 }
 
 CrowdEditor.prototype.fromReasoning = function (schema, reasoning) {
@@ -4395,12 +4681,20 @@ CrowdEditor.prototype.fromReasoning = function (schema, reasoning) {
   self.config.conceptualModel.fromReasoning(self, schema, reasoning);
 }
 
-CrowdEditor.prototype.fromRepair = function (schema, repair) {
+CrowdEditor.prototype.fromRepairMark = function (repair, selectedAxioms) {
   var self = this;
 
   //call the function to do the repairing marks for the specific conceptual model
   //it can do use of generic mark function
-  self.config.conceptualModel.fromRepair(self, schema, repair);
+  self.config.conceptualModel.fromRepairMark(self, repair, selectedAxioms);
+}
+
+CrowdEditor.prototype.fromRepairApply = function (repair, selectedAxioms) {
+  var self = this;
+
+  //call the function to do apply repairing for the specific conceptual model
+  //it can do use of generic repairing apply function
+  self.config.conceptualModel.fromRepairApply(self, repair, selectedAxioms);
 }
 
 CrowdEditor.prototype.toBase64 = function (options, callback) {
