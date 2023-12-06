@@ -2231,5 +2231,8 @@ var CrowdEditorOrm = {
       crowd.reasoning.genericMark(reasoning);
     });
     crowd.reasoning.importPositionedSchema(schema);
+  },
+  fromRepair: function (crowd, schema, repair) {
+    //todo
   }
 }

@@ -467,6 +467,191 @@ export class ApiComponent implements OnInit {
         ]
       }
     },
+    kfRepairing: {
+      "Entity type": {
+        "Value property": {
+          "Value type": []
+        },
+        "Data type": [],
+        "Object type": [
+          "http://crowd.fi.uncoma.edu.ar#A3",
+          "http://crowd.fi.uncoma.edu.ar#A2",
+          "http://crowd.fi.uncoma.edu.ar#A4",
+          "http://crowd.fi.uncoma.edu.ar#A1",
+          "http://crowd.fi.uncoma.edu.ar#A6",
+          "http://crowd.fi.uncoma.edu.ar#A7",
+          "http://crowd.fi.uncoma.edu.ar#A5",
+          "http://crowd.fi.uncoma.edu.ar#A"
+        ]
+      },
+      "Role": [],
+      "Constraints": {
+        "Cardinality constraints": {
+          "Attibutive property cardinality": [],
+          "Object type cardinality": []
+        },
+        "Disjointness constraints": {
+          "Disjoint object type": [],
+          "Disjoint role": []
+        },
+        "Completeness constraints": [],
+        "Mandatory constraints": {
+          "Mandatory": []
+        }
+      },
+      "Relationship": {
+        "Attributive property": {
+          "Attributive property": [],
+          "Attribute": {
+            "Attribute": [],
+            "Mapped to": []
+          }
+        },
+        "Subsumption": [
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A3",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A6,http://crowd.fi.uncoma.edu.ar#A3)_8DY4_qxYE",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A6"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A3",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A7,http://crowd.fi.uncoma.edu.ar#A3)_S4xT_9duZ",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A7"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A3",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A4,http://crowd.fi.uncoma.edu.ar#A3)_oL97_noY1",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A4"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A3",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A5,http://crowd.fi.uncoma.edu.ar#A3)_cRaw_ELkk",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A5"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A2",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A4,http://crowd.fi.uncoma.edu.ar#A2)_BGLa_qsPB",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A4"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A2",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A,http://crowd.fi.uncoma.edu.ar#A2)_4h72_BOcZ",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A1",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A3,http://crowd.fi.uncoma.edu.ar#A1)_Xex4_iQD2",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A3"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A1",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A6,http://crowd.fi.uncoma.edu.ar#A1)_Wpza_xcS8",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A6"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A1",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A7,http://crowd.fi.uncoma.edu.ar#A1)_dCqg_xjZd",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A7"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A6",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A1,http://crowd.fi.uncoma.edu.ar#A6)_asaH_7SO7",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A1"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A6",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A3,http://crowd.fi.uncoma.edu.ar#A6)_CsRb_3UHE",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A3"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A6",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A7,http://crowd.fi.uncoma.edu.ar#A6)_SM1S_64iu",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A7"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A7",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A1,http://crowd.fi.uncoma.edu.ar#A7)_iyiX_LBNY",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A1"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A7",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A3,http://crowd.fi.uncoma.edu.ar#A7)_9aji_AqPH",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A3"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#A7",
+            "name": "Subsumption(http://crowd.fi.uncoma.edu.ar#A6,http://crowd.fi.uncoma.edu.ar#A7)_j6q5_sTb2",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#A6"
+          },
+        ],
+        "Relationship": []
+      }
+    },
+    kfRepairingSimple: {
+      "Entity type": {
+        "Value property": {
+          "Value type": []
+        },
+        "Data type": [],
+        "Object type": [
+          "http://crowd.fi.uncoma.edu.ar#entity-1",
+          "http://crowd.fi.uncoma.edu.ar#entity-2",
+          "http://crowd.fi.uncoma.edu.ar#entity-3"
+        ]
+      },
+      "Role": [],
+      "Constraints": {
+        "Cardinality constraints": {
+          "Attibutive property cardinality": [],
+          "Object type cardinality": []
+        },
+        "Disjointness constraints": {
+          "Disjoint object type": [
+            {
+              "entities": [
+                "http://crowd.fi.uncoma.edu.ar#entity-3",
+                "http://crowd.fi.uncoma.edu.ar#entity-2"
+              ],
+              "name": "dc1"
+            }
+          ],
+          "Disjoint role": []
+        },
+        "Completeness constraints": [],
+        "Mandatory constraints": {
+          "Mandatory": []
+        }
+      },
+      "Relationship": {
+        "Attributive property": {
+          "Attributive property": [],
+          "Attribute": {
+            "Attribute": [],
+            "Mapped to": []
+          }
+        },
+        "Subsumption": [
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#entity-1",
+            "name": "c3316_2eLT_2eBw_FDI1",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#entity-3"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#entity-3",
+            "disjointness constraints": "dc1",
+            "name": "c432_ueQZ",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#entity-1"
+          },
+          {
+            "entity child": "http://crowd.fi.uncoma.edu.ar#entity-2",
+            "disjointness constraints": "dc1",
+            "name": "c432_Bgpw",
+            "entity parent": "http://crowd.fi.uncoma.edu.ar#entity-1"
+          }
+        ],
+        "Relationship": []
+      }
+    },
     owl: "<rdf:RDF\n    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n    xmlns=\"http://crowd.fi.uncoma.edu.ar/kb1#\"\n    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\">\n  <owl:Ontology rdf:about=\"http://crowd.fi.uncoma.edu.ar/kb1#\"/>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#empleado\">\n    <rdfs:subClassOf>\n      <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#persona\"/>\n    </rdfs:subClassOf>\n  </owl:Class>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#empresa\"/>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#independiente\">\n    <rdfs:subClassOf rdf:resource=\"http://crowd.fi.uncoma.edu.ar#persona\"/>\n  </owl:Class>\n  <owl:Class rdf:about=\"http://crowd.fi.uncoma.edu.ar#trabaja\">\n    <rdfs:subClassOf>\n      <owl:Restriction>\n        <owl:someValuesFrom rdf:resource=\"http://crowd.fi.uncoma.edu.ar#empresa\"/>\n        <owl:onProperty>\n          <owl:ObjectProperty rdf:about=\"http://crowd.fi.uncoma.edu.ar#role-b-1\"/>\n        </owl:onProperty>\n      </owl:Restriction>\n    </rdfs:subClassOf>\n    <rdfs:subClassOf>\n      <owl:Restriction>\n        <owl:someValuesFrom rdf:resource=\"http://crowd.fi.uncoma.edu.ar#empleado\"/>\n        <owl:onProperty>\n          <owl:ObjectProperty rdf:about=\"http://crowd.fi.uncoma.edu.ar#role-a-1\"/>\n        </owl:onProperty>\n      </owl:Restriction>\n    </rdfs:subClassOf>\n  </owl:Class>\n</rdf:RDF>\n",
     uris: [
       { emoji: "🍕", uri: "https://protege.stanford.edu/ontologies/pizza/pizza.owl", prefix: 'pizza' },
@@ -668,7 +853,7 @@ export class ApiComponent implements OnInit {
           parameters: {
             from: 'owl',
             to: 'kf',
-            reasoner: '',
+            reasoner: 'pellet',
             input: 'string',
             filtering: true,
             timeout: 60000,
@@ -676,7 +861,30 @@ export class ApiComponent implements OnInit {
             ontologiesUris: [{ uri: '', prefix: '' }],
             ontologiesFiles: []
           }
-        }
+        },
+        {
+          name: 'KF Repair',
+          method: 'metarepair',
+          description: 'Use Ontology Repair Debugging Technics, specifically MUPS sets, but using KF metamodel.',
+          url: environment.metamodelVerbalizationUrl,
+          type: 'POST',
+          example: this.examples.kfRepairingSimple,
+          exampleParameters: { entity: "http://crowd.fi.uncoma.edu.ar#entity-2" }, //for kfReparingSimple
+          // exampleParameters: { entity: "http://crowd.fi.uncoma.edu.ar#A1" }, //for kfReparing
+          serialize: ['meta'],
+          parameters: {
+            repair: true,
+            from: 'kf',
+            to: 'kf',
+            meta: '',
+            entity: '',
+            reasoner: 'pellet',
+            timeout: 60000,
+            maxExplanations: 5,
+            precompute: false,
+            filtering: true,
+          }
+        },
       ]
     }
   };
@@ -850,10 +1058,16 @@ export class ApiComponent implements OnInit {
 
   getCategories(items: any): any {
     let categories = [];
-    Object.values(items).forEach(item => {
-      let category = this.getCategory(item.toString());
-      if (!categories.includes(category)) categories.push(category);
+    Object.keys(items).forEach(key => {
+      //if the items are objects, use the key as the category
+      if (typeof items[key] == 'object') {
+        if (!categories.includes(key)) categories.push(key);
+      } else {
+        let category = this.getCategory(items[key].toString());
+        if (!categories.includes(category)) categories.push(category);
+      }
     });
+    categories.sort();
     return categories;
   }
 
@@ -863,10 +1077,29 @@ export class ApiComponent implements OnInit {
 
   getItemsByCategory(items: any, category: string): any {
     let itemsByCategory = [];
-    Object.values(items).forEach(item => {
-      if (this.getCategory(item.toString()) == category) itemsByCategory.push(item);
-    });
+    //if items in the category are objects, use their values as the items
+    if (typeof items[category] == 'object') {
+      Object.values(items[category]).forEach(item => {
+        itemsByCategory.push(item);
+      });
+    } else {
+      Object.values(items).forEach(item => {
+        if (this.getCategory(item.toString()) == category) itemsByCategory.push(item);
+      });
+    }
+    itemsByCategory.sort();
     return itemsByCategory;
+  }
+
+  isItemObject(item: any) {
+    return typeof item == 'object';
+  }
+
+  setExampleParameters(tab: any, exampleParameters: any) {
+    if (!exampleParameters) return;
+    Object.keys(exampleParameters).forEach(key => {
+      tab.parameters[key] = exampleParameters[key];
+    });
   }
 
   fromInfix(string: string): string {

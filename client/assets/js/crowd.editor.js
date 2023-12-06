@@ -45,6 +45,9 @@ CrowdEditor.prototype.init = function () {
   if (self.config.reasoningApi && !self.config.conceptualModel.fromReasoning) {
     self.config.conceptualModel.fromReasoning = function () { console.warn("CrowdEditor conceptual model fromReasoning is not defined and the Reasoning API is active."); }
   }
+  if (self.config.metamodelApi && !self.config.conceptualModel.fromRepair) {
+    self.config.conceptualModel.fromRepair = function () { console.warn("CrowdEditor conceptual model fromRepair is not defined and the Metamodel API is active."); }
+  }
 
   $("#" + this.config.selector).html('');
 
@@ -104,6 +107,7 @@ CrowdEditor.prototype.init = function () {
   self.initMap();
   self.initSyntaxValidator();
   self.initReasoningValidator();
+  self.initRepairingTools();
 
   //fit and center the paper for first time
   self.workspace.fitPaper();
@@ -372,6 +376,7 @@ CrowdEditor.prototype.initTools = function () {
   self.tools.reasoning = {};
   self.tools.undoReasoning = {};
   self.tools.clearReasoning = {};
+  self.tools.repair = {};
 
   self.tools.help = {};
   self.tools.tutorials = {};
@@ -2055,7 +2060,7 @@ CrowdEditor.prototype.initTools = function () {
         });
       };
 
-      //append dom for reasoning tool and clear reasoning tool
+      //append dom for reasoning tool
       $('[aria-labelledby="crowd-tools-tools-dropdown-' + self.id + '"]').append(
         '<li> \
           <span class="d-block" data-toggle="tooltip" data-placement="right" title="Call Reasoner"> \
@@ -2136,7 +2141,7 @@ CrowdEditor.prototype.initTools = function () {
             // response.reasoning.KF.hasPositions = false;
             // self.tools.import.importFrom({ model: 'kf', schema: response.reasoning.KF, file: self.config.actualFile });
           }
-        })
+        });
       });
     }
     self.tools.reasoning.init();
@@ -2250,6 +2255,281 @@ CrowdEditor.prototype.initTools = function () {
       });
     }
     self.tools.clearReasoning.init();
+
+    //repair tool
+    self.tools.repair.init = function () {
+      //call the repair with the actual diagram transalted to meta
+      self.tools.repair.callRepair = function (options) {
+        self.tools.export.exportTo({
+          model: 'kf',
+          success: function (schema) {
+            console.log('success meta', schema);
+            self.config.metamodelApi.request({
+              repair: true,
+              meta: schema,
+              entity: options?.entity,
+              reasoner: options?.reasoner,
+              maxExplanations: options?.maxExplanations,
+              timeout: options?.timeout,
+              success: (res) => {
+                options?.success({ schema: schema, repair: res });
+              },
+              error: (error) => { if (options?.error) options?.error(error) }
+            });
+          }
+        });
+
+      }
+
+      self.tools.repair.openExplanationsWindow = function (options) {
+        //clear explanations sets
+        $('.crowd-tools-repair-explanations-sets').empty();
+
+        //show explanations window
+        $('.crowd-tools-repair-explanations-container').removeClass('d-none');
+
+        //append explanations sets obtained from repair Explanations object
+        if (options?.Explanations) {
+          Object.keys(options?.Explanations).forEach(function (key, index) {
+            let explanationsSet = options?.Explanations[key];
+
+            //create explanations radios for each axiom
+            let axiomsRadios = '';
+            Object.keys(explanationsSet).forEach(function (key2, index2) {
+              let axiom = explanationsSet[key2];
+
+              console.log('axiom', axiom);
+
+              axiomsRadios +=
+                '<div class="form-check"> \
+                  <input class="form-check-input" type="radio" name="crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1) + '" \
+                  id="crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1) + '-' + (index2 + 1) + '" ' + (index2 == 0 ? 'checked' : '') + '> \
+                  <label class="form-check-label" for="crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1) + '-' + (index2 + 1) + '"> \
+                    ' + self.tools.repair.prettyAxiom(axiom) + ' \
+                  </label> \
+                </div>';
+            });
+
+            //creates explanations set dom
+            $('.crowd-tools-repair-explanations-sets').append(
+              '<div id="crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1) + '" class="crowd-tools-repair-explanations-set ' + (index == 0 ? 'selected' : '') + '"> \
+                <div> \
+                  <h6>Explanation ' + (index + 1) + '</h6> \
+                </div> \
+                <div> \
+                  ' + axiomsRadios + ' \
+                </div> \
+              </div>'
+            );
+
+            //event handler when click explanations set
+            //makes set selected
+            $('#crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1)).on('click', function () {
+              $('.crowd-tools-repair-explanations-set').removeClass('selected');
+              $(this).addClass('selected');
+            });
+          });
+        }
+      }
+
+      self.tools.repair.prettyAxiom = function (axiom) {
+        let prettyAxiom = axiom;
+
+        // find entities between < and > and replace with the URI fragment (without < and >)
+        let entities = axiom.match(/<[^>]*>/g);
+        if (entities) {
+          entities.forEach(function (entity) {
+            let entityFragment = entity.replace('<', '').replace('>', '').split('#')[1];
+            prettyAxiom = prettyAxiom.replace(entity, entityFragment);
+          });
+        }
+
+        return prettyAxiom;
+      }
+
+      //append dom for repair tool
+      $('[aria-labelledby="crowd-tools-tools-dropdown-' + self.id + '"]').append(
+        '<li class="dropdown-divider"></li> \
+        <li> \
+            <span class="d-block" data-toggle="tooltip" data-placement="right" title="Use the KF Repair Tool for Generate Explanations"> \
+              <button class="dropdown-item" id="crowd-tools-repair-input-' + self.id + '"> \
+              <i class="fa fa-fw fa-wrench"></i> Repair</button> \
+            </span> \
+          </li>'
+      );
+
+      //append dom for modal to set repair options before call metamodel api
+      $('body').append(
+        '<div id="crowd-tools-repair-options-modal-' + self.id + '" class="modal fade"> \
+              <div class="modal-dialog modal-dialog-scrollable modal-sm"> \
+                <div class="modal-content"> \
+                  <div class="modal-header"> \
+                    <h5 class="modal-title"><i class="fa fa-fw fa-wrench"></i> Repair</h5> \
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"> \
+                      <span aria-hidden="true">&times;</span> \
+                    </button> \
+                  </div> \
+                  <div class="modal-body"> \
+                    <div class="form-group text-center"> \
+                      <button class="btn btn-sm btn-danger" id="crowd-tools-repair-options-find-unsat-concepts-' + self.id + '" type="button" \
+                      data-toggle="tooltip" data-placement="bottom" title="Search if your diagram have some unsatisfacible concept for repair."> \
+                        Find Unsatisfiable Concepts <i class="fa fa-fw fa-search"></i> \
+                      </button> \
+                    </div> \
+                    <div class="form-group"> \
+                      <label for="">Concept</label> \
+                      <select class="form-control custom-select my-1 mr-sm-2" id="crowd-tools-repair-options-concept-' + self.id + '" disabled> \
+                      </select> \
+                    </div> \
+                    <div class="form-group"> \
+                      <label for="">Reasoner</label> \
+                      <select class="form-control custom-select my-1 mr-sm-2" id="crowd-tools-repair-options-reasoner-' + self.id + '"> \
+                        <option>JFact</option> \
+                        <option selected>Pellet</option> \
+                        <option>Racer</option> \
+                        <option>Konclude</option> \
+                      </select> \
+                    </div> \
+                  </div> \
+                  <div class="modal-footer"> \
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
+                    <button class="btn btn-warning" data-model="" id="crowd-tools-repair-call-' + self.id + '" disabled>Call Repair</button> \
+                  </div> \
+                </div> \
+              </div> \
+            </div>'
+      );
+
+      //append dom for explanations window
+      $('#crowd-workspace-' + self.id).append(
+        '<div class="crowd-tools-repair-explanations-container d-none"> \
+          <div> \
+            <h5 class="text-center">Explanations</h5> \
+          </div> \
+          <div> \
+            Select one Explanation set and a Axiom to remove of that set to apply repair: \
+            <div class="crowd-tools-repair-explanations-sets mt-2"> \
+            </div> \
+            <div class="text-center mt-2"> \
+              <button class="btn btn-default text-secondary" id="crowd-tools-repair-explanations-cancel-' + self.id + '">Cancel</button> \
+              <button class="btn btn-warning" id="crowd-tools-repair-explanations-apply-' + self.id + '">Apply</button> \
+            </div> \
+          </div> \
+        </div>'
+      );
+
+      //event handler when click repair to open repair options
+      $('#crowd-tools-repair-input-' + self.id).on('click', function () {
+        //clear unsat concepts select options
+        $('#crowd-tools-repair-options-concept-' + self.id).empty();
+        //disable unsat concepts select
+        $('#crowd-tools-repair-options-concept-' + self.id).prop('disabled', true);
+        //disable call repair button
+        $('#crowd-tools-repair-call-' + self.id).prop('disabled', true);
+
+        $('#crowd-tools-repair-options-modal-' + self.id).modal('show');
+
+        $(".tooltip").tooltip('hide');
+        $(this).blur();
+      });
+
+      //event handler when click find unsat concepts
+      $('#crowd-tools-repair-options-find-unsat-concepts-' + self.id).on('click', function () {
+        //disable find unsat concepts button
+        $('#crowd-tools-repair-options-find-unsat-concepts-' + self.id).prop('disabled', true);
+        self.tools.reasoning.callReasoning({
+          reasoner: "Racer",
+          strategy: "alcqi",
+          cards: false,
+          success: function (response) {
+            //clear select options
+            $('#crowd-tools-repair-options-concept-' + self.id).empty();
+            //disable select
+            $('#crowd-tools-repair-options-concept-' + self.id).prop('disabled', true);
+            //disable call repair button
+            $('#crowd-tools-repair-call-' + self.id).prop('disabled', true);
+
+            //add unsat concepts to the select
+            response.reasoning['KF output']['UNSATisfiable Entity types'].forEach(function (concept) {
+              $('#crowd-tools-repair-options-concept-' + self.id).append('<option>' + concept + '</option>');
+            });
+
+            //enable select and call repair button if there are unsat concepts
+            if (response.reasoning['KF output']['UNSATisfiable Entity types'].length > 0) {
+              $('#crowd-tools-repair-options-concept-' + self.id).prop('disabled', false);
+              $('#crowd-tools-repair-call-' + self.id).prop('disabled', false);
+            } else {
+              alert('There are no unsatisfiable concepts in your diagram.');
+            }
+
+            //enable find unsat concepts button
+            $('#crowd-tools-repair-options-find-unsat-concepts-' + self.id).prop('disabled', false);
+          },
+          error: function (error) {
+            //enable find unsat concepts button
+            $('#crowd-tools-repair-options-find-unsat-concepts-' + self.id).prop('disabled', false);
+
+            //disable call repair button
+            $('#crowd-tools-repair-call-' + self.id).prop('disabled', true);
+          }
+        });
+      });
+
+      //event handler when click call repair
+      $('#crowd-tools-repair-call-' + self.id).on('click', function () {
+        //disable call repair button
+        $('#crowd-tools-repair-call-' + self.id).prop('disabled', true);
+
+        self.tools.repair.callRepair({
+          reasoner: $('#crowd-tools-repair-options-reasoner-' + self.id + ' option:selected').val(),
+          entity: $('#crowd-tools-repair-options-concept-' + self.id + ' option:selected').val(),
+          maxExplanations: 5,
+          timeout: 120000,
+          success: function (response) {
+            //preserve repair response
+            self.tools.repair.response = response;
+
+            //call open explanations window
+            self.tools.repair.openExplanationsWindow(response.repair);
+
+            $('#crowd-tools-repair-options-modal-' + self.id).modal('hide');
+
+            //enable call repair button
+            $('#crowd-tools-repair-call-' + self.id).prop('disabled', false);
+          },
+          error: function (error) {
+            //enable call repair button
+            $('#crowd-tools-repair-call-' + self.id).prop('disabled', false);
+          }
+        })
+      });
+
+      //event handler when click cancel button in explanations window
+      $('#crowd-tools-repair-explanations-cancel-' + self.id).on('click', function () {
+        //hide explanations window
+        $('.crowd-tools-repair-explanations-container').addClass('d-none');
+      });
+
+      //event handler when select a explanations set in explanations window
+      $('#crowd-tools-repair-explanations-set-' + self.id).on('click', function () {
+
+      });
+
+      //event handler when click apply button in explanations window
+      $('#crowd-tools-repair-explanations-apply-' + self.id).on('click', function () {
+        //hide explanations window
+        $('.crowd-tools-repair-explanations-container').addClass('d-none');
+
+        //get selected explanations set
+        let selectedMupsSet = $('.crowd-tools-repair-explanations-set.selected').attr('id');
+        //get selected axiom
+        let selectedAxiom = $('input[name="' + selectedMupsSet + '"]:checked').parent().text();
+
+        //call repair interpretation for the specific conceptual model
+        self.fromRepair(selectedAxiom);
+      });
+    }
+    self.tools.repair.init();
 
     //activate bootstrap nested dropdowns for tools tools
     $('#crowd-tools-tools-btn-' + self.id).bootnavbar({});
@@ -4103,12 +4383,24 @@ CrowdEditor.prototype.initReasoningValidator = function () {
   self.config.conceptualModel.initReasoningValidator(self);
 }
 
+CrowdEditor.prototype.initRepairingTools = function () {
+
+}
+
 CrowdEditor.prototype.fromReasoning = function (schema, reasoning) {
   var self = this;
 
   //call the function to do the semantic marks with the resoner response for the specific conceptual model
   //it can do use of generic mark function
   self.config.conceptualModel.fromReasoning(self, schema, reasoning);
+}
+
+CrowdEditor.prototype.fromRepair = function (schema, repair) {
+  var self = this;
+
+  //call the function to do the repairing marks for the specific conceptual model
+  //it can do use of generic mark function
+  self.config.conceptualModel.fromRepair(self, schema, repair);
 }
 
 CrowdEditor.prototype.toBase64 = function (options, callback) {
