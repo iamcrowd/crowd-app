@@ -2320,7 +2320,7 @@ CrowdEditor.prototype.initTools = function () {
             //creates explanations set dom
             $('.crowd-tools-repair-explanations-sets').append(
               '<div id="crowd-tools-repair-explanations-set-' + self.id + '-' + (index + 1) + '" \
-              class="crowd-tools-repair-explanations-set ' + (index == 0 ? 'selected' : '') + '"> \
+              class="crowd-tools-repair-explanations-set"> \
                 <div> \
                   <h6>Explanation ' + (index + 1) + '</h6> \
                 </div> \
