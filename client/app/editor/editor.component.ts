@@ -182,7 +182,7 @@ export class EditorComponent implements OnInit {
           }
         }
       },
-      defaultNamespace: "http://crowd.fi.uncoma.edu.ar#",
+      defaultNamespace: 'http://crowd.fi.uncoma.edu.ar',
       ngComponent: this,
       ngRouter: this.router,
       ngFiles: {

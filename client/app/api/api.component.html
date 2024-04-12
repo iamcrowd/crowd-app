@@ -412,38 +412,52 @@
 <ng-template #codeEditor let-tab='tab' let-container='container' let-parameter='parameter' let-label='label'
   let-languageMode='languageMode' let-outputMode='outputMode' let-listMode='listMode'
   let-listModeCategorized='listModeCategorized' let-listModeFailedFiles='listModeFailedFiles' let-serialize='serialize'
-  let-example='example' let-exampleParameters='exampleParameters' let-open='open' let-fullHeight='fullHeight'
-  let-raw='raw'>
-  <span *ngVar="{ categoriesMode: listModeCategorized, failedFilesMode: listModeFailedFiles } as settings">
-    <button *ngIf="raw" class="btn btn-secondary btn-sm float-left mr-2" (click)="raw.raw = !raw.raw"
-      tippy="Toggle raw data view">
-      <i class="fa fa-fw fa-file-code-o"></i>
-    </button>
-    <label>{{label}}</label>&nbsp;
-    <button *ngIf="example && !outputMode" class="example-btn btn btn-sm btn-warning font-weight-bold"
-      (click)="container[parameter] = example; setExampleParameters(tab, exampleParameters)">EXAMPLE</button>
-    <button class="btn btn-secondary btn-sm float-right" ngxClipboard
-      [cbContent]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
-      tippy="Copy to Clipboard">
-      <i class="fa fa-fw fa-clipboard"></i>
-    </button>
-    <button class="btn btn-secondary btn-sm float-right" *ngIf="listMode && listModeCategorized"
-      (click)="settings.categoriesMode = !settings.categoriesMode" tippy="Categorized Mode"
-      style="margin-right: 0.5rem;">
-      <i class="fa fa-fw fa-list"></i>
-    </button>
-    <button class="btn btn-secondary btn-sm float-right" *ngIf="open"
-      (click)="openInEditor(open.editorModel, open.sourceModel, open.parameter ? container[parameter][open.parameter] : container[parameter], open.serialize)"
-      tippy="Open in Editor" style="margin-right: 0.5rem;">
-      <i class="fa fa-fw fa-th"></i>
-    </button>
-    <button class="btn btn-secondary btn-sm float-right" *ngIf="open"
-      (click)="downloadFile(open.sourceModel, 'json', open.parameter ? container[parameter][open.parameter] : container[parameter], !open.serialize)"
-      tippy="Download File" style="margin-right: 0.5rem;">
-      <i class="fa fa-fw fa-download"></i>
-    </button>
-    <ngx-codemirror *ngIf="!outputMode && !listMode" [(ngModel)]="container[parameter]" [preserveScrollPosition]="true"
-      [options]="{
+  let-example='example' let-exampleFormat='exampleFormat' let-exampleParameters='exampleParameters' let-open='open'
+  let-fullHeight='fullHeight' let-raw='raw'>
+  <span class="d-flex flex-column h-100"
+    *ngVar="{ categoriesMode: listModeCategorized, failedFilesMode: listModeFailedFiles } as settings">
+    <div class="d-flex flex-row flex-shrink-0 align-items-center mb-1">
+      <button *ngIf="raw" class="btn btn-secondary btn-sm float-left mr-2" (click)="raw.raw = !raw.raw"
+        tippy="Toggle raw data view">
+        <i class="fa fa-fw fa-file-code-o"></i>
+      </button>
+      <label class="mb-0 mx-2">{{label}}</label>&nbsp;
+      <span *ngIf="example && !outputMode" class="flex-fill">
+        <button *ngFor="let ex of example" class="example-btn btn btn-sm btn-warning font-weight-bold mr-2 mb-1"
+          (click)="
+        container[parameter] = exampleFormat == false
+        ? (ex.content ? ex.content : ex)
+        : JSON.stringify((ex.content ? ex.content : ex), null, '\t');
+        setExampleParameters(tab, exampleParameters, ex.name)
+        ">
+          {{ ex.name ? ex.name : 'EXAMPLE' }}
+        </button>
+      </span>
+      <span class="flex-fill">
+        <button class="btn btn-secondary btn-sm float-right mr-1" ngxClipboard
+          [cbContent]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
+          tippy="Copy to Clipboard">
+          <i class="fa fa-fw fa-clipboard"></i>
+        </button>
+        <button class="btn btn-secondary btn-sm float-right mr-1" *ngIf="listMode && listModeCategorized"
+          (click)="settings.categoriesMode = !settings.categoriesMode" tippy="Categorized Mode">
+          <i class="fa fa-fw fa-list"></i>
+        </button>
+        <button class="btn btn-secondary btn-sm float-right mr-1" *ngIf="open"
+          (click)="openInEditor(open.editorModel, open.sourceModel, open.parameter ? container[parameter][open.parameter] : container[parameter], open.serialize)"
+          tippy="Open in Editor">
+          <i class="fa fa-fw fa-th"></i>
+        </button>
+        <button class="btn btn-secondary btn-sm float-right mr-1" *ngIf="open"
+          (click)="downloadFile(open.sourceModel, 'json', open.parameter ? container[parameter][open.parameter] : container[parameter], !open.serialize)"
+          tippy="Download File">
+          <i class="fa fa-fw fa-download"></i>
+        </button>
+      </span>
+    </div>
+    <div class="flex-fill">
+      <ngx-codemirror *ngIf="!outputMode && !listMode" [(ngModel)]="container[parameter]"
+        [preserveScrollPosition]="true" [options]="{
         theme: 'duotone-' + (this.darkmodeService.isDarkMode() ? 'dark' : 'light'),
         mode: !languageMode ? { name: 'javascript', jsonld: true } : languageMode,
         lineNumbers: true,
@@ -454,9 +468,9 @@
         matchBrackets: true,
         readOnly: false
       }"></ngx-codemirror>
-    <ngx-codemirror *ngIf="outputMode && !listMode" [class.codemirror-full-height]="fullHeight"
-      [ngModel]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
-      [preserveScrollPosition]="true" [options]="{
+      <ngx-codemirror *ngIf="outputMode && !listMode" [class.codemirror-full-height]="fullHeight"
+        [ngModel]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
+        [preserveScrollPosition]="true" [options]="{
         theme: 'duotone-' + (this.darkmodeService.isDarkMode() ? 'dark' : 'light'),
         mode: !languageMode ? { name: 'javascript', jsonld: true } : languageMode,
         lineNumbers: false,
@@ -467,7 +481,8 @@
         matchBrackets: true,
         readOnly: true
       }"></ngx-codemirror>
-    <div *ngIf="listMode" class="overflow-y-auto overflow-x-hidden text-break pr-2"
+    </div>
+    <div *ngIf="listMode" class="overflow-y-auto overflow-x-hidden text-break pr-2 flex-fill"
       style="height: calc(100% - 2.5rem);">
       <div *ngIf="Object.keys(container[parameter]).length == 0"
         class="text-center d-flex flex-row align-items-center justify-content-center w-100 h-75">
@@ -522,7 +537,8 @@
     container: tab.parameters,
     parameter: parameter ? parameter : 'data',
     label: label ? label : apis[tab.api].endpoints[tab.endpoint].parameters.from.toUpperCase(),
-    example: JSON.stringify(apis[tab.api].endpoints[tab.endpoint].example, null, '\t'),
+    example: apis[tab.api].endpoints[tab.endpoint].example,
+    exampleFormat: apis[tab.api].endpoints[tab.endpoint].exampleFormat,
     exampleParameters: apis[tab.api].endpoints[tab.endpoint].exampleParameters,
     open: {
       editorModel: apis[tab.api].endpoints[tab.endpoint].parameters.from,
@@ -744,6 +760,7 @@
           parameter: 'ontologyString',
           label: apis[tab.api].endpoints[tab.endpoint].parameters.from.toUpperCase(),
           example: apis[tab.api].endpoints[tab.endpoint].example,
+          exampleFormat: apis[tab.api].endpoints[tab.endpoint].exampleFormat,
           languageMode: 'xml',
           open: false
         }"></ng-container>
