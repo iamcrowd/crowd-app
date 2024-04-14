@@ -6319,12 +6319,12 @@ CrowdEditor.prototype.initReasoningValidator = function () {
         ) {
           cells[0]?.prop(
             "semantic/contents/" + cells[0]?.prop("semantic/contents").length,
-            owlAxiomsMessagesMap[axiom] + " <b>" + fromURI(uris[1]) + "</b>"
+            owlAxiomsMessagesMap[axiom] + " <b>" + fromURI(uris[1], self.config.defaultNamespace) + "</b>"
           );
           if (owlAxiomsMessagesMap[axiom] == "Equivalent with")
             cells[1]?.prop(
               "semantic/contents/" + cells[1]?.prop("semantic/contents").length,
-              owlAxiomsMessagesMap[axiom] + " <b>" + fromURI(uris[0]) + "</b>"
+              owlAxiomsMessagesMap[axiom] + " <b>" + fromURI(uris[0], self.config.defaultNamespace) + "</b>"
             );
         }
       });

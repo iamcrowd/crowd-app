@@ -200,7 +200,7 @@ function fromURI(str, defaultNamespace) {
           formatFragment(uri.fragment())
       : formatFragment(uri.fragment());
   } else {
-    return formatFragment(uri.fragment());
+    return uri.fragment() ? formatFragment(uri.fragment()) : str;
   }
 }
 

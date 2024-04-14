@@ -26,7 +26,7 @@ CrowdReasoning.prototype.request = function (req) {
       if (req.success) req.success(res);
     },
     error: function (error) {
-      error = JSON.parse(error);
+      // error = JSON.parse(error);
       console.log("ReasoningAPI: error", error);
       if (!req.hideError) self.config.error(error);
       if (req.error) req.error(error);

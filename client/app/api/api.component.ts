@@ -1081,7 +1081,9 @@ export class ApiComponent implements OnInit {
               ? error.responseJSON.message
               : error.responseText != null
               ? error.responseText
-              : error.statusText) +
+              : error.statusText != null
+              ? error.statusText
+              : error) +
             "</b>",
           buttons: [
             [
@@ -1115,7 +1117,9 @@ export class ApiComponent implements OnInit {
               ? error.responseJSON.message
               : error.responseText != null
               ? error.responseText
-              : error.statusText) +
+              : error.statusText != null
+              ? error.statusText
+              : error) +
             "</b>",
           buttons: [
             [
