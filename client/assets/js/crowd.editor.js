@@ -197,11 +197,14 @@ CrowdEditor.prototype.init = function () {
   self.workspace.centerScroll();
 
   //preload a schema if it's sended as parameter
-  if (self.config.preloadedSchema) {
-    var schema = self.config.preloadedSchema;
+  if (self.config.preloadedDiagram?.schema) {
+    console.log("Preloaded diagram", self.config.preloadedDiagram);
+    var schema = self.config.preloadedDiagram.schema;
     self.fromJSONSchema(schema);
-    if (schema.hasPositions != null && !schema.hasPositions) {
+    if (!schema.hasPositions && !self.config.preloadedDiagram.positions) {
       self.tools.layout.doLayout();
+    } else {
+      self.tools.layout.applyPositions(self.config.preloadedDiagram.positions);
     }
   }
 
@@ -577,6 +580,7 @@ CrowdEditor.prototype.initTools = function () {
             hideError: true,
           });
         });
+        self.config.actualFile.positions = self.tools.layout.getPositions();
       } else {
         var newFile = {};
         newFile.content = self.toJSONSchema();
@@ -597,6 +601,7 @@ CrowdEditor.prototype.initTools = function () {
             hideError: true,
           });
         });
+        newFile.positions = self.tools.layout.getPositions();
       }
     };
 
@@ -1618,11 +1623,22 @@ CrowdEditor.prototype.initTools = function () {
         //load the schema on workspace
         self.fromJSONSchema(self.tools.import.diagramToImport.schema);
         //do a layout if hasPositions is false
+
         if (
-          self.tools.import.diagramToImport.schema.hasPositions != null &&
-          !self.tools.import.diagramToImport.schema.hasPositions
+          !self.tools.import.diagramToImport.schema?.hasPositions &&
+          !self.tools.import.diagramToImport.positions &&
+          !self.tools.import.diagramToImport.file?.positions
         ) {
           self.tools.layout.doLayout();
+        } else if (
+          self.tools.import.diagramToImport.file?.positions ||
+          self.tools.import.diagramToImport.positions
+        ) {
+          self.tools.layout.applyPositions(
+            self.tools.import.diagramToImport.file?.positions
+              ? self.tools.import.diagramToImport.file.positions
+              : self.tools.import.diagramToImport.positions
+          );
         }
         //update actual file with the imported
         self.config.actualFile = self.tools.import.diagramToImport.file;
@@ -1651,7 +1667,7 @@ CrowdEditor.prototype.initTools = function () {
           });
           return;
         } else if (
-          !self.config.availableConceptualModels[diagram.model].initPalette
+          !self.config.availableConceptualModels[diagram.model]?.initPalette
         ) {
           self.config.metamodelApi.request({
             from: diagram.model,
@@ -1685,12 +1701,12 @@ CrowdEditor.prototype.initTools = function () {
         //in case that actual conceptual model was different, redirect to url of the correct model sending the diagram schema as parameter
         else {
           if (
-            self.config.availableConceptualModels[diagram.model].initPalette !=
+            self.config.availableConceptualModels[diagram.model]?.initPalette !=
             null
           ) {
             if (self.config.ngRouter) {
               self.config.ngRouter.navigate(["/editor/" + diagram.model], {
-                state: { schema: diagram.schema, file: diagram.file },
+                state: diagram,
               });
               // $('.modal').modal('hide');
             } else {
@@ -2050,7 +2066,7 @@ CrowdEditor.prototype.initTools = function () {
               );
             });
 
-          console.log("filteredGraph", filteredGraph);
+          // console.log("filteredGraph", filteredGraph);
 
           //initiate data for d3
           var elements = [];
@@ -2151,7 +2167,7 @@ CrowdEditor.prototype.initTools = function () {
 
           cyLayout.run();
 
-          console.log("cytoscape", cyGraph, cyLayout);
+          // console.log("cytoscape", cyGraph, cyLayout);
 
           setTimeout(() => {
             self.workspace.fitPaper();
@@ -2159,6 +2175,69 @@ CrowdEditor.prototype.initTools = function () {
             self.inspector.hideInformation();
           });
         }, 100);
+      };
+
+      self.tools.layout.getPositions = function () {
+        let positions = {};
+        self.workspace.graph.getCells().forEach(function (cell) {
+          if (cell.attributes.uri && cell.isElement()) {
+            positions[cell.attributes.uri] = cell.attributes.position;
+          }
+        });
+        return JSON.stringify(positions);
+      };
+
+      self.tools.layout.applyPositions = function (positions) {
+        positions = positions ? JSON.parse(positions) : null;
+        if (positions) {
+          self.workspace.graph.getElements().forEach((cell) => {
+            if (cell.attributes.uri && positions[cell.attributes.uri]) {
+              cell.set("position", positions[cell.attributes.uri]);
+            }
+          });
+          self.workspace.graph.getElements().forEach((cell) => {
+            if (cell.attributes.uri && !positions[cell.attributes.uri]) {
+              self.tools.layout.cellToCentroid(cell);
+            }
+          });
+          self.workspace.graph.getElements().forEach((cell) => {
+            if (!cell.attributes.uri) {
+              self.tools.layout.cellToCentroid(cell);
+            }
+          });
+        }
+      };
+
+      self.tools.layout.cellToCentroid = function (cell) {
+        let links = self.workspace.graph.getConnectedLinks(cell);
+        let connectedCells = links.map((link) => {
+          if (link.getSourceCell().id === cell.id) {
+            if (link.getTargetCell().attributes.uri)
+              return link.getTargetCell();
+          } else {
+            if (link.getSourceCell().attributes.uri)
+              return link.getSourceCell();
+          }
+        });
+        connectedCells = connectedCells.filter((cell) => cell != null);
+        // get the geometric median point of the connected cells positions
+        let positions = connectedCells.map((connectedCell) => {
+          if (connectedCell.isLink()) {
+            let targetPoint = connectedCell.getTargetPoint();
+            let sourcePoint = connectedCell.getSourcePoint();
+            return [(targetPoint.x + sourcePoint.x) / 2, (targetPoint.y + sourcePoint.y) / 2];
+          } else {
+            return [
+              connectedCell.attributes.position.x,
+              connectedCell.attributes.position.y,
+            ]
+          }
+        });
+        let centroid = positions.length >= 3
+        ? geometric.polygonCentroid(positions)
+        : geometric.lineMidpoint(positions);
+        // console.log("CELL TO CENTROID", cell.attributes.uri, cell, connectedCells, positions, centroid);
+        cell.position(centroid[0], centroid[1]);
       };
 
       //append dom for layout tool
@@ -2419,6 +2498,11 @@ CrowdEditor.prototype.initTools = function () {
               ' <i class="loading fa fa-circle-o-notch fa-spin"></i>'
           );
 
+          let positions = self.tools.layout.getPositions();
+
+          if (self.config.actualFile)
+            self.config.actualFile.positions = positions;
+
           self.tools.export.exportTo({
             model: model,
             success: function (schema) {
@@ -2427,6 +2511,7 @@ CrowdEditor.prototype.initTools = function () {
                 model: model,
                 schema: schema,
                 file: self.config.actualFile,
+                positions: positions,
               });
             },
             finally: function () {
@@ -2775,7 +2860,6 @@ CrowdEditor.prototype.initTools = function () {
       self.tools.filterImplicitTerms.filtered = true;
 
       self.tools.filterImplicitTerms.updateFilter = function () {
-        console.log("filter implicit terms");
         self.workspace.graph.getElements().forEach(function (element) {
           if (
             element.prop("uri") == "http://www.w3.org/2002/07/owl#Thing" ||
@@ -3264,8 +3348,6 @@ CrowdEditor.prototype.initTools = function () {
             let axiomsRadios = "";
             Object.keys(explanationsSet).forEach(function (key2, index2) {
               let axiom = explanationsSet[key2];
-
-              console.log("axiom", axiom);
 
               axiomsRadios +=
                 '<div class="form-check" id="crowd-tools-repair-explanations-set-container-' +

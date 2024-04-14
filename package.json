@@ -62,6 +62,7 @@
     "express": "^4.17.1",
     "file-saver": "^2.0.5",
     "font-awesome": "^4.7.0",
+    "geometric": "^2.5.4",
     "graphlib": "^2.1.8",
     "highlight.js": "^10.1.2",
     "html2canvas": "^1.0.0-rc.7",

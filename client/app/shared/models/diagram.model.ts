@@ -5,5 +5,6 @@ export class Diagram {
   model?: string;
   content?: string;
   meta?: string;
+  positions?: string;
   preview?: string;
 }

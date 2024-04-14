@@ -6,6 +6,7 @@ const diagramSchema = new mongoose.Schema({
   model: String,
   content: Object,
   meta: Object,
+  positions: String,
   preview: String
 });
 
