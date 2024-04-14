@@ -109,9 +109,6 @@ CrowdMetamodel.prototype.request = function (req) {
           format: req.format,
           syntax: req.syntax
         },
-        headers: {
-          "Access-Control-Allow-Origin": "*"
-        },
         success: function (res) {
           console.log('MetamodelAPI: response to ' + url + req.from + 'to' + req.to, res);
           if (req.success) req.success(res);
@@ -200,9 +197,6 @@ CrowdMetamodel.prototype.request = function (req) {
           contentType: false,
           cache: false,
           data: formData,
-          headers: {
-            "Access-Control-Allow-Origin": "*"
-          },
           timeout: req.timeout ? req.timeout : 60000, //default timeout is 60s
           success: function (res) {
             console.log('MetamodelAPI: response to ' + url + req.from + 'to' + req.to, 'Ontology: ' + getOntologyName(ontologies[index], index), res);
@@ -257,7 +251,6 @@ CrowdMetamodel.prototype.request = function (req) {
         type: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
         },
         url: url + req.from + 'to' + req.to,
         data: JSON.stringify(req.data),
