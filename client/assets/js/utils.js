@@ -183,7 +183,7 @@ function toURI(str) {
 // /dom/exists | R_B | Dom ∃R.B
 // /dom/forall | R_B | Dom ∀R.B
 function fromURI(str, defaultNamespace) {
-  if (!str || !defaultNamespace) return;
+  if (!str || !defaultNamespace) return "";
   let uri = URI(str);
 
   let namespace = namespaceFromURI(uri);
@@ -200,7 +200,13 @@ function fromURI(str, defaultNamespace) {
           formatFragment(uri.fragment())
       : formatFragment(uri.fragment());
   } else {
-    return uri.fragment() ? formatFragment(uri.fragment()) : str;
+    return uri.fragment()?.length > 0
+      ? formatFragment(uri.fragment())
+      : uri.path() != "/"
+      ? formatFragment(uri.path().split("/").slice(-1)[0])
+      : uri.hostname()
+      ? ''
+      : str;
   }
 }
 
@@ -225,6 +231,7 @@ function formatFragment(str) {
 }
 
 function namespaceFromURI(uri) {
+  if (uri.toString().length == 1) return uri.toString();
   if (uri.path().length > 1) {
     return uri.origin() + uri.path() + uri.query();
   } else {
@@ -253,12 +260,12 @@ const crowdOperationsImpl = {
   },
   "/dom/exists": (fragments) => {
     if (fragments.length > 1)
-      return "Dom ∃" + fragments[0] + "." + fragments[1]
+      return "Dom ∃" + fragments[0] + "." + fragments[1];
     else return null;
   },
   "/dom/forall": (fragments) => {
     if (fragments.length > 1)
-      return "Dom ∀" + fragments[0] + "." + fragments[1]
+      return "Dom ∀" + fragments[0] + "." + fragments[1];
     else return null;
   },
   "/negation/exists": (fragments) => {

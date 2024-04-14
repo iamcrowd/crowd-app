@@ -122,7 +122,7 @@ export class EditorComponent implements OnInit {
       eer: CrowdEditorEer,
       orm2: CrowdEditorOrm,
       kf: { name: 'kf', export: true },
-      owl: { name: 'owl', title: 'OWL', import: false },
+      owl: { name: 'owl', title: 'OWL', import: true },
       verbalization: { name: 'verbalization', title: 'CNL/NLG', import: false },
       image: { name: 'image', title: 'JPG/PNG/PDF', import: false }
     }

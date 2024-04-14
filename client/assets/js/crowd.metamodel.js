@@ -226,7 +226,7 @@ CrowdMetamodel.prototype.request = function (req) {
             //this is only for multiple,
             //when is the last ontology, it clears intervals and return response on the "success" callback with all succeded and failed ontologies
             //if it's not the last ontology, it makes a recursivelly request for the next ontology
-            if (isMulti) {
+            if (isMulti && req.apiComponent) {
               if (index < ontologies.length - 1) {
                 request(index + 1);
               } else {
@@ -237,7 +237,7 @@ CrowdMetamodel.prototype.request = function (req) {
                   req.success(res);
                 }
               }
-            } else {
+            } else if (req.apiComponent) {
               clearInterval(req.apiComponent.tabs[req.tab].multiTimeInterval);
             }
           }

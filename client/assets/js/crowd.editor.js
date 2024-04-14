@@ -1716,6 +1716,27 @@ CrowdEditor.prototype.initTools = function () {
         }
       };
 
+      //this function is specific for owl import
+      self.tools.import.owlImport = function (diagram) {
+        self.config.metamodelApi.request({
+          from: "owl",
+          to: "kf",
+          reasoner: diagram.reasoner ? diagram.reasoner : "jfact",
+          input: "string",
+          filtering: diagram.filtering,
+          timeout: 60000,
+          ontologyString: diagram.ontologyString,
+          success: function (response) {
+            response.hasPositions = false;
+            self.tools.import.importFrom({
+              model: "kf",
+              schema: response.kf,
+              file: self.config.conceptualModel.file,
+            });
+          },
+        });
+      };
+
       //append dom for the advertisement modal when try to import a diagram
       $("body").append(
         '<div id="crowd-tools-import-advertisement-' +
@@ -1814,6 +1835,35 @@ CrowdEditor.prototype.initTools = function () {
                 </button> \
               </div> \
               <div class="modal-body"> \
+                <div class="form-group mb-0" id="crowd-tools-import-owl-settings-' +
+          self.id +
+          '"> \
+                  <div class="row"> \
+                    <div class="col-6"> \
+                      <label>Reasoner</label> \
+                      <select class="form-control custom-select my-1 mr-sm-2" id="crowd-tools-import-owl-settings-reasoner-' +
+          self.id +
+          '"> \
+                        <option value="">No reasoning</option> \
+                        <option value="jfact" selected>JFact</option> \
+                        <option value="pellet">Pellet</option> \
+                        <option value="Racer">Racer</option> \
+                        <option value="konclude">Konclude</option> \
+                      </select> \
+                    </div> \
+                    <div class="col-6"> \
+                    <div class="form-group form-check"> \
+                      <input type="checkbox" class="form-check-input" id="crowd-tools-import-owl-settings-filtering-' +
+          self.id +
+          '" checked> \
+                      <label class="form-check-label" for="crowd-tools-import-owl-settings-filtering-' +
+          self.id +
+          '">Filtering</label><br> \
+                      <small class="text-muted">(this will remove implicit axioms, that involve ⊤ and ⊥, from the ontology)</small><br> \
+                    </div> \
+                    </div> \
+                  </div> \
+                </div> \
                 <div class="form-group"> \
                   <label for="crowd-tools-import-file-' +
           self.id +
@@ -1870,7 +1920,7 @@ CrowdEditor.prototype.initTools = function () {
           // var btn = this;
           event.stopPropagation();
 
-          var model = $(this).attr("data-model");
+          let model = $(this).attr("data-model");
           $("#crowd-tools-import-schema-" + self.id).attr("data-model", model);
 
           $(
@@ -1882,6 +1932,13 @@ CrowdEditor.prototype.initTools = function () {
               model.toUpperCase() +
               " Schema"
           );
+
+          if (model == "owl") {
+            $("#crowd-tools-import-owl-settings-" + self.id).show();
+          } else {
+            $("#crowd-tools-import-owl-settings-" + self.id).hide();
+          }
+
           $("#crowd-tools-import-check-schema-modal-" + self.id).modal("show");
 
           $(
@@ -1895,14 +1952,38 @@ CrowdEditor.prototype.initTools = function () {
 
       //event handler when click upload imported schema
       $("#crowd-tools-import-schema-" + self.id).on("click", function () {
-        var schema = JSON.parse($("#crowd-tools-import-raw-" + self.id).val());
-        if (JSON.stringify(schema).indexOf('"position": {') == -1)
-          schema.hasPositions = false;
-        self.tools.import.importFrom({
-          model: $(this).attr("data-model"),
-          schema: schema,
-          file: self.config.actualFile,
-        });
+        // get model selected for check formatJSON property
+        let model =
+          self.config.availableConceptualModels[$(this).attr("data-model")];
+        let schema = $("#crowd-tools-import-raw-" + self.id).val();
+
+        if (!model || model.name != "owl") {
+          schema = JSON.parse($("#crowd-tools-import-raw-" + self.id).val());
+          if (JSON.stringify(schema).indexOf('"position": {') == -1)
+            schema.hasPositions = false;
+        }
+
+        if (model.name == "owl") {
+          self.tools.import.owlImport({
+            model: $(this).attr("data-model"),
+            ontologyString: schema,
+            reasoner: $(
+              "#crowd-tools-import-owl-settings-reasoner-" + self.id
+            ).val(),
+            input: "string",
+            filtering: $(
+              "#crowd-tools-import-owl-settings-filtering-" + self.id
+            ).is(":checked"),
+            timeout: 60000,
+            file: self.config.actualFile,
+          });
+        } else {
+          self.tools.import.importFrom({
+            model: $(this).attr("data-model"),
+            schema: schema,
+            file: self.config.actualFile,
+          });
+        }
       });
 
       //event on close import modal
@@ -5384,6 +5465,11 @@ CrowdEditor.prototype.initInspector = function () {
                 ' +
             (attribute.label ? "<label>" + attribute.label + "</label>" : "") +
             ' \
+            <span id="crowd-inspector-group-split-' +
+            attribute.elementID +
+            "-" +
+            self.id +
+            '"> \
                 <span class="text-secondary small" id="crowd-inspector-content-detail-' +
             attribute.elementID +
             "-" +
@@ -5396,18 +5482,39 @@ CrowdEditor.prototype.initInspector = function () {
             '" \
                 placeholder="Namespace"> \
                 </select> \
-                <' +
-            (attribute.input == "textarea"
-              ? 'textarea rows="' +
-                (attribute.inputRows ? attribute.inputRows : 3) +
-                '"'
-              : 'input type="text"') +
-            ' \
-                placeholder="Fragment" class="form-control" id="crowd-inspector-content-fragment-' +
+                <div class="input-group mb-0"> \
+                <input type="text" placeholder="Fragment" class="form-control" id="crowd-inspector-content-fragment-' +
             attribute.elementID +
             "-" +
             self.id +
             '" /> \
+              <div class="input-group-append"> \
+                <button class="btn btn-sm btn-outline-secondary" style="height: 38px !important;" type="button" id="crowd-inspector-group-swap-full-' +
+            attribute.elementID +
+            "-" +
+            self.id +
+            '"><i class="fa fa-fw fa-compress"></i></button> \
+              </div> \
+            </div> \
+            </span> \
+            <div class="input-group mb-0" id="crowd-inspector-group-full-' +
+            attribute.elementID +
+            "-" +
+            self.id +
+            '"> \
+              <input type="text" placeholder="example.com/path#fragment" class="form-control" id="crowd-inspector-content-' +
+            attribute.elementID +
+            "-" +
+            self.id +
+            '" /> \
+              <div class="input-group-append"> \
+                <button class="btn btn-sm btn-outline-secondary" style="height: 38px !important;" type="button" id="crowd-inspector-group-swap-split-' +
+            attribute.elementID +
+            "-" +
+            self.id +
+            '"><i class="fa fa-fw fa-expand"></i></button> \
+              </div> \
+            </div> \
               </div> \
             </div> \
           </span>'
@@ -5429,7 +5536,8 @@ CrowdEditor.prototype.initInspector = function () {
           $(dom)
             .find("select")
             .append(
-              '<option value="' +
+              '<option value="" title="empty" class="text-muted">empty</option>' +
+                '<option value="' +
                 self.config.defaultNamespace +
                 '" title="' +
                 self.config.defaultNamespace +
@@ -5560,48 +5668,106 @@ CrowdEditor.prototype.initInspector = function () {
         }
       );
 
+      // show/hide fulluri input by showFullURI config
+      $("#crowd-inspector-group-full-" + elementID + "-" + self.id).toggle(
+        self.inspector.showFullUri
+      );
+      $("#crowd-inspector-group-split-" + elementID + "-" + self.id).toggle(
+        !self.inspector.showFullUri
+      );
+
+      // set event for swap between split and full uri
+      $("#crowd-inspector-group-swap-split-" + elementID + "-" + self.id).on(
+        "click",
+        function () {
+          $("#crowd-inspector-group-split-" + elementID + "-" + self.id).show();
+          $("#crowd-inspector-group-full-" + elementID + "-" + self.id).hide();
+
+          // get uri value from full input
+          let uri = URI(
+            $("#crowd-inspector-content-" + elementID + "-" + self.id).val()
+          );
+          let namespace = namespaceFromURI(uri);
+          //trigger namespace change event to update the detail text
+          $(
+            "#crowd-inspector-content-namespace-" + elementID + "-" + self.id
+          ).trigger("change", [namespace]);
+
+          // set showFullUri config
+          self.inspector.showFullUri = false;
+        }
+      );
+      $("#crowd-inspector-group-swap-full-" + elementID + "-" + self.id).on(
+        "click",
+        function () {
+          $("#crowd-inspector-group-split-" + elementID + "-" + self.id).hide();
+          $("#crowd-inspector-group-full-" + elementID + "-" + self.id).show();
+
+          // set showFullUri config
+          self.inspector.showFullUri = true;
+        }
+      );
+
       // set detail text when namespace changes. If namespace is not in the list warn it else show the full namespace
       $("#crowd-inspector-content-namespace-" + elementID + "-" + self.id).on(
         "change",
         function (e, ns) {
           var namespace = $(this).val() || ns;
+          if (namespace) {
+            let uri = URI(namespace);
+            let isPartOfDefault =
+              uri.origin() == URI(self.config.defaultNamespace).origin();
 
-          let uri = URI(namespace);
-          let isPartOfDefault =
-            uri.origin() == URI(self.config.defaultNamespace).origin();
+            let foundedNamespace =
+              (isPartOfDefault &&
+                (uri.path()?.length <= 1 ||
+                  crowdOperations.includes(uri.path()))) ||
+              self.config.ngComponent.namespaces.find(
+                (ns) => ns.url == namespace
+              ) != null;
 
-          let foundedNamespace =
-            (isPartOfDefault && (uri.path()?.length <= 1 || crowdOperations.includes(uri.path()))) ||
-            self.config.ngComponent.namespaces.find(
-              (ns) => ns.url == namespace
-            ) != null;
+            if (!foundedNamespace) {
+              // let defaultPath = isPartOfDefault ? uri.path().slice(1) : null;
 
-          if (!foundedNamespace) {
-            // let defaultPath = isPartOfDefault ? uri.path().slice(1) : null;
+              // let namespaceTitle = defaultPath
+              //   ? "crowd (" + defaultPath + ")"
+              //   : namespace;
 
-            // let namespaceTitle = defaultPath
-            //   ? "crowd (" + defaultPath + ")"
-            //   : namespace;
-
-            $("#crowd-inspector-content-namespace-" + elementID + "-" + self.id)
-              .append(
-                '<option value="' +
-                  namespace +
-                  '" title="' +
-                  namespace +
-                  '">' +
-                  namespace +
-                  "</option>"
+              // remove all dynamic options before adding the new one
+              $(
+                "#crowd-inspector-content-namespace-" +
+                  elementID +
+                  "-" +
+                  self.id
               )
-              .val(namespace);
+                .find("option[data-dynamic='true']")
+                .remove();
 
-            $("#crowd-inspector-content-detail-" + elementID + "-" + self.id)
-              .toggleClass("text-warning", true)
-              .html("*not registered namespace*");
-          } else {
-            $("#crowd-inspector-content-detail-" + elementID + "-" + self.id)
-              .toggleClass("text-warning", false)
-              .html(namespace);
+              $(
+                "#crowd-inspector-content-namespace-" +
+                  elementID +
+                  "-" +
+                  self.id
+              )
+                .append(
+                  '<option value="' +
+                    namespace +
+                    '" title="' +
+                    namespace +
+                    '" data-dynamic="true">' +
+                    namespace +
+                    "</option>"
+                )
+                .val(namespace);
+
+              $("#crowd-inspector-content-detail-" + elementID + "-" + self.id)
+                .toggleClass("text-warning", true)
+                .html("*not registered namespace*");
+            } else {
+              $("#crowd-inspector-content-detail-" + elementID + "-" + self.id)
+                .toggleClass("text-warning", false)
+                .html(namespace);
+            }
           }
         }
       );
@@ -5726,27 +5892,37 @@ CrowdEditor.prototype.initInspector = function () {
         }
         break;
       case "uri":
-        let uri;
-        if (propertyValue) uri = URI(propertyValue);
-        else uri = URI(attribute.default);
+        let uriValue = propertyValue ? propertyValue : attribute.default;
 
-        namespace = namespaceFromURI(uri);
-        fragment = uri.fragment();
+        // set value on the split view
+        self.inspector.setURISplit(attribute, uriValue);
 
-        $(
-          "#crowd-inspector-content-namespace-" +
-            attribute.elementID +
-            "-" +
-            self.id
-        )
-          .val(namespace)
-          .trigger("change", namespace);
-        $(
-          "#crowd-inspector-content-fragment-" +
-            attribute.elementID +
-            "-" +
-            self.id
-        ).val(fragment);
+        if (uriValue) {
+          // create a URI object to get the namespace
+          let uri = URI(uriValue);
+          let namespace = namespaceFromURI(uri);
+          // trigger namespace change event to update the detail text
+          $(
+            "#crowd-inspector-content-namespace-" +
+              attribute.elementID +
+              "-" +
+              self.id
+          ).trigger("change", [namespace]);
+
+          //set value on the full view
+          $(
+            "#crowd-inspector-content-" + attribute.elementID + "-" + self.id
+          ).val(uriValue);
+        } else {
+          // trigger namespace change event to update the detail text
+          $(
+            "#crowd-inspector-content-namespace-" +
+              attribute.elementID +
+              "-" +
+              self.id
+          ).trigger("change", "");
+        }
+
         break;
       case "text":
       default:
@@ -5818,21 +5994,41 @@ CrowdEditor.prototype.initInspector = function () {
           ).val();
           break;
         case "uri":
-          newPropertyValue =
-            $(
+          if (
+            $(this).attr("id") ==
+            "crowd-inspector-content-" + attribute.elementID + "-" + self.id
+          ) {
+            newPropertyValue = $(
+              "#crowd-inspector-content-" + attribute.elementID + "-" + self.id
+            ).val();
+
+            self.inspector.setURISplit(attribute, newPropertyValue, true);
+          } else {
+            let namespace = $(
               "#crowd-inspector-content-namespace-" +
                 attribute.elementID +
                 "-" +
                 self.id +
                 " option:selected"
-            ).val() +
-            "#" +
-            $(
+            ).val();
+            let fragment = $(
               "#crowd-inspector-content-fragment-" +
                 attribute.elementID +
                 "-" +
                 self.id
             ).val();
+
+            newPropertyValue =
+              namespace == "" && fragment == ""
+                ? ""
+                : namespace + (fragment == "" ? "" : "#" + fragment);
+
+            $(
+              "#crowd-inspector-content-" + attribute.elementID + "-" + self.id
+            ).val(newPropertyValue);
+          }
+
+          if (!newPropertyValue) newPropertyValue = "";
           break;
         case "text":
         default:
@@ -5905,6 +6101,44 @@ CrowdEditor.prototype.initInspector = function () {
       }
     }
   };
+
+  // function that set the uri value in the uri input when it's on split mode
+  self.inspector.setURISplit = function (attribute, uriValue) {
+    if (uriValue) {
+      let uri = URI(uriValue);
+
+      let namespace = namespaceFromURI(uri);
+      let fragment = uri.fragment();
+
+      $(
+        "#crowd-inspector-content-namespace-" +
+          attribute.elementID +
+          "-" +
+          self.id
+      ).val(namespace);
+      $(
+        "#crowd-inspector-content-fragment-" +
+          attribute.elementID +
+          "-" +
+          self.id
+      ).val(fragment);
+    } else {
+      $(
+        "#crowd-inspector-content-namespace-" +
+          attribute.elementID +
+          "-" +
+          self.id
+      ).val("");
+      $(
+        "#crowd-inspector-content-fragment-" +
+          attribute.elementID +
+          "-" +
+          self.id
+      ).val("");
+    }
+  };
+
+  self.inspector.showSplitURI = true;
 
   //append dom element that shows an empty message on the inspector
   $("#crowd-inspector-" + self.id).append(
@@ -6319,12 +6553,18 @@ CrowdEditor.prototype.initReasoningValidator = function () {
         ) {
           cells[0]?.prop(
             "semantic/contents/" + cells[0]?.prop("semantic/contents").length,
-            owlAxiomsMessagesMap[axiom] + " <b>" + fromURI(uris[1], self.config.defaultNamespace) + "</b>"
+            owlAxiomsMessagesMap[axiom] +
+              " <b>" +
+              fromURI(uris[1], self.config.defaultNamespace) +
+              "</b>"
           );
           if (owlAxiomsMessagesMap[axiom] == "Equivalent with")
             cells[1]?.prop(
               "semantic/contents/" + cells[1]?.prop("semantic/contents").length,
-              owlAxiomsMessagesMap[axiom] + " <b>" + fromURI(uris[0], self.config.defaultNamespace) + "</b>"
+              owlAxiomsMessagesMap[axiom] +
+                " <b>" +
+                fromURI(uris[0], self.config.defaultNamespace) +
+                "</b>"
             );
         }
       });
