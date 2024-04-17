@@ -111,6 +111,17 @@
                         <i class="fa fa-fw fa-upload"></i>
                       </button>
                     </span>
+                    <span class="float-right mr-1" [tippy]="add_output_log">
+                      <button ngfSelect class="btn btn-secondary btn-sm" selectable="1" [(file)]="tab.addOutputFile"
+                        accept=".json, .txt" [disabled]="tab.loadingOutput || !tab.output" (fileChange)="addOutput(index)">
+                        <i class="fa fa-fw fa-plus-circle"></i>
+                      </button>
+                    </span>
+                    <ng-template #add_output_log>
+                      Add Output Log<br>
+                      <span class="text-muted">(Only for multifile: adds processed uris of another output to the current
+                        loaded one. Also remove the correspondent failed or empty result if find a success one.)</span>
+                    </ng-template>
                     <span class="float-right mr-1" tippy="Save Output Log">
                       <button class="btn btn-secondary btn-sm"
                         (click)="downloadFile('save.' + tab.api, 'json', JSON.stringify(tab.output, null, '\t'))"
@@ -226,6 +237,7 @@
                             <ng-container [ngTemplateOutlet]="outputTabs" [ngTemplateOutletContext]="{
                             container: tab.output,
                             listFailedFiles: ['failed'],
+                            listEmptyFiles: ['empty'],
                             subtab: {
                               'success': {
                                 raw: {
@@ -326,12 +338,17 @@
                           aria-valuemax="{{tab.multiTotalFiles}}" [style.width]="getMultiProgress(index) + '%'"></div>
                       </div>
                       <div class="row w-100 m-0" style="overflow-x: hidden; overflow-y: auto">
-                        <div class="col-6">
+                        <div class="col-4">
                           <ng-container [ngTemplateOutlet]="tableSuccededFiles" [ngTemplateOutletContext]="{
                             succededFiles: tab.multiSucceded
                           }"></ng-container>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
+                          <ng-container [ngTemplateOutlet]="tableEmptyFiles" [ngTemplateOutletContext]="{
+                            emptyFiles: tab.multiEmpty
+                          }"></ng-container>
+                        </div>
+                        <div class="col-4">
                           <ng-container [ngTemplateOutlet]="tableFailedFiles" [ngTemplateOutletContext]="{
                             failedFiles: tab.multiFailed
                           }"></ng-container>
@@ -411,11 +428,12 @@
 <!--generic code editor for use in both input and output templates-->
 <ng-template #codeEditor let-tab='tab' let-container='container' let-parameter='parameter' let-label='label'
   let-languageMode='languageMode' let-outputMode='outputMode' let-listMode='listMode'
-  let-listModeCategorized='listModeCategorized' let-listModeFailedFiles='listModeFailedFiles' let-serialize='serialize'
-  let-example='example' let-exampleFormat='exampleFormat' let-exampleParameters='exampleParameters' let-open='open'
+  let-listModeCategorized='listModeCategorized' let-listModeFailedFiles='listModeFailedFiles'
+  let-listModeEmptyFiles='listModeEmptyFiles' let-serialize='serialize' let-example='example'
+  let-exampleFormat='exampleFormat' let-exampleParameters='exampleParameters' let-open='open'
   let-fullHeight='fullHeight' let-raw='raw'>
   <span class="d-flex flex-column h-100"
-    *ngVar="{ categoriesMode: listModeCategorized, failedFilesMode: listModeFailedFiles } as settings">
+    *ngVar="{ categoriesMode: listModeCategorized, failedFilesMode: listModeFailedFiles, emptyFilesMode: listModeEmptyFiles } as settings">
     <div class="d-flex flex-row flex-shrink-0 align-items-center mb-1">
       <button *ngIf="raw" class="btn btn-secondary btn-sm float-left mr-2" (click)="raw.raw = !raw.raw"
         tippy="Toggle raw data view">
@@ -494,7 +512,7 @@
         </div>
       </div>
       <div *ngIf="Object.keys(container[parameter]).length > 0">
-        <ul *ngIf="!settings.categoriesMode && !settings.failedFilesMode">
+        <ul *ngIf="!settings.categoriesMode && !settings.failedFilesMode && !settings.emptyFilesMode">
           <li *ngFor="let item of container[parameter] | keyvalue">
             <ng-container *ngIf="isItemObject(item.value)">
               <label>{{ item.key }}</label>
@@ -524,6 +542,9 @@
         </ngb-accordion>
         <ng-container *ngIf="settings.failedFilesMode" [ngTemplateOutlet]="tableFailedFiles" [ngTemplateOutletContext]="{
           failedFiles: container[parameter]
+        }"></ng-container>
+        <ng-container *ngIf="settings.emptyFilesMode" [ngTemplateOutlet]="tableEmptyFiles" [ngTemplateOutletContext]="{
+          emptyFiles: container[parameter]
         }"></ng-container>
       </div>
     </div>
@@ -567,8 +588,9 @@
 
 <!--generic template for divide output json in tabs-->
 <ng-template #outputTabs let-container='container' let-open='open' let-subtab='subtab' let-raw='raw' let-list='list'
-  let-listCategorized='listCategorized' let-listFailedFiles='listFailedFiles' let-rawTemplate='rawTemplate'
-  let-rawParameter='rawParameter' let-adjustedHeight='adjustedHeight' let-alt='alt' let-opened="opened">
+  let-listCategorized='listCategorized' let-listFailedFiles='listFailedFiles' let-listEmptyFiles='listEmptyFiles'
+  let-rawTemplate='rawTemplate' let-rawParameter='rawParameter' let-adjustedHeight='adjustedHeight' let-alt='alt'
+  let-opened="opened">
   <span
     *ngVar="{ opened: opened && Object.keys(container).indexOf(opened) >= 0 ? opened : Object.keys(container)[0], raw: false } as settings">
     <span *ngIf="settings.raw">
@@ -598,9 +620,13 @@
                 parameter: tab.key,
                 label: '‎',
                 outputMode: true,
-                listMode: (list && list.includes(tab.key)) || (listCategorized && listCategorized.includes(tab.key)) || (listFailedFiles && listFailedFiles.includes(tab.key)),
+                listMode: (list && list.includes(tab.key))
+                  || (listCategorized && listCategorized.includes(tab.key))
+                  || (listFailedFiles && listFailedFiles.includes(tab.key))
+                  || (listEmptyFiles && listEmptyFiles.includes(tab.key)),
                 listModeCategorized: listCategorized && listCategorized.includes(tab.key),
                 listModeFailedFiles: listFailedFiles && listFailedFiles.includes(tab.key),
+                listModeEmptyFiles: listEmptyFiles && listEmptyFiles.includes(tab.key),
                 serialize: true,
                 open: open && open[tab.key] ? {
                   editorModel: open[tab.key].editorModel,
@@ -614,6 +640,7 @@
                 list: subtab[tab.key] ? subtab[tab.key].list : subtab['*'].list,
                 listCategorized: subtab[tab.key] ? subtab[tab.key].listCategorized : subtab['*'].listCategorized,
                 listFailedFiles: subtab[tab.key] ? subtab[tab.key].listFailedFiles : subtab['*'].listFailedFiles,
+                listEmptyFiles: subtab[tab.key] ? subtab[tab.key].listEmptyFiles : subtab['*'].listEmptyFiles,
                 open: subtab[tab.key] ? subtab[tab.key].open : subtab['*'].open,
                 raw: subtab[tab.key] ? subtab[tab.key].raw : Object.assign(subtab['*'].raw, { parameter: tab.key }),
                 subtab: subtab[tab.key] ? subtab[tab.key].subtab : subtab['*'].subtab,
@@ -814,6 +841,17 @@
                   [disabled]="tab.loadingOutput || tab.downloadingFailedUris || tab.parameters?.ontologiesUris?.length <= 0 || tab.output?.failed?.length <= 0"
                   (click)="downloadFailedUris(tabIndex)">
                   <i class="fa fa-fw fa-{{tab.downloadingFailedUris ? 'spinner fa-pulse': 'download'}}"></i>
+                </button>
+              </span>
+              <ng-template #timeout_uris_export_info>
+                Download Timeout URIs <br>
+                <span class="text-muted">(Loaded URIs and Output URIs are needed)</span>
+              </ng-template>
+              <span class="float-right mr-1" [tippy]="timeout_uris_export_info">
+                <button class="btn btn-sm btn-warning text-white"
+                  [disabled]="tab.loadingOutput || tab.downloadingTimeoutUris || tab.parameters?.ontologiesUris?.length <= 0 || tab.output?.failed?.length <= 0"
+                  (click)="downloadTimeoutUris(tabIndex)">
+                  <i class="fa fa-fw fa-{{tab.downloadingTimeoutUris ? 'spinner fa-pulse': 'download'}}"></i>
                 </button>
               </span>
             </div>
@@ -1030,31 +1068,58 @@
 
 <!--table for show failed (error) files on multifile processing-->
 <ng-template #tableFailedFiles let-failedFiles='failedFiles'>
-  <table class="table owltometa-files-table">
-    <thead>
-      <tr>
-        <th><span class="text-danger">Failed ({{Object.keys(failedFiles).length}})</span>
-        </th>
-        <th style="width: 5rem;"></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr class="owltometa-file-row" *ngFor="let file of failedFiles | keyvalue">
-        <td style="word-break: break-all;">
-          <strong>{{ file.key }}</strong>
-        </td>
-        <td class="text-right" nowrap>
-          <i class="fa fa-fw fa-exclamation-triangle mr-1 text-{{file.value.message ? 'danger' : 'warning'}}"
-            [tippy]="file.value.message ? file.value.message : 'Timeout'" [maxWidth]="'none'"></i>
-          <button *ngIf="file.value.stackTrace" class="btn"
-            (click)="downloadFile(file.key + '.exception', 'txt', file.value.stackTrace)"
-            tippy="Download full stack trace">
-            <i class="fa fa-fw fa-download"></i>
+  <span *ngVar="{ errorSpecify: 1 } as failedFilesSettings">
+    <table class="table owltometa-files-table">
+      <thead>
+        <tr>
+          <th class="w-100">
+            <div class="form-group row mb-0">
+              <span class="text-danger col-auto">Failed ({{Object.keys(failedFiles).length}})</span>
+              <label class="form-label col-auto ml-auto text-muted small p-1 mb-0">Specify</label>
+              <select class="custom-select custom-select-sm col-4" [(ngModel)]="failedFilesSettings.errorSpecify">
+                <option value="1">One level</option>
+                <option value="2">Two levels</option>
+                <option value="3">Three levels</option>
+              </select>
+            </div>
+          </th>
+          <th style="width: 5rem;"></th>
+        </tr>
+      </thead>
+    </table>
+    <ngb-accordion #listAccordion="ngbAccordion" animation="true">
+      <ngb-panel *ngFor="let category of getErrorCategories(failedFiles, failedFilesSettings.errorSpecify)"
+        cardClass="accordion-error-button">
+        <ng-template ngbPanelHeader>
+          <button ngbPanelToggle class="btn w-100 h-100">
+            {{ category }} <b class="text-danger">({{ Object.keys(getErrorsByCategory(failedFiles, category,
+              failedFilesSettings.errorSpecify)).length }})</b>
           </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        </ng-template>
+        <ng-template ngbPanelContent>
+          <table class="w-100">
+            <tbody>
+              <tr class="owltometa-file-row"
+                *ngFor="let file of getErrorsByCategory(failedFiles, category, errorSpecify) | keyvalue">
+                <td class="px-3 py-2" style="word-break: break-all;">
+                  <strong>{{ file.key }}</strong>
+                </td>
+                <td class="text-right  px-3 py-2" nowrap>
+                  <i class="fa fa-fw fa-exclamation-triangle mr-1 text-{{file.value.message ? 'danger' : 'warning'}}"
+                    [tippy]="file.value.message ? file.value.message : 'Timeout'" [maxWidth]="'none'"></i>
+                  <button *ngIf="file.value.stackTrace" class="btn"
+                    (click)="downloadFile(file.key + '.exception', 'txt', file.value.stackTrace)"
+                    tippy="Download full stack trace">
+                    <i class="fa fa-fw fa-download"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </ng-template>
+      </ngb-panel>
+    </ngb-accordion>
+  </span>
 </ng-template>
 
 <!--table for show succeded files on multifile processing-->
@@ -1075,6 +1140,30 @@
         </td>
         <td class="text-right" nowrap>
           <i class="fa fa-fw fa-check text-success"></i>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</ng-template>
+
+<!--table for show empty files on multifile processing-->
+<ng-template #tableEmptyFiles let-emptyFiles='emptyFiles'>
+  <table class="table owltometa-files-table">
+    <thead>
+      <tr>
+        <th><span class="text-secondary">Empty
+            ({{Object.keys(emptyFiles).length}})</span>
+        </th>
+        <th style="width: 5rem;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="owltometa-file-row" *ngFor="let file of emptyFiles | keyvalue">
+        <td style="word-break: break-all;">
+          <strong>{{ file.key }}</strong>
+        </td>
+        <td class="text-right" nowrap>
+          <i class="fa fa-fw fa-file-o text-secondary"></i>
         </td>
       </tr>
     </tbody>

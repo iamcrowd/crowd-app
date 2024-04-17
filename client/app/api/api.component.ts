@@ -1440,6 +1440,7 @@ export class ApiComponent implements OnInit {
       this.tabs[tab].multiTotalFiles = null;
       this.tabs[tab].multiSucceded = {};
       this.tabs[tab].multiFailed = {};
+      this.tabs[tab].multiEmpty = {};
       this.tabs[tab].multiActual = null;
       this.tabs[tab].multiActualTime = 0;
       this.tabs[tab].multiTotalTime = 0;
@@ -1455,6 +1456,7 @@ export class ApiComponent implements OnInit {
             this.apis[this.tabs[tab].api].endpoints[
               this.tabs[tab].endpoint
             ].parameters.outputTab;
+          // don't use the metrics on the response, calculate them based on success ones
           this.calculateMetrics(tab);
           if (response.metrics) {
             this.tabs[tab].showMetrics = true;
@@ -1615,6 +1617,36 @@ export class ApiComponent implements OnInit {
     return itemsByCategory;
   }
 
+  getErrorCategories(failedFiles: any, specify: number = 1): any {
+    let categories = [];
+    Object.keys(failedFiles).forEach((key: any) => {
+      let category = !failedFiles[key].stackTrace
+        ? "Timeout"
+        : failedFiles[key].stackTrace.split(":").slice(0, specify).join(":");
+      if (!categories.includes(category)) {
+        categories.push(category);
+      }
+    });
+    return categories.sort();
+  }
+
+  getErrorsByCategory(
+    failedFiles: any,
+    category: string,
+    specify: number = 1
+  ): any {
+    let errorsByCategory = {};
+    Object.keys(failedFiles).forEach((key: any) => {
+      let fileCategory = !failedFiles[key].stackTrace
+        ? "Timeout"
+        : failedFiles[key].stackTrace.split(":").slice(0, specify).join(":");
+      if (fileCategory === category) {
+        errorsByCategory[key] = failedFiles[key];
+      }
+    });
+    return errorsByCategory;
+  }
+
   isItemObject(item: any) {
     return typeof item == "object";
   }
@@ -1638,7 +1670,8 @@ export class ApiComponent implements OnInit {
   getMultiProcessed(tab: number): number {
     return (
       Object.keys(this.tabs[tab].multiSucceded).length +
-      Object.keys(this.tabs[tab].multiFailed).length
+      Object.keys(this.tabs[tab].multiFailed).length +
+      Object.keys(this.tabs[tab].multiEmpty).length
     );
   }
 
@@ -1672,6 +1705,23 @@ export class ApiComponent implements OnInit {
     this.downloadFile("failed.uris", "json", failedUris, true);
 
     delete this.tabs[tab].downloadingFailedUris;
+  }
+
+  downloadTimeoutUris(tab: number): void {
+    this.tabs[tab].downloadingTimeoutUris = true;
+
+    let timeoutUris = this.tabs[tab].parameters.ontologiesUris.filter((uri) => {
+      return (
+        this.tabs[tab].output.failed[uri.prefix ? uri.prefix : uri.uri] !=
+          null &&
+        !this.tabs[tab].output.failed[uri.prefix ? uri.prefix : uri.uri]
+          .stackTrace
+      );
+    });
+
+    this.downloadFile("timeout.uris", "json", timeoutUris, true);
+
+    delete this.tabs[tab].downloadingTimeoutUris;
   }
 
   downloadFile(
@@ -1767,6 +1817,60 @@ export class ApiComponent implements OnInit {
     let formated = moment.utc(milisecs).format(format);
 
     return formated == "Invalid date" ? "-" : formated;
+  }
+
+  addOutput(tab: number): void {
+    if (this.tabs[tab].output != null) {
+      var reader: FileReader = new FileReader();
+
+      reader.onloadend = (e) => {
+        let newOutput = JSON.parse(reader.result.toString());
+
+        Object.keys(newOutput.success).forEach((key) => {
+          this.tabs[tab].output.success[key] = newOutput.success[key];
+          if (this.tabs[tab].output.failed[key] != null) {
+            delete this.tabs[tab].output.failed[key];
+          }
+          if (this.tabs[tab].output.empty[key] != null) {
+            delete this.tabs[tab].output.empty[key];
+          }
+        });
+
+        Object.keys(newOutput.empty).forEach((key) => {
+          if (!this.tabs[tab].output.success[key]) {
+            this.tabs[tab].output.empty[key] = newOutput.empty[key];
+            if (this.tabs[tab].output.failed[key] != null) {
+              delete this.tabs[tab].output.failed[key];
+            }
+          }
+        });
+
+        Object.keys(newOutput.failed).forEach((key) => {
+          if (
+            !this.tabs[tab].output.success[key] &&
+            !this.tabs[tab].output.empty[key]
+          ) {
+            this.tabs[tab].output.failed[key] = newOutput.failed[key];
+          }
+        });
+
+        setTimeout(() => {
+          this.calculateMetrics(tab);
+          this.tabs[tab].showOutput = true;
+          this.tabs[tab].showMetrics = true;
+          this.tabs[tab].addOutputFile = null;
+          this.metricsAccordion?.expandAll();
+          this.listAccordion?.expandAll();
+        });
+      };
+
+      reader.readAsText(this.tabs[tab].addOutputFile);
+    } else {
+      iziToast.error({
+        title: "Error",
+        message: "<i>There is no output to add.</i>",
+      });
+    }
   }
 
   loadOutput(tab: number): void {

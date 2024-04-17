@@ -2051,6 +2051,10 @@ CrowdEditor.prototype.initTools = function () {
         if (!options) options = {};
         if (!options.algorithm) options.algorithm = "cose";
 
+        self.tools.layout._doLayoutBasic(options);
+      };
+
+      self.tools.layout._doLayoutBasic = function(options) {
         setTimeout(() => {
           //get only cells that have not "layoutIgnore" property
           var filteredGraph = self.workspace.graph
@@ -2175,6 +2179,10 @@ CrowdEditor.prototype.initTools = function () {
             self.inspector.hideInformation();
           });
         }, 100);
+      };
+
+      self.tools.layout._doLayoutStructured = function (options) {
+        //TODO
       };
 
       self.tools.layout.getPositions = function () {

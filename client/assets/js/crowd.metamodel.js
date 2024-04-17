@@ -203,8 +203,13 @@ CrowdMetamodel.prototype.request = function (req) {
             //when is multiple, add response to succeded array
             //if single, return response using "success" callback
             if (isMulti && req.apiComponent) {
-              if (req.apiComponent.tabs[req.tab].multiSucceded)
-                req.apiComponent.tabs[req.tab].multiSucceded[getOntologyName(ontologies[index], index)] = res;
+              if (req.apiComponent.tabs[req.tab].multiSucceded) {
+                //check if res has a kf that is not empty (has at least one object type)
+                if (res.kf["Entity type"]["Object type"].length > 0)
+                  req.apiComponent.tabs[req.tab].multiSucceded[getOntologyName(ontologies[index], index)] = res;
+                else
+                  req.apiComponent.tabs[req.tab].multiEmpty[getOntologyName(ontologies[index], index)] = res;
+              }
             } else {
               if (req.success) req.success(res);
             }
@@ -232,7 +237,11 @@ CrowdMetamodel.prototype.request = function (req) {
               } else {
                 if (req.apiComponent && req.apiComponent.tabs[req.tab].multiSucceded && req.apiComponent.tabs[req.tab].multiFailed) {
                   clearInterval(req.apiComponent.tabs[req.tab].multiTimeInterval);
-                  var res = { success: req.apiComponent.tabs[req.tab].multiSucceded, failed: req.apiComponent.tabs[req.tab].multiFailed };
+                  var res = {
+                    success: req.apiComponent.tabs[req.tab].multiSucceded,
+                    failed: req.apiComponent.tabs[req.tab].multiFailed,
+                    empty: req.apiComponent.tabs[req.tab].multiEmpty
+                  };
                   req.apiComponent.tabs[req.tab].multiActual = null;
                   req.success(res);
                 }
