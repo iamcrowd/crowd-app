@@ -1738,10 +1738,11 @@ CrowdEditor.prototype.initTools = function () {
           from: "owl",
           to: "kf",
           reasoner: diagram.reasoner ? diagram.reasoner : "jfact",
-          input: "string",
+          input: diagram.input,
           filtering: diagram.filtering,
           timeout: 60000,
           ontologyString: diagram.ontologyString,
+          ontologiesUris: diagram.ontologiesUris,
           success: function (response) {
             response.hasPositions = false;
             self.tools.import.importFrom({
@@ -1851,7 +1852,7 @@ CrowdEditor.prototype.initTools = function () {
                 </button> \
               </div> \
               <div class="modal-body"> \
-                <div class="form-group mb-0" id="crowd-tools-import-owl-settings-' +
+                <div class="form-group mb-2" id="crowd-tools-import-owl-settings-' +
           self.id +
           '"> \
                   <div class="row"> \
@@ -1879,6 +1880,14 @@ CrowdEditor.prototype.initTools = function () {
                     </div> \
                     </div> \
                   </div> \
+                  <div class="row"> \
+                    <div class="col"> \
+                      <label class="form-label">URI <span class="text-muted small">(if set URI the file will be ignored)</span></label> \
+                      <input type="text" class="form-control" placeholder="ex: http://www.w3.org/2006/time" id="crowd-tools-import-owl-uri-' +
+          self.id +
+          '"> \
+                    </div> \
+                  </div> \
                 </div> \
                 <div class="form-group"> \
                   <label for="crowd-tools-import-file-' +
@@ -1896,7 +1905,9 @@ CrowdEditor.prototype.initTools = function () {
                 <div class="form-group"> \
                   <label for="crowd-tools-import-raw-' +
           self.id +
-          '">Or paste the JSON directly</label> \
+          '">Or paste the <span id="crowd-tools-import-type-of-file-' +
+          self.id +
+          '"></span> directly</label> \
                   <textarea class="form-control" id="crowd-tools-import-raw-' +
           self.id +
           '" rows="10"></textarea> \
@@ -1951,8 +1962,12 @@ CrowdEditor.prototype.initTools = function () {
 
           if (model == "owl") {
             $("#crowd-tools-import-owl-settings-" + self.id).show();
+            $("#crowd-tools-import-type-of-file-" + self.id).html("RDF");
+            // clear uri
+            $("#crowd-tools-import-owl-uri-" + self.id).val("");
           } else {
             $("#crowd-tools-import-owl-settings-" + self.id).hide();
+            $("#crowd-tools-import-type-of-file-" + self.id).html("JSON");
           }
 
           $("#crowd-tools-import-check-schema-modal-" + self.id).modal("show");
@@ -1980,13 +1995,15 @@ CrowdEditor.prototype.initTools = function () {
         }
 
         if (model.name == "owl") {
+          let uri = $("#crowd-tools-import-owl-uri-" + self.id).val();
           self.tools.import.owlImport({
             model: $(this).attr("data-model"),
             ontologyString: schema,
+            ontologiesUris: uri ? [{ uri: uri }] : [],
             reasoner: $(
               "#crowd-tools-import-owl-settings-reasoner-" + self.id
             ).val(),
-            input: "string",
+            input: uri ? "uri" : "string",
             filtering: $(
               "#crowd-tools-import-owl-settings-filtering-" + self.id
             ).is(":checked"),
@@ -2054,7 +2071,7 @@ CrowdEditor.prototype.initTools = function () {
         self.tools.layout._doLayoutBasic(options);
       };
 
-      self.tools.layout._doLayoutBasic = function(options) {
+      self.tools.layout._doLayoutBasic = function (options) {
         setTimeout(() => {
           //get only cells that have not "layoutIgnore" property
           var filteredGraph = self.workspace.graph
@@ -2233,17 +2250,21 @@ CrowdEditor.prototype.initTools = function () {
           if (connectedCell.isLink()) {
             let targetPoint = connectedCell.getTargetPoint();
             let sourcePoint = connectedCell.getSourcePoint();
-            return [(targetPoint.x + sourcePoint.x) / 2, (targetPoint.y + sourcePoint.y) / 2];
+            return [
+              (targetPoint.x + sourcePoint.x) / 2,
+              (targetPoint.y + sourcePoint.y) / 2,
+            ];
           } else {
             return [
               connectedCell.attributes.position.x,
               connectedCell.attributes.position.y,
-            ]
+            ];
           }
         });
-        let centroid = positions.length >= 3
-        ? geometric.polygonCentroid(positions)
-        : geometric.lineMidpoint(positions);
+        let centroid =
+          positions.length >= 3
+            ? geometric.polygonCentroid(positions)
+            : geometric.lineMidpoint(positions);
         // console.log("CELL TO CENTROID", cell.attributes.uri, cell, connectedCells, positions, centroid);
         cell.position(centroid[0], centroid[1]);
       };

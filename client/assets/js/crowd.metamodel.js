@@ -98,7 +98,7 @@ CrowdMetamodel.prototype.request = function (req) {
     if (!req.verbalization) req.verbalization = 'cnl';
     if (!req.language) req.language = 'en';
 
-    console.log('MetamodelAPI: requesting ' + url + req.from + 'to' + req.to, req.data);
+    console.log('MetamodelAPI: requesting ' + url + req.from + 'to' + req.to, req);
 
     if (req.to == 'owl') {
       return $.ajax({
