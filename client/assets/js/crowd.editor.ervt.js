@@ -1,232 +1,252 @@
 var CrowdEditorErvt = {
-  name: 'ervt',
+  name: "ervt",
   initPalette: function (crowd) {
     //colors for palette elements
     crowd.palette.colors = {
-      entity: getCSS('color', 'crowd-entity-color'),
+      entity: getCSS("color", "crowd-entity-color"),
       // weakEntity: getCSS('color', 'crowd-weak-entity-color'),
-      temporalEntity: getCSS('color', 'crowd-temporal-entity-color'),
-      snapshotEntity: getCSS('color', 'crowd-snapshot-entity-color'),
-      relationship: getCSS('color', 'crowd-relationship-color'),
-      temporalRelationship: getCSS('color', 'crowd-temporal-relationship-color'),
-      snapshotRelationship: getCSS('color', 'crowd-snapshot-relationship-color'),
+      temporalEntity: getCSS("color", "crowd-temporal-entity-color"),
+      snapshotEntity: getCSS("color", "crowd-snapshot-entity-color"),
+      relationship: getCSS("color", "crowd-relationship-color"),
+      temporalRelationship: getCSS(
+        "color",
+        "crowd-temporal-relationship-color"
+      ),
+      snapshotRelationship: getCSS(
+        "color",
+        "crowd-snapshot-relationship-color"
+      ),
       // weakRelationship: getCSS('color', 'crowd-weak-relationship-color'),
-      attribute: getCSS('color', 'crowd-attribute-color'),
-      temporalAttribute: getCSS('color', 'crowd-temporal-attribute-color'),
-      snapshotAttribute: getCSS('color', 'crowd-snapshot-attribute-color'),
-      multivaluedAttribute: getCSS('color', 'crowd-multivalued-attribute-color'),
-      keyAttribute: getCSS('color', 'crowd-key-attribute-color'),
-      temporalKeyAttribute: getCSS('color', 'crowd-temporal-key-attribute-color'),
-      snapshotKeyAttribute: getCSS('color', 'crowd-snapshot-key-attribute-color'),
+      attribute: getCSS("color", "crowd-attribute-color"),
+      temporalAttribute: getCSS("color", "crowd-temporal-attribute-color"),
+      snapshotAttribute: getCSS("color", "crowd-snapshot-attribute-color"),
+      multivaluedAttribute: getCSS(
+        "color",
+        "crowd-multivalued-attribute-color"
+      ),
+      keyAttribute: getCSS("color", "crowd-key-attribute-color"),
+      temporalKeyAttribute: getCSS(
+        "color",
+        "crowd-temporal-key-attribute-color"
+      ),
+      snapshotKeyAttribute: getCSS(
+        "color",
+        "crowd-snapshot-key-attribute-color"
+      ),
       // weakKeyAttribute: getCSS('color', 'crowd-weak-key-attribute-color'),
-      inheritance: getCSS('color', 'crowd-inheritance-color'),
-      temporalMark: getCSS('color', 'crowd-temporal-mark-color'),
-      derivedAttribute: getCSS('color', 'crowd-derived-attribute-color'),
-      entityStroke: getCSS('color', 'crowd-entity-stroke-color'),
-      relationshipStroke: getCSS('color', 'crowd-relationship-stroke-color'),
-      attributeStroke: getCSS('color', 'crowd-attribute-stroke-color'),
-      keyAttributeStroke: getCSS('color', 'crowd-key-attribute-stroke-color'),
-      inheritanceStroke: getCSS('color', 'crowd-inheritance-stroke-color'),
-      temporalMarkStroke: getCSS('color', 'crowd-temporal-mark-stroke-color'),
-    }
+      inheritance: getCSS("color", "crowd-inheritance-color"),
+      temporalMark: getCSS("color", "crowd-temporal-mark-color"),
+      derivedAttribute: getCSS("color", "crowd-derived-attribute-color"),
+      entityStroke: getCSS("color", "crowd-entity-stroke-color"),
+      relationshipStroke: getCSS("color", "crowd-relationship-stroke-color"),
+      attributeStroke: getCSS("color", "crowd-attribute-stroke-color"),
+      keyAttributeStroke: getCSS("color", "crowd-key-attribute-stroke-color"),
+      inheritanceStroke: getCSS("color", "crowd-inheritance-stroke-color"),
+      temporalMarkStroke: getCSS("color", "crowd-temporal-mark-stroke-color"),
+    };
 
     //add joint eer entity to palette elements
-    crowd.palette.elements.entity = new joint.shapes.erd.Entity({
-      parentType: 'entity',
-      temporal: false,
-      temporalType: 'temporalEntity',
-      type: 'entity',
-      name: 'Entity',
-      uri: 'http://crowd.fi.uncoma.edu.ar#entity',
-      attrs: {
-        text: {
-          fill: '#000000',
-          class: 'crowd-element-text'
+    crowd.palette.elements.entity = new joint.shapes.erd.Entity(
+      {
+        parentType: "entity",
+        temporal: false,
+        temporalType: "temporalEntity",
+        type: "entity",
+        name: "Entity",
+        uri: crowd.config.defaultNamespace + "#entity",
+        attrs: {
+          text: {
+            fill: "#000000",
+            class: "crowd-element-text",
+          },
+          ".outer": {
+            fill: crowd.palette.colors.entity,
+            stroke: crowd.palette.colors.entityStroke,
+          },
+          ".inner": {
+            fill: crowd.palette.colors.entity,
+            stroke: crowd.palette.colors.entity,
+          },
         },
-        '.outer': {
-          fill: crowd.palette.colors.entity,
-          stroke: crowd.palette.colors.entityStroke
+        size: {
+          width: 90,
+          height: 40,
         },
-        '.inner': {
-          fill: crowd.palette.colors.entity,
-          stroke: crowd.palette.colors.entity
-        }
       },
-      size: {
-        width: 90,
-        height: 40
-      },
-    },
       {
         markup: [
           {
-            tagName: 'rect',
-            selector: 'text'
+            tagName: "rect",
+            selector: "text",
           },
           {
-            tagName: 'rect',
-            selector: 'outer'
-          }
-        ]
+            tagName: "rect",
+            selector: "outer",
+          },
+        ],
       }
     );
 
-    joint.dia.Element.define('ervt.TemporalEntity',
+    joint.dia.Element.define(
+      "ervt.TemporalEntity",
       {
         size: {
           width: 90,
-          height: 40
+          height: 40,
         },
         attrs: {
           body: {
-            refWidth: '100%',
-            refHeight: '100%',
+            refWidth: "100%",
+            refHeight: "100%",
             strokeWidth: 1,
             rx: 0,
             ry: 0,
             stroke: crowd.palette.colors.entityStroke,
-            fill: crowd.palette.colors.temporalEntity
+            fill: crowd.palette.colors.temporalEntity,
           },
           text: {
-            text: 'Temporal\nEntity',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refX: '50%',
-            refY: '50%',
-            fill: '#000000',
-            class: 'crowd-element-text'
+            text: "Temporal\nEntity",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refX: "50%",
+            refY: "50%",
+            fill: "#000000",
+            class: "crowd-element-text",
           },
           temporalMark: {
-            refWidth: '20%',
-            refHeight: '45%',
+            refWidth: "20%",
+            refHeight: "45%",
             strokeWidth: 1,
-            refX: '80%',
+            refX: "80%",
             stroke: crowd.palette.colors.temporalMarkStroke,
-            fill: crowd.palette.colors.temporalMark
+            fill: crowd.palette.colors.temporalMark,
           },
           temporalText: {
-            text: 'T',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refWidth: '20%',
-            refHeight: '45%',
-            refX: '90%',
-            refY: '24%',
-            fill: '#000000',
-            class: 'crowd-element-text'
-          }
+            text: "T",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refWidth: "20%",
+            refHeight: "45%",
+            refX: "90%",
+            refY: "24%",
+            fill: "#000000",
+            class: "crowd-element-text",
+          },
         },
       },
       {
         markup: [
           {
-            tagName: 'rect',
-            selector: 'body',
+            tagName: "rect",
+            selector: "body",
           },
           {
-            tagName: 'text',
-            selector: 'text'
+            tagName: "text",
+            selector: "text",
           },
           {
-            tagName: 'rect',
-            selector: 'temporalMark',
+            tagName: "rect",
+            selector: "temporalMark",
           },
           {
-            tagName: 'text',
-            selector: 'temporalText'
-          }
-        ]
+            tagName: "text",
+            selector: "temporalText",
+          },
+        ],
       }
     );
 
-    crowd.palette.elements.temporalEntity = new joint.shapes.ervt.TemporalEntity({
-      parentType: 'entity',
-      temporal: true,
-      temporalType: 'temporalEntity',
-      type: 'entity',
-      name: 'Temporal\nEntity',
-      uri: 'http://crowd.fi.uncoma.edu.ar#temporal-entity',
-      refUri: ''
-    });
+    crowd.palette.elements.temporalEntity =
+      new joint.shapes.ervt.TemporalEntity({
+        parentType: "entity",
+        temporal: true,
+        temporalType: "temporalEntity",
+        type: "entity",
+        name: "Temporal\nEntity",
+        uri: crowd.config.defaultNamespace + "#temporal-entity",
+        refUri: "",
+      });
 
-    joint.dia.Element.define('ervt.SnapshotEntity',
+    joint.dia.Element.define(
+      "ervt.SnapshotEntity",
       {
         addToPalette: false,
         size: {
           width: 90,
-          height: 40
+          height: 40,
         },
         attrs: {
           body: {
-            refWidth: '100%',
-            refHeight: '100%',
+            refWidth: "100%",
+            refHeight: "100%",
             strokeWidth: 1,
             rx: 0,
             ry: 0,
             stroke: crowd.palette.colors.entityStroke,
-            fill: crowd.palette.colors.snapshotEntity
+            fill: crowd.palette.colors.snapshotEntity,
           },
           text: {
-            text: 'Snapshot\nEntity',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refX: '50%',
-            refY: '50%',
-            fill: '#000000',
-            class: 'crowd-element-text'
+            text: "Snapshot\nEntity",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refX: "50%",
+            refY: "50%",
+            fill: "#000000",
+            class: "crowd-element-text",
           },
           temporalMark: {
-            refWidth: '20%',
-            refHeight: '45%',
+            refWidth: "20%",
+            refHeight: "45%",
             strokeWidth: 1,
-            refX: '80%',
+            refX: "80%",
             stroke: crowd.palette.colors.temporalMarkStroke,
-            fill: crowd.palette.colors.temporalMark
+            fill: crowd.palette.colors.temporalMark,
           },
           temporalText: {
-            text: 'S',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refWidth: '20%',
-            refHeight: '45%',
-            refX: '90%',
-            refY: '24%',
-            fill: '#000000',
-            class: 'crowd-element-text'
-          }
+            text: "S",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refWidth: "20%",
+            refHeight: "45%",
+            refX: "90%",
+            refY: "24%",
+            fill: "#000000",
+            class: "crowd-element-text",
+          },
         },
       },
       {
         markup: [
           {
-            tagName: 'rect',
-            selector: 'body',
+            tagName: "rect",
+            selector: "body",
           },
           {
-            tagName: 'text',
-            selector: 'text'
+            tagName: "text",
+            selector: "text",
           },
           {
-            tagName: 'rect',
-            selector: 'temporalMark',
+            tagName: "rect",
+            selector: "temporalMark",
           },
           {
-            tagName: 'text',
-            selector: 'temporalText'
-          }
-        ]
+            tagName: "text",
+            selector: "temporalText",
+          },
+        ],
       }
     );
 
-    crowd.palette.elements.snapshotEntity = new joint.shapes.ervt.SnapshotEntity({
-      parentType: 'entity',
-      temporal: true,
-      temporalType: 'snapshotEntity',
-      type: 'entity',
-      name: 'Temporal\nEntity',
-      uri: 'http://crowd.fi.uncoma.edu.ar#temporal-entity',
-      refUri: ''
-    });
+    crowd.palette.elements.snapshotEntity =
+      new joint.shapes.ervt.SnapshotEntity({
+        parentType: "entity",
+        temporal: true,
+        temporalType: "snapshotEntity",
+        type: "entity",
+        name: "Temporal\nEntity",
+        uri: crowd.config.defaultNamespace + "#temporal-entity",
+        refUri: "",
+      });
 
     //add joint eer weak entity to palette elements
     // crowd.palette.elements.weakEntity = new joint.shapes.erd.Entity({
@@ -260,185 +280,189 @@ var CrowdEditorErvt = {
 
     //add joint eer relationship to palette elements
     crowd.palette.elements.relationship = new joint.shapes.erd.Relationship({
-      parentType: 'relationship',
+      parentType: "relationship",
       temporal: false,
-      temporalType: 'temporalRelationship',
-      type: 'relationship',
-      name: 'Relationship',
-      uri: 'http://crowd.fi.uncoma.edu.ar#relationship',
+      temporalType: "temporalRelationship",
+      type: "relationship",
+      name: "Relationship",
+      uri: crowd.config.defaultNamespace + "#relationship",
       attrs: {
         text: {
-          fill: '#000000',
-          class: 'crowd-element-text s'
+          fill: "#000000",
+          class: "crowd-element-text s",
         },
-        '.outer': {
+        ".outer": {
           fill: crowd.palette.colors.relationship,
-          stroke: crowd.palette.colors.relationshipStroke
+          stroke: crowd.palette.colors.relationshipStroke,
         },
-        '.inner': {
+        ".inner": {
           fill: crowd.palette.colors.relationship,
-          stroke: crowd.palette.colors.relationship
-        }
+          stroke: crowd.palette.colors.relationship,
+        },
       },
       size: {
         width: 90,
-        height: 60
-      }
+        height: 60,
+      },
     });
 
-    joint.dia.Element.define('ervt.TemporalRelationship',
+    joint.dia.Element.define(
+      "ervt.TemporalRelationship",
       {
         size: {
           width: 90,
-          height: 40
+          height: 40,
         },
         attrs: {
           body: {
             // points: '45,-10 90,20 45,50 0,20',
-            points: '45,0 90,30 45,60 0,30',
+            points: "45,0 90,30 45,60 0,30",
             strokeWidth: 2,
             stroke: crowd.palette.colors.relationshipStroke,
-            fill: crowd.palette.colors.temporalRelationship
+            fill: crowd.palette.colors.temporalRelationship,
           },
           text: {
-            text: 'Temporal\nRelationship',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refX: '50%',
-            refY: '50%',
-            fill: '#000000',
-            class: 'crowd-element-text s'
+            text: "Temporal\nRelationship",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refX: "50%",
+            refY: "50%",
+            fill: "#000000",
+            class: "crowd-element-text s",
           },
           temporalMark: {
-            refWidth: '20%',
-            refHeight: '45%',
+            refWidth: "20%",
+            refHeight: "45%",
             strokeWidth: 1,
-            refX: '80%',
+            refX: "80%",
             stroke: crowd.palette.colors.temporalMarkStroke,
-            fill: crowd.palette.colors.temporalMark
+            fill: crowd.palette.colors.temporalMark,
           },
           temporalText: {
-            text: 'T',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refWidth: '20%',
-            refHeight: '45%',
-            refX: '90%',
-            refY: '24%',
-            fill: '#000000',
-            class: 'crowd-element-text'
-          }
+            text: "T",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refWidth: "20%",
+            refHeight: "45%",
+            refX: "90%",
+            refY: "24%",
+            fill: "#000000",
+            class: "crowd-element-text",
+          },
         },
       },
       {
         markup: [
           {
-            tagName: 'polygon',
-            selector: 'body',
+            tagName: "polygon",
+            selector: "body",
           },
           {
-            tagName: 'text',
-            selector: 'text'
+            tagName: "text",
+            selector: "text",
           },
           {
-            tagName: 'rect',
-            selector: 'temporalMark',
+            tagName: "rect",
+            selector: "temporalMark",
           },
           {
-            tagName: 'text',
-            selector: 'temporalText'
-          }
-        ]
+            tagName: "text",
+            selector: "temporalText",
+          },
+        ],
       }
     );
 
     //add joint ervt temporal relationship to palette elements
-    crowd.palette.elements.temporalRelationship = new joint.shapes.ervt.TemporalRelationship({
-      parentType: 'relationship',
-      temporal: true,
-      temporalType: 'temporalRelationship',
-      type: 'relationship',
-      name: 'Temporal\nRelationship',
-      uri: 'http://crowd.fi.uncoma.edu.ar#temporal-relationship',
-      refUri: ''
-    });
+    crowd.palette.elements.temporalRelationship =
+      new joint.shapes.ervt.TemporalRelationship({
+        parentType: "relationship",
+        temporal: true,
+        temporalType: "temporalRelationship",
+        type: "relationship",
+        name: "Temporal\nRelationship",
+        uri: crowd.config.defaultNamespace + "#temporal-relationship",
+        refUri: "",
+      });
 
-    joint.dia.Element.define('ervt.SnapshotRelationship',
+    joint.dia.Element.define(
+      "ervt.SnapshotRelationship",
       {
         addToPalette: false,
         size: {
           width: 90,
-          height: 40
+          height: 40,
         },
         attrs: {
           body: {
-            points: '45,-10 90,20 45,50 0,20',
+            points: "45,-10 90,20 45,50 0,20",
             strokeWidth: 2,
             stroke: crowd.palette.colors.relationshipStroke,
-            fill: crowd.palette.colors.snapshotRelationship
+            fill: crowd.palette.colors.snapshotRelationship,
           },
           text: {
-            text: 'Snapshot\nRelationship',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refX: '50%',
-            refY: '50%',
-            fill: '#000000',
-            class: 'crowd-element-text s'
+            text: "Snapshot\nRelationship",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refX: "50%",
+            refY: "50%",
+            fill: "#000000",
+            class: "crowd-element-text s",
           },
           temporalMark: {
-            refWidth: '20%',
-            refHeight: '45%',
+            refWidth: "20%",
+            refHeight: "45%",
             strokeWidth: 1,
-            refX: '80%',
+            refX: "80%",
             stroke: crowd.palette.colors.temporalMarkStroke,
-            fill: crowd.palette.colors.temporalMark
+            fill: crowd.palette.colors.temporalMark,
           },
           temporalText: {
-            text: 'S',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refWidth: '20%',
-            refHeight: '45%',
-            refX: '90%',
-            refY: '24%',
-            fill: '#000000',
-            class: 'crowd-element-text'
-          }
+            text: "S",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refWidth: "20%",
+            refHeight: "45%",
+            refX: "90%",
+            refY: "24%",
+            fill: "#000000",
+            class: "crowd-element-text",
+          },
         },
       },
       {
         markup: [
           {
-            tagName: 'polygon',
-            selector: 'body',
+            tagName: "polygon",
+            selector: "body",
           },
           {
-            tagName: 'text',
-            selector: 'text'
+            tagName: "text",
+            selector: "text",
           },
           {
-            tagName: 'rect',
-            selector: 'temporalMark',
+            tagName: "rect",
+            selector: "temporalMark",
           },
           {
-            tagName: 'text',
-            selector: 'temporalText'
-          }
-        ]
+            tagName: "text",
+            selector: "temporalText",
+          },
+        ],
       }
     );
 
     //add joint ervt snapshot relationship to palette elements
-    crowd.palette.elements.snapshotRelationship = new joint.shapes.ervt.SnapshotRelationship({
-      parentType: 'relationship',
-      temporal: true,
-      temporalType: 'snapshotRelationship',
-      type: 'relationship',
-      name: 'Snapshot\nRelationship',
-      uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-relationship',
-      refUri: ''
-    });
+    crowd.palette.elements.snapshotRelationship =
+      new joint.shapes.ervt.SnapshotRelationship({
+        parentType: "relationship",
+        temporal: true,
+        temporalType: "snapshotRelationship",
+        type: "relationship",
+        name: "Snapshot\nRelationship",
+        uri: crowd.config.defaultNamespace + "#snapshot-relationship",
+        refUri: "",
+      });
 
     //add joint eer weak relationship to palette elements
     // crowd.palette.elements.weakRelationship = new joint.shapes.erd.Relationship({
@@ -472,49 +496,50 @@ var CrowdEditorErvt = {
 
     //add joint eer attribute to palette elements
     crowd.palette.elements.attribute = new joint.shapes.erd.Attribute({
-      parentType: 'attribute',
+      parentType: "attribute",
       temporal: false,
-      type: 'attribute',
-      temporalType: 'temporalAttribute',
-      name: 'Attribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#attribute',
-      datatype: 'string',
+      type: "attribute",
+      temporalType: "temporalAttribute",
+      name: "Attribute",
+      uri: crowd.config.defaultNamespace + "#attribute",
+      datatype: "string",
       attrs: {
         text: {
-          fill: '#000000',
-          text: 'Attribute',
-          class: 'crowd-element-text xs'
+          fill: "#000000",
+          text: "Attribute",
+          class: "crowd-element-text xs",
         },
-        '.outer': {
+        ".outer": {
           fill: crowd.palette.colors.attribute,
-          stroke: crowd.palette.colors.attributeStroke
-        }
+          stroke: crowd.palette.colors.attributeStroke,
+        },
       },
       size: {
         width: 70,
-        height: 40
-      }
+        height: 40,
+      },
     });
 
     //add joint eer temporal attribute to palette elements
-    joint.dia.Element.define('ervt.TemporalAttribute',
+    joint.dia.Element.define(
+      "ervt.TemporalAttribute",
       {
-        parentType: 'attribute',
+        parentType: "attribute",
         temporal: true,
-        type: 'attribute',
-        temporalType: 'temporalAttribute',
-        name: 'Temporal\nAttribute',
-        uri: 'http://crowd.fi.uncoma.edu.ar#temporal-attribute',
-        datatype: 'string',
+        type: "attribute",
+        temporalType: "temporalAttribute",
+        name: "Temporal\nAttribute",
+        uri: crowd.config.defaultNamespace + "#temporal-attribute",
+        datatype: "string",
         attrs: {
           text: {
-            text: 'Temporal\nAttribute',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refX: '50%',
-            refY: '50%',
-            fill: '#000000',
-            class: 'crowd-element-text xs temporal-attribute'
+            text: "Temporal\nAttribute",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refX: "50%",
+            refY: "50%",
+            fill: "#000000",
+            class: "crowd-element-text xs temporal-attribute",
           },
           body: {
             cx: 35,
@@ -523,84 +548,87 @@ var CrowdEditorErvt = {
             ry: 20,
             strokeWidth: 2,
             fill: crowd.palette.colors.temporalAttribute,
-            stroke: crowd.palette.colors.attributeStroke
+            stroke: crowd.palette.colors.attributeStroke,
           },
           temporalMark: {
-            refWidth: '20%',
-            refHeight: '45%',
+            refWidth: "20%",
+            refHeight: "45%",
             strokeWidth: 1,
-            refX: '80%',
+            refX: "80%",
             stroke: crowd.palette.colors.temporalMarkStroke,
-            fill: crowd.palette.colors.temporalMark
+            fill: crowd.palette.colors.temporalMark,
           },
           temporalText: {
-            text: 'T',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refWidth: '20%',
-            refHeight: '45%',
-            refX: '90%',
-            refY: '24%',
-            fill: '#000000',
-            class: 'crowd-element-text'
-          }
+            text: "T",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refWidth: "20%",
+            refHeight: "45%",
+            refX: "90%",
+            refY: "24%",
+            fill: "#000000",
+            class: "crowd-element-text",
+          },
         },
         size: {
           width: 70,
-          height: 40
-        }
+          height: 40,
+        },
       },
       {
         markup: [
           {
-            tagName: 'ellipse',
-            selector: 'body',
+            tagName: "ellipse",
+            selector: "body",
           },
           {
-            tagName: 'text',
-            selector: 'text'
+            tagName: "text",
+            selector: "text",
           },
           {
-            tagName: 'rect',
-            selector: 'temporalMark',
+            tagName: "rect",
+            selector: "temporalMark",
           },
           {
-            tagName: 'text',
-            selector: 'temporalText'
-          }
-        ]
+            tagName: "text",
+            selector: "temporalText",
+          },
+        ],
+      }
+    );
+
+    crowd.palette.elements.temporalAttribute =
+      new joint.shapes.ervt.TemporalAttribute({
+        parentType: "attribute",
+        temporal: true,
+        type: "attribute",
+        temporalType: "temporalAttribute",
+        name: "Temporal\nAttribute",
+        uri: crowd.config.defaultNamespace + "#temporal-attribute",
+        refUri: "",
       });
 
-    crowd.palette.elements.temporalAttribute = new joint.shapes.ervt.TemporalAttribute({
-      parentType: 'attribute',
-      temporal: true,
-      type: 'attribute',
-      temporalType: 'temporalAttribute',
-      name: 'Temporal\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#temporal-attribute',
-      refUri: ''
-    });
-
     //add joint eer snapshot attribute to palette elements
-    joint.dia.Element.define('ervt.SnapshotAttribute',
+    joint.dia.Element.define(
+      "ervt.SnapshotAttribute",
       {
-        parentType: 'attribute',
+        parentType: "attribute",
         addToPalette: false,
         temporal: true,
-        type: 'attribute',
-        temporalType: 'snapshotAttribute',
-        name: 'Snapshot\nAttribute',
-        uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-attribute',
-        datatype: 'string',
+        type: "attribute",
+        temporalType: "snapshotAttribute",
+        name: "Snapshot\nAttribute",
+        uri: crowd.config.defaultNamespace + "#snapshot-attribute",
+        datatype: "string",
         attrs: {
           text: {
-            text: 'Snapshot\nAttribute',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refX: '50%',
-            refY: '50%',
-            fill: '#000000',
-            class: 'crowd-element-text xs snapshot-attribute'
+            text: "Snapshot\nAttribute",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refX: "50%",
+            refY: "50%",
+            fill: "#000000",
+            class: "crowd-element-text xs snapshot-attribute",
           },
           body: {
             cx: 35,
@@ -609,109 +637,112 @@ var CrowdEditorErvt = {
             ry: 20,
             strokeWidth: 2,
             fill: crowd.palette.colors.snapshotAttribute,
-            stroke: crowd.palette.colors.attributeStroke
+            stroke: crowd.palette.colors.attributeStroke,
           },
           temporalMark: {
-            refWidth: '20%',
-            refHeight: '45%',
+            refWidth: "20%",
+            refHeight: "45%",
             strokeWidth: 1,
-            refX: '80%',
+            refX: "80%",
             stroke: crowd.palette.colors.temporalMarkStroke,
-            fill: crowd.palette.colors.temporalMark
+            fill: crowd.palette.colors.temporalMark,
           },
           temporalText: {
-            text: 'S',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refWidth: '20%',
-            refHeight: '45%',
-            refX: '90%',
-            refY: '24%',
-            fill: '#000000',
-            class: 'crowd-element-text'
-          }
+            text: "S",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refWidth: "20%",
+            refHeight: "45%",
+            refX: "90%",
+            refY: "24%",
+            fill: "#000000",
+            class: "crowd-element-text",
+          },
         },
         size: {
           width: 70,
-          height: 40
-        }
+          height: 40,
+        },
       },
       {
         markup: [
           {
-            tagName: 'ellipse',
-            selector: 'body',
+            tagName: "ellipse",
+            selector: "body",
           },
           {
-            tagName: 'text',
-            selector: 'text'
+            tagName: "text",
+            selector: "text",
           },
           {
-            tagName: 'rect',
-            selector: 'temporalMark',
+            tagName: "rect",
+            selector: "temporalMark",
           },
           {
-            tagName: 'text',
-            selector: 'temporalText'
-          }
-        ]
-      });
+            tagName: "text",
+            selector: "temporalText",
+          },
+        ],
+      }
+    );
 
-    crowd.palette.elements.snapshotAttribute = new joint.shapes.ervt.SnapshotAttribute({
-      parentType: 'attribute',
-      temporal: true,
-      type: 'attribute',
-      temporalType: 'snapshotAttribute',
-      name: 'Snapshot\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-attribute',
-      refUri: ''
-    });
+    crowd.palette.elements.snapshotAttribute =
+      new joint.shapes.ervt.SnapshotAttribute({
+        parentType: "attribute",
+        temporal: true,
+        type: "attribute",
+        temporalType: "snapshotAttribute",
+        name: "Snapshot\nAttribute",
+        uri: crowd.config.defaultNamespace + "#snapshot-attribute",
+        refUri: "",
+      });
 
     //add joint eer key attribute to palette elements
     crowd.palette.elements.keyAttribute = new joint.shapes.erd.Attribute({
-      parentType: 'attribute',
+      parentType: "attribute",
       temporal: false,
-      type: 'keyAttribute',
-      temporalType: 'temporalAttribute',
-      name: 'Key\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#key-attribute',
-      datatype: 'string',
+      type: "keyAttribute",
+      temporalType: "temporalAttribute",
+      name: "Key\nAttribute",
+      uri: crowd.config.defaultNamespace + "#key-attribute",
+      datatype: "string",
       attrs: {
         text: {
-          fill: '#000000',
-          text: 'Key\nAttribute',
-          class: 'crowd-element-text xs key-attribute'
+          fill: "#000000",
+          text: "Key\nAttribute",
+          class: "crowd-element-text xs key-attribute",
         },
-        '.outer': {
+        ".outer": {
           fill: crowd.palette.colors.keyAttribute,
-          stroke: crowd.palette.colors.keyAttributeStroke
-        }
+          stroke: crowd.palette.colors.keyAttributeStroke,
+        },
       },
       size: {
         width: 70,
-        height: 40
-      }
+        height: 40,
+      },
     });
 
     //add joint eer temporal key attribute to palette elements
-    joint.dia.Element.define('ervt.TemporalKeyAttribute',
+    joint.dia.Element.define(
+      "ervt.TemporalKeyAttribute",
       {
-        parentType: 'attribute',
+        parentType: "attribute",
         temporal: true,
-        type: 'keyAttribute',
-        temporalType: 'temporalKeyAttribute',
-        name: 'Temporal\nKey\nAttribute',
-        uri: 'http://crowd.fi.uncoma.edu.ar#temporal-key-attribute',
-        datatype: 'string',
+        type: "keyAttribute",
+        temporalType: "temporalKeyAttribute",
+        name: "Temporal\nKey\nAttribute",
+        uri: crowd.config.defaultNamespace + "#temporal-key-attribute",
+        datatype: "string",
         attrs: {
           text: {
-            text: 'Temporal\nKey\nAttribute',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refX: '50%',
-            refY: '50%',
-            fill: '#000000',
-            class: 'crowd-element-text xs key-attribute'
+            text: "Temporal\nKey\nAttribute",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refX: "50%",
+            refY: "50%",
+            fill: "#000000",
+            class: "crowd-element-text xs key-attribute",
           },
           body: {
             cx: 35,
@@ -720,84 +751,87 @@ var CrowdEditorErvt = {
             ry: 20,
             strokeWidth: 2,
             fill: crowd.palette.colors.temporalKeyAttribute,
-            stroke: crowd.palette.colors.keyAttributeStroke
+            stroke: crowd.palette.colors.keyAttributeStroke,
           },
           temporalMark: {
-            refWidth: '20%',
-            refHeight: '45%',
+            refWidth: "20%",
+            refHeight: "45%",
             strokeWidth: 1,
-            refX: '80%',
+            refX: "80%",
             stroke: crowd.palette.colors.temporalMarkStroke,
-            fill: crowd.palette.colors.temporalMark
+            fill: crowd.palette.colors.temporalMark,
           },
           temporalText: {
-            text: 'T',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refWidth: '20%',
-            refHeight: '45%',
-            refX: '90%',
-            refY: '24%',
-            fill: '#000000',
-            class: 'crowd-element-text'
-          }
+            text: "T",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refWidth: "20%",
+            refHeight: "45%",
+            refX: "90%",
+            refY: "24%",
+            fill: "#000000",
+            class: "crowd-element-text",
+          },
         },
         size: {
           width: 70,
-          height: 40
-        }
+          height: 40,
+        },
       },
       {
         markup: [
           {
-            tagName: 'ellipse',
-            selector: 'body',
+            tagName: "ellipse",
+            selector: "body",
           },
           {
-            tagName: 'text',
-            selector: 'text'
+            tagName: "text",
+            selector: "text",
           },
           {
-            tagName: 'rect',
-            selector: 'temporalMark',
+            tagName: "rect",
+            selector: "temporalMark",
           },
           {
-            tagName: 'text',
-            selector: 'temporalText'
-          }
-        ]
+            tagName: "text",
+            selector: "temporalText",
+          },
+        ],
+      }
+    );
+
+    crowd.palette.elements.temporalKeyAttribute =
+      new joint.shapes.ervt.TemporalKeyAttribute({
+        parentType: "attribute",
+        temporal: true,
+        type: "keyAttribute",
+        temporalType: "temporalKeyAttribute",
+        name: "Temporal\nKey\nAttribute",
+        uri: crowd.config.defaultNamespace + "#temporal-key-attribute",
+        refUri: "",
       });
 
-    crowd.palette.elements.temporalKeyAttribute = new joint.shapes.ervt.TemporalKeyAttribute({
-      parentType: 'attribute',
-      temporal: true,
-      type: 'keyAttribute',
-      temporalType: 'temporalKeyAttribute',
-      name: 'Temporal\nKey\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#temporal-key-attribute',
-      refUri: ''
-    });
-
     //add joint eer snapshot key attribute to palette elements
-    joint.dia.Element.define('ervt.SnapshotKeyAttribute',
+    joint.dia.Element.define(
+      "ervt.SnapshotKeyAttribute",
       {
-        parentType: 'attribute',
+        parentType: "attribute",
         addToPalette: false,
         temporal: true,
-        type: 'keyAttribute',
-        temporalType: 'snapshotKeyAttribute',
-        name: 'Snapshot\nKey\nAttribute',
-        uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-key-attribute',
-        datatype: 'string',
+        type: "keyAttribute",
+        temporalType: "snapshotKeyAttribute",
+        name: "Snapshot\nKey\nAttribute",
+        uri: crowd.config.defaultNamespace + "#snapshot-key-attribute",
+        datatype: "string",
         attrs: {
           text: {
-            text: 'Snapshot\nKey\nAttribute',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refX: '50%',
-            refY: '50%',
-            fill: '#000000',
-            class: 'crowd-element-text xs key-attribute'
+            text: "Snapshot\nKey\nAttribute",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refX: "50%",
+            refY: "50%",
+            fill: "#000000",
+            class: "crowd-element-text xs key-attribute",
           },
           body: {
             cx: 35,
@@ -806,63 +840,65 @@ var CrowdEditorErvt = {
             ry: 20,
             strokeWidth: 2,
             fill: crowd.palette.colors.snapshotKeyAttribute,
-            stroke: crowd.palette.colors.keyAttributeStroke
+            stroke: crowd.palette.colors.keyAttributeStroke,
           },
           temporalMark: {
-            refWidth: '20%',
-            refHeight: '45%',
+            refWidth: "20%",
+            refHeight: "45%",
             strokeWidth: 1,
-            refX: '80%',
+            refX: "80%",
             stroke: crowd.palette.colors.temporalMarkStroke,
-            fill: crowd.palette.colors.temporalMark
+            fill: crowd.palette.colors.temporalMark,
           },
           temporalText: {
-            text: 'S',
-            textVerticalAnchor: 'middle',
-            textAnchor: 'middle',
-            refWidth: '20%',
-            refHeight: '45%',
-            refX: '90%',
-            refY: '24%',
-            fill: '#000000',
-            class: 'crowd-element-text'
-          }
+            text: "S",
+            textVerticalAnchor: "middle",
+            textAnchor: "middle",
+            refWidth: "20%",
+            refHeight: "45%",
+            refX: "90%",
+            refY: "24%",
+            fill: "#000000",
+            class: "crowd-element-text",
+          },
         },
         size: {
           width: 70,
-          height: 40
-        }
+          height: 40,
+        },
       },
       {
         markup: [
           {
-            tagName: 'ellipse',
-            selector: 'body',
+            tagName: "ellipse",
+            selector: "body",
           },
           {
-            tagName: 'text',
-            selector: 'text'
+            tagName: "text",
+            selector: "text",
           },
           {
-            tagName: 'rect',
-            selector: 'temporalMark',
+            tagName: "rect",
+            selector: "temporalMark",
           },
           {
-            tagName: 'text',
-            selector: 'temporalText'
-          }
-        ]
-      });
+            tagName: "text",
+            selector: "temporalText",
+          },
+        ],
+      }
+    );
 
-    crowd.palette.elements.snapshotKeyAttribute = new joint.shapes.ervt.SnapshotKeyAttribute({
-      parentType: 'attribute',
-      temporal: true,
-      type: 'keyAttribute',
-      temporalType: 'snapshotKeyAttribute',
-      name: 'Snapshot\nKey\nAttribute',
-      uri: 'http://crowd.fi.uncoma.edu.ar#snapshot-key-attribute',
-      refUri: ''
-    });
+    crowd.palette.elements.snapshotKeyAttribute =
+      new joint.shapes.ervt.SnapshotKeyAttribute({
+        parentType: "attribute",
+        temporal: true,
+        type: "keyAttribute",
+        temporalType: "snapshotKeyAttribute",
+        name: "Snapshot\nKey\nAttribute",
+        uri: crowd.config.defaultNamespace + "#snapshot-key-attribute",
+        refUri: "",
+      });
 
     //add joint eer weak key attribute to palette elements
     // crowd.palette.elements.weakKeyAttribute = new joint.shapes.erd.Attribute({
@@ -923,26 +959,26 @@ var CrowdEditorErvt = {
 
     //add joint eer inheritance to palette elements
     crowd.palette.elements.inheritance = new joint.shapes.erd.Attribute({
-      parentType: 'inheritance',
-      type: 'inheritance',
-      subtype: 'overlaped',
+      parentType: "inheritance",
+      type: "inheritance",
+      subtype: "overlaped",
       attrs: {
         text: {
           fill: crowd.palette.colors.inheritanceStroke,
-          text: 'o',
-          class: 'crowd-element-text l inheritance',
-          'dominant-baseline': 'middle'
+          text: "o",
+          class: "crowd-element-text l inheritance",
+          "dominant-baseline": "middle",
         },
-        '.outer': {
+        ".outer": {
           fill: crowd.palette.colors.inheritance,
           stroke: crowd.palette.colors.inheritanceStroke,
-          'stroke-width': 2
-        }
+          "stroke-width": 2,
+        },
       },
       size: {
         width: 30,
-        height: 30
-      }
+        height: 30,
+      },
     });
 
     //add joint eer derived attribute to palette elements
@@ -977,100 +1013,106 @@ var CrowdEditorErvt = {
 
     //add joint eer connector to palette links
     crowd.palette.links.connector = new joint.shapes.standard.Link({
-      type: 'connector',
-      cardinality: '0..1',
+      type: "connector",
+      cardinality: "0..1",
       total: false,
       inherit: false,
       inheritChild: false,
       attribute: false,
-      uri: 'http://crowd.fi.uncoma.edu.ar#role',
+      uri: crowd.config.defaultNamespace + "#role",
       attrs: {
         line: {
-          stroke: 'black',
+          stroke: "black",
           strokeWidth: 2,
           sourceMarker: {},
           targetMarker: {
-            stroke: 'black',
-            fill: 'black',
-            d: ''
-          }
-        }
-      },
-      labels: [{
-        attrs: {
-          text: {
-            text: '0..1'
+            stroke: "black",
+            fill: "black",
+            d: "",
           },
-          rect: {
-            fill: getCSS('background-color', 'crowd-workspace')
-          }
-        }
-      }]
+        },
+      },
+      labels: [
+        {
+          attrs: {
+            text: {
+              text: "0..1",
+            },
+            rect: {
+              fill: getCSS("background-color", "crowd-workspace"),
+            },
+          },
+        },
+      ],
     });
 
     //add joint eer connector to palette links
     crowd.palette.links.temporal = new joint.shapes.standard.Link({
-      type: 'temporalConnector',
-      subtype: 'tex',
+      type: "temporalConnector",
+      subtype: "tex",
       attrs: {
         line: {
-          stroke: 'black',
+          stroke: "black",
           strokeDasharray: "4",
           strokeWidth: 2,
           sourceMarker: {},
           targetMarker: {
-            'fill': getCSS('background-color', 'crowd-workspace'),
-            'stroke': '#000000',
-            'd': 'M 15 -6 0 0 15 6 Z'
-          }
-        }
-      },
-      labels: [{
-        attrs: {
-          text: {
-            text: 'TEX'
+            fill: getCSS("background-color", "crowd-workspace"),
+            stroke: "#000000",
+            d: "M 15 -6 0 0 15 6 Z",
           },
-          rect: {
-            fill: getCSS('background-color', 'crowd-workspace')
-          }
-        }
-      }]
+        },
+      },
+      labels: [
+        {
+          attrs: {
+            text: {
+              text: "TEX",
+            },
+            rect: {
+              fill: getCSS("background-color", "crowd-workspace"),
+            },
+          },
+        },
+      ],
     });
 
     //add joint eer total connector to palette links
     crowd.palette.links.total = new joint.shapes.standard.DoubleLink({
-      type: 'connector',
-      cardinality: '0..1',
+      type: "connector",
+      cardinality: "0..1",
       total: true,
       inherit: false,
       inheritChild: false,
       attribute: false,
-      uri: 'http://crowd.fi.uncoma.edu.ar#role',
+      uri: crowd.config.defaultNamespace + "#role",
       attrs: {
         line: {
-          stroke: getCSS('background-color', 'crowd-workspace'),
+          stroke: getCSS("background-color", "crowd-workspace"),
           sourceMarker: {},
           targetMarker: {
-            stroke: 'black',
-            fill: 'black',
-            d: ''
-          }
+            stroke: "black",
+            fill: "black",
+            d: "",
+          },
         },
         outline: {
-          stroke: 'black',
+          stroke: "black",
           strokeWidth: 8,
-        }
+        },
       },
-      labels: [{
-        attrs: {
-          text: {
-            text: '0..1'
+      labels: [
+        {
+          attrs: {
+            text: {
+              text: "0..1",
+            },
+            rect: {
+              fill: getCSS("background-color", "crowd-workspace"),
+            },
           },
-          rect: {
-            fill: getCSS('background-color', 'crowd-workspace')
-          }
-        }
-      }]
+        },
+      ],
     });
   },
   initElementsToolsViews: function (crowd) {
@@ -1079,28 +1121,29 @@ var CrowdEditorErvt = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.entity,
-        x: config.position?.x ? config.position?.x : '100%',
-        y: config.position?.y ? config.position?.y : '50%',
+        x: config.position?.x ? config.position?.x : "100%",
+        y: config.position?.y ? config.position?.y : "50%",
         offset: {
           x: config.offset?.x ? config.offset?.x : 25,
-          y: config.offset?.y ? config.offset?.y : 10
+          y: config.offset?.y ? config.offset?.y : 10,
         },
         markup: crowd.workspace.tools.elements.markup({
-          icon: 'share',
+          icon: "share",
           // background: crowd.palette.colors.entity,
           tooltip: {
-            title: 'Click and drag to make a <b class="crowd-bold-color">entity</b> and connect with it',
-            placement: "right"
-          }
+            title:
+              'Click and drag to make a <b class="crowd-bold-color">entity</b> and connect with it',
+            placement: "right",
+          },
         }),
         link: {
-          type: config.total ? 'total' : 'connector',
+          type: config.total ? "total" : "connector",
           props: {
-            cardinality: config.cardinality ? config.cardinality : '0..1',
+            cardinality: config.cardinality ? config.cardinality : "0..1",
             inherit: config.inherit ? config.inherit : false,
-            inheritChild: config.inheritChild ? config.inheritChild : false
-          }
-        }
+            inheritChild: config.inheritChild ? config.inheritChild : false,
+          },
+        },
       });
     };
 
@@ -1139,28 +1182,29 @@ var CrowdEditorErvt = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.relationship,
-        x: config.position?.x ? config.position?.x : '100%',
-        y: config.position?.y ? config.position?.y : '50%',
+        x: config.position?.x ? config.position?.x : "100%",
+        y: config.position?.y ? config.position?.y : "50%",
         offset: {
           x: config.offset?.x ? config.offset?.x : 25,
-          y: config.offset?.y ? config.offset?.y : 10
+          y: config.offset?.y ? config.offset?.y : 10,
         },
         markup: crowd.workspace.tools.elements.markup({
-          icon: 'share',
+          icon: "share",
           // background: crowd.palette.colors.relationship,
           tooltip: {
-            title: 'Click and drag to make a <b class="crowd-bold-color">relationship</b> and connect with it',
-            placement: "right"
-          }
+            title:
+              'Click and drag to make a <b class="crowd-bold-color">relationship</b> and connect with it',
+            placement: "right",
+          },
         }),
         link: {
-          type: config.total ? 'total' : 'connector',
+          type: config.total ? "total" : "connector",
           props: {
-            cardinality: config.cardinality ? config.cardinality : '0..1',
+            cardinality: config.cardinality ? config.cardinality : "0..1",
             inherit: config.inherit ? config.inherit : false,
-            inheritChild: config.inheritChild ? config.inheritChild : false
-          }
-        }
+            inheritChild: config.inheritChild ? config.inheritChild : false,
+          },
+        },
       });
     };
 
@@ -1197,22 +1241,24 @@ var CrowdEditorErvt = {
     //link tool for attributes
     var linkAttributeTool = crowd.workspace.tools.elements.linkElementTool({
       elementType: crowd.palette.elements.attribute,
-      x: '50%', offset: { x: -25, y: -15 },
+      x: "50%",
+      offset: { x: -25, y: -15 },
       markup: crowd.workspace.tools.elements.markup({
-        icon: 'share',
+        icon: "share",
         // background: crowd.palette.colors.attribute,
         tooltip: {
-          title: 'Click and drag to make an <b class="crowd-bold-color">attribute</b> and connect with it',
-          placement: "top"
-        }
+          title:
+            'Click and drag to make an <b class="crowd-bold-color">attribute</b> and connect with it',
+          placement: "top",
+        },
       }),
       link: {
-        type: 'connector',
+        type: "connector",
         props: {
-          cardinality: '1..1',
-          attribute: true
-        }
-      }
+          cardinality: "1..1",
+          attribute: true,
+        },
+      },
     });
 
     //link tool for multivalued attributes
@@ -1239,22 +1285,24 @@ var CrowdEditorErvt = {
     //link tool for key attributes
     var linkKeyAttributeTool = crowd.workspace.tools.elements.linkElementTool({
       elementType: crowd.palette.elements.keyAttribute,
-      x: '50%', offset: { x: 25, y: -15 },
+      x: "50%",
+      offset: { x: 25, y: -15 },
       markup: crowd.workspace.tools.elements.markup({
-        icon: 'share',
+        icon: "share",
         // background: crowd.palette.colors.keyAttribute,
         tooltip: {
-          title: 'Click and drag to make a <b class="crowd-bold-color">key attribute</b> and connect with it',
-          placement: "top"
-        }
+          title:
+            'Click and drag to make a <b class="crowd-bold-color">key attribute</b> and connect with it',
+          placement: "top",
+        },
       }),
       link: {
-        type: 'connector',
+        type: "connector",
         props: {
-          cardinality: '1..1',
-          attribute: true
-        }
-      }
+          cardinality: "1..1",
+          attribute: true,
+        },
+      },
     });
 
     //link tool for weak key attributes
@@ -1283,25 +1331,28 @@ var CrowdEditorErvt = {
       config = config ? config : {};
       return crowd.workspace.tools.elements.linkElementTool({
         elementType: crowd.palette.elements.inheritance,
-        x: '50%', y: '100%', offset: { x: 25, y: 35 },
+        x: "50%",
+        y: "100%",
+        offset: { x: 25, y: 35 },
         markup: crowd.workspace.tools.elements.markup({
-          icon: 'share',
+          icon: "share",
           // background: crowd.palette.colors.inheritance,
           tooltip: {
-            title: 'Click and drag to make a <b class="crowd-bold-color">inheritance</b> and connect with it',
-            placement: "bottom"
-          }
+            title:
+              'Click and drag to make a <b class="crowd-bold-color">inheritance</b> and connect with it',
+            placement: "bottom",
+          },
         }),
         link: {
-          type: config.total ? 'total' : 'connector',
+          type: config.total ? "total" : "connector",
           props: {
-            cardinality: '0..1',
+            cardinality: "0..1",
             inherit: config.inherit ? config.inherit : true,
-            inheritChild: config.inheritChild ? config.inheritChild : false
-          }
-        }
+            inheritChild: config.inheritChild ? config.inheritChild : false,
+          },
+        },
       });
-    }
+    };
 
     //link tool for generic link connection
     var linkTool = function (config) {
@@ -1309,15 +1360,15 @@ var CrowdEditorErvt = {
       return crowd.workspace.tools.elements.linkTool({
         offset: { x: 10, y: -15 },
         link: {
-          type: 'connector',
+          type: "connector",
           props: {
-            cardinality: config.cardinality ? config.cardinality : '0..1',
+            cardinality: config.cardinality ? config.cardinality : "0..1",
             inherit: config.inherit ? config.inherit : false,
-            inheritChild: config.inheritChild ? config.inheritChild : false
-          }
-        }
+            inheritChild: config.inheritChild ? config.inheritChild : false,
+          },
+        },
       });
-    }
+    };
 
     //link tool for generic link connection
     var temporalLinkTool = function (config) {
@@ -1327,26 +1378,33 @@ var CrowdEditorErvt = {
         // y: ,
         offset: { x: 25, y: 0 },
         link: {
-          type: 'temporal',
+          type: "temporal",
         },
-        markup: crowd.workspace.tools.elements.markup({ icon: 'update', tooltip: { title: 'Click and drag to create a temporal link', placement: "right" } })
+        markup: crowd.workspace.tools.elements.markup({
+          icon: "update",
+          tooltip: {
+            title: "Click and drag to create a temporal link",
+            placement: "right",
+          },
+        }),
       });
-    }
+    };
 
     //create tools view for entities
-    crowd.workspace.tools.elements.elementsToolsView['entity'] = new joint.dia.ToolsView({
-      name: 'entity-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool(),
-        temporalLinkTool(),
-        linkAttributeTool,
-        linkKeyAttributeTool,
-        linkRelationshipTool(),
-        // linkWeakRelationshipTool({ cardinality: '0..1' }),
-        // linkMultivaluedAttributeTool,
-        linkInheritanceTool()
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["entity"] =
+      new joint.dia.ToolsView({
+        name: "entity-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool(),
+          temporalLinkTool(),
+          linkAttributeTool,
+          linkKeyAttributeTool,
+          linkRelationshipTool(),
+          // linkWeakRelationshipTool({ cardinality: '0..1' }),
+          // linkMultivaluedAttributeTool,
+          linkInheritanceTool(),
+        ]),
+      });
 
     //create tools view for weak entities
     // crowd.workspace.tools.elements.elementsToolsView['weakEntity'] = new joint.dia.ToolsView({
@@ -1364,73 +1422,78 @@ var CrowdEditorErvt = {
     // });
 
     //create tools view for temporal entities
-    crowd.workspace.tools.elements.elementsToolsView['temporalEntity'] = new joint.dia.ToolsView({
-      name: 'temporal-entity-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool(),
-        temporalLinkTool(),
-        linkAttributeTool,
-        linkKeyAttributeTool,
-        linkRelationshipTool(),
-        // linkWeakRelationshipTool({ cardinality: '0..1' }),
-        // linkMultivaluedAttributeTool,
-        linkInheritanceTool()
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["temporalEntity"] =
+      new joint.dia.ToolsView({
+        name: "temporal-entity-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool(),
+          temporalLinkTool(),
+          linkAttributeTool,
+          linkKeyAttributeTool,
+          linkRelationshipTool(),
+          // linkWeakRelationshipTool({ cardinality: '0..1' }),
+          // linkMultivaluedAttributeTool,
+          linkInheritanceTool(),
+        ]),
+      });
 
     //create tools view for snapshot entities
-    crowd.workspace.tools.elements.elementsToolsView['snapshotEntity'] = new joint.dia.ToolsView({
-      name: 'snapshot-entity-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool(),
-        temporalLinkTool(),
-        linkAttributeTool,
-        linkKeyAttributeTool,
-        linkRelationshipTool(),
-        // linkWeakRelationshipTool({ cardinality: '0..1' }),
-        // linkMultivaluedAttributeTool,
-        linkInheritanceTool()
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["snapshotEntity"] =
+      new joint.dia.ToolsView({
+        name: "snapshot-entity-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool(),
+          temporalLinkTool(),
+          linkAttributeTool,
+          linkKeyAttributeTool,
+          linkRelationshipTool(),
+          // linkWeakRelationshipTool({ cardinality: '0..1' }),
+          // linkMultivaluedAttributeTool,
+          linkInheritanceTool(),
+        ]),
+      });
 
     //create tools view for relationship
-    crowd.workspace.tools.elements.elementsToolsView['relationship'] = new joint.dia.ToolsView({
-      name: 'relationship-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool(),
-        linkAttributeTool,
-        linkKeyAttributeTool,
-        linkEntityTool(),
-        // linkWeakEntityTool(),
-        linkInheritanceTool()
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["relationship"] =
+      new joint.dia.ToolsView({
+        name: "relationship-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool(),
+          linkAttributeTool,
+          linkKeyAttributeTool,
+          linkEntityTool(),
+          // linkWeakEntityTool(),
+          linkInheritanceTool(),
+        ]),
+      });
 
     //create tools view for temporal relationship
-    crowd.workspace.tools.elements.elementsToolsView['temporalRelationship'] = new joint.dia.ToolsView({
-      name: 'temporal-relationship-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool(),
-        linkAttributeTool,
-        linkKeyAttributeTool,
-        linkEntityTool(),
-        // linkWeakEntityTool(),
-        linkInheritanceTool()
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["temporalRelationship"] =
+      new joint.dia.ToolsView({
+        name: "temporal-relationship-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool(),
+          linkAttributeTool,
+          linkKeyAttributeTool,
+          linkEntityTool(),
+          // linkWeakEntityTool(),
+          linkInheritanceTool(),
+        ]),
+      });
 
     //create tools view for snapshot relationship
-    crowd.workspace.tools.elements.elementsToolsView['snapshotRelationship'] = new joint.dia.ToolsView({
-      name: 'snapshot-relationship-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool(),
-        linkAttributeTool,
-        linkKeyAttributeTool,
-        linkEntityTool(),
-        // linkWeakEntityTool(),
-        linkInheritanceTool()
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["snapshotRelationship"] =
+      new joint.dia.ToolsView({
+        name: "snapshot-relationship-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool(),
+          linkAttributeTool,
+          linkKeyAttributeTool,
+          linkEntityTool(),
+          // linkWeakEntityTool(),
+          linkInheritanceTool(),
+        ]),
+      });
 
     //create tools view for weak relationship
     // crowd.workspace.tools.elements.elementsToolsView['weakRelationship'] = new joint.dia.ToolsView({
@@ -1446,55 +1509,61 @@ var CrowdEditorErvt = {
     // });
 
     //create tools view for attribute
-    crowd.workspace.tools.elements.elementsToolsView['attribute'] = new joint.dia.ToolsView({
-      name: 'attribute-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '0..1' }),
-        linkAttributeTool
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["attribute"] =
+      new joint.dia.ToolsView({
+        name: "attribute-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool({ cardinality: "0..1" }),
+          linkAttributeTool,
+        ]),
+      });
 
     //create tools view for temporal attribute
-    crowd.workspace.tools.elements.elementsToolsView['temporalAttribute'] = new joint.dia.ToolsView({
-      name: 'temporal-attribute-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '0..1' }),
-        linkAttributeTool
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["temporalAttribute"] =
+      new joint.dia.ToolsView({
+        name: "temporal-attribute-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool({ cardinality: "0..1" }),
+          linkAttributeTool,
+        ]),
+      });
 
     //create tools view for snapshot attribute
-    crowd.workspace.tools.elements.elementsToolsView['snapshotAttribute'] = new joint.dia.ToolsView({
-      name: 'snapshot-attribute-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '0..1' }),
-        linkAttributeTool
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["snapshotAttribute"] =
+      new joint.dia.ToolsView({
+        name: "snapshot-attribute-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool({ cardinality: "0..1" }),
+          linkAttributeTool,
+        ]),
+      });
 
     //create tools view for key attribute
-    crowd.workspace.tools.elements.elementsToolsView['keyAttribute'] = new joint.dia.ToolsView({
-      name: 'key-attribute-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '0..1' })
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["keyAttribute"] =
+      new joint.dia.ToolsView({
+        name: "key-attribute-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool({ cardinality: "0..1" }),
+        ]),
+      });
 
     //create tools view for temporal key attribute
-    crowd.workspace.tools.elements.elementsToolsView['temporalKeyAttribute'] = new joint.dia.ToolsView({
-      name: 'temporal-key-attribute-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '0..1' })
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["temporalKeyAttribute"] =
+      new joint.dia.ToolsView({
+        name: "temporal-key-attribute-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool({ cardinality: "0..1" }),
+        ]),
+      });
 
     //create tools view for snapshot key attribute
-    crowd.workspace.tools.elements.elementsToolsView['snapshotKeyAttribute'] = new joint.dia.ToolsView({
-      name: 'snapshot-key-attribute-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ cardinality: '0..1' })
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["snapshotKeyAttribute"] =
+      new joint.dia.ToolsView({
+        name: "snapshot-key-attribute-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool({ cardinality: "0..1" }),
+        ]),
+      });
 
     //create tools view for weak key attribute
     // crowd.workspace.tools.elements.elementsToolsView['weakKeyAttribute'] = new joint.dia.ToolsView({
@@ -1521,152 +1590,200 @@ var CrowdEditorErvt = {
     // });
 
     //create tools view for inheritance
-    crowd.workspace.tools.elements.elementsToolsView['inheritance'] = new joint.dia.ToolsView({
-      name: 'inheritance-tools',
-      tools: crowd.workspace.tools.elements.basicTools.concat([
-        linkTool({ inherit: true, inheritChild: true }),
-        linkEntityTool({ inherit: true, inheritChild: true, position: { y: '25%' }, offset: { y: -1 } }),
-        // linkWeakEntityTool({ inherit: true, inheritChild: true, position: { y: '25%' }, offset: { y: -1 } }),
-        linkRelationshipTool({ inherit: true, inheritChild: true, position: { y: '75%' }, offset: { y: 20 } }),
-        // linkWeakRelationshipTool({ inherit: true, inheritChild: true, position: { y: '75%' }, offset: { y: 20 } })
-      ])
-    });
+    crowd.workspace.tools.elements.elementsToolsView["inheritance"] =
+      new joint.dia.ToolsView({
+        name: "inheritance-tools",
+        tools: crowd.workspace.tools.elements.basicTools.concat([
+          linkTool({ inherit: true, inheritChild: true }),
+          linkEntityTool({
+            inherit: true,
+            inheritChild: true,
+            position: { y: "25%" },
+            offset: { y: -1 },
+          }),
+          // linkWeakEntityTool({ inherit: true, inheritChild: true, position: { y: '25%' }, offset: { y: -1 } }),
+          linkRelationshipTool({
+            inherit: true,
+            inheritChild: true,
+            position: { y: "75%" },
+            offset: { y: 20 },
+          }),
+          // linkWeakRelationshipTool({ inherit: true, inheritChild: true, position: { y: '75%' }, offset: { y: 20 } })
+        ]),
+      });
   },
   initLinksToolsViews: function (crowd) {
     //no extra links tools
   },
   initChangeAttributesEvents: function (crowd) {
     //event when the elements type change (types are: entity, weakEntity, attribute, etc)
-    crowd.workspace.graph.on('change:temporal change:type change:temporalType', function (element, newType) {
-      // console.log('change:type', { element, newType });
+    crowd.workspace.graph.on(
+      "change:temporal change:type change:temporalType",
+      function (element, newType) {
+        // console.log('change:type', { element, newType });
 
-      if (element.isElement()) {
-        if (element.attributes.temporal) {
-          newType = element.attributes.temporalType;
-        } else {
-          newType = element.attributes.type;
+        if (element.isElement()) {
+          if (element.attributes.temporal) {
+            newType = element.attributes.temporalType;
+          } else {
+            newType = element.attributes.type;
+          }
+          //replace element attributes and markup with the palette default component of the newtype
+          element.attributes.attrs = $.extend(
+            true,
+            {},
+            crowd.palette.elements[newType].attributes.attrs
+          );
+          element.markup = crowd.palette.elements[newType].markup;
+
+          //get element view
+          var elementView = element.findView(crowd.workspace.paper);
+
+          //redraw the element and their tools with the new type style
+          elementView.render();
+          crowd.workspace.renderElementTools(elementView);
+
+          //trigger the change name event to update the text with the name of the element
+          //(because it is overwrited when replaced the attributes.attrs)
+          element.trigger("change:name", element, element.prop("name"));
+
+          crowd.inspector.loadContent();
         }
-        //replace element attributes and markup with the palette default component of the newtype
-        element.attributes.attrs = $.extend(true, {}, crowd.palette.elements[newType].attributes.attrs);
-        element.markup = crowd.palette.elements[newType].markup;
-
-        //get element view
-        var elementView = element.findView(crowd.workspace.paper);
-
-        //redraw the element and their tools with the new type style
-        elementView.render();
-        crowd.workspace.renderElementTools(elementView);
-
-        //trigger the change name event to update the text with the name of the element
-        //(because it is overwrited when replaced the attributes.attrs)
-        element.trigger('change:name', element, element.prop('name'));
-
-        crowd.inspector.loadContent();
       }
-    });
+    );
 
     //event when the elements name change
-    crowd.workspace.graph.on('change:name', function (element, newName) {
+    crowd.workspace.graph.on("change:name", function (element, newName) {
       // console.log('change:name', { element, newName });
 
       if (element.isElement()) {
-        element.attr('text/text', joint.util.breakText(newName, { width: element.attributes.size.width }));
+        element.attr(
+          "text/text",
+          joint.util.breakText(newName, {
+            width: element.attributes.size.width,
+          })
+        );
         // element.attr('text/text', newName);
-        element.attributes.uri = element.attributes.uri.split("#")[0] + "#" + toURI(newName);
-        $('#crowd-inspector-content--uri--' + crowd.id).val(element.attributes.uri);
+        element.attributes.uri =
+          element.attributes.uri.split("#")[0] + "#" + toURI(newName);
+        $("#crowd-inspector-content--uri--" + crowd.id).val(
+          element.attributes.uri
+        );
       }
     });
 
     //event when the elements uri change
-    crowd.workspace.graph.on('change:uri', function (element, newUri) {
+    crowd.workspace.graph.on("change:uri", function (element, newUri) {
       // console.log('change:uri', { element, newUri });
 
-      if (element.isElement() && element.attributes.parentType != "inheritance") {
-        element.attr('text/text', joint.util.breakText(fromURI(newUri), { width: element.attributes.size.width }));
-        // element.attr('text/text', fromURI(newUri));
-        element.attributes.name = fromURI(newUri);
-        $('#crowd-inspector-content--name--' + crowd.id).val(element.attributes.name);
+      if (
+        element.isElement() &&
+        element.attributes.parentType != "inheritance"
+      ) {
+        element.attr(
+          "text/text",
+          joint.util.breakText(fromURI(newUri, crowd.config.defaultNamespace), {
+            width: element.attributes.size.width,
+          })
+        );
+        // element.attr('text/text', fromURI(newUri, crowd.config.defaultNamespace));
+        element.attributes.name = fromURI(newUri, crowd.config.defaultNamespace);
+        $("#crowd-inspector-content--name--" + crowd.id).val(
+          element.attributes.name
+        );
       }
     });
 
     //event when the element subtype change
-    crowd.workspace.graph.on('change:subtype', function (element, newSubtype) {
+    crowd.workspace.graph.on("change:subtype", function (element, newSubtype) {
       // console.log('change:subtype', { element, newSubtype });
 
       if (element.isLink() && element.attributes.type == "temporalConnector") {
-        var subtypesText = { tex: 'TEX', dev: 'DEV', dex: 'DEX-', pex: 'PEX' };
-        element.attributes.labels[0].attrs.text.text = subtypesText[newSubtype]
+        var subtypesText = { tex: "TEX", dev: "DEV", dex: "DEX-", pex: "PEX" };
+        element.attributes.labels[0].attrs.text.text = subtypesText[newSubtype];
 
         //get link view
         var linkView = element.findView(crowd.workspace.paper);
 
         //redraw the link with the new text
         linkView.render();
-      } else if (element.isElement() && element.prop('type') == 'inheritance') {
-        var subtypesText = { overlaped: 'o', disjoint: 'd', union: 'U' };
-        element.attr('text/text', subtypesText[newSubtype]);
+      } else if (element.isElement() && element.prop("type") == "inheritance") {
+        var subtypesText = { overlaped: "o", disjoint: "d", union: "U" };
+        element.attr("text/text", subtypesText[newSubtype]);
       }
     });
 
     //event when the links cardinality or uri change
-    crowd.workspace.graph.on('change:cardinality change:uri', function (link, newCardinalityUri) {
-      // console.log('change:cardinality', { link, newCardinality });
+    crowd.workspace.graph.on(
+      "change:cardinality change:uri",
+      function (link, newCardinalityUri) {
+        // console.log('change:cardinality', { link, newCardinality });
 
-      if (link.isLink() && link.attributes.type == 'connector') {
-        var newCardinality = link.attributes.cardinality;
-        var newUri = link.attributes.uri;
+        if (link.isLink() && link.attributes.type == "connector") {
+          var newCardinality = link.attributes.cardinality;
+          var newUri = link.attributes.uri;
 
-        var isConnectedAttribute =
-          link.getSourceElement()?.attributes?.parentType == 'attribute' ||
-          link.getTargetElement()?.attributes?.parentType == 'attribute'
+          var isConnectedAttribute =
+            link.getSourceElement()?.attributes?.parentType == "attribute" ||
+            link.getTargetElement()?.attributes?.parentType == "attribute";
 
-        if (!link.attributes.inherit && !link.attributes.attribute) {
-          // if (newCardinality == "null" || newCardinality == null) {
-          //   link.prop('cardinality', '0..1');
-          // }
+          if (!link.attributes.inherit && !link.attributes.attribute) {
+            // if (newCardinality == "null" || newCardinality == null) {
+            //   link.prop('cardinality', '0..1');
+            // }
 
-          link.labels([
-            {
-              attrs: {
-                text: {
-                  text: (!isConnectedAttribute || newCardinality != '1..1' ? newCardinality : null),
-                  class: ''
+            link.labels([
+              {
+                attrs: {
+                  text: {
+                    text:
+                      !isConnectedAttribute || newCardinality != "1..1"
+                        ? newCardinality
+                        : null,
+                    class: "",
+                  },
+                  rect: {
+                    fill: getCSS("background-color", "crowd-workspace"),
+                  },
                 },
-                rect: {
-                  fill: getCSS('background-color', 'crowd-workspace')
-                }
+                position: {
+                  angle: null,
+                  args: {
+                    keepGradient: false,
+                  },
+                },
               },
-              position: {
-                angle: null,
-                args: {
-                  keepGradient: false
-                }
-              }
-            },
-            {
-              attrs: {
-                text: {
-                  text: (!isConnectedAttribute || newCardinality != '1..1' ? fromURI(newUri) : null),
-                }
+              {
+                attrs: {
+                  text: {
+                    text:
+                      !isConnectedAttribute || newCardinality != "1..1"
+                        ? fromURI(newUri, crowd.config.defaultNamespace)
+                        : null,
+                  },
+                },
+                position: {
+                  distance: 0.25,
+                  offset: -20,
+                },
               },
-              position: {
-                distance: 0.25,
-                offset: -20
-              }
-            }
-          ]);
+            ]);
 
-          if (newCardinality.charAt(0) != '0' && (!isConnectedAttribute || newCardinality != '1..1')) {
-            link.prop('total', true);
-          } else {
-            link.prop('total', false);
+            if (
+              newCardinality.charAt(0) != "0" &&
+              (!isConnectedAttribute || newCardinality != "1..1")
+            ) {
+              link.prop("total", true);
+            } else {
+              link.prop("total", false);
+            }
           }
         }
       }
-    });
+    );
 
     //event when the link total change
-    crowd.workspace.graph.on('change:total', function (link, newTotal) {
+    crowd.workspace.graph.on("change:total", function (link, newTotal) {
       // console.log('change:total', { link, newTotal });
 
       if (link.isLink()) {
@@ -1679,9 +1796,24 @@ var CrowdEditorErvt = {
           : crowd.palette.links.connector.markup;
 
         //change color if is for inheritance or not
-        link.attr((link.attributes.total ? 'outline' : 'line') + '/stroke', link.attributes.inherit ? crowd.palette.colors.inheritanceStroke : '#000000');
-        link.attr('line/targetMarker/stroke', link.attributes.inherit ? crowd.palette.colors.inheritanceStroke : '#000000');
-        link.attr('line/targetMarker/fill', link.attributes.inherit ? crowd.palette.colors.inheritanceStroke : '#000000');
+        link.attr(
+          (link.attributes.total ? "outline" : "line") + "/stroke",
+          link.attributes.inherit
+            ? crowd.palette.colors.inheritanceStroke
+            : "#000000"
+        );
+        link.attr(
+          "line/targetMarker/stroke",
+          link.attributes.inherit
+            ? crowd.palette.colors.inheritanceStroke
+            : "#000000"
+        );
+        link.attr(
+          "line/targetMarker/fill",
+          link.attributes.inherit
+            ? crowd.palette.colors.inheritanceStroke
+            : "#000000"
+        );
 
         //get link view
         var linkView = link.findView(crowd.workspace.paper);
@@ -1689,14 +1821,13 @@ var CrowdEditorErvt = {
         //redraw the link with the new style
         linkView.render();
 
-        if (newTotal)
-          link.prop('inheritChild', false);
+        if (newTotal) link.prop("inheritChild", false);
         // crowd.inspector.loadContent();
       }
     });
 
     //event when the link is attribute change
-    crowd.workspace.graph.on('change:attribute', function (link, newAttribute) {
+    crowd.workspace.graph.on("change:attribute", function (link, newAttribute) {
       // console.log('change:attribute', { link, newAttribute });
 
       crowd.inspector.loadContent();
@@ -1704,111 +1835,171 @@ var CrowdEditorErvt = {
     });
 
     //event when the link inherit change
-    crowd.workspace.graph.on('change:inherit', function (link, newInherit) {
+    crowd.workspace.graph.on("change:inherit", function (link, newInherit) {
       // console.log('change:inherit', { link, newInherit });
 
       if (link.isLink()) {
         if (newInherit) {
-          link.trigger('change:inheritChild', link, link.prop('inheritChild'));
-          link.attr((link.attributes.total ? 'outline' : 'line') + '/stroke', crowd.palette.colors.inheritanceStroke);
-          link.attr('line/targetMarker/stroke', crowd.palette.colors.inheritanceStroke);
-          link.attr('line/targetMarker/fill', crowd.palette.colors.inheritanceStroke);
+          link.trigger("change:inheritChild", link, link.prop("inheritChild"));
+          link.attr(
+            (link.attributes.total ? "outline" : "line") + "/stroke",
+            crowd.palette.colors.inheritanceStroke
+          );
+          link.attr(
+            "line/targetMarker/stroke",
+            crowd.palette.colors.inheritanceStroke
+          );
+          link.attr(
+            "line/targetMarker/fill",
+            crowd.palette.colors.inheritanceStroke
+          );
         } else {
-          link.trigger('change:cardinality', link, link.prop('cardinality'));
-          link.attr((link.attributes.total ? 'outline' : 'line') + '/stroke', '#000000');
-          link.attr('line/targetMarker/stroke', '#000000');
-          link.attr('line/targetMarker/fill', '#000000');
+          link.trigger("change:cardinality", link, link.prop("cardinality"));
+          link.attr(
+            (link.attributes.total ? "outline" : "line") + "/stroke",
+            "#000000"
+          );
+          link.attr("line/targetMarker/stroke", "#000000");
+          link.attr("line/targetMarker/fill", "#000000");
         }
         crowd.inspector.loadContent();
       }
     });
 
     //event when the link inherit child change
-    crowd.workspace.graph.on('change:inheritChild', function (link, newInheritChild) {
-      // console.log('change:inheritChild', { link, newInheritChild });
+    crowd.workspace.graph.on(
+      "change:inheritChild",
+      function (link, newInheritChild) {
+        // console.log('change:inheritChild', { link, newInheritChild });
 
-      if (link.isLink()) {
-        var linkSourceType = link.getSourceElement()?.attributes?.parentType;
-        var linkTargetType = link.getTargetElement()?.attributes?.parentType;
+        if (link.isLink()) {
+          var linkSourceType = link.getSourceElement()?.attributes?.parentType;
+          var linkTargetType = link.getTargetElement()?.attributes?.parentType;
 
-        if (link.attributes.inherit) {
-          link.attr((link.attributes.total ? 'outline' : 'line') + '/stroke', crowd.palette.colors.inheritanceStroke);
-          link.attr('line/targetMarker/stroke', crowd.palette.colors.inheritanceStroke);
-          link.attr('line/targetMarker/fill', crowd.palette.colors.inheritanceStroke);
-          link.labels([{
-            attrs: {
-              text: {
-                fill: crowd.palette.colors.inheritanceStroke,
-                text: newInheritChild ? 'U' : null,
-                class: newInheritChild ? 'crowd-link-text inherit' : ''
+          if (link.attributes.inherit) {
+            link.attr(
+              (link.attributes.total ? "outline" : "line") + "/stroke",
+              crowd.palette.colors.inheritanceStroke
+            );
+            link.attr(
+              "line/targetMarker/stroke",
+              crowd.palette.colors.inheritanceStroke
+            );
+            link.attr(
+              "line/targetMarker/fill",
+              crowd.palette.colors.inheritanceStroke
+            );
+            link.labels([
+              {
+                attrs: {
+                  text: {
+                    fill: crowd.palette.colors.inheritanceStroke,
+                    text: newInheritChild ? "U" : null,
+                    class: newInheritChild ? "crowd-link-text inherit" : "",
+                  },
+                  rect: {
+                    fill: newInheritChild
+                      ? "none"
+                      : getCSS("background-color", "crowd-workspace"),
+                  },
+                },
+                position: {
+                  angle: newInheritChild
+                    ? linkSourceType == "inheritance" ||
+                      (linkSourceType == null &&
+                        linkTargetType != "inheritance")
+                      ? -90
+                      : 90
+                    : null,
+                  args: {
+                    keepGradient: newInheritChild,
+                  },
+                },
               },
-              rect: {
-                fill: newInheritChild ? "none" : getCSS('background-color', 'crowd-workspace')
-              }
-            },
-            position: {
-              angle: newInheritChild ? (linkSourceType == 'inheritance' || (linkSourceType == null && linkTargetType != 'inheritance') ? -90 : 90) : null,
-              args: {
-                keepGradient: newInheritChild
-              }
-            }
-          }]);
-          if (newInheritChild)
-            link.prop('total', false);
-        }
+            ]);
+            if (newInheritChild) link.prop("total", false);
+          }
 
-        crowd.inspector.loadContent();
+          crowd.inspector.loadContent();
+        }
       }
-    });
+    );
 
     //event when the links source or target change
-    crowd.workspace.graph.on('change:source change:target', function (link, newSourceTarget) {
-      // console.log('change:source change:target', { link, newSourceTarget });
+    crowd.workspace.graph.on(
+      "change:source change:target",
+      function (link, newSourceTarget) {
+        // console.log('change:source change:target', { link, newSourceTarget });
 
-      if (link.isLink()) {
-        link.trigger('change:cardinality', link, link.prop('cardinality'));
-        link.trigger('change:inheritChild', link, link.prop('inheritChild'));
+        if (link.isLink()) {
+          link.trigger("change:cardinality", link, link.prop("cardinality"));
+          link.trigger("change:inheritChild", link, link.prop("inheritChild"));
+        }
       }
-    });
+    );
 
     //mark or unmark the element or link when the syntax property changed
-    crowd.workspace.graph.on('change:syntax', function (cell, newSyntax) {
+    crowd.workspace.graph.on("change:syntax", function (cell, newSyntax) {
       // console.log('change:syntax', { cell, newSyntax });
-      var syntaxError = newSyntax && newSyntax != '';
-      var color = 'red';
+      var syntaxError = newSyntax && newSyntax != "";
+      var color = "red";
       if (cell.isElement()) {
-        color = syntaxError ? color : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke');
-        cell.attr('.outer/stroke', color);
+        color = syntaxError
+          ? color
+          : crowd.palette.elements[cell.attributes.type]?.attr(".outer/stroke");
+        cell.attr(".outer/stroke", color);
       } else if (cell.isLink()) {
         if (!cell?.attributes?.total) {
-          color = syntaxError ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
-          cell.attr('line/stroke', color);
+          color = syntaxError
+            ? color
+            : crowd.palette.links[cell.attributes.type]?.attr("line/stroke");
+          cell.attr("line/stroke", color);
         } else {
-          color = syntaxError ? color : crowd.palette.links.total.attr('outline/stroke');
-          cell.attr('outline/stroke', color);
+          color = syntaxError
+            ? color
+            : crowd.palette.links.total.attr("outline/stroke");
+          cell.attr("outline/stroke", color);
         }
       }
 
       if (!syntaxError)
-        cell.trigger('change:semantic', cell, cell.prop('semantic'));
+        cell.trigger("change:semantic", cell, cell.prop("semantic"));
     });
 
     //mark or unmark the element or link when the semantic property changed
-    crowd.workspace.graph.on('change:semantic', function (cell, newSemantic) {
+    crowd.workspace.graph.on("change:semantic", function (cell, newSemantic) {
       // console.log('change:semantic', { cell, newSemantic });
-      var unsatisfiable = newSemantic?.contents?.find(function (content) { return content.value == 'unsatisfiable' });
-      var inferred = newSemantic?.contents?.find(function (content) { return content.value == 'inferred' });
-      var color = unsatisfiable != null ? getCSS('color', 'crowd-unsat-color') : getCSS('color', 'crowd-inferred-color');
+      var unsatisfiable = newSemantic?.contents?.find(function (content) {
+        return content.value == "unsatisfiable";
+      });
+      var inferred = newSemantic?.contents?.find(function (content) {
+        return content.value == "inferred";
+      });
+      var color =
+        unsatisfiable != null
+          ? getCSS("color", "crowd-unsat-color")
+          : getCSS("color", "crowd-inferred-color");
       if (cell.isElement()) {
-        color = unsatisfiable != null || inferred != null ? color : crowd.palette.elements[cell.attributes.type]?.attr('.outer/stroke');
-        cell.attr('.outer/stroke', color);
+        color =
+          unsatisfiable != null || inferred != null
+            ? color
+            : crowd.palette.elements[cell.attributes.type]?.attr(
+                ".outer/stroke"
+              );
+        cell.attr(".outer/stroke", color);
       } else if (cell.isLink()) {
         if (!cell?.attributes?.total) {
-          color = unsatisfiable != null || inferred != null ? color : crowd.palette.links[cell.attributes.type]?.attr('line/stroke');
-          cell.attr('line/stroke', color);
+          color =
+            unsatisfiable != null || inferred != null
+              ? color
+              : crowd.palette.links[cell.attributes.type]?.attr("line/stroke");
+          cell.attr("line/stroke", color);
         } else {
-          color = unsatisfiable != null || inferred != null ? color : crowd.palette.links.total.attr('outline/stroke');
-          cell.attr('outline/stroke', color);
+          color =
+            unsatisfiable != null || inferred != null
+              ? color
+              : crowd.palette.links.total.attr("outline/stroke");
+          cell.attr("outline/stroke", color);
         }
       }
       crowd.inspector.loadContent();
@@ -1817,44 +2008,59 @@ var CrowdEditorErvt = {
   initInspector: function (crowd) {
     //add uri attribute to content for all types
     switch (crowd.inspector.model.attributes.type) {
-      case 'entity':
+      case "entity":
       // case 'weakEntity':
-      case 'temporalEntity':
-      case 'snapshotEntity':
-      case 'relationship':
-      case 'temporalRelationship':
-      case 'snapshotRelationship':
+      case "temporalEntity":
+      case "snapshotEntity":
+      case "relationship":
+      case "temporalRelationship":
+      case "snapshotRelationship":
       // case 'weakRelationship':
-      case 'attribute':
-      case 'temporalAttribute':
-      case 'temporalAttribute':
-      case 'snapshotAttribute':
+      case "attribute":
+      case "temporalAttribute":
+      case "temporalAttribute":
+      case "snapshotAttribute":
       // case 'multivaluedAttribute':
-      case 'keyAttribute':
-      case 'temporalKeyAttribute':
-      case 'snapshotKeyAttribute':
+      case "keyAttribute":
+      case "temporalKeyAttribute":
+      case "snapshotKeyAttribute":
       // case 'weakKeyAttribute':
       // case 'derivedAttribute':
-      case 'connector':
-        if (crowd.inspector.model.attributes.type != 'connector' || (!crowd.inspector.model.attributes.inherit && !crowd.inspector.model.attributes.attribute))
-          crowd.inspector.addAttribute({ label: 'URI', property: 'uri', type: 'uri' });
+      case "connector":
+        if (
+          crowd.inspector.model.attributes.type != "connector" ||
+          (!crowd.inspector.model.attributes.inherit &&
+            !crowd.inspector.model.attributes.attribute)
+        )
+          crowd.inspector.addAttribute({
+            label: "URI",
+            property: "uri",
+            type: "uri",
+          });
         break;
     }
 
     //add is weak attribute for entities
     switch (crowd.inspector.model.attributes.type) {
-      case 'entity':
+      case "entity":
       // case 'weakEntity':
-      case 'temporalEntity':
-      case 'snapshotEntity':
-        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false } });
+      case "temporalEntity":
+      case "snapshotEntity":
+        crowd.inspector.addAttribute({
+          label: "Is temporal",
+          property: "temporal",
+          type: "boolean",
+          map: { true: true, false: false },
+        });
         if (crowd.inspector.model.attributes.temporal) {
           crowd.inspector.addAttribute({
-            label: 'Type', property: 'temporalType', type: 'multiple',
+            label: "Type",
+            property: "temporalType",
+            type: "multiple",
             values: [
-              { label: 'Temporal', value: 'temporalEntity' },
-              { label: 'Snapshot', value: 'snapshotEntity' },
-            ]
+              { label: "Temporal", value: "temporalEntity" },
+              { label: "Snapshot", value: "snapshotEntity" },
+            ],
           });
           // } else {
           //   crowd.inspector.addAttribute({
@@ -1870,18 +2076,25 @@ var CrowdEditorErvt = {
 
     //add is weak attribute for relationship and weak relationship
     switch (crowd.inspector.model.attributes.type) {
-      case 'relationship':
-      case 'temporalRelationship':
-      case 'snapshotRelationship':
+      case "relationship":
+      case "temporalRelationship":
+      case "snapshotRelationship":
         // case 'weakRelationship':
-        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false } });
+        crowd.inspector.addAttribute({
+          label: "Is temporal",
+          property: "temporal",
+          type: "boolean",
+          map: { true: true, false: false },
+        });
         if (crowd.inspector.model.attributes.temporal) {
           crowd.inspector.addAttribute({
-            label: 'Type', property: 'temporalType', type: 'multiple',
+            label: "Type",
+            property: "temporalType",
+            type: "multiple",
             values: [
-              { label: 'Temporal', value: 'temporalRelationship' },
-              { label: 'Snapshot', value: 'snapshotRelationship' },
-            ]
+              { label: "Temporal", value: "temporalRelationship" },
+              { label: "Snapshot", value: "snapshotRelationship" },
+            ],
           });
           // } else {
           //   crowd.inspector.addAttribute({
@@ -1897,84 +2110,110 @@ var CrowdEditorErvt = {
 
     //add the type and datatype attributes for all attributes types
     switch (crowd.inspector.model.attributes.type) {
-      case 'attribute':
-      case 'temporalAttribute':
-      case 'snapshotAttribute':
+      case "attribute":
+      case "temporalAttribute":
+      case "snapshotAttribute":
       // case 'multivaluedAttribute':
-      case 'keyAttribute':
-      case 'temporalKeyAttribute':
-      case 'snapshotKeyAttribute':
+      case "keyAttribute":
+      case "temporalKeyAttribute":
+      case "snapshotKeyAttribute":
         // case 'weakKeyAttribute':
         // case 'derivedAttribute':
-        crowd.inspector.addAttribute({ label: 'Is temporal', property: 'temporal', type: 'boolean', map: { true: true, false: false } });
+        crowd.inspector.addAttribute({
+          label: "Is temporal",
+          property: "temporal",
+          type: "boolean",
+          map: { true: true, false: false },
+        });
         if (crowd.inspector.model.attributes.temporal) {
           crowd.inspector.addAttribute({
-            label: 'Type', property: 'temporalType', type: 'multiple',
+            label: "Type",
+            property: "temporalType",
+            type: "multiple",
             values: [
-              { label: 'Temporal', value: 'temporalAttribute' },
-              { label: 'Snapshot', value: 'snapshotAttribute' },
-              { label: 'Temporal Key', value: 'temporalKeyAttribute' },
-              { label: 'Key Snapshot', value: 'snapshotKeyAttribute' },
-            ]
+              { label: "Temporal", value: "temporalAttribute" },
+              { label: "Snapshot", value: "snapshotAttribute" },
+              { label: "Temporal Key", value: "temporalKeyAttribute" },
+              { label: "Key Snapshot", value: "snapshotKeyAttribute" },
+            ],
           });
         } else {
           crowd.inspector.addAttribute({
-            label: 'Type', property: 'type', type: 'multiple',
+            label: "Type",
+            property: "type",
+            type: "multiple",
             values: [
-              { label: 'Normal', value: 'attribute' },
-              { label: 'Key', value: 'keyAttribute' },
+              { label: "Normal", value: "attribute" },
+              { label: "Key", value: "keyAttribute" },
               // { label: 'Weak Key', value: 'weakKeyAttribute' },
               // { label: 'Multivalued', value: 'multivaluedAttribute' },
               // { label: 'Derived', value: 'derivedAttribute' }
-            ]
+            ],
           });
         }
         crowd.inspector.addAttribute({
-          label: 'Datatype', property: 'datatype', type: 'select',
+          label: "Datatype",
+          property: "datatype",
+          type: "select",
           values: [
-            { label: 'integer', value: 'integer' },
-            { label: 'string', value: 'string' },
-            { label: 'boolean', value: 'boolean' },
-            { label: 'decimal', value: 'decimal' },
-            { label: 'float', value: 'float' },
-            { label: 'double', value: 'double' },
-            { label: 'duration', value: 'duration' },
-            { label: 'dateTime', value: 'dateTime' },
-            { label: 'time', value: 'time' },
-            { label: 'date', value: 'date' },
-            { label: 'gYear', value: 'gYear' },
-            { label: 'gYearMonth', value: 'gYearMonth' },
-            { label: 'gYearMonthDay', value: 'gYearMonthDay' },
-            { label: 'gDay', value: 'gDay' },
-            { label: 'gMonth', value: 'gMonth' },
-            { label: 'hexBinary', value: 'hexBinary' },
-            { label: 'base64Binary', value: 'base64Binary' },
-            { label: 'anyURI', value: 'anyURI' }
-          ]
+            { label: "integer", value: "integer" },
+            { label: "string", value: "string" },
+            { label: "boolean", value: "boolean" },
+            { label: "decimal", value: "decimal" },
+            { label: "float", value: "float" },
+            { label: "double", value: "double" },
+            { label: "duration", value: "duration" },
+            { label: "dateTime", value: "dateTime" },
+            { label: "time", value: "time" },
+            { label: "date", value: "date" },
+            { label: "gYear", value: "gYear" },
+            { label: "gYearMonth", value: "gYearMonth" },
+            { label: "gYearMonthDay", value: "gYearMonthDay" },
+            { label: "gDay", value: "gDay" },
+            { label: "gMonth", value: "gMonth" },
+            { label: "hexBinary", value: "hexBinary" },
+            { label: "base64Binary", value: "base64Binary" },
+            { label: "anyURI", value: "anyURI" },
+          ],
         });
         break;
     }
 
     //add the subtype attribute for inheritance
     switch (crowd.inspector.model.attributes.type) {
-      case 'inheritance':
+      case "inheritance":
         crowd.inspector.addAttribute({
-          label: 'Type', property: 'subtype', type: 'multiple',
+          label: "Type",
+          property: "subtype",
+          type: "multiple",
           values: [
-            { label: 'Overlaped', value: 'overlaped' },
-            { label: 'Disjoint', value: 'disjoint' },
+            { label: "Overlaped", value: "overlaped" },
+            { label: "Disjoint", value: "disjoint" },
             // { label: 'Union', value: 'union' },
-          ]
+          ],
         });
         break;
     }
 
     //add the cardinality and total attribute for connector
     switch (crowd.inspector.model.attributes.type) {
-      case 'connector':
-        if (!crowd.inspector.model.attributes.attribute && !crowd.inspector.model.attributes.inherit) {
-          crowd.inspector.addAttribute({ label: 'Is for Attribute?', property: 'attribute', type: 'boolean', map: { true: true, false: false } });
-          crowd.inspector.addAttribute({ label: 'Is for Inheritance?', property: 'inherit', type: 'boolean', map: { true: true, false: false } });
+      case "connector":
+        if (
+          !crowd.inspector.model.attributes.attribute &&
+          !crowd.inspector.model.attributes.inherit
+        ) {
+          crowd.inspector.addAttribute({
+            label: "Is for Attribute?",
+            property: "attribute",
+            type: "boolean",
+            map: { true: true, false: false },
+          });
+          crowd.inspector.addAttribute({
+            label: "Is for Inheritance?",
+            property: "inherit",
+            type: "boolean",
+            map: { true: true, false: false },
+          });
           // crowd.inspector.addAttribute({
           //   label: 'Cardinality', property: 'cardinality', type: 'multiple',
           //   values: [
@@ -1985,39 +2224,78 @@ var CrowdEditorErvt = {
           //   ]
           // });
           crowd.inspector.addAttribute({
-            label: 'Cardinality', property: 'cardinality', type: 'text', placeholder: 'example: 0..1'
+            label: "Cardinality",
+            property: "cardinality",
+            type: "text",
+            placeholder: "example: 0..1",
           });
         } else if (crowd.inspector.model.attributes.attribute) {
-          crowd.inspector.addAttribute({ label: 'Is for Attribute?', property: 'attribute', type: 'boolean', map: { true: true, false: false } });
+          crowd.inspector.addAttribute({
+            label: "Is for Attribute?",
+            property: "attribute",
+            type: "boolean",
+            map: { true: true, false: false },
+          });
         } else if (crowd.inspector.model.attributes.inherit) {
-          crowd.inspector.addAttribute({ label: 'Is for Inheritance?', property: 'inherit', type: 'boolean', map: { true: true, false: false } });
+          crowd.inspector.addAttribute({
+            label: "Is for Inheritance?",
+            property: "inherit",
+            type: "boolean",
+            map: { true: true, false: false },
+          });
           if (crowd.inspector.model.attributes.inherit) {
-            crowd.inspector.addAttribute({ label: 'Is Child Connector?', property: 'inheritChild', type: 'boolean', map: { true: true, false: false } });
-            crowd.inspector.addAttribute({ label: 'Is Total?', property: 'total', type: 'boolean', map: { true: true, false: false } });
+            crowd.inspector.addAttribute({
+              label: "Is Child Connector?",
+              property: "inheritChild",
+              type: "boolean",
+              map: { true: true, false: false },
+            });
+            crowd.inspector.addAttribute({
+              label: "Is Total?",
+              property: "total",
+              type: "boolean",
+              map: { true: true, false: false },
+            });
           }
         }
         break;
     }
 
-    if (crowd.inspector.model.attributes.type == 'temporalConnector') {
+    if (crowd.inspector.model.attributes.type == "temporalConnector") {
       crowd.inspector.addAttribute({
-        label: 'Type', property: 'subtype', type: 'multiple',
+        label: "Type",
+        property: "subtype",
+        type: "multiple",
         values: [
-          { label: 'TEX', value: 'tex' },
-          { label: 'DEV', value: 'dev' },
-          { label: 'DEX-', value: 'dex' },
-          { label: 'PEX', value: 'pex' },
-        ]
+          { label: "TEX", value: "tex" },
+          { label: "DEV", value: "dev" },
+          { label: "DEX-", value: "dex" },
+          { label: "PEX", value: "pex" },
+        ],
       });
     }
 
     //add the syntax alert message when there's a syntax error
-    if (crowd.inspector.model.attributes.syntax && crowd.inspector.model.attributes.syntax != '')
-      crowd.inspector.addAttribute({ property: 'syntax', type: 'alert', color: 'danger' });
+    if (
+      crowd.inspector.model.attributes.syntax &&
+      crowd.inspector.model.attributes.syntax != ""
+    )
+      crowd.inspector.addAttribute({
+        property: "syntax",
+        type: "alert",
+        color: "danger",
+      });
 
     //add the semantic alert message when there's a semantic error
-    if (crowd.inspector.model.attributes.semantic && crowd.inspector.model.attributes.semantic.contents?.length)
-      crowd.inspector.addAttribute({ property: 'semantic', type: 'alert', color: 'warning' });
+    if (
+      crowd.inspector.model.attributes.semantic &&
+      crowd.inspector.model.attributes.semantic.contents?.length
+    )
+      crowd.inspector.addAttribute({
+        property: "semantic",
+        type: "alert",
+        color: "warning",
+      });
   },
   toJSONSchema: function (crowd) {
     //define basic structure of eer json according to schema
@@ -2025,21 +2303,21 @@ var CrowdEditorErvt = {
       entities: [],
       attributes: [],
       relationships: [],
-      links: []
+      links: [],
     };
 
     var attributeTypeMap = {
-      'attribute': 'normal',
-      'keyAttribute': 'key',
+      attribute: "normal",
+      keyAttribute: "key",
       // 'weakKeyAttribute': 'normal',
       // 'multivaluedAttribute': 'normal',
       // 'derivedAttribute': 'normal',
-    }
+    };
 
     //mapping of datatypes to the requested format of schema
     var datatypeMap = function (datatype) {
-      return 'http://www.w3.org/2001/XMLSchema#' + datatype;
-    }
+      return "http://www.w3.org/2001/XMLSchema#" + datatype;
+    };
 
     //mapping of cardinalities to the requested format of schema
     var cardinalityMap = function (cardinality, total) {
@@ -2054,25 +2332,33 @@ var CrowdEditorErvt = {
       // }
       // return result;
       return cardinality;
-    }
+    };
 
     //mapping of inheritances to the requested format of schema
     var inheritanceSubtypeMap = {
-      'disjoint': 'exclusive',
-      'overlaped': 'overlapping',
+      disjoint: "exclusive",
+      overlaped: "overlapping",
       // 'union': 'union'
-    }
+    };
 
-    var temporalLinkTypeMap = { tex: 'tex', dev: 'dev', dex: 'dex-', pex: 'pex' };
+    var temporalLinkTypeMap = {
+      tex: "tex",
+      dev: "dev",
+      dex: "dex-",
+      pex: "pex",
+    };
 
     //iterates each element and add it to the correspondent collection
     crowd.workspace.graph.getElements().forEach(function (element) {
       switch (element.attributes.parentType) {
-        case 'entity':
+        case "entity":
           if (element.attributes.temporal) {
-            timestamp = element.attributes.temporalType == 'temporalEntity' ? 'temporal' : 'snapshot'
+            timestamp =
+              element.attributes.temporalType == "temporalEntity"
+                ? "temporal"
+                : "snapshot";
           } else {
-            timestamp = ""
+            timestamp = "";
           }
           jsonSchema.entities.push({
             name: element.attributes.uri,
@@ -2084,35 +2370,44 @@ var CrowdEditorErvt = {
             size: element.attributes.size,
           });
           //search for temporal links connected to the entity
-          crowd.workspace.graph.getConnectedLinks(element).filter(function (link) {
-            return link.attributes.type == 'temporalConnector'
-          }).forEach(function (link) {
-            var connectedEntity = link.attributes.source.id == element.id
-              ? link.getTargetElement() : null
-            if (connectedEntity) {
-              if (connectedEntity.attributes.parentType == 'entity') {
-                //create the temporal link for this entity
-                jsonSchema.links.push({
-                  name: link.cid,
-                  id: link.cid,
-                  entities: [
-                    element.attributes.uri,
-                    connectedEntity.attributes.uri
-                  ],
-                  type: temporalLinkTypeMap[link.attributes.subtype],
-                  vertices: link.attributes.vertices,
-                  sourcePoint: { "anchor": link.source().anchor },
-                  targetPoint: { "anchor": link.target().anchor },
-                });
+          crowd.workspace.graph
+            .getConnectedLinks(element)
+            .filter(function (link) {
+              return link.attributes.type == "temporalConnector";
+            })
+            .forEach(function (link) {
+              var connectedEntity =
+                link.attributes.source.id == element.id
+                  ? link.getTargetElement()
+                  : null;
+              if (connectedEntity) {
+                if (connectedEntity.attributes.parentType == "entity") {
+                  //create the temporal link for this entity
+                  jsonSchema.links.push({
+                    name: link.cid,
+                    id: link.cid,
+                    entities: [
+                      element.attributes.uri,
+                      connectedEntity.attributes.uri,
+                    ],
+                    type: temporalLinkTypeMap[link.attributes.subtype],
+                    vertices: link.attributes.vertices,
+                    sourcePoint: { anchor: link.source().anchor },
+                    targetPoint: { anchor: link.target().anchor },
+                  });
+                }
               }
-            }
-          });
+            });
           break;
-        case 'attribute':
+        case "attribute":
           if (element.attributes.temporal) {
-            timestamp = element.attributes.temporalType == 'temporalAttribute' || element.attributes.temporalType == 'temporalKeyAttribute' ? 'temporal' : 'snapshot'
+            timestamp =
+              element.attributes.temporalType == "temporalAttribute" ||
+              element.attributes.temporalType == "temporalKeyAttribute"
+                ? "temporal"
+                : "snapshot";
           } else {
-            timestamp = ""
+            timestamp = "";
           }
           jsonSchema.attributes.push({
             name: element.attributes.uri,
@@ -2131,34 +2426,42 @@ var CrowdEditorErvt = {
             name: element.cid,
             entity: null,
             attribute: element.attributes.uri,
-            type: 'attribute'
-          }
+            type: "attribute",
+          };
           //search for links connected to the attribute for add entity to attribute link
-          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
-            var connectedEntity = link.attributes.source.id != element.id
-              ? link.getSourceElement()
-              : (link.attributes.target.id != element.id
-                ? link.getTargetElement()
-                : null);
-            if (connectedEntity) {
-              if (connectedEntity.attributes.parentType == 'entity')
-                attributeLink.entity = connectedEntity.attributes.uri;
-              else if (connectedEntity.attributes.parentType == 'relationship')
-                attributeLink.relationship = connectedEntity.attributes.uri;
-              // attributeLink.uri = link.attributes.uri;
-              // attributeLink.name = link.attributes.uri;
-            }
-            attributeLink.vertices = link.attributes.vertices;
-            attributeLink.sourcePoint = { "anchor": link.source().anchor };
-            attributeLink.targetPoint = { "anchor": link.target().anchor };
-          });
+          crowd.workspace.graph
+            .getConnectedLinks(element)
+            .forEach(function (link) {
+              var connectedEntity =
+                link.attributes.source.id != element.id
+                  ? link.getSourceElement()
+                  : link.attributes.target.id != element.id
+                  ? link.getTargetElement()
+                  : null;
+              if (connectedEntity) {
+                if (connectedEntity.attributes.parentType == "entity")
+                  attributeLink.entity = connectedEntity.attributes.uri;
+                else if (
+                  connectedEntity.attributes.parentType == "relationship"
+                )
+                  attributeLink.relationship = connectedEntity.attributes.uri;
+                // attributeLink.uri = link.attributes.uri;
+                // attributeLink.name = link.attributes.uri;
+              }
+              attributeLink.vertices = link.attributes.vertices;
+              attributeLink.sourcePoint = { anchor: link.source().anchor };
+              attributeLink.targetPoint = { anchor: link.target().anchor };
+            });
           jsonSchema.links.push(attributeLink);
           break;
-        case 'relationship':
+        case "relationship":
           if (element.attributes.temporal) {
-            timestamp = element.attributes.temporalType == 'temporalRelationship' ? 'temporal' : 'snapshot'
+            timestamp =
+              element.attributes.temporalType == "temporalRelationship"
+                ? "temporal"
+                : "snapshot";
           } else {
-            timestamp = ""
+            timestamp = "";
           }
           jsonSchema.relationships.push({
             name: element.attributes.uri,
@@ -2167,7 +2470,7 @@ var CrowdEditorErvt = {
             position: element.attributes.position,
             uri: element.attributes.uri,
             // isWeak: element.attributes.type == 'weakRelationship',
-            size: element.attributes.size
+            size: element.attributes.size,
           });
           //create the link for this relationship
           var relationshipLink = {
@@ -2176,7 +2479,7 @@ var CrowdEditorErvt = {
             entities: [],
             cardinality: [],
             roles: [],
-            type: 'relationship',
+            type: "relationship",
             uri: element.attributes.uri,
             // isWeak: element.attributes.type == 'weakRelationship',
             position: element.attributes.position,
@@ -2184,70 +2487,99 @@ var CrowdEditorErvt = {
             vertices: [],
             sourcePoint: [],
             targetPoint: [],
-          }
+          };
           //search for links connected to the relationship for add entities to relationship link
-          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
-            var connectedEntity = link.attributes.source.id != element.id && link.getSourceElement().attributes.parentType == 'entity'
-              ? link.getSourceElement()
-              : (link.attributes.target.id != element.id && link.getTargetElement().attributes.parentType == 'entity'
-                ? link.getTargetElement()
-                : null);
-            if (connectedEntity) {
-              relationshipLink.entities.push(connectedEntity.attributes.uri);
-              relationshipLink.roles.push(link.attributes.uri);
-              relationshipLink.cardinality.push(cardinalityMap(link.attributes.cardinality, link.attributes.total));
-            }
-            relationshipLink.vertices.push(link.attributes.vertices);
-            relationshipLink.sourcePoint.push({ "anchor": link.source().anchor });
-            relationshipLink.targetPoint.push({ "anchor": link.target().anchor });
-          });
+          crowd.workspace.graph
+            .getConnectedLinks(element)
+            .forEach(function (link) {
+              var connectedEntity =
+                link.attributes.source.id != element.id &&
+                link.getSourceElement().attributes.parentType == "entity"
+                  ? link.getSourceElement()
+                  : link.attributes.target.id != element.id &&
+                    link.getTargetElement().attributes.parentType == "entity"
+                  ? link.getTargetElement()
+                  : null;
+              if (connectedEntity) {
+                relationshipLink.entities.push(connectedEntity.attributes.uri);
+                relationshipLink.roles.push(link.attributes.uri);
+                relationshipLink.cardinality.push(
+                  cardinalityMap(
+                    link.attributes.cardinality,
+                    link.attributes.total
+                  )
+                );
+              }
+              relationshipLink.vertices.push(link.attributes.vertices);
+              relationshipLink.sourcePoint.push({
+                anchor: link.source().anchor,
+              });
+              relationshipLink.targetPoint.push({
+                anchor: link.target().anchor,
+              });
+            });
           jsonSchema.links.push(relationshipLink);
           break;
-        case 'inheritance':
+        case "inheritance":
           //create the link for this inheritance
           var inheritanceLink = {
             name: element.cid,
             parent: null,
             entities: [],
-            type: 'isa',
-            constraint: [
-              inheritanceSubtypeMap[element.attributes.subtype]
-            ],
+            type: "isa",
+            constraint: [inheritanceSubtypeMap[element.attributes.subtype]],
             position: element.attributes.position,
             size: element.attributes.size,
             vertices: [],
             sourcePoint: [],
             targetPoint: [],
-          }
+          };
           //search for links connected to the inheritance for add entities to inheritance link
-          crowd.workspace.graph.getConnectedLinks(element).forEach(function (link) {
-            if (link.attributes.inherit) {
-              var connectedEntity = link.attributes.source.id != element.id
-                && (link.getSourceElement().attributes.parentType == 'entity' || link.getSourceElement().attributes.parentType == 'relationship')
-                ? link.getSourceElement()
-                : (link.attributes.target.id != element.id
-                  && (link.getTargetElement().attributes.parentType == 'entity' || link.getTargetElement().attributes.parentType == 'relationship')
-                  ? link.getTargetElement()
-                  : null);
-              if (connectedEntity) {
-                if (!link.attributes.inheritChild) {
-                  inheritanceLink.parent = connectedEntity.attributes.uri;
-                  if (link.attributes.total) {
-                    inheritanceLink.constraint.push('union');
+          crowd.workspace.graph
+            .getConnectedLinks(element)
+            .forEach(function (link) {
+              if (link.attributes.inherit) {
+                var connectedEntity =
+                  link.attributes.source.id != element.id &&
+                  (link.getSourceElement().attributes.parentType == "entity" ||
+                    link.getSourceElement().attributes.parentType ==
+                      "relationship")
+                    ? link.getSourceElement()
+                    : link.attributes.target.id != element.id &&
+                      (link.getTargetElement().attributes.parentType ==
+                        "entity" ||
+                        link.getTargetElement().attributes.parentType ==
+                          "relationship")
+                    ? link.getTargetElement()
+                    : null;
+                if (connectedEntity) {
+                  if (!link.attributes.inheritChild) {
+                    inheritanceLink.parent = connectedEntity.attributes.uri;
+                    if (link.attributes.total) {
+                      inheritanceLink.constraint.push("union");
+                    }
+                    inheritanceLink.vertices.unshift(link.attributes.vertices);
+                    inheritanceLink.sourcePoint.unshift({
+                      anchor: link.source().anchor,
+                    });
+                    inheritanceLink.targetPoint.unshift({
+                      anchor: link.target().anchor,
+                    });
+                  } else {
+                    inheritanceLink.entities.push(
+                      connectedEntity.attributes.uri
+                    );
+                    inheritanceLink.vertices.push(link.attributes.vertices);
+                    inheritanceLink.sourcePoint.push({
+                      anchor: link.source().anchor,
+                    });
+                    inheritanceLink.targetPoint.push({
+                      anchor: link.target().anchor,
+                    });
                   }
-                  inheritanceLink.vertices.unshift(link.attributes.vertices);
-                  inheritanceLink.sourcePoint.unshift({ "anchor": link.source().anchor });
-                  inheritanceLink.targetPoint.unshift({ "anchor": link.target().anchor });
-                }
-                else {
-                  inheritanceLink.entities.push(connectedEntity.attributes.uri);
-                  inheritanceLink.vertices.push(link.attributes.vertices);
-                  inheritanceLink.sourcePoint.push({ "anchor": link.source().anchor });
-                  inheritanceLink.targetPoint.push({ "anchor": link.target().anchor });
                 }
               }
-            }
-          });
+            });
           jsonSchema.links.push(inheritanceLink);
           break;
       }
@@ -2256,7 +2588,7 @@ var CrowdEditorErvt = {
     return jsonSchema;
   },
   fromJSONSchema: function (crowd, schema) {
-    console.log('loadERvt', schema);
+    console.log("loadERvt", schema);
 
     var entitiesObj = {};
     var relationshipsObj = {};
@@ -2265,64 +2597,72 @@ var CrowdEditorErvt = {
     var linksObj = {};
 
     var entityTypeMap = {
-      '': 'entity',
-      'temporal': 'temporalEntity',
-      'snapshot': 'snapshotEntity',
-    }
+      "": "entity",
+      temporal: "temporalEntity",
+      snapshot: "snapshotEntity",
+    };
 
     var attributeTypeMap = {
-      'normal': 'attribute',
-      'key': 'keyAttribute',
-      'normaltemporal': 'temporalAttribute',
-      'normalsnapshot': 'snapshotAttribute',
-      'keytemporal': 'temporalKeyAttribute',
-      'keysnapshot': 'snapshotKeyAttribute',
-    }
+      normal: "attribute",
+      key: "keyAttribute",
+      normaltemporal: "temporalAttribute",
+      normalsnapshot: "snapshotAttribute",
+      keytemporal: "temporalKeyAttribute",
+      keysnapshot: "snapshotKeyAttribute",
+    };
 
     var relationshipTypeMap = {
-      '': 'relationship',
-      'temporal': 'temporalRelationship',
-      'snapshot': 'snapshotRelationship',
-    }
+      "": "relationship",
+      temporal: "temporalRelationship",
+      snapshot: "snapshotRelationship",
+    };
 
     //mapping of datatypes to the editor format
     var datatypeMap = function (datatype) {
       return datatype.split("http://www.w3.org/2001/XMLSchema#")[1] != null
-        ? datatype.split("http://www.w3.org/2001/XMLSchema#")[1] : datatype;
-    }
+        ? datatype.split("http://www.w3.org/2001/XMLSchema#")[1]
+        : datatype;
+    };
 
     //mapping of cardinalities to the editor format
     var cardinalityMap = function (cardinality) {
       // return cardinality?.indexOf('*') != -1 ? 'N' : '1';
       return cardinality;
-    }
+    };
 
     var totalMap = function (cardinality) {
-      return cardinality?.charAt(0) == '1';
-    }
+      return cardinality?.charAt(0) == "1";
+    };
 
     //mapping of inheritances to the editor format
     var inheritanceSubtypeMap = {
-      'exclusive': 'disjoint',
-      'overlapping': 'overlaped',
+      exclusive: "disjoint",
+      overlapping: "overlaped",
       // 'union': 'union'
-    }
+    };
 
-    var temporalLinkTypeMap = { tex: 'tex', dev: 'dev', "dex-": 'dex', pex: 'pex' };
+    var temporalLinkTypeMap = {
+      tex: "tex",
+      dev: "dev",
+      "dex-": "dex",
+      pex: "pex",
+    };
 
     if (schema) {
       //add each entity and their properties
       if (schema.entities) {
         schema.entities.forEach(function (entity) {
-          entitiesObj[entity.name] = crowd.palette.elements[entityTypeMap[entity.timestamp]].clone();
+          entitiesObj[entity.name] =
+            crowd.palette.elements[entityTypeMap[entity.timestamp]].clone();
           crowd.workspace.graph.addCell(entitiesObj[entity.name]);
           $.each(entity, function (attribute, value) {
             switch (attribute) {
-              case 'name':
-                entitiesObj[entity.name].prop('uri', value);
+              case "name":
+                entitiesObj[entity.name].prop("uri", value);
                 break;
-              case 'position': case 'size':
-                entitiesObj[entity.name].prop(attribute, value)
+              case "position":
+              case "size":
+                entitiesObj[entity.name].prop(attribute, value);
                 break;
             }
           });
@@ -2332,19 +2672,22 @@ var CrowdEditorErvt = {
       //add each attribute and their properties
       if (schema.attributes) {
         schema.attributes.forEach(function (attribute) {
-          attributeType = attributeTypeMap[attribute.type + attribute.timestamp]
-          attributesObj[attribute.name] = crowd.palette.elements[attributeType].clone();
+          attributeType =
+            attributeTypeMap[attribute.type + attribute.timestamp];
+          attributesObj[attribute.name] =
+            crowd.palette.elements[attributeType].clone();
           crowd.workspace.graph.addCell(attributesObj[attribute.name]);
           $.each(attribute, function (attr, value) {
             switch (attr) {
-              case 'name':
-                attributesObj[attribute.name].prop('uri', value);
+              case "name":
+                attributesObj[attribute.name].prop("uri", value);
                 break;
-              case 'datatype':
+              case "datatype":
                 attributesObj[attribute.name].prop(attr, datatypeMap(value));
                 break;
-              case 'position': case 'size':
-                attributesObj[attribute.name].prop(attr, value)
+              case "position":
+              case "size":
+                attributesObj[attribute.name].prop(attr, value);
                 break;
             }
           });
@@ -2355,28 +2698,49 @@ var CrowdEditorErvt = {
       if (schema.links) {
         schema.links.forEach(function (link) {
           switch (link.type) {
-            case 'relationship':
-              relationship = schema.relationships.find(element => element.name === link.name);
-              relationshipsObj[link.name] = crowd.palette.elements[relationshipTypeMap[relationship.timestamp]].clone();
+            case "relationship":
+              relationship = schema.relationships.find(
+                (element) => element.name === link.name
+              );
+              relationshipsObj[link.name] =
+                crowd.palette.elements[
+                  relationshipTypeMap[relationship.timestamp]
+                ].clone();
               crowd.workspace.graph.addCell(relationshipsObj[link.name]);
               $.each(link, function (attribute, value) {
                 switch (attribute) {
-                  case 'name':
-                    relationshipsObj[link.name].prop('uri', value);
+                  case "name":
+                    relationshipsObj[link.name].prop("uri", value);
                     break;
-                  case 'position': case 'size':
-                    relationshipsObj[link.name].prop(attribute, value)
+                  case "position":
+                  case "size":
+                    relationshipsObj[link.name].prop(attribute, value);
                     break;
                 }
               });
               link.entities.forEach(function (connectedEntity, index) {
-                linksObj[link.roles[index]] = crowd.palette.links[totalMap(link?.cardinality[index]) ? 'total' : 'connector'].clone();
-                linksObj[link.roles[index]].source(relationshipsObj[link.name], link.sourcePoint[index]);
-                linksObj[link.roles[index]].target(entitiesObj[link.entities[index]], link.targetPoint[index]);
+                linksObj[link.roles[index]] =
+                  crowd.palette.links[
+                    totalMap(link?.cardinality[index]) ? "total" : "connector"
+                  ].clone();
+                linksObj[link.roles[index]].source(
+                  relationshipsObj[link.name],
+                  link.sourcePoint[index]
+                );
+                linksObj[link.roles[index]].target(
+                  entitiesObj[link.entities[index]],
+                  link.targetPoint[index]
+                );
                 crowd.workspace.graph.addCell(linksObj[link.roles[index]]);
-                linksObj[link.roles[index]].prop('uri', link.roles[index]);
-                linksObj[link.roles[index]].prop('cardinality', cardinalityMap(link?.cardinality[index]));
-                linksObj[link.roles[index]].prop('vertices', link.vertices[index]);
+                linksObj[link.roles[index]].prop("uri", link.roles[index]);
+                linksObj[link.roles[index]].prop(
+                  "cardinality",
+                  cardinalityMap(link?.cardinality[index])
+                );
+                linksObj[link.roles[index]].prop(
+                  "vertices",
+                  link.vertices[index]
+                );
               });
               break;
           }
@@ -2384,59 +2748,102 @@ var CrowdEditorErvt = {
 
         schema.links.forEach(function (link) {
           switch (link.type) {
-            case 'isa':
-              var inheritanceName = link.name.split('_')[0];
+            case "isa":
+              var inheritanceName = link.name.split("_")[0];
               if (!inheritancesObj[inheritanceName]) {
-                inheritancesObj[inheritanceName] = crowd.palette.elements.inheritance.clone();
+                inheritancesObj[inheritanceName] =
+                  crowd.palette.elements.inheritance.clone();
                 crowd.workspace.graph.addCell(inheritancesObj[inheritanceName]);
                 $.each(link, function (attribute, value) {
                   switch (attribute) {
-                    case 'constraint':
+                    case "constraint":
                       value.forEach(function (constraint) {
-                        if (constraint == 'exclusive') inheritancesObj[inheritanceName].prop('subtype', 'disjoint');
+                        if (constraint == "exclusive")
+                          inheritancesObj[inheritanceName].prop(
+                            "subtype",
+                            "disjoint"
+                          );
                       });
                       break;
-                    case 'name':
-                      inheritancesObj[inheritanceName].prop('uri', value)
+                    case "name":
+                      inheritancesObj[inheritanceName].prop("uri", value);
                       break;
-                    case 'position': case 'size': case 'uri':
-                      inheritancesObj[inheritanceName].prop(attribute, value)
+                    case "position":
+                    case "size":
+                    case "uri":
+                      inheritancesObj[inheritanceName].prop(attribute, value);
                       break;
                   }
                 });
               }
 
-              var parentLinkName = link.parent + '-' + fromURI(inheritanceName);
-              linksObj[parentLinkName] = crowd.palette.links[link.constraint?.find((value) => value == 'union') != null ? 'total' : 'connector'].clone();
-              linksObj[parentLinkName].source(inheritancesObj[inheritanceName], link.sourcePoint[0]);
-              linksObj[parentLinkName].target(entitiesObj[link.parent] ? entitiesObj[link.parent] : relationshipsObj[link.parent], link.targetPoint[0]);
+              var parentLinkName = link.parent + "-" + fromURI(inheritanceName, crowd.config.defaultNamespace);
+              linksObj[parentLinkName] =
+                crowd.palette.links[
+                  link.constraint?.find((value) => value == "union") != null
+                    ? "total"
+                    : "connector"
+                ].clone();
+              linksObj[parentLinkName].source(
+                inheritancesObj[inheritanceName],
+                link.sourcePoint[0]
+              );
+              linksObj[parentLinkName].target(
+                entitiesObj[link.parent]
+                  ? entitiesObj[link.parent]
+                  : relationshipsObj[link.parent],
+                link.targetPoint[0]
+              );
               crowd.workspace.graph.addCell(linksObj[parentLinkName]);
-              linksObj[parentLinkName].prop('uri', parentLinkName);
-              linksObj[parentLinkName].prop('inherit', true);
-              linksObj[parentLinkName].prop('total', link.constraint?.find((value) => value == 'union') != null);
-              linksObj[parentLinkName].prop('vertices', link.vertices[0]);
+              linksObj[parentLinkName].prop("uri", parentLinkName);
+              linksObj[parentLinkName].prop("inherit", true);
+              linksObj[parentLinkName].prop(
+                "total",
+                link.constraint?.find((value) => value == "union") != null
+              );
+              linksObj[parentLinkName].prop("vertices", link.vertices[0]);
 
               link.entities.forEach(function (connectedEntity, index) {
-                var linkName = link.entities[index] + '-' + fromURI(inheritanceName);
+                var linkName =
+                  link.entities[index] + "-" + fromURI(inheritanceName, crowd.config.defaultNamespace);
                 linksObj[linkName] = crowd.palette.links.connector.clone();
-                linksObj[linkName].source(inheritancesObj[inheritanceName], link.sourcePoint[index + 1]);
-                linksObj[linkName].target(entitiesObj[connectedEntity] ? entitiesObj[connectedEntity] : relationshipsObj[connectedEntity], link.targetPoint[index + 1]);
+                linksObj[linkName].source(
+                  inheritancesObj[inheritanceName],
+                  link.sourcePoint[index + 1]
+                );
+                linksObj[linkName].target(
+                  entitiesObj[connectedEntity]
+                    ? entitiesObj[connectedEntity]
+                    : relationshipsObj[connectedEntity],
+                  link.targetPoint[index + 1]
+                );
                 crowd.workspace.graph.addCell(linksObj[linkName]);
-                linksObj[linkName].prop('uri', linkName);
-                linksObj[linkName].prop('inherit', true);
-                linksObj[linkName].prop('inheritChild', true);
-                linksObj[linkName].prop('vertices', link.vertices[index + 1]);
+                linksObj[linkName].prop("uri", linkName);
+                linksObj[linkName].prop("inherit", true);
+                linksObj[linkName].prop("inheritChild", true);
+                linksObj[linkName].prop("vertices", link.vertices[index + 1]);
               });
 
               //position inheritance circle if it has not previous position
               if (!link.position) {
                 var mediumPosition = medianPoint(
                   inheritancesObj[inheritanceName],
-                  link.entities.map(function (connectedEntity) {
-                    return entitiesObj[connectedEntity] ? entitiesObj[connectedEntity] : relationshipsObj[connectedEntity]
-                  }).concat(entitiesObj[link.parent] ? entitiesObj[link.parent] : relationshipsObj[link.parent])
+                  link.entities
+                    .map(function (connectedEntity) {
+                      return entitiesObj[connectedEntity]
+                        ? entitiesObj[connectedEntity]
+                        : relationshipsObj[connectedEntity];
+                    })
+                    .concat(
+                      entitiesObj[link.parent]
+                        ? entitiesObj[link.parent]
+                        : relationshipsObj[link.parent]
+                    )
                 );
-                inheritancesObj[inheritanceName]?.position(mediumPosition.x, mediumPosition.y);
+                inheritancesObj[inheritanceName]?.position(
+                  mediumPosition.x,
+                  mediumPosition.y
+                );
               }
               break;
           }
@@ -2444,30 +2851,44 @@ var CrowdEditorErvt = {
 
         schema.links.forEach(function (link) {
           switch (link.type) {
-            case 'attribute':
+            case "attribute":
               linksObj[link.uri] = crowd.palette.links.connector.clone();
-              linksObj[link.uri].source(attributesObj[link.attribute], link.sourcePoint);
-              linksObj[link.uri].target(link.entity ? entitiesObj[link.entity] : relationshipsObj[link.relationship], link.targetPoint);
+              linksObj[link.uri].source(
+                attributesObj[link.attribute],
+                link.sourcePoint
+              );
+              linksObj[link.uri].target(
+                link.entity
+                  ? entitiesObj[link.entity]
+                  : relationshipsObj[link.relationship],
+                link.targetPoint
+              );
               crowd.workspace.graph.addCell(linksObj[link.uri]);
-              linksObj[link.uri].prop('cardinality', '1..1');
-              linksObj[link.uri].prop('attribute', true);
-              linksObj[link.uri].prop('vertices', link.vertices);
+              linksObj[link.uri].prop("cardinality", "1..1");
+              linksObj[link.uri].prop("attribute", true);
+              linksObj[link.uri].prop("vertices", link.vertices);
               break;
           }
         });
 
         schema.links.forEach(function (link) {
           switch (link.type) {
-            case 'dev':
-            case 'dex-':
-            case 'tex':
-            case 'pex':
+            case "dev":
+            case "dex-":
+            case "tex":
+            case "pex":
               linksObj[link.id] = crowd.palette.links.temporal.clone();
-              linksObj[link.id].source(entitiesObj[link.entities[0]], link.sourcePoint);
-              linksObj[link.id].target(entitiesObj[link.entities[1]], link.targetPoint);
+              linksObj[link.id].source(
+                entitiesObj[link.entities[0]],
+                link.sourcePoint
+              );
+              linksObj[link.id].target(
+                entitiesObj[link.entities[1]],
+                link.targetPoint
+              );
               crowd.workspace.graph.addCell(linksObj[link.id]);
-              linksObj[link.id].prop('subtype', temporalLinkTypeMap[link.type]);
-              linksObj[link.id].prop('vertices', link.vertices);
+              linksObj[link.id].prop("subtype", temporalLinkTypeMap[link.type]);
+              linksObj[link.id].prop("vertices", link.vertices);
               break;
           }
         });
@@ -2512,7 +2933,7 @@ var CrowdEditorErvt = {
 
     mergedSchema.links.forEach(function (link) {
       let relative = positionedSchema.links.find(function (r) {
-        return r.name == link.name && link.type != 'isa';
+        return r.name == link.name && link.type != "isa";
       });
 
       if (relative) {
@@ -2594,7 +3015,6 @@ var CrowdEditorErvt = {
     //     weakRelationship: { connector: { inherit: true } },
     //   },
     // };
-
     //do the syntax validation of an entity
     // crowd.syntax.validate.canConnect = function (options) {
     //   try {
@@ -2611,7 +3031,6 @@ var CrowdEditorErvt = {
     //               throw error;
     //             }
     //           });
-
     //           //case there's no exception reset syntax errors values
     //           options?.elementA?.prop('syntax', null);
     //           options?.elementB?.prop('syntax', null);
@@ -2653,21 +3072,15 @@ var CrowdEditorErvt = {
     //     crowd.inspector.loadContent();
     //   }
     // };
-
     //do the syntax validation of an entity
     // crowd.syntax.validate.entity = function (options) {
-
     // };
-
     //event when add or remove cell (element or link) into the diagram
     // crowd.workspace.graph.on('add remove', function (cell) {
-
     // });
-
     //event when the links source or target change
     // crowd.workspace.graph.on('change add remove', function (link, newSourceTarget) {
     //   // console.log('change:source change:target', { link, previosAttributes: link._previousAttributes, newSourceTarget });
-
     //   if (link.isLink()) {
     //     crowd.syntax.validate.canConnect({
     //       elementA: link.getSourceElement(),
@@ -2680,6 +3093,9 @@ var CrowdEditorErvt = {
   initReasoningValidator: function (crowd) {
     //todo
   },
+  initRepairingTools: function (crowd) {
+    //todo
+  },
   fromReasoning: function (crowd, schema, reasoning) {
     //use generic semantic import and mark of the editor
     //this is called after the reasoned schema is finished imported to the editor
@@ -2688,5 +3104,11 @@ var CrowdEditorErvt = {
       crowd.reasoning.genericMark(reasoning);
     });
     crowd.reasoning.importPositionedSchema(schema);
-  }
-}
+  },
+  fromRepairMark: function (crowd, repair, selectedAxioms) {
+    //todo
+  },
+  fromRepairApply: function (crowd, repair, selectedAxioms) {
+    //todo
+  },
+};

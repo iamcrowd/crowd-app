@@ -24,6 +24,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { HttpInterceptorService } from './services/http-interceptor.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 // Components
+import { VarDirective } from './directives/var.directive';
 import { AppComponent } from './app.component';
 import { AboutComponent } from './about/about.component';
 import { RegisterComponent } from './register/register.component';
@@ -35,10 +36,10 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { EditorComponent } from './editor/editor.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ApiComponent } from './api/api.component';
-import { VarDirective } from './directives/var.directive';
 
 @NgModule({
   declarations: [
+    VarDirective,
     AppComponent,
     AboutComponent,
     RegisterComponent,
@@ -48,8 +49,7 @@ import { VarDirective } from './directives/var.directive';
     AdminComponent,
     NotFoundComponent,
     EditorComponent,
-    ApiComponent,
-    VarDirective
+    ApiComponent
   ],
   imports: [
     AppRoutingModule,

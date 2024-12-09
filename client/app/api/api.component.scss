@@ -295,6 +295,14 @@ $alt-accent-dark: #262a2e;
   padding: 0;
 }
 
+::ng-deep .accordion-error-button > .card-header {
+  padding: 0.5rem;
+}
+
+::ng-deep .accordion-error-button .card-body {
+  padding: 0;
+}
+
 .tab-pane-input {
   position: relative;
   height: 100%;

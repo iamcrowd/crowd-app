@@ -113,10 +113,11 @@ export class EditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(this.auth.currentUser);
+    // this.state = this.router.getCurrentNavigation()?.extras?.state;
 
     this.file = this.router.getCurrentNavigation()?.extras?.state?.file;
     this.schema = this.router.getCurrentNavigation()?.extras?.state?.schema;
+    let positions = this.router.getCurrentNavigation()?.extras?.state?.positions;
 
     const availableConceptualModels = {
       uml: CrowdEditorUml,
@@ -124,7 +125,7 @@ export class EditorComponent implements OnInit {
       ervt: CrowdEditorErvt,
       orm2: CrowdEditorOrm,
       kf: { name: 'kf', export: true },
-      owl: { name: 'owl', title: 'OWL', import: false },
+      owl: { name: 'owl', title: 'OWL', import: true },
       verbalization: { name: 'verbalization', title: 'CNL/NLG', import: false },
       image: { name: 'image', title: 'JPG/PNG/PDF', import: false }
     }
@@ -185,7 +186,7 @@ export class EditorComponent implements OnInit {
           }
         }
       },
-      defaultNamespace: "http://crowd.fi.uncoma.edu.ar#",
+      defaultNamespace: 'http://crowd.fi.uncoma.edu.ar',
       ngComponent: this,
       ngRouter: this.router,
       ngFiles: {
@@ -213,7 +214,7 @@ export class EditorComponent implements OnInit {
         user: this.auth?.currentUser?._id
       },
       cytoscape: cytoscape,
-      preloadedSchema: this.schema,
+      preloadedDiagram: { schema: this.schema, positions: positions },
       actualFile: this.file
     });
 
@@ -247,7 +248,7 @@ export class EditorComponent implements OnInit {
   }
 
   loadState(): void {
-    this.editor.tools.import.importFrom({ model: this.state.model, schema: this.state.diagram });
+    this.editor.tools.import.importFrom(this.state);
   }
 
   getDiagrams(): void {

@@ -81,13 +81,16 @@
                     <ng-container [ngTemplateOutlet]="reasoningInput" [ngTemplateOutletContext]="{ tab: tab }">
                     </ng-container>
                   </span>
-                  <span *ngIf="tab.api == 'test' && tab.endpoint == 0">
-                    <ng-container [ngTemplateOutlet]="owltometa"
+                  <span *ngIf="tab.api == 'test'">
+                    <ng-container *ngIf="tab.endpoint == 0" [ngTemplateOutlet]="owltometa"
+                      [ngTemplateOutletContext]="{ tab: tab, tabIndex: index }">
+                    </ng-container>
+                    <ng-container *ngIf="tab.endpoint == 1" [ngTemplateOutlet]="metarepair"
                       [ngTemplateOutletContext]="{ tab: tab, tabIndex: index }">
                     </ng-container>
                   </span>
                   <span
-                    *ngIf="!(tab.api == 'metamodel' && tab.endpoint == 6) && !(tab.api == 'reasoning') && !(tab.api == 'test' && tab.endpoint == 0)">
+                    *ngIf="!(tab.api == 'metamodel' && tab.endpoint == 6) && !(tab.api == 'reasoning') && !(tab.api == 'test' && (tab.endpoint == 0 || tab.endpoint == 1))">
                     <ng-container [ngTemplateOutlet]="inputCodeEditor" [ngTemplateOutletContext]="{ tab: tab }">
                     </ng-container>
                   </span>
@@ -108,6 +111,17 @@
                         <i class="fa fa-fw fa-upload"></i>
                       </button>
                     </span>
+                    <span class="float-right mr-1" [tippy]="add_output_log">
+                      <button ngfSelect class="btn btn-secondary btn-sm" selectable="1" [(file)]="tab.addOutputFile"
+                        accept=".json, .txt" [disabled]="tab.loadingOutput || !tab.output" (fileChange)="addOutput(index)">
+                        <i class="fa fa-fw fa-plus-circle"></i>
+                      </button>
+                    </span>
+                    <ng-template #add_output_log>
+                      Add Output Log<br>
+                      <span class="text-muted">(Only for multifile: adds processed uris of another output to the current
+                        loaded one. Also remove the correspondent failed or empty result if find a success one.)</span>
+                    </ng-template>
                     <span class="float-right mr-1" tippy="Save Output Log">
                       <button class="btn btn-secondary btn-sm"
                         (click)="downloadFile('save.' + tab.api, 'json', JSON.stringify(tab.output, null, '\t'))"
@@ -190,11 +204,13 @@
                           }
                         }"></ng-container>
                       </span>
-                      <span *ngIf="tab.api == 'test' && tab.endpoint == 0">
-                        <span *ngIf="tab.output.success == null">
-                          <ng-container [ngTemplateOutlet]="outputTabs" [ngTemplateOutletContext]="{
+                      <span *ngIf="tab.api == 'test'">
+                        <ng-container *ngIf="tab.endpoint == 0">
+                          <span *ngIf="tab.output.success == null">
+                            <ng-container [ngTemplateOutlet]="outputTabs" [ngTemplateOutletContext]="{
                             container: tab.output,
-                            listCategorized: ['supported', 'unsupported'],
+                            opened: 'kf',
+                            listCategorized: ['supported', 'unsupported', 'simpleAxioms'],
                             open: {
                               'kf': {
                                 editorModel: apis[tab.api].endpoints[tab.endpoint].parameters.to,
@@ -216,11 +232,12 @@
                               }
                             }
                           }"></ng-container>
-                        </span>
-                        <span *ngIf="tab.output.success != null">
-                          <ng-container [ngTemplateOutlet]="outputTabs" [ngTemplateOutletContext]="{
+                          </span>
+                          <span *ngIf="tab.output.success != null">
+                            <ng-container [ngTemplateOutlet]="outputTabs" [ngTemplateOutletContext]="{
                             container: tab.output,
                             listFailedFiles: ['failed'],
+                            listEmptyFiles: ['empty'],
                             subtab: {
                               'success': {
                                 raw: {
@@ -233,7 +250,7 @@
                                 },
                                 subtab: {
                                 '*': {
-                                    listCategorized: ['supported', 'unsupported'],
+                                    listCategorized: ['supported', 'unsupported', 'simpleAxioms'],
                                     open: {
                                       'kf': {
                                         editorModel: apis[tab.api].endpoints[tab.endpoint].parameters.to,
@@ -266,10 +283,26 @@
                               serialize: true
                             }
                           }"></ng-container>
-                        </span>
+                          </span>
+                        </ng-container>
+                        <ng-container *ngIf="tab.endpoint == 1">
+                          <ng-container [ngTemplateOutlet]="outputTabs" [ngTemplateOutletContext]="{
+                            container: tab.output,
+                            opened: 'Explanations',
+                            listCategorized: ['Explanations', 'TBox', 'FilteredTBox'],
+                            raw: {
+                              container: tab,
+                              parameter: 'output',
+                              label: 'KF Repair',
+                              outputMode: true,
+                              fullHeight: true,
+                              serialize: true
+                            }
+                          }"></ng-container>
+                        </ng-container>
                       </span>
                       <span
-                        *ngIf="!(tab.api == 'metamodel' && tab.endpoint == 6) && !(tab.api == 'reasoning') && !(tab.api == 'test' && tab.endpoint == 0)">
+                        *ngIf="!(tab.api == 'metamodel' && tab.endpoint == 6) && !(tab.api == 'reasoning') && !(tab.api == 'test' && (tab.endpoint == 0 || tab.endpoint == 1))">
                         <ng-container [ngTemplateOutlet]="outputCodeEditor" [ngTemplateOutletContext]="{ tab: tab }">
                         </ng-container>
                       </span>
@@ -305,12 +338,17 @@
                           aria-valuemax="{{tab.multiTotalFiles}}" [style.width]="getMultiProgress(index) + '%'"></div>
                       </div>
                       <div class="row w-100 m-0" style="overflow-x: hidden; overflow-y: auto">
-                        <div class="col-6">
+                        <div class="col-4">
                           <ng-container [ngTemplateOutlet]="tableSuccededFiles" [ngTemplateOutletContext]="{
                             succededFiles: tab.multiSucceded
                           }"></ng-container>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
+                          <ng-container [ngTemplateOutlet]="tableEmptyFiles" [ngTemplateOutletContext]="{
+                            emptyFiles: tab.multiEmpty
+                          }"></ng-container>
+                        </div>
+                        <div class="col-4">
                           <ng-container [ngTemplateOutlet]="tableFailedFiles" [ngTemplateOutletContext]="{
                             failedFiles: tab.multiFailed
                           }"></ng-container>
@@ -388,40 +426,56 @@
 </div>
 
 <!--generic code editor for use in both input and output templates-->
-<ng-template #codeEditor let-container='container' let-parameter='parameter' let-label='label'
+<ng-template #codeEditor let-tab='tab' let-container='container' let-parameter='parameter' let-label='label'
   let-languageMode='languageMode' let-outputMode='outputMode' let-listMode='listMode'
-  let-listModeCategorized='listModeCategorized' let-listModeFailedFiles='listModeFailedFiles' let-serialize='serialize'
-  let-example='example' let-open='open' let-fullHeight='fullHeight' let-raw='raw'>
-  <span *ngVar="{ categoriesMode: listModeCategorized, failedFilesMode: listModeFailedFiles } as settings">
-    <button *ngIf="raw" class="btn btn-secondary btn-sm float-left mr-2" (click)="raw.raw = !raw.raw"
-      tippy="Toggle raw data view">
-      <i class="fa fa-fw fa-file-code-o"></i>
-    </button>
-    <label>{{label}}</label>&nbsp;
-    <button *ngIf="example && !outputMode" class="example-btn btn btn-sm btn-warning font-weight-bold"
-      (click)="container[parameter] = example">EXAMPLE</button>
-    <button class="btn btn-secondary btn-sm float-right" ngxClipboard
-      [cbContent]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
-      tippy="Copy to Clipboard">
-      <i class="fa fa-fw fa-clipboard"></i>
-    </button>
-    <button class="btn btn-secondary btn-sm float-right" *ngIf="listMode && listModeCategorized"
-      (click)="settings.categoriesMode = !settings.categoriesMode" tippy="Categorized Mode"
-      style="margin-right: 0.5rem;">
-      <i class="fa fa-fw fa-list"></i>
-    </button>
-    <button class="btn btn-secondary btn-sm float-right" *ngIf="open"
-      (click)="openInEditor(open.editorModel, open.sourceModel, open.parameter ? container[parameter][open.parameter] : container[parameter], open.serialize)"
-      tippy="Open in Editor" style="margin-right: 0.5rem;">
-      <i class="fa fa-fw fa-th"></i>
-    </button>
-    <button class="btn btn-secondary btn-sm float-right" *ngIf="open"
-      (click)="downloadFile(open.sourceModel, 'json', open.parameter ? container[parameter][open.parameter] : container[parameter], !open.serialize)"
-      tippy="Download File" style="margin-right: 0.5rem;">
-      <i class="fa fa-fw fa-download"></i>
-    </button>
-    <ngx-codemirror *ngIf="!outputMode && !listMode" [(ngModel)]="container[parameter]" [preserveScrollPosition]="true"
-      [options]="{
+  let-listModeCategorized='listModeCategorized' let-listModeFailedFiles='listModeFailedFiles'
+  let-listModeEmptyFiles='listModeEmptyFiles' let-serialize='serialize' let-example='example'
+  let-exampleFormat='exampleFormat' let-exampleParameters='exampleParameters' let-open='open'
+  let-fullHeight='fullHeight' let-raw='raw'>
+  <span class="d-flex flex-column h-100"
+    *ngVar="{ categoriesMode: listModeCategorized, failedFilesMode: listModeFailedFiles, emptyFilesMode: listModeEmptyFiles } as settings">
+    <div class="d-flex flex-row flex-shrink-0 align-items-center mb-1">
+      <button *ngIf="raw" class="btn btn-secondary btn-sm float-left mr-2" (click)="raw.raw = !raw.raw"
+        tippy="Toggle raw data view">
+        <i class="fa fa-fw fa-file-code-o"></i>
+      </button>
+      <label class="mb-0 mx-2">{{label}}</label>&nbsp;
+      <span *ngIf="example && !outputMode" class="flex-fill">
+        <button *ngFor="let ex of example" class="example-btn btn btn-sm btn-warning font-weight-bold mr-2 mb-1"
+          (click)="
+        container[parameter] = exampleFormat == false
+        ? (ex.content ? ex.content : ex)
+        : JSON.stringify((ex.content ? ex.content : ex), null, '\t');
+        setExampleParameters(tab, exampleParameters, ex.name)
+        ">
+          {{ ex.name ? ex.name : 'EXAMPLE' }}
+        </button>
+      </span>
+      <span class="flex-fill">
+        <button class="btn btn-secondary btn-sm float-right mr-1" ngxClipboard
+          [cbContent]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
+          tippy="Copy to Clipboard">
+          <i class="fa fa-fw fa-clipboard"></i>
+        </button>
+        <button class="btn btn-secondary btn-sm float-right mr-1" *ngIf="listMode && listModeCategorized"
+          (click)="settings.categoriesMode = !settings.categoriesMode" tippy="Categorized Mode">
+          <i class="fa fa-fw fa-list"></i>
+        </button>
+        <button class="btn btn-secondary btn-sm float-right mr-1" *ngIf="open"
+          (click)="openInEditor(open.editorModel, open.sourceModel, open.parameter ? container[parameter][open.parameter] : container[parameter], open.serialize)"
+          tippy="Open in Editor">
+          <i class="fa fa-fw fa-th"></i>
+        </button>
+        <button class="btn btn-secondary btn-sm float-right mr-1" *ngIf="open"
+          (click)="downloadFile(open.sourceModel, 'json', open.parameter ? container[parameter][open.parameter] : container[parameter], !open.serialize)"
+          tippy="Download File">
+          <i class="fa fa-fw fa-download"></i>
+        </button>
+      </span>
+    </div>
+    <div class="flex-fill">
+      <ngx-codemirror *ngIf="!outputMode && !listMode" [(ngModel)]="container[parameter]"
+        [preserveScrollPosition]="true" [options]="{
         theme: 'duotone-' + (this.darkmodeService.isDarkMode() ? 'dark' : 'light'),
         mode: !languageMode ? { name: 'javascript', jsonld: true } : languageMode,
         lineNumbers: true,
@@ -432,9 +486,9 @@
         matchBrackets: true,
         readOnly: false
       }"></ngx-codemirror>
-    <ngx-codemirror *ngIf="outputMode && !listMode" [class.codemirror-full-height]="fullHeight"
-      [ngModel]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
-      [preserveScrollPosition]="true" [options]="{
+      <ngx-codemirror *ngIf="outputMode && !listMode" [class.codemirror-full-height]="fullHeight"
+        [ngModel]="serialize ? JSON.stringify(container[parameter], null, '\t') : container[parameter]"
+        [preserveScrollPosition]="true" [options]="{
         theme: 'duotone-' + (this.darkmodeService.isDarkMode() ? 'dark' : 'light'),
         mode: !languageMode ? { name: 'javascript', jsonld: true } : languageMode,
         lineNumbers: false,
@@ -445,7 +499,8 @@
         matchBrackets: true,
         readOnly: true
       }"></ngx-codemirror>
-    <div *ngIf="listMode" class="overflow-y-auto overflow-x-hidden text-break pr-2"
+    </div>
+    <div *ngIf="listMode" class="overflow-y-auto overflow-x-hidden text-break pr-2 flex-fill"
       style="height: calc(100% - 2.5rem);">
       <div *ngIf="Object.keys(container[parameter]).length == 0"
         class="text-center d-flex flex-row align-items-center justify-content-center w-100 h-75">
@@ -457,8 +512,19 @@
         </div>
       </div>
       <div *ngIf="Object.keys(container[parameter]).length > 0">
-        <ul *ngIf="!settings.categoriesMode && !settings.failedFilesMode">
-          <li *ngFor="let item of container[parameter] | keyvalue">{{item.value}}</li>
+        <ul *ngIf="!settings.categoriesMode && !settings.failedFilesMode && !settings.emptyFilesMode">
+          <li *ngFor="let item of container[parameter] | keyvalue">
+            <ng-container *ngIf="isItemObject(item.value)">
+              <label>{{ item.key }}</label>
+              <ul>
+                <li *ngFor="let subitem of item.value | keyvalue">
+                  {{ subitem.value }}
+              </ul>
+            </ng-container>
+            <ng-container *ngIf="!isItemObject(item.value)">
+              {{ item.value }}
+            </ng-container>
+          </li>
         </ul>
         <ngb-accordion *ngIf="settings.categoriesMode" #listAccordion="ngbAccordion" animation="true">
           <ngb-panel *ngFor="let category of getCategories(container[parameter])" cardClass="accordion-button">
@@ -477,6 +543,9 @@
         <ng-container *ngIf="settings.failedFilesMode" [ngTemplateOutlet]="tableFailedFiles" [ngTemplateOutletContext]="{
           failedFiles: container[parameter]
         }"></ng-container>
+        <ng-container *ngIf="settings.emptyFilesMode" [ngTemplateOutlet]="tableEmptyFiles" [ngTemplateOutletContext]="{
+          emptyFiles: container[parameter]
+        }"></ng-container>
       </div>
     </div>
   </span>
@@ -485,10 +554,13 @@
 <!--generic code editor configuration for use in input templates-->
 <ng-template #inputCodeEditor let-tab="tab" let-parameter='parameter' let-label='label'>
   <ng-container [ngTemplateOutlet]="codeEditor" [ngTemplateOutletContext]="{
+    tab: tab,
     container: tab.parameters,
     parameter: parameter ? parameter : 'data',
     label: label ? label : apis[tab.api].endpoints[tab.endpoint].parameters.from.toUpperCase(),
-    example: JSON.stringify(apis[tab.api].endpoints[tab.endpoint].example, null, '\t'),
+    example: apis[tab.api].endpoints[tab.endpoint].example,
+    exampleFormat: apis[tab.api].endpoints[tab.endpoint].exampleFormat,
+    exampleParameters: apis[tab.api].endpoints[tab.endpoint].exampleParameters,
     open: {
       editorModel: apis[tab.api].endpoints[tab.endpoint].parameters.from,
       sourceModel: apis[tab.api].endpoints[tab.endpoint].parameters.from,
@@ -516,9 +588,11 @@
 
 <!--generic template for divide output json in tabs-->
 <ng-template #outputTabs let-container='container' let-open='open' let-subtab='subtab' let-raw='raw' let-list='list'
-  let-listCategorized='listCategorized' let-listFailedFiles='listFailedFiles' let-rawTemplate='rawTemplate'
-  let-rawParameter='rawParameter' let-adjustedHeight='adjustedHeight' let-alt='alt'>
-  <span *ngVar="{ opened: Object.keys(container)[0], raw: false } as settings">
+  let-listCategorized='listCategorized' let-listFailedFiles='listFailedFiles' let-listEmptyFiles='listEmptyFiles'
+  let-rawTemplate='rawTemplate' let-rawParameter='rawParameter' let-adjustedHeight='adjustedHeight' let-alt='alt'
+  let-opened="opened">
+  <span
+    *ngVar="{ opened: opened && Object.keys(container).indexOf(opened) >= 0 ? opened : Object.keys(container)[0], raw: false } as settings">
     <span *ngIf="settings.raw">
       <ng-container [ngTemplateOutlet]="raw.template ? raw.template : codeEditor"
         [ngTemplateOutletContext]="Object.assign(raw, { raw: settings })">
@@ -546,9 +620,13 @@
                 parameter: tab.key,
                 label: '‎',
                 outputMode: true,
-                listMode: (list && list.includes(tab.key)) || (listCategorized && listCategorized.includes(tab.key)) || (listFailedFiles && listFailedFiles.includes(tab.key)),
+                listMode: (list && list.includes(tab.key))
+                  || (listCategorized && listCategorized.includes(tab.key))
+                  || (listFailedFiles && listFailedFiles.includes(tab.key))
+                  || (listEmptyFiles && listEmptyFiles.includes(tab.key)),
                 listModeCategorized: listCategorized && listCategorized.includes(tab.key),
                 listModeFailedFiles: listFailedFiles && listFailedFiles.includes(tab.key),
+                listModeEmptyFiles: listEmptyFiles && listEmptyFiles.includes(tab.key),
                 serialize: true,
                 open: open && open[tab.key] ? {
                   editorModel: open[tab.key].editorModel,
@@ -562,6 +640,7 @@
                 list: subtab[tab.key] ? subtab[tab.key].list : subtab['*'].list,
                 listCategorized: subtab[tab.key] ? subtab[tab.key].listCategorized : subtab['*'].listCategorized,
                 listFailedFiles: subtab[tab.key] ? subtab[tab.key].listFailedFiles : subtab['*'].listFailedFiles,
+                listEmptyFiles: subtab[tab.key] ? subtab[tab.key].listEmptyFiles : subtab['*'].listEmptyFiles,
                 open: subtab[tab.key] ? subtab[tab.key].open : subtab['*'].open,
                 raw: subtab[tab.key] ? subtab[tab.key].raw : Object.assign(subtab['*'].raw, { parameter: tab.key }),
                 subtab: subtab[tab.key] ? subtab[tab.key].subtab : subtab['*'].subtab,
@@ -683,7 +762,7 @@
           <div class="col mr-sm-2 my-1 pr-0">
             <input type="text" class="form-control" [(ngModel)]="tab.parameters.timeout" placeholder="60000">
           </div>
-          <label class="col mr-sm-2 my-2 p-0">
+          <label class="col-auto pl-0 mr-2 my-2">
             Timeout&nbsp;
             <i class="btn btn-sm fa fa-fw fa-info-circle" tippy="It's the time limit of each query in miliseconds (ms), if it's set to 0 there is no
             limit." placement="right"></i>
@@ -708,6 +787,7 @@
           parameter: 'ontologyString',
           label: apis[tab.api].endpoints[tab.endpoint].parameters.from.toUpperCase(),
           example: apis[tab.api].endpoints[tab.endpoint].example,
+          exampleFormat: apis[tab.api].endpoints[tab.endpoint].exampleFormat,
           languageMode: 'xml',
           open: false
         }"></ng-container>
@@ -761,6 +841,17 @@
                   [disabled]="tab.loadingOutput || tab.downloadingFailedUris || tab.parameters?.ontologiesUris?.length <= 0 || tab.output?.failed?.length <= 0"
                   (click)="downloadFailedUris(tabIndex)">
                   <i class="fa fa-fw fa-{{tab.downloadingFailedUris ? 'spinner fa-pulse': 'download'}}"></i>
+                </button>
+              </span>
+              <ng-template #timeout_uris_export_info>
+                Download Timeout URIs <br>
+                <span class="text-muted">(Loaded URIs and Output URIs are needed)</span>
+              </ng-template>
+              <span class="float-right mr-1" [tippy]="timeout_uris_export_info">
+                <button class="btn btn-sm btn-warning text-white"
+                  [disabled]="tab.loadingOutput || tab.downloadingTimeoutUris || tab.parameters?.ontologiesUris?.length <= 0 || tab.output?.failed?.length <= 0"
+                  (click)="downloadTimeoutUris(tabIndex)">
+                  <i class="fa fa-fw fa-{{tab.downloadingTimeoutUris ? 'spinner fa-pulse': 'download'}}"></i>
                 </button>
               </span>
             </div>
@@ -872,33 +963,163 @@
   </div>
 </ng-template>
 
+<!--input template for meta repair-->
+<ng-template #metarepair let-tab='tab' let-tabIndex="tabIndex">
+  <div class="d-flex flex-column h-100 w-100">
+    <div class="row flex-shrink-0" style="padding-bottom: 0.5rem;">
+      <div class="col-6">
+        <div class="form-group mb-0">
+          <label class="mb-0">Reasoner&nbsp;
+            <i class="btn btn-sm fa fa-fw fa-info-circle"
+              tippy="Reasoner is a mandatory requirement for this process. You must select one."
+              placement="right"></i></label>
+          <select class="form-control custom-select custom-select-sm my-1 mr-sm-2"
+            [(ngModel)]="tab.parameters.reasoner">
+            <option value="jfact">JFact</option>
+            <option value="pellet">Pellet</option>
+            <option value="Racer">Racer</option>
+            <option value="konclude">Konclude</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="row">
+          <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" [(ngModel)]="tab.parameters.filtering"
+              id="filtering-switch">
+            <label class="custom-control-label" for="filtering-switch">Filtering</label>
+            <i class="btn btn-sm fa fa-fw fa-info-circle" [tippy]="repair_filtering_info" placement="right"></i>
+          </div>
+          <ng-template #repair_filtering_info>
+            This will remove axioms that don't have purpose with the normalized translation to OWL from the KF.
+            Because
+            them will never generate incoherence or unsat. concepts.<br>
+            <span class="text-muted">Specifically:<br>
+              - data property range <br>
+              - data property domain <br>
+              - object min/max cardinality <br>
+              - data min/max cardinality <br>
+              - subclass of owl:Nothing
+            </span>
+          </ng-template>
+        </div>
+        <div class="row">
+          <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" [(ngModel)]="tab.parameters.precompute"
+              id="precompute-switch">
+            <label class="custom-control-label" for="precompute-switch">Precompute</label>
+            <i class="btn btn-sm fa fa-fw fa-info-circle"
+              tippy="Enable to precompute the ontology. It generates the concequences of the ontology base."
+              placement="right"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row flex-shrink-0" style="padding-bottom: 0.5rem;">
+      <div class="col-6">
+        <div class="row">
+          <div class="col mr-sm-2 my-1 pr-0">
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="tab.parameters.timeout"
+              placeholder="60000">
+          </div>
+          <label class="col-auto pl-0 mr-2 my-2">
+            Timeout&nbsp;
+            <i class="btn btn-sm fa fa-fw fa-info-circle" tippy="It's the time limit of each query in miliseconds (ms), if it's set to 0 there is no
+            limit." placement="right"></i>
+          </label>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="row">
+          <div class="col mr-sm-2 my-1 pr-0">
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="tab.parameters.maxExplanations"
+              placeholder="4">
+          </div>
+          <label class="col-auto pl-0 mr-2 my-2">
+            Max. Explanations&nbsp;
+            <i class="btn btn-sm fa fa-fw fa-info-circle"
+              tippy="It's the maximum amount of Explanations that will be calculated, it can take too much time if this number is greater."
+              placement="right"></i>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="row flex-shrink-0" style="padding-bottom: 0.5rem;">
+      <div class="col-12">
+        <div class="row flex-shrink-0">
+          <label class="col-auto pr-0">
+            Concept&nbsp;
+            <i class="btn btn-sm fa fa-fw fa-info-circle"
+              tippy="It's the unsatisfiable concept that you want to repair." placement="bottom"></i>
+          </label>
+          <div class="col">
+            <input type="text" class="form-control" [(ngModel)]="tab.parameters.entity"
+              placeholder="Some Unsat. Concept...">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex-grow-1 h-100">
+      <ng-container [ngTemplateOutlet]="inputCodeEditor" [ngTemplateOutletContext]="{ tab: tab, parameter: 'meta' }">
+      </ng-container>
+    </div>
+  </div>
+</ng-template>
+
 <!--table for show failed (error) files on multifile processing-->
 <ng-template #tableFailedFiles let-failedFiles='failedFiles'>
-  <table class="table owltometa-files-table">
-    <thead>
-      <tr>
-        <th><span class="text-danger">Failed ({{Object.keys(failedFiles).length}})</span>
-        </th>
-        <th style="width: 5rem;"></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr class="owltometa-file-row" *ngFor="let file of failedFiles | keyvalue">
-        <td style="word-break: break-all;">
-          <strong>{{ file.key }}</strong>
-        </td>
-        <td class="text-right" nowrap>
-          <i class="fa fa-fw fa-exclamation-triangle mr-1 text-{{file.value.message ? 'danger' : 'warning'}}"
-            [tippy]="file.value.message ? file.value.message : 'Timeout'" [maxWidth]="'none'"></i>
-          <button *ngIf="file.value.stackTrace" class="btn"
-            (click)="downloadFile(file.key + '.exception', 'txt', file.value.stackTrace)"
-            tippy="Download full stack trace">
-            <i class="fa fa-fw fa-download"></i>
+  <span *ngVar="{ errorSpecify: 1 } as failedFilesSettings">
+    <table class="table owltometa-files-table">
+      <thead>
+        <tr>
+          <th class="w-100">
+            <div class="form-group row mb-0">
+              <span class="text-danger col-auto">Failed ({{Object.keys(failedFiles).length}})</span>
+              <label class="form-label col-auto ml-auto text-muted small p-1 mb-0">Specify</label>
+              <select class="custom-select custom-select-sm col-4" [(ngModel)]="failedFilesSettings.errorSpecify">
+                <option value="1">One level</option>
+                <option value="2">Two levels</option>
+                <option value="3">Three levels</option>
+              </select>
+            </div>
+          </th>
+          <th style="width: 5rem;"></th>
+        </tr>
+      </thead>
+    </table>
+    <ngb-accordion #listAccordion="ngbAccordion" animation="true">
+      <ngb-panel *ngFor="let category of getErrorCategories(failedFiles, failedFilesSettings.errorSpecify)"
+        cardClass="accordion-error-button">
+        <ng-template ngbPanelHeader>
+          <button ngbPanelToggle class="btn w-100 h-100">
+            {{ category }} <b class="text-danger">({{ Object.keys(getErrorsByCategory(failedFiles, category,
+              failedFilesSettings.errorSpecify)).length }})</b>
           </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        </ng-template>
+        <ng-template ngbPanelContent>
+          <table class="w-100">
+            <tbody>
+              <tr class="owltometa-file-row"
+                *ngFor="let file of getErrorsByCategory(failedFiles, category, errorSpecify) | keyvalue">
+                <td class="px-3 py-2" style="word-break: break-all;">
+                  <strong>{{ file.key }}</strong>
+                </td>
+                <td class="text-right  px-3 py-2" nowrap>
+                  <i class="fa fa-fw fa-exclamation-triangle mr-1 text-{{file.value.message ? 'danger' : 'warning'}}"
+                    [tippy]="file.value.message ? file.value.message : 'Timeout'" [maxWidth]="'none'"></i>
+                  <button *ngIf="file.value.stackTrace" class="btn"
+                    (click)="downloadFile(file.key + '.exception', 'txt', file.value.stackTrace)"
+                    tippy="Download full stack trace">
+                    <i class="fa fa-fw fa-download"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </ng-template>
+      </ngb-panel>
+    </ngb-accordion>
+  </span>
 </ng-template>
 
 <!--table for show succeded files on multifile processing-->
@@ -919,6 +1140,30 @@
         </td>
         <td class="text-right" nowrap>
           <i class="fa fa-fw fa-check text-success"></i>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</ng-template>
+
+<!--table for show empty files on multifile processing-->
+<ng-template #tableEmptyFiles let-emptyFiles='emptyFiles'>
+  <table class="table owltometa-files-table">
+    <thead>
+      <tr>
+        <th><span class="text-secondary">Empty
+            ({{Object.keys(emptyFiles).length}})</span>
+        </th>
+        <th style="width: 5rem;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="owltometa-file-row" *ngFor="let file of emptyFiles | keyvalue">
+        <td style="word-break: break-all;">
+          <strong>{{ file.key }}</strong>
+        </td>
+        <td class="text-right" nowrap>
+          <i class="fa fa-fw fa-file-o text-secondary"></i>
         </td>
       </tr>
     </tbody>

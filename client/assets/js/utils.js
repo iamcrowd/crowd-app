@@ -1,19 +1,20 @@
 $(document).ready(function () {
   $('[data-toggle="tooltip"]').tooltip();
   $('[data-toggle="tooltip"]').on("DOMNodeRemoved", function () {
-    $('[data-toggle="tooltip"]').tooltip('hide');
+    $('[data-toggle="tooltip"]').tooltip("hide");
   });
 });
 
 var uuidv4 = function () {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
-}
+};
 
 var getCSS = function (prop, fromClass) {
-  var $inspector = $("<div>").css('display', 'none').addClass(fromClass);
+  var $inspector = $("<div>").css("display", "none").addClass(fromClass);
   $("body").append($inspector); // add to DOM, in order to read the CSS property
   try {
     return $inspector.css(prop);
@@ -23,16 +24,25 @@ var getCSS = function (prop, fromClass) {
 };
 
 var formatString = function (str) {
-  return (str.charAt(0).toUpperCase() + str.slice(1)).split(/(?=[A-Z])/).join(" ");
-}
+  return (str.charAt(0).toUpperCase() + str.slice(1))
+    .split(/(?=[A-Z])/)
+    .join(" ");
+};
 
 var formatSelector = function (str) {
-  return str.replace('/', '-');
-}
+  return str.replace("/", "-");
+};
 
 function toggleFullScreen(elem) {
   // ## The below if statement seems to work better ## if ((document.fullScreenElement && document.fullScreenElement !== null) || (document.msfullscreenElement && document.msfullscreenElement !== null) || (!document.mozFullScreen && !document.webkitIsFullScreen)) {
-  if ((document.fullScreenElement !== undefined && document.fullScreenElement === null) || (document.msFullscreenElement !== undefined && document.msFullscreenElement === null) || (document.mozFullScreen !== undefined && !document.mozFullScreen) || (document.webkitIsFullScreen !== undefined && !document.webkitIsFullScreen)) {
+  if (
+    (document.fullScreenElement !== undefined &&
+      document.fullScreenElement === null) ||
+    (document.msFullscreenElement !== undefined &&
+      document.msFullscreenElement === null) ||
+    (document.mozFullScreen !== undefined && !document.mozFullScreen) ||
+    (document.webkitIsFullScreen !== undefined && !document.webkitIsFullScreen)
+  ) {
     if (elem.requestFullScreen) {
       elem.requestFullScreen();
     } else if (elem.mozRequestFullScreen) {
@@ -72,7 +82,8 @@ function getEventClientPoint(event) {
 }
 
 function getBrowser() {
-  var sBrowser, sUsrAg = navigator.userAgent;
+  var sBrowser,
+    sUsrAg = navigator.userAgent;
 
   // The order matters here, and this may report false positives for unlisted browsers.
 
@@ -104,12 +115,20 @@ function getBrowser() {
 }
 
 function SVGtoPDFDownload(svg, options) {
-  let doc = new PDFDocument({ compress: false, size: [options.pageWidth || 612, options.pageHeight || 792], margin: 0 });
-  SVGtoPDF(doc, svg, options.x || 0, options.y || 0, { width: options.width, height: options.height, assumePt: true });
+  let doc = new PDFDocument({
+    compress: false,
+    size: [options.pageWidth || 612, options.pageHeight || 792],
+    margin: 0,
+  });
+  SVGtoPDF(doc, svg, options.x || 0, options.y || 0, {
+    width: options.width,
+    height: options.height,
+    assumePt: true,
+  });
   let stream = doc.pipe(blobStream());
-  stream.on('finish', () => {
-    let blob = stream.toBlob('application/pdf');
-    const link = document.createElement('a');
+  stream.on("finish", () => {
+    let blob = stream.toBlob("application/pdf");
+    const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = options.name + ".pdf";
     link.click();
@@ -118,132 +137,196 @@ function SVGtoPDFDownload(svg, options) {
 }
 
 function cropCanvas(sourceCanvas, left, top, width, height) {
-  let destCanvas = document.createElement('canvas');
+  let destCanvas = document.createElement("canvas");
   destCanvas.width = width;
   destCanvas.height = height;
   destCanvas.getContext("2d").drawImage(
     sourceCanvas,
-    left, top, width, height,  // source rect with content to crop
-    0, 0, width, height);      // newCanvas, same size as source rect
+    left,
+    top,
+    width,
+    height, // source rect with content to crop
+    0,
+    0,
+    width,
+    height
+  ); // newCanvas, same size as source rect
   return destCanvas;
 }
 
 function isURI(str) {
-  return str.indexOf('http://') == 0;
+  return URI(str).is("absolute");
 }
 
 function toURI(str) {
   // return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); }).replace(' ', '');
-  return str.split(' ').join('-').split('\n').join('-').toLowerCase();
+  return str.split(" ").join("-").split("\n").join("-").toLowerCase();
 }
 
-function fromURI(str) {
-  if (str != null && str.indexOf("IMPORT") != -1) {
-    try {
-      return fromURIImport(getURIFragment(str), getImportSymbol(str))
-    } catch (e) {
-      return _fromURI(str);
-    }
-  } else if (str != null && str.indexOf("NORMAL\/FRESH") != -1) {
-    try {
-      return fromURIFresh(getURIFragment(str).substring(1, str.length - 1))
-    } catch (e) {
-      return _fromURI(str);
-    }
+// returns the fragment of the URI formatted as follows:
+// 1) characters - are replaced by spaces (consecutive spaces are replaced by a single space)
+// 2) the first letter of each word is capitalized the rest of the letters are lower case
+// 3) if the fragment is in infix caps, a space is added between the lower case and upper case letters
+// exists some special cases, which based on the path of the URI changed format:
+// path | fragment | formatted fragment
+// /negation | A | ¬A
+// /union | A_B | A ∪ B
+// /intersection | A_B | A ∩ B
+// /exists | R_B | ∃R.B
+// /exists | A_R_B | (A)∃R.B
+// /exists/negation | A_R_B | (¬A)∃R.B
+// /forall | R_B | ∀R.B
+// /forall | A_R_B | (A)∀R.B
+// /forall/negation | A_R_B | (¬A)∀R.B
+// /dom | A | Dom A
+// /ran | A | Ran A
+// /dom/exists | R_B | Dom ∃R.B
+// /dom/forall | R_B | Dom ∀R.B
+function fromURI(str, defaultNamespace) {
+  if (!str || !defaultNamespace) return "";
+  let uri = URI(str);
+
+  let namespace = namespaceFromURI(uri);
+
+  // if the URI is a default URI, check for special cases
+  if (operationFromURI(uri, defaultNamespace) != null) {
+    let fragments = uri
+      .fragment()
+      .split("_")
+      .map((fragment) => formatFragment(fragment));
+
+    return crowdOperationsImpl[uri.path()]
+      ? crowdOperationsImpl[uri.path()](fragments) ||
+          formatFragment(uri.fragment())
+      : formatFragment(uri.fragment());
   } else {
-    return _fromURI(str);
+    return uri.fragment()?.length > 0
+      ? formatFragment(uri.fragment())
+      : uri.path() != "/"
+      ? formatFragment(uri.path().split("/").slice(-1)[0])
+      : uri.hostname()
+      ? ''
+      : str;
   }
 }
 
-function _fromURI(str) {
-  return str != null ? infixCapsReplace(capitalizeOnlyFirstLetter(getURIFragment(str).split('-').join(' '))) : str;
+// returns the fragment formatted as follows:
+// 1) characters - are replaced by spaces (consecutive spaces are replaced by a single space)
+// 2) the first letter of each word is capitalized the rest of the letters are lower case
+// 3) if the fragment is in infix caps, a space is added between the lower case and upper case letters
+function formatFragment(str) {
+  return str
+    .split(/[-_]/)
+    .filter((word) => word.length > 0)
+    .map(function (word) {
+      // check if the word is in infix caps (e.g. infixCapsAndCops => Infix Caps And Cops)
+      return word
+        .split(/(?=[A-Z])/)
+        .map(function (word) {
+          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        })
+        .join(" ");
+    })
+    .join(" ");
 }
 
-function getImportSymbol(str) {
-  var start = str.indexOf("IMPORT\/") + "IMPORT\/".length;
-  var end = str.indexOf("%");
-  if (start == -1 || end == -1) return { symbol: '-', infix: true };
-  var operation = fromURI(str.substring(start, end));
-  switch (operation) {
-    case 'UNION': return { symbol: '∪', infix: true }; break;
-    case 'INTERSECTION': return { symbol: '∩', infix: true }; break;
-    case 'COMPLEMENT': return { symbol: "'", infix: false }; break;
-    default: return { symbol: '<' + operation + '>', infix: true }; break;
-  }
-}
-
-function fromURIImport(str, op) {
-  if (str.indexOf("%") != -1) return op.infix ? op.symbol + '(' + fromURI(str) + ')' : '(' + fromURI(str) + ')' + op.symbol;
-  var uris = str.split('$').map(uri => fromURI(uri)).filter(uri => uri != '');
-  if (uris.length <= 1) return op.symbol + ' ' + uris[0];
-  else return uris.join(' ' + op.symbol + ' ');
-}
-
-function fromURIFresh(str) {
-  // console.log("TERM", str);
-  if (isURI(str.substring(1, str.length - 1))) {
-    return fromURI(str.substring(1, str.length - 1));
+function namespaceFromURI(uri) {
+  if (uri.toString().length == 1) return uri.toString();
+  if (uri.path().length > 1) {
+    return uri.origin() + uri.path() + uri.query();
   } else {
-    var start = str.indexOf("(");
-    var end = str.lastIndexOf(")");
-    var symbol = str.substring(0, start);
-    // console.log("SYMBOL", symbol);
-    var elements = str.substring(start + 1, end).split(' ');
-    elements = combineElements(elements);
-    // console.log("ELEMENTS", elements);
-    var beutySymbol;
-    var infix = true;
-    switch (symbol) {
-      case 'ObjectIntersectionOf':
-        beutySymbol = '∩';
-        break;
-      case 'ObjectUnionOf':
-        beutySymbol = '∪';
-        break;
-      case 'ObjectSomeValuesFrom':
-        beutySymbol = '∃';
-        infix = false;
-        break;
-      case 'ObjectAllValuesFrom':
-        beutySymbol = '∀';
-        infix = false;
-        break;
-    }
-    elements = elements.map(function (element) { return fromURIFresh(element) });
-
-    return infix ? elements.join(' ' + beutySymbol + ' ') : beutySymbol + ' ' + elements[0] + '.(' + elements[1] + ')';
+    return uri.origin();
   }
 }
 
-function combineElements(elements) {
-  var terms = [];
-  var openTerm = false;
-  elements.forEach(function (element) {
-    if (!openTerm) terms.push(element)
-    else terms[terms.length - 1] += ' ' + element
-    if (hasSymbol(element)) openTerm = true;
-    if (element.indexOf(')') != -1) openTerm = false;
-  });
-  return terms;
-}
+// define all the operations that can be applied to the crowd URI
+const crowdOperationsImpl = {
+  "/negation": (fragments) => "¬" + fragments[0],
+  "/union": (fragments) => fragments.join(" ⊔ "),
+  "/intersection": (fragments) => fragments.join(" ⊓ "),
+  "/dom": (fragments) => "Dom " + fragments[0],
+  "/ran": (fragments) => "Ran " + fragments[0],
+  "/exists": (fragments) => {
+    if (fragments.length == 2) return "∃" + fragments[0] + "." + fragments[1];
+    else if (fragments.length > 2)
+      return "(" + fragments[0] + ")∃" + fragments[1] + "." + fragments[2];
+    else return null;
+  },
+  "/forall": (fragments) => {
+    if (fragments.length == 2) return "∀" + fragments[0] + "." + fragments[1];
+    else if (fragments.length > 2)
+      return "(" + fragments[0] + ")∀" + fragments[1] + "." + fragments[2];
+    else return null;
+  },
+  "/dom/exists": (fragments) => {
+    if (fragments.length > 1)
+      return "Dom ∃" + fragments[0] + "." + fragments[1];
+    else return null;
+  },
+  "/dom/forall": (fragments) => {
+    if (fragments.length > 1)
+      return "Dom ∀" + fragments[0] + "." + fragments[1];
+    else return null;
+  },
+  "/negation/exists": (fragments) => {
+    if (fragments.length == 2)
+      return "∃" + fragments[0] + ".(¬" + fragments[1] + ")";
+    else if (fragments.length > 2)
+      return "(¬" + fragments[0] + ")∃" + fragments[1] + "." + fragments[2];
+    else return null;
+  },
+  "/negation/forall": (fragments) => {
+    if (fragments.length == 2)
+      return "∀" + fragments[0] + ".(¬" + fragments[1] + ")";
+    else if (fragments.length > 2)
+      return "(¬" + fragments[0] + ")∀" + fragments[1] + "." + fragments[2];
+    else return null;
+  },
+};
 
-function hasSymbol(str) {
-  return str.indexOf("ObjectIntersectionOf") != -1 ||
-    str.indexOf("ObjectSomeValuesFrom") != -1 ||
-    str.indexOf("ObjectUnionOf") != -1 ||
-    str.indexOf("ObjectAllValuesFrom") != -1;
+// define all the subpaths of the crowd URI, used for define fresh entities/relations from owl imports
+const crowdOperations = [
+  // "/faketop",
+  "/union",
+  "/intersection",
+  "/exists",
+  "/forall",
+  // "/dom",
+  // "/ran",
+  "/dom/exists",
+  "/dom/forall",
+  "/negation",
+  "/negation/exists",
+  "/negation/forall",
+];
+
+function operationFromURI(uri, defaultNamespace) {
+  let defaultURI = URI(defaultNamespace);
+  if (uri.origin() == defaultURI.origin()) {
+    if (crowdOperations.includes(uri.path())) {
+      return uri.path();
+    }
+  }
+  return null;
 }
 
 function capitalize(str) {
-  return str.toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+    .join(" ");
 }
 
 function capitalizeOnlyFirstLetter(str) {
-  return str.split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+  return str
+    .split(" ")
+    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+    .join(" ");
 }
 
 function infixCapsReplace(str) {
-  return str.replace(/([a-z])_?([A-Z])/g, '$1 $2');
+  return str.replace(/([a-z])_?([A-Z])/g, "$1 $2");
 }
 
 function toInfixCaps(str) {
@@ -259,50 +342,24 @@ function upperFirstLetter(str) {
 }
 
 function removeSpaces(str) {
-  return str.split(' ').join('');
-}
-
-function getURIFragment(uri) {
-  var separator = '/';
-  if (uri.indexOf('%') != -1) separator = '%';
-  else if (uri.indexOf('#') != -1) separator = '#';
-  var fragment;
-  if (separator == '/') {
-    fragment = uri.split(separator);
-    fragment = fragment[fragment.length - 1];
-  } else {
-    fragment = uri.substring(uri.indexOf(separator) + 1, uri.length);
-  }
-  return fragment;
-}
-
-function getURINamespace(uri) {
-  var separator = '/';
-  if (uri.indexOf('%') != -1) separator = '%';
-  else if (uri.indexOf('#') != -1) separator = '#';
-  var namespace;
-  if (separator == '/') {
-    namespace = uri.substring(0, uri.lastIndexOf(separator) + 1);
-  } else {
-    namespace = uri.substring(0, uri.indexOf(separator) + 1);
-  }
-  return namespace;
+  return str.split(" ").join("");
 }
 
 function escapeXML(xml) {
-  return xml.replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+  return xml
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 function formatXML(xml) {
-  var formatted = '';
+  var formatted = "";
   var reg = /(>)(<)(\/*)/g;
-  xml = xml.replace(reg, '$1\r\n$2$3');
+  xml = xml.replace(reg, "$1\r\n$2$3");
   var pad = 0;
-  $.each(xml.split('\r\n'), function (index, node) {
+  $.each(xml.split("\r\n"), function (index, node) {
     var indent = 0;
     if (node.match(/.+<\/\w[^>]*>$/)) {
       indent = 0;
@@ -316,12 +373,12 @@ function formatXML(xml) {
       indent = 0;
     }
 
-    var padding = '';
+    var padding = "";
     for (var i = 0; i < pad; i++) {
-      padding += '  ';
+      padding += "  ";
     }
 
-    formatted += padding + node + '\r\n';
+    formatted += padding + node + "\r\n";
     pad += indent;
   });
 
@@ -330,9 +387,9 @@ function formatXML(xml) {
 
 function arraysEqual(_arr1, _arr2) {
   if (
-    !Array.isArray(_arr1)
-    || !Array.isArray(_arr2)
-    || _arr1.length !== _arr2.length
+    !Array.isArray(_arr1) ||
+    !Array.isArray(_arr2) ||
+    _arr1.length !== _arr2.length
   ) {
     return false;
   }
@@ -357,19 +414,25 @@ function medianPoint(centerElement, aroundElements) {
     aroundElements.forEach(function (element) {
       mediumPosition = mediumPosition
         ? {
-          x: ((mediumPosition.x + (element.getBBox().x + element.getBBox().width / 2)) / 2),
-          y: ((mediumPosition.y + (element.getBBox().y + element.getBBox().height / 2)) / 2),
-        }
+            x:
+              (mediumPosition.x +
+                (element.getBBox().x + element.getBBox().width / 2)) /
+              2,
+            y:
+              (mediumPosition.y +
+                (element.getBBox().y + element.getBBox().height / 2)) /
+              2,
+          }
         : {
-          x: (element.getBBox().x + element.getBBox().width / 2),
-          y: (element.getBBox().y + element.getBBox().height / 2),
-        };
+            x: element.getBBox().x + element.getBBox().width / 2,
+            y: element.getBBox().y + element.getBBox().height / 2,
+          };
     });
 
     mediumPosition = {
       x: mediumPosition.x - centerElement.getBBox().width / 2,
-      y: mediumPosition.y - centerElement.getBBox().height / 2
-    }
+      y: mediumPosition.y - centerElement.getBBox().height / 2,
+    };
   }
 
   return mediumPosition;
@@ -379,12 +442,11 @@ function setSelectionRange(input, selectionStart, selectionEnd) {
   if (input.setSelectionRange) {
     input.focus();
     input.setSelectionRange(selectionStart, selectionEnd);
-  }
-  else if (input.createTextRange) {
+  } else if (input.createTextRange) {
     var range = input.createTextRange();
     range.collapse(true);
-    range.moveEnd('character', selectionEnd);
-    range.moveStart('character', selectionStart);
+    range.moveEnd("character", selectionEnd);
+    range.moveStart("character", selectionStart);
     range.select();
   }
 }

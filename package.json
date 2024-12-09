@@ -2,8 +2,8 @@
   "name": "crowd-app",
   "license": "MIT",
   "engines": {
-    "node": "12.16.1",
-    "npm": "6.13.4"
+    "node": "12.22.0",
+    "npm": "v6.14.11"
   },
   "scripts": {
     "start": "npm run prod",
@@ -62,6 +62,7 @@
     "express": "^4.17.1",
     "file-saver": "^2.0.5",
     "font-awesome": "^4.7.0",
+    "geometric": "^2.5.4",
     "graphlib": "^2.1.8",
     "highlight.js": "^10.1.2",
     "html2canvas": "^1.0.0-rc.7",
@@ -86,6 +87,7 @@
     "svg-to-pdfkit": "^0.1.8",
     "tether": "^1.4.7",
     "tslib": "^2.0.0",
+    "urijs": "^1.19.11",
     "xlsx": "^0.18.5",
     "zone.js": "~0.10.3"
   },

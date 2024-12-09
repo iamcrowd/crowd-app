@@ -326,7 +326,7 @@
               <div class="col-md-8 col-lg-8 col-xl-8 col-sm-12">
                 <label for="namespaceUrl">URL <small class="text-muted">*</small></label>
                 <input class="form-control" type="text" name="namespaceUrl" formControlName="namespaceUrl"
-                  placeholder="ex: http://www.w3.org/2006/time#" [ngClass]="setValid('namespaceUrl')"
+                  placeholder="ex: http://www.w3.org/2006/time" [ngClass]="setValid('namespaceUrl')"
                   autocomplete="off">
                 <div class="invalid-feedback">
                   <div *ngIf="namespaceUrl.errors && namespaceUrl.errors.required">
