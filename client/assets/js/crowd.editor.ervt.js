@@ -103,29 +103,16 @@ var CrowdEditorErvt = {
         }
       );
 
-      joint.dia.Element.define(
+      joint.shapes.ervt.Entity.define(
         "ervt.TemporalEntity",
         {
-          size: {
-            width: ENTITY_WIDTH,
-            height: ENTITY_HEIGHT,
-          },
           attrs: {
             body: {
-              refWidth: "100%",
-              refHeight: "100%",
               strokeWidth: TEMPORAL_STROKE_WIDTH,
               fill: crowd.palette.colors.temporalEntity,
-              stroke: crowd.palette.colors.entityStroke,
             },
             text: {
               text: "Temporal\nEntity",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refX: "50%",
-              refY: "50%",
-              fill: "#000000",
-              class: ENTITY_TEXT_CLASS,
             },
             temporalMark: {
               refWidth: "20%",
@@ -170,73 +157,20 @@ var CrowdEditorErvt = {
         }
       );
 
-      joint.dia.Element.define(
-        "ervt.SnapshotEntity",
-        {
-          addToPalette: false,
-          size: {
-            width: ENTITY_WIDTH,
-            height: ENTITY_HEIGHT,
+      joint.shapes.ervt.TemporalEntity.define("ervt.SnapshotEntity", {
+        addToPalette: false,
+        attrs: {
+          body: {
+            fill: crowd.palette.colors.snapshotEntity,
           },
-          attrs: {
-            body: {
-              refWidth: "100%",
-              refHeight: "100%",
-              strokeWidth: TEMPORAL_STROKE_WIDTH,
-              fill: crowd.palette.colors.snapshotEntity,
-              stroke: crowd.palette.colors.entityStroke,
-            },
-            text: {
-              text: "Snapshot\nEntity",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refX: "50%",
-              refY: "50%",
-              fill: "#000000",
-              class: ENTITY_TEXT_CLASS,
-            },
-            temporalMark: {
-              refWidth: "20%",
-              refHeight: "45%",
-              strokeWidth: TEMPORAL_STROKE_WIDTH,
-              refX: "80%",
-              fill: crowd.palette.colors.temporalMark,
-              stroke: crowd.palette.colors.temporalMarkStroke,
-            },
-            temporalText: {
-              text: "S",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refWidth: "20%",
-              refHeight: "45%",
-              refX: "90%",
-              refY: "24%",
-              fill: "#000000",
-              class: TEMPORAL_TEXT_CLASS,
-            },
+          text: {
+            text: "Snapshot\nEntity",
+          },
+          temporalText: {
+            text: "S",
           },
         },
-        {
-          markup: [
-            {
-              tagName: "rect",
-              selector: "body",
-            },
-            {
-              tagName: "text",
-              selector: "text",
-            },
-            {
-              tagName: "rect",
-              selector: "temporalMark",
-            },
-            {
-              tagName: "text",
-              selector: "temporalText",
-            },
-          ],
-        }
-      );
+      });
 
       joint.dia.Element.define(
         "ervt.Relationship",
@@ -281,32 +215,16 @@ var CrowdEditorErvt = {
         }
       );
 
-      joint.dia.Element.define(
+      joint.shapes.ervt.Relationship.define(
         "ervt.TemporalRelationship",
         {
-          size: {
-            width: RELATIONSHIP_WIDTH,
-            height: RELATIONSHIP_HEIGHT,
-          },
           attrs: {
             body: {
-              refPoints:
-                `${RELATIONSHIP_WIDTH / 2},0 ` +
-                `${RELATIONSHIP_WIDTH},${RELATIONSHIP_HEIGHT / 2} ` +
-                `${RELATIONSHIP_WIDTH / 2},${RELATIONSHIP_HEIGHT} ` +
-                `0,${RELATIONSHIP_HEIGHT / 2}`,
               strokeWidth: TEMPORAL_STROKE_WIDTH,
               fill: crowd.palette.colors.temporalRelationship,
-              stroke: crowd.palette.colors.relationshipStroke,
             },
             text: {
               text: "Temporal\nRelationship",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refX: "50%",
-              refY: "50%",
-              fill: "#000000",
-              class: RELATIONSHIP_TEXT_CLASS,
             },
             temporalMark: {
               refWidth: "20%",
@@ -351,74 +269,21 @@ var CrowdEditorErvt = {
         }
       );
 
-      joint.dia.Element.define(
+      joint.shapes.ervt.TemporalRelationship.define(
         "ervt.SnapshotRelationship",
         {
           addToPalette: false,
-          size: {
-            width: RELATIONSHIP_WIDTH,
-            height: RELATIONSHIP_HEIGHT,
-          },
           attrs: {
             body: {
-              refPoints:
-                `${RELATIONSHIP_WIDTH / 2},0 ` +
-                `${RELATIONSHIP_WIDTH},${RELATIONSHIP_HEIGHT / 2} ` +
-                `${RELATIONSHIP_WIDTH / 2},${RELATIONSHIP_HEIGHT} ` +
-                `0,${RELATIONSHIP_HEIGHT / 2}`,
-              strokeWidth: TEMPORAL_STROKE_WIDTH,
               fill: crowd.palette.colors.snapshotRelationship,
-              stroke: crowd.palette.colors.relationshipStroke,
             },
             text: {
               text: "Snapshot\nRelationship",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refX: "50%",
-              refY: "50%",
-              fill: "#000000",
-              class: RELATIONSHIP_TEXT_CLASS,
-            },
-            temporalMark: {
-              refWidth: "20%",
-              refHeight: "30%",
-              strokeWidth: TEMPORAL_STROKE_WIDTH,
-              refX: "80%",
-              fill: crowd.palette.colors.temporalMark,
-              stroke: crowd.palette.colors.temporalMarkStroke,
             },
             temporalText: {
               text: "S",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refWidth: "20%",
-              refHeight: "35%",
-              refX: "90%",
-              refY: "15%",
-              fill: "#000000",
-              class: TEMPORAL_TEXT_CLASS,
             },
           },
-        },
-        {
-          markup: [
-            {
-              tagName: "polygon",
-              selector: "body",
-            },
-            {
-              tagName: "text",
-              selector: "text",
-            },
-            {
-              tagName: "rect",
-              selector: "temporalMark",
-            },
-            {
-              tagName: "text",
-              selector: "temporalText",
-            },
-          ],
         }
       );
 
@@ -464,31 +329,16 @@ var CrowdEditorErvt = {
         }
       );
 
-      joint.dia.Element.define(
+      joint.shapes.ervt.Attribute.define(
         "ervt.TemporalAttribute",
         {
-          size: {
-            width: ATTRIBUTE_WIDTH,
-            height: ATTRIBUTE_HEIGHT,
-          },
           attrs: {
             body: {
-              refCx: "50%",
-              refCy: "50%",
-              refRx: "50%",
-              refRy: "50%",
               strokeWidth: TEMPORAL_STROKE_WIDTH,
               fill: crowd.palette.colors.temporalAttribute,
-              stroke: crowd.palette.colors.attributeStroke,
             },
             text: {
               text: "Temporal\nAttribute",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refX: "50%",
-              refY: "50%",
-              fill: "#000000",
-              class: ATTRIBUTE_TEXT_CLASS,
             },
             temporalMark: {
               refWidth: "20%",
@@ -533,143 +383,44 @@ var CrowdEditorErvt = {
         }
       );
 
-      joint.dia.Element.define(
-        "ervt.SnapshotAttribute",
-        {
-          addToPalette: false,
-          size: {
-            width: ATTRIBUTE_WIDTH,
-            height: ATTRIBUTE_HEIGHT,
+      joint.shapes.ervt.TemporalAttribute.define("ervt.SnapshotAttribute", {
+        addToPalette: false,
+        attrs: {
+          body: {
+            fill: crowd.palette.colors.snapshotAttribute,
           },
-          attrs: {
-            body: {
-              refCx: "50%",
-              refCy: "50%",
-              refRx: "50%",
-              refRy: "50%",
-              strokeWidth: TEMPORAL_STROKE_WIDTH,
-              fill: crowd.palette.colors.snapshotAttribute,
-              stroke: crowd.palette.colors.attributeStroke,
-            },
-            text: {
-              text: "Snapshot\nAttribute",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refX: "50%",
-              refY: "50%",
-              fill: "#000000",
-              class: ATTRIBUTE_TEXT_CLASS,
-            },
-            temporalMark: {
-              refWidth: "20%",
-              refHeight: "45%",
-              strokeWidth: TEMPORAL_STROKE_WIDTH,
-              refX: "80%",
-              fill: crowd.palette.colors.temporalMark,
-              stroke: crowd.palette.colors.temporalMarkStroke,
-            },
-            temporalText: {
-              text: "S",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refWidth: "20%",
-              refHeight: "45%",
-              refX: "90%",
-              refY: "24%",
-              fill: "#000000",
-              class: TEMPORAL_TEXT_CLASS,
-            },
+          text: {
+            text: "Snapshot\nAttribute",
+          },
+          temporalText: {
+            text: "S",
           },
         },
-        {
-          markup: [
-            {
-              tagName: "ellipse",
-              selector: "body",
-            },
-            {
-              tagName: "text",
-              selector: "text",
-            },
-            {
-              tagName: "rect",
-              selector: "temporalMark",
-            },
-            {
-              tagName: "text",
-              selector: "temporalText",
-            },
-          ],
-        }
-      );
+      });
 
-      joint.dia.Element.define(
-        "ervt.KeyAttribute",
-        {
-          size: {
-            width: ATTRIBUTE_WIDTH,
-            height: ATTRIBUTE_HEIGHT,
+      joint.shapes.ervt.Attribute.define("ervt.KeyAttribute", {
+        attrs: {
+          body: {
+            fill: crowd.palette.colors.keyAttribute,
+            stroke: crowd.palette.colors.keyAttributeStroke,
           },
-          attrs: {
-            body: {
-              refCx: "50%",
-              refCy: "50%",
-              refRx: "50%",
-              refRy: "50%",
-              strokeWidth: 2,
-              fill: crowd.palette.colors.keyAttribute,
-              stroke: crowd.palette.colors.keyAttributeStroke,
-            },
-            text: {
-              text: "Key\nAttribute",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refX: "50%",
-              refY: "50%",
-              fill: "#000000",
-              class: KEY_ATTRIBUTE_TEXT_CLASS,
-            },
+          text: {
+            text: "Key\nAttribute",
+            class: KEY_ATTRIBUTE_TEXT_CLASS,
           },
         },
-        {
-          markup: [
-            {
-              tagName: "ellipse",
-              selector: "body",
-            },
-            {
-              tagName: "text",
-              selector: "text",
-            },
-          ],
-        }
-      );
+      });
 
-      joint.dia.Element.define(
+      joint.shapes.ervt.KeyAttribute.define(
         "ervt.TemporalKeyAttribute",
         {
-          size: {
-            width: ATTRIBUTE_WIDTH,
-            height: ATTRIBUTE_HEIGHT,
-          },
           attrs: {
             body: {
-              refCx: "50%",
-              refCy: "50%",
-              refRx: "50%",
-              refRy: "50%",
               strokeWidth: TEMPORAL_STROKE_WIDTH,
               fill: crowd.palette.colors.temporalKeyAttribute,
-              stroke: crowd.palette.colors.keyAttributeStroke,
             },
             text: {
               text: "Temporal\nKey\nAttribute",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refX: "50%",
-              refY: "50%",
-              fill: "#000000",
-              class: KEY_ATTRIBUTE_TEXT_CLASS,
             },
             temporalMark: {
               refWidth: "20%",
@@ -714,73 +465,21 @@ var CrowdEditorErvt = {
         }
       );
 
-      joint.dia.Element.define(
+      joint.shapes.ervt.TemporalKeyAttribute.define(
         "ervt.SnapshotKeyAttribute",
         {
           addToPalette: false,
-          size: {
-            width: ATTRIBUTE_WIDTH,
-            height: ATTRIBUTE_HEIGHT,
-          },
           attrs: {
             body: {
-              refCx: "50%",
-              refCy: "50%",
-              refRx: "50%",
-              refRy: "50%",
-              strokeWidth: TEMPORAL_STROKE_WIDTH,
               fill: crowd.palette.colors.snapshotKeyAttribute,
-              stroke: crowd.palette.colors.attributeKeyStroke,
             },
             text: {
               text: "Snapshot\nAttribute",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refX: "50%",
-              refY: "50%",
-              fill: "#000000",
-              class: KEY_ATTRIBUTE_TEXT_CLASS,
-            },
-            temporalMark: {
-              refWidth: "20%",
-              refHeight: "45%",
-              strokeWidth: TEMPORAL_STROKE_WIDTH,
-              refX: "80%",
-              fill: crowd.palette.colors.temporalMark,
-              stroke: crowd.palette.colors.temporalMarkStroke,
             },
             temporalText: {
               text: "S",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refWidth: "20%",
-              refHeight: "45%",
-              refX: "90%",
-              refY: "24%",
-              fill: "#000000",
-              class: TEMPORAL_TEXT_CLASS,
             },
           },
-        },
-        {
-          markup: [
-            {
-              tagName: "ellipse",
-              selector: "body",
-            },
-            {
-              tagName: "text",
-              selector: "text",
-            },
-            {
-              tagName: "rect",
-              selector: "temporalMark",
-            },
-            {
-              tagName: "text",
-              selector: "temporalText",
-            },
-          ],
         }
       );
 
@@ -974,7 +673,7 @@ var CrowdEditorErvt = {
     //     height: 40
     //   }
     // });
-    
+
     //add joint eer weak relationship to palette elements
     // crowd.palette.elements.weakRelationship = new joint.shapes.erd.Relationship({
     //   parentType: 'relationship',
