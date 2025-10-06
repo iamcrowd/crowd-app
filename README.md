@@ -74,3 +74,7 @@ Now install node
 > n stable      * install latest stable  version of node
 
 > n             * here we can choose the version of node
+
+## License
+
+This project is licensed under the GNU General Public License v3.0
