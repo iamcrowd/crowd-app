@@ -473,6 +473,10 @@ $alt-accent-dark: #262a2e;
   text-transform: none;
 }
 
+.crowd-element-text.temporal {
+  font-weight: bold;
+}
+
 .crowd-link-text.inherit {
   font-size: 40px;
 }
@@ -605,11 +609,15 @@ $alt-accent-dark: #262a2e;
 }
 
 .crowd-temporal-mark-color {
-  color: rgb(0, 255, 136);
+  color: rgba(0, 0, 173, 1);
 }
 
 .crowd-temporal-mark-stroke-color {
   color: rgba(0, 0, 173, 1);
+}
+
+.crowd-temporal-mark-text-color {
+  color: rgb(255, 255, 255);
 }
 
 .crowd-bold-color {

@@ -43,6 +43,7 @@ var CrowdEditorErvt = {
       keyAttributeStroke: getCSS("color", "crowd-key-attribute-stroke-color"),
       inheritanceStroke: getCSS("color", "crowd-inheritance-stroke-color"),
       temporalMarkStroke: getCSS("color", "crowd-temporal-mark-stroke-color"),
+      temporalMarkText: getCSS("color", "crowd-temporal-mark-text-color"),
     };
 
     //function to initialize ervt shapes in joint
@@ -54,14 +55,21 @@ var CrowdEditorErvt = {
       const RELATIONSHIP_HEIGHT = 60;
       const ATTRIBUTE_WIDTH = 70;
       const ATTRIBUTE_HEIGHT = 40;
+      const ENTITY_TEMPORAL_MARK_PROPORTION = 0.12;
+      const RELATIONSHIP_TEMPORAL_MARK_POSITION_X = 0.5;
+      const RELATIONSHIP_TEMPORAL_MARK_PROPORTION = 0.125;
+      const ATTRIBUTE_TEMPORAL_MARK_POSITION_X = 0.925;
+      const ATTRIBUTE_TEMPORAL_MARK_POSITION_Y = 0.5;
+      const ATTRIBUTE_TEMPORAL_MARK_PROPORTION_X = 0.15;
+      const ATTRIBUTE_TEMPORAL_MARK_PROPORTION_Y = 0.263;
       const ELEMENT_TEXT_CLASS = "crowd-element-text";
       const ENTITY_TEXT_CLASS = ELEMENT_TEXT_CLASS;
       const RELATIONSHIP_TEXT_CLASS = ELEMENT_TEXT_CLASS + " s";
       const ATTRIBUTE_TEXT_CLASS = ELEMENT_TEXT_CLASS + " xs attribute";
       const KEY_ATTRIBUTE_TEXT_CLASS = ELEMENT_TEXT_CLASS + " xs key-attribute";
       const INHERITANCE_TEXT_CLASS = ELEMENT_TEXT_CLASS + " l inheritance";
-      const TEMPORAL_TEXT_CLASS = ELEMENT_TEXT_CLASS;
-      const TEMPORAL_STROKE_WIDTH = 1;
+      const TEMPORAL_TEXT_CLASS = ELEMENT_TEXT_CLASS + " temporal";
+      const TEMPORAL_STROKE_WIDTH = 2;
 
       joint.dia.Element.define(
         "ervt.Entity",
@@ -113,12 +121,13 @@ var CrowdEditorErvt = {
             },
             text: {
               text: "Temporal\nEntity",
+              refX: 0.5-ENTITY_TEMPORAL_MARK_PROPORTION/2,
             },
             temporalMark: {
-              refWidth: "20%",
-              refHeight: "45%",
+              refX: 1-ENTITY_TEMPORAL_MARK_PROPORTION,
+              refWidth: ENTITY_TEMPORAL_MARK_PROPORTION,
+              refHeight: "100%",
               strokeWidth: TEMPORAL_STROKE_WIDTH,
-              refX: "80%",
               fill: crowd.palette.colors.temporalMark,
               stroke: crowd.palette.colors.temporalMarkStroke,
             },
@@ -126,11 +135,9 @@ var CrowdEditorErvt = {
               text: "T",
               textVerticalAnchor: "middle",
               textAnchor: "middle",
-              refWidth: "20%",
-              refHeight: "45%",
-              refX: "90%",
-              refY: "24%",
-              fill: "#000000",
+              refX: 1-ENTITY_TEMPORAL_MARK_PROPORTION/2,
+              refY: "50%",
+              fill: crowd.palette.colors.temporalMarkText,
               class: TEMPORAL_TEXT_CLASS,
             },
           },
@@ -227,10 +234,13 @@ var CrowdEditorErvt = {
               text: "Temporal\nRelationship",
             },
             temporalMark: {
-              refWidth: "20%",
-              refHeight: "30%",
+              d:
+                `M calc(${RELATIONSHIP_TEMPORAL_MARK_POSITION_X}*w),0 ` +
+                `l calc(${RELATIONSHIP_TEMPORAL_MARK_PROPORTION}*w),calc(${RELATIONSHIP_TEMPORAL_MARK_PROPORTION}*h) ` +
+                `l calc(-${RELATIONSHIP_TEMPORAL_MARK_PROPORTION}*w),calc(${RELATIONSHIP_TEMPORAL_MARK_PROPORTION}*h) ` +
+                `l calc(-${RELATIONSHIP_TEMPORAL_MARK_PROPORTION}*w),calc(-${RELATIONSHIP_TEMPORAL_MARK_PROPORTION}*h) ` +
+                `z`,
               strokeWidth: TEMPORAL_STROKE_WIDTH,
-              refX: "80%",
               fill: crowd.palette.colors.temporalMark,
               stroke: crowd.palette.colors.temporalMarkStroke,
             },
@@ -238,11 +248,9 @@ var CrowdEditorErvt = {
               text: "T",
               textVerticalAnchor: "middle",
               textAnchor: "middle",
-              refWidth: "20%",
-              refHeight: "35%",
-              refX: "90%",
-              refY: "15%",
-              fill: "#000000",
+              refX: "50%",
+              refY: RELATIONSHIP_TEMPORAL_MARK_PROPORTION*1.05,
+              fill: crowd.palette.colors.temporalMarkText,
               class: TEMPORAL_TEXT_CLASS,
             },
           },
@@ -258,7 +266,7 @@ var CrowdEditorErvt = {
               selector: "text",
             },
             {
-              tagName: "rect",
+              tagName: "path",
               selector: "temporalMark",
             },
             {
@@ -339,12 +347,14 @@ var CrowdEditorErvt = {
             },
             text: {
               text: "Temporal\nAttribute",
+              refX: 0.5-ATTRIBUTE_TEMPORAL_MARK_PROPORTION_X/2,
             },
             temporalMark: {
-              refWidth: "20%",
-              refHeight: "45%",
+              d:
+                `M calc(${ATTRIBUTE_TEMPORAL_MARK_POSITION_X}*w),calc(${ATTRIBUTE_TEMPORAL_MARK_POSITION_Y-ATTRIBUTE_TEMPORAL_MARK_PROPORTION_Y}*h) ` +
+                `Q calc(${ATTRIBUTE_TEMPORAL_MARK_POSITION_X+ATTRIBUTE_TEMPORAL_MARK_PROPORTION_X}*w),calc(${ATTRIBUTE_TEMPORAL_MARK_POSITION_Y}*h) calc(${ATTRIBUTE_TEMPORAL_MARK_POSITION_X}*w),calc(${ATTRIBUTE_TEMPORAL_MARK_POSITION_Y+ATTRIBUTE_TEMPORAL_MARK_PROPORTION_Y}*h) ` +
+                `Q calc(${ATTRIBUTE_TEMPORAL_MARK_POSITION_X-ATTRIBUTE_TEMPORAL_MARK_PROPORTION_X}*w),calc(${ATTRIBUTE_TEMPORAL_MARK_POSITION_Y}*h) calc(${ATTRIBUTE_TEMPORAL_MARK_POSITION_X}*w),calc(${ATTRIBUTE_TEMPORAL_MARK_POSITION_Y-ATTRIBUTE_TEMPORAL_MARK_PROPORTION_Y}*h) `,
               strokeWidth: TEMPORAL_STROKE_WIDTH,
-              refX: "80%",
               fill: crowd.palette.colors.temporalMark,
               stroke: crowd.palette.colors.temporalMarkStroke,
             },
@@ -352,11 +362,9 @@ var CrowdEditorErvt = {
               text: "T",
               textVerticalAnchor: "middle",
               textAnchor: "middle",
-              refWidth: "20%",
-              refHeight: "45%",
-              refX: "90%",
-              refY: "24%",
-              fill: "#000000",
+              refX: ATTRIBUTE_TEMPORAL_MARK_POSITION_X,
+              refY: ATTRIBUTE_TEMPORAL_MARK_POSITION_Y,
+              fill: crowd.palette.colors.temporalMarkText,
               class: TEMPORAL_TEXT_CLASS,
             },
           },
@@ -372,7 +380,7 @@ var CrowdEditorErvt = {
               selector: "text",
             },
             {
-              tagName: "rect",
+              tagName: "path",
               selector: "temporalMark",
             },
             {
@@ -384,19 +392,19 @@ var CrowdEditorErvt = {
       );
 
       joint.shapes.ervt.TemporalAttribute.define("ervt.SnapshotAttribute", {
-        addToPalette: false,
-        attrs: {
-          body: {
-            fill: crowd.palette.colors.snapshotAttribute,
+          addToPalette: false,
+          attrs: {
+            body: {
+              fill: crowd.palette.colors.snapshotAttribute,
+            },
+            text: {
+              text: "Snapshot\nAttribute",
+            },
+            temporalText: {
+              text: "S",
+            },
           },
-          text: {
-            text: "Snapshot\nAttribute",
-          },
-          temporalText: {
-            text: "S",
-          },
-        },
-      });
+        });
 
       joint.shapes.ervt.Attribute.define("ervt.KeyAttribute", {
         attrs: {
@@ -411,58 +419,20 @@ var CrowdEditorErvt = {
         },
       });
 
-      joint.shapes.ervt.KeyAttribute.define(
+      joint.shapes.ervt.TemporalAttribute.define(
         "ervt.TemporalKeyAttribute",
         {
           attrs: {
             body: {
-              strokeWidth: TEMPORAL_STROKE_WIDTH,
               fill: crowd.palette.colors.temporalKeyAttribute,
+              stroke: crowd.palette.colors.keyAttributeStroke,
             },
             text: {
               text: "Temporal\nKey\nAttribute",
-            },
-            temporalMark: {
-              refWidth: "20%",
-              refHeight: "45%",
-              strokeWidth: TEMPORAL_STROKE_WIDTH,
-              refX: "80%",
-              fill: crowd.palette.colors.temporalMark,
-              stroke: crowd.palette.colors.temporalMarkStroke,
-            },
-            temporalText: {
-              text: "T",
-              textVerticalAnchor: "middle",
-              textAnchor: "middle",
-              refWidth: "20%",
-              refHeight: "45%",
-              refX: "90%",
-              refY: "24%",
-              fill: "#000000",
-              class: TEMPORAL_TEXT_CLASS,
+              class: KEY_ATTRIBUTE_TEXT_CLASS,
             },
           },
         },
-        {
-          markup: [
-            {
-              tagName: "ellipse",
-              selector: "body",
-            },
-            {
-              tagName: "text",
-              selector: "text",
-            },
-            {
-              tagName: "rect",
-              selector: "temporalMark",
-            },
-            {
-              tagName: "text",
-              selector: "temporalText",
-            },
-          ],
-        }
       );
 
       joint.shapes.ervt.TemporalKeyAttribute.define(
